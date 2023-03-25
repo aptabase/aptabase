@@ -2,6 +2,8 @@
 
 👋 Hey there, this repo is for bug tracking, feature requests and discussion about Aptabase.
 
+Feel free to open an issue or start a discussion if need help or have something to ask.
+
 #### SDKs for Aptabase:
 
 - ✅ [Tauri](https://github.com/aptabase/tauri-plugin-aptabase) 
