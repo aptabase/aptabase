@@ -14,7 +14,6 @@ These are the SDKs currently available (✅), as well se the ones we plan to bui
 - ❓ [Apple (Swift)](https://github.com/aptabase/aptabase/issues/5)
 - ❓ [Capacitor.js](https://github.com/aptabase/aptabase/issues/6)
 - ❓ [.NET MAUI](https://github.com/aptabase/aptabase/issues/7)
-- ❓ [Ionic](https://github.com/aptabase/aptabase/issues/8)
 - ❓ [Xamarin](https://github.com/aptabase/aptabase/issues/9)
 - ❓ [Unity](https://github.com/aptabase/aptabase/issues/10)
 
