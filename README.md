@@ -4,7 +4,9 @@
 
 This repo is for bug tracking, feature requests and discussion about Aptabase. Feel free to open an issue or start a discussion if need help or have something to ask.
 
-These are the SDKs currently available (✅), as well se the ones we plan to build (❓). If you're interested on a specific SDK, please follow the link and upvote it so I can focus on the ones that are most requested.
+These are the SDKs currently available (✅), as well as the ones we plan to build (❓). 
+
+If you're interested on a specific SDK, please follow the link and upvote it so I can focus on the ones that are most requested.
 
 - ✅ [Tauri](https://github.com/aptabase/tauri-plugin-aptabase) 
 - ✅ [Flutter](https://github.com/aptabase/aptabase_flutter)
