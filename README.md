@@ -7,7 +7,7 @@ This repo is for bug tracking, feature requests and discussion about Aptabase. F
 These are the SDKs currently available (✅), as well se the ones we plan to build (❓). If you're interested on a specific SDK, please follow the link and upvote it so I can focus on the ones that are most requested.
 
 - ✅ [Tauri](https://github.com/aptabase/tauri-plugin-aptabase) 
-- ❓ [Flutter](https://github.com/aptabase/aptabase/issues/1)
+- ✅ [Flutter](https://github.com/aptabase/aptabase_flutter)
 - ❓ [React Native](https://github.com/aptabase/aptabase/issues/2)
 - ❓ [Electron](https://github.com/aptabase/aptabase/issues/3)
 - ❓ [Android (Kotlin)](https://github.com/aptabase/aptabase/issues/4)
