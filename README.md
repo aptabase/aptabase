@@ -17,6 +17,7 @@ If you're interested on a specific SDK, please follow the link and upvote it so 
 
 - ✅ [Tauri](https://github.com/aptabase/tauri-plugin-aptabase) 
 - ✅ [Flutter](https://github.com/aptabase/aptabase_flutter)
+- ✅ [Web Apps (JavaScript/TypeScript)](https://github.com/aptabase/aptabase-js)
 - ❓ [React Native](https://github.com/aptabase/aptabase/issues/2)
 - ❓ [Electron](https://github.com/aptabase/aptabase/issues/3)
 - ❓ [Android (Kotlin)](https://github.com/aptabase/aptabase/issues/4)
