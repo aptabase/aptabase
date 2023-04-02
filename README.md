@@ -1,4 +1,11 @@
-# Aptabase: Privacy-first analytics for desktop and mobile apps
+<div align="center">
+	<img src="https://aptabase.com/og.png" alt="Aptabase"/>
+	<br>
+    <h1>Aptabase</h1>
+	<p>Privacy-first and simple analytics for apps<p>
+	<br>
+	<br>
+</div>
 
 👋 Hey there, 
 
