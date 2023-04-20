@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@aptabase/web": "0.0.2",
+    "@aptabase/web": "0.0.3",
     "@fontsource/inter": "4.5.15",
     "@headlessui/react": "1.7.13",
     "@heroicons/react": "2.0.16",

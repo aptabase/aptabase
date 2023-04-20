@@ -1,4 +1,3 @@
-using System.Data;
 using Aptabase.Application;
 using Aptabase.Application.Ingestion;
 using Microsoft.AspNetCore.Cors;
