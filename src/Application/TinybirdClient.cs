@@ -124,6 +124,21 @@ public class TinybirdClient : ITinybirdClient
         };
     }
 
+    // List of locales that are longer than 5 characters
+    // In future we might want to extend this to more locales
+    private Dictionary<string, string> LongerLocales = new()
+    {
+        { "zh-hans", "zh-Hans" },
+        { "zh-hans-cn", "zh-Hans-CN" },
+        { "zh-hans-hk", "zh-Hans-HK" },
+        { "zh-hans-mo", "zh-Hans-MO" },
+        { "zh-hans-sg", "zh-Hans-SG" },
+        { "zh-hant", "zh-Hant" },
+        { "zh-hant-hk", "zh-Hant-HK" },
+        { "zh-hant-mo", "zh-Hant-MO" },
+        { "zh-hant-tw", "zh-Hant-TW" },
+    };
+
     private string FormatLocale(string? locale)
     {
         if (string.IsNullOrEmpty(locale))
@@ -131,6 +146,9 @@ public class TinybirdClient : ITinybirdClient
 
         if (locale.Length != 2 && locale.Length != 5)
         {
+            if (LongerLocales.TryGetValue(locale.ToLower(), out var formattedLocale))
+                return formattedLocale;
+
             _logger.LogWarning("Invalid locale {Locale}", locale);
             return "";
         }
