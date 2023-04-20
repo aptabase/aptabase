@@ -2,14 +2,10 @@
 	<img src="https://aptabase.com/og.png" alt="Aptabase"/>
 	<br>
     <h1>Aptabase</h1>
-	<p>Privacy-first and simple analytics for apps<p>
+	<p>Open Source, Privacy-First and Simple Analytics for Apps<p>
 	<br>
 	<br>
 </div>
-
-👋 Hey there,
-
-This repo is for bug tracking, feature requests and discussion about Aptabase. Feel free to open an issue or start a discussion if need help or have something to ask.
 
 These are the SDKs currently available (✅), as well as the ones we plan to build (❓).
 
