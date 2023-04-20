@@ -23,6 +23,7 @@ public class EventsController : Controller
     }
 
     [HttpPost("/v0/event")]
+    [HttpPost("/api/v0/event")]
     [EnableCors("AllowAny")]
     [EnableRateLimiting("EventIngestion")]
     public async Task<IActionResult> Single(
