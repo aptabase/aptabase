@@ -1,0 +1,58 @@
+/* Highlight.js (based on Dracula theme) */
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  background: #2d333b;
+}
+
+.hljs-built_in,
+.hljs-selector-tag,
+.hljs-section,
+.hljs-link {
+  color: #8be9fd;
+}
+
+.hljs-keyword {
+  color: #f47067;
+}
+
+.hljs,
+.hljs-subst {
+  color: #f8f8f2;
+}
+
+.hljs-title,
+.hljs-attr,
+.hljs-meta-keyword {
+  color: #d2a8ff;
+}
+
+.hljs-addition {
+  color: #b4f1b4;
+  background-color: #1b4721;
+}
+
+.hljs-string,
+.hljs-meta,
+.hljs-name,
+.hljs-type,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-variable,
+.hljs-template-tag,
+.hljs-template-variable {
+  color: #96d0ff;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion {
+  color: #6272a4;
+}
+
+.hljs-literal,
+.hljs-number {
+  color: #bd93f9;
+}

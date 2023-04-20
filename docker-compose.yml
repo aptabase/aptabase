@@ -1,0 +1,16 @@
+version: "3"
+services:
+  pgdev:
+    container_name: aptabase_pgdev
+    restart: always
+    image: postgres:15
+    volumes:
+      - pgdev-data:/var/lib/postgresql/data
+    ports:
+      - "5444:5432"
+    environment:
+      POSTGRES_USER: aptabase
+      POSTGRES_PASSWORD: aptabase_pw
+
+volumes:
+  pgdev-data:

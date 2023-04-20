@@ -1,0 +1,28 @@
+DESCRIPTION >
+    Analytics events for production app environments
+
+SCHEMA >
+    `app_id` String `json:$.appId`,
+    `timestamp` DateTime `json:$.timestamp`,
+    `event_name` String `json:$.eventName`,
+    `session_id` String `json:$.sessionId`,
+    `os_name` LowCardinality(String) `json:$.osName`,
+    `os_version` String `json:$.osVersion`,
+    `locale` LowCardinality(String) `json:$.locale`,
+    `app_version` String `json:$.appVersion`,
+    `app_build_number` String `json:$.appBuildNumber`,
+    `engine_name` LowCardinality(String) `json:$.engineName`,
+    `engine_version` String `json:$.engineVersion`,
+    `sdk_version` String `json:$.sdkVersion`,
+    `country_code` LowCardinality(String) `json:$.countryCode`,
+    `region_name` LowCardinality(String) `json:$.regionName`,
+    `city` String `json:$.city`,
+    `string_props` String `json:$.stringProps`,
+    `numeric_props` String `json:$.numericProps`,
+    `ttl` DateTime `json:$.ttl`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "app_id, timestamp, event_name"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_TTL "ttl"

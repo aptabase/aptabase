@@ -1,0 +1,65 @@
+name: Publish Aptabase
+on: [push]
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Run Tests
+        run: |
+          dotnet test
+
+      - name: Docker Build
+        run: |
+          docker build -t prod_build_img .
+
+      # Push to US
+      - name: Configure AWS credentials (US)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::907052285437:role/github-action
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR (US)
+        uses: aws-actions/amazon-ecr-login@v1
+        env:
+          REGISTRY: 907052285437.dkr.ecr.us-east-1.amazonaws.com
+          REPOSITORY: aptabase
+          IMAGE_TAG: main
+
+      - name: Push to Amazon ECR (US)
+        run: |
+          docker tag prod_build_img $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+        env:
+          REGISTRY: 907052285437.dkr.ecr.us-east-1.amazonaws.com
+          REPOSITORY: aptabase
+          IMAGE_TAG: main
+
+      # Push to EU
+      - name: Configure AWS credentials (EU)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::907052285437:role/github-action
+          aws-region: eu-central-1
+
+      - name: Login to Amazon ECR (EU)
+        uses: aws-actions/amazon-ecr-login@v1
+        env:
+          REGISTRY: 907052285437.dkr.ecr.eu-central-1.amazonaws.com
+          REPOSITORY: aptabase
+          IMAGE_TAG: main
+
+      - name: Push to Amazon ECR (EU)
+        run: |
+          docker tag prod_build_img $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+        env:
+          REGISTRY: 907052285437.dkr.ecr.eu-central-1.amazonaws.com
+          REPOSITORY: aptabase
+          IMAGE_TAG: main

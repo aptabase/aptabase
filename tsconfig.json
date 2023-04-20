@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@app/*": ["./webapp/src/*"],
+      "@app/charts": ["./webapp/pkg/charts"],
+      "@app/widgets": ["./webapp/pkg/widgets"],
+      "@app/primitives": ["./webapp/pkg/primitives"],
+      "@app/apps": ["./webapp/pkg/apps"],
+      "@app/navigation": ["./webapp/pkg/navigation"],
+      "@app/auth": ["./webapp/pkg/auth"],
+      "@app/theme": ["./webapp/pkg/theme"]
+    }
+  },
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

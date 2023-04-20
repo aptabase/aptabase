@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Text & Colors
+*/
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-title;
+}
+
+body,
+button,
+a,
+canvas {
+  @apply tracking-tight;
+}
+
+.text-default {
+  @apply text-black;
+}
+
+.text-secondary {
+  @apply text-gray-500;
+}
+
+.border-default {
+  @apply border-gray-200;
+}
+
+/*
+  Buttons
+*/
+.btn {
+  @apply w-full p-2 rounded text-sm shadow-sm tracking-normal;
+}
+
+.btn-danger {
+  @apply bg-red-700 text-white outline-red-700;
+}
+
+.btn-danger:not(:disabled):hover {
+  @apply bg-red-800;
+}
+
+.btn-primary {
+  @apply bg-black text-white outline-black;
+}
+
+.btn-primary:not(:disabled):hover {
+  @apply bg-gray-800;
+}
+
+.btn:disabled {
+  @apply cursor-not-allowed opacity-70;
+}
+
+/*
+  Forms
+*/
+.form-input,
+.form-select {
+  @apply block text-sm rounded border border-default py-2 placeholder-gray-400 shadow-sm;
+}
+
+.form-input:focus,
+.form-select:focus {
+  @apply border-primary shadow ring ring-primary-100;
+}
+
+.form-input {
+  @apply px-3;
+}
+
+.form-select {
+  @apply pl-3 pr-10;
+}
+
+.form-select.compact {
+  @apply py-1 pl-1 pr-0;
+}
+
+/*
+  General
+*/
+a:focus-visible {
+  @apply rounded outline-primary;
+}
+
+.focus-ring:focus-visible,
+a:focus-visible,
+button:focus-visible {
+  @apply outline outline-2 outline-offset-1 outline-primary;
+}
