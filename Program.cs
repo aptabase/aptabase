@@ -128,15 +128,20 @@ app.UseResponseCaching();
 
 if (appEnv.IsProduction)
 {
-    app.MapFallbackToFile("index.html");
+    app.MapFallbackToFile("index.html", new StaticFileOptions
+    {
+        OnPrepareResponse = ctx =>
+        {
+            ctx.Context.Response.Headers.Append("Cache-Control", "no-store,no-cache");
+        }
+    });
+
     app.UseStaticFiles(new StaticFileOptions
     {
         OnPrepareResponse = ctx =>
         {
             if (ctx.Context.Request.Path.StartsWithSegments("/assets"))
                 ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000,immutable");
-            else
-                ctx.Context.Response.Headers.Append("Cache-Control", "no-store,no-cache");
         }
     });
 }
