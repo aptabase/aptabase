@@ -128,6 +128,7 @@ public class TinybirdClient : ITinybirdClient
     // In future we might want to extend this to more locales
     private Dictionary<string, string> LongerLocales = new()
     {
+        { "es-419", "es-419" },
         { "zh-hans", "zh-Hans" },
         { "zh-hans-cn", "zh-Hans-CN" },
         { "zh-hans-hk", "zh-Hans-HK" },
