@@ -33,6 +33,9 @@ public static class OAuthExtensions
 
     public static AuthenticationBuilder AddGitHub(this AuthenticationBuilder builder, EnvSettings env)
     {
+        if (string.IsNullOrWhiteSpace(env.OAuthGitHubClientId))
+            return builder;
+
         return builder.AddOAuth("github", o =>
         {
             o.ClientId = env.OAuthGitHubClientId;
@@ -72,6 +75,9 @@ public static class OAuthExtensions
 
     public static AuthenticationBuilder AddGoogle(this AuthenticationBuilder builder, EnvSettings env)
     {
+        if (string.IsNullOrWhiteSpace(env.OAuthGoogleClientId))
+            return builder;
+
         return builder.AddOAuth("google", o =>
         {
             o.ClientId = env.OAuthGoogleClientId;
