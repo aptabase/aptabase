@@ -13,7 +13,7 @@ public class EnvSettings
     public byte[] AuthSecret { get; private set; } = new byte[0];
 
     public bool IsManagedCloud => Region == "EU" || Region == "US";
-    public bool IsProduction => !IsProduction;
+    public bool IsProduction => !IsDevelopment;
     public bool IsDevelopment { get; private set; }
 
     // OAuth (Optional)

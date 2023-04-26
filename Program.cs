@@ -35,7 +35,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-if (appEnv.IsProduction)
+if (appEnv.IsManagedCloud)
 {
     builder.Services.AddDataProtection()
                     .PersistKeysToAWSSystemsManager("/aptabase/production/aspnet-dataprotection/");
