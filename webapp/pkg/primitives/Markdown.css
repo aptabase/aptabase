@@ -3,8 +3,7 @@
 .hljs {
   display: block;
   overflow-x: auto;
-  padding: 0.5em;
-  background: #2d333b;
+  background: var(--tw-prose-pre-bg);
 }
 
 .hljs-built_in,
