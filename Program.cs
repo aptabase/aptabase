@@ -111,13 +111,17 @@ builder.Services.AddFluentMigratorCore().ConfigureRunner(
 
 var app = builder.Build();
 
-if (appEnv.IsProduction)
+if (appEnv.IsManagedCloud)
 {
     app.UseForwardedHeaders(new ForwardedHeadersOptions
     {
         ForwardedProtoHeaderName = "Cloudfront-Forwarded-Proto",
         ForwardedHeaders = ForwardedHeaders.XForwardedProto
     });
+}
+else
+{
+    app.UseForwardedHeaders();
 }
 
 app.UseRateLimiter();
