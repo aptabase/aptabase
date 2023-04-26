@@ -16,6 +16,7 @@ If you're interested on a specific SDK, please follow the link and upvote it so 
 - ✅ [Web Apps (JavaScript/TypeScript)](https://github.com/aptabase/aptabase-js)
 - ✅ [Swift (Apple)](https://github.com/aptabase/aptabase-swift)
 - ✅ [.NET MAUI](https://github.com/aptabase/aptabase-maui)
+- ✅ [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase)
 - ❓ [React Native](https://github.com/aptabase/aptabase/issues/2)
 - ❓ [Electron](https://github.com/aptabase/aptabase/issues/3)
 - ❓ [Android (Kotlin)](https://github.com/aptabase/aptabase/issues/4)
