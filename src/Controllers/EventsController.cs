@@ -40,18 +40,10 @@ public class EventsController : Controller
             _logger.LogWarning("Missing CloudFront-Viewer-Country-Region-Name header");
             _logger.LogWarning("CloudFront-Viewer-Country-Region={Region}", this.Request.Headers["CloudFront-Viewer-Country-Region"].ToString());
         }
-        else if (regionName.Contains("%"))
-        {
-            _logger.LogWarning("RegionName contains %: {RegionName}", regionName);
-            _logger.LogWarning("Fixed {RegionName}", Uri.UnescapeDataString(regionName));
-        }
-        else
-        {
-            _logger.LogWarning("Region={RegionName}", Uri.UnescapeDataString(regionName));
-        }
-
+        
         appKey = appKey?.ToUpper() ?? "";
         countryCode = countryCode?.ToUpper() ?? "";
+        regionName = Uri.UnescapeDataString(regionName ?? "");
 
         var (valid, errorMessage) = _validator.IsValidBody(body);
         if (!valid)
