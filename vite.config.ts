@@ -24,24 +24,49 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api' : {
-        target: 'http://localhost:5251',
+      "/api": {
+        target: "http://localhost:5251",
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api')
-      }
-    } 
+        rewrite: (path) => path.replace(/^\/api/, "/api"),
+      },
+    },
   },
   resolve: {
     conditions: ["development", "browser"],
     alias: [
-      { find: "@app/charts", replacement: path.resolve(__dirname, "./webapp/pkg/charts") },
-      { find: "@app/primitives", replacement: path.resolve(__dirname, "./webapp/pkg/primitives") },
-      { find: "@app/theme", replacement: path.resolve(__dirname, "./webapp/pkg/theme") },
-      { find: "@app/navigation", replacement: path.resolve(__dirname, "./webapp/pkg/navigation") },
-      { find: "@app/apps", replacement: path.resolve(__dirname, "./webapp/pkg/apps") },
-      { find: "@app/auth", replacement: path.resolve(__dirname, "./webapp/pkg/auth") },
-      { find: "@app/widgets", replacement: path.resolve(__dirname, "./webapp/pkg/widgets") },
+      {
+        find: "@app/env",
+        replacement: path.resolve(__dirname, "./webapp/pkg/env"),
+      },
+      {
+        find: "@app/charts",
+        replacement: path.resolve(__dirname, "./webapp/pkg/charts"),
+      },
+      {
+        find: "@app/primitives",
+        replacement: path.resolve(__dirname, "./webapp/pkg/primitives"),
+      },
+      {
+        find: "@app/theme",
+        replacement: path.resolve(__dirname, "./webapp/pkg/theme"),
+      },
+      {
+        find: "@app/navigation",
+        replacement: path.resolve(__dirname, "./webapp/pkg/navigation"),
+      },
+      {
+        find: "@app/apps",
+        replacement: path.resolve(__dirname, "./webapp/pkg/apps"),
+      },
+      {
+        find: "@app/auth",
+        replacement: path.resolve(__dirname, "./webapp/pkg/auth"),
+      },
+      {
+        find: "@app/widgets",
+        replacement: path.resolve(__dirname, "./webapp/pkg/widgets"),
+      },
       { find: "@app", replacement: path.resolve(__dirname, "./webapp/src") },
     ],
   },

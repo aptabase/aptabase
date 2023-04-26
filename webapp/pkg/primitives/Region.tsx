@@ -1,11 +1,4 @@
-const regions: { [host: string]: "eu" | "us" } = {
-  "api-us.aptabase.com": "us",
-  "api-eu.aptabase.com": "eu",
-  "us.aptabase.com": "us",
-  "eu.aptabase.com": "eu",
-};
-
-export const region = regions[window.location.hostname] || "eu";
+import { region } from "@app/env";
 
 const flags: { [host: string]: string } = {
   us: new URL(`./icons/us.svg`, import.meta.url).href,

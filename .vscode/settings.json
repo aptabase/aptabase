@@ -1,15 +1,17 @@
 {
-    "editor.formatOnSave": true,
-    "csharp.format.enable": true,
-    "csharp.referencesCodeLens.enabled": false,
-    "files.exclude": {
-        "**/.git": true,
-        "**/.svn": true,
-        "**/.hg": true,
-        "**/CVS": true,
-        "**/.DS_Store": true,
-        "**/Thumbs.db": true,
-        "**/bin": true,
-        "**/obj": true,
-    }
+  "editor.formatOnSave": true,
+  "csharp.format.enable": true,
+  "csharp.referencesCodeLens.enabled": false,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/bin": true,
+    "**/obj": true
+  }
 }

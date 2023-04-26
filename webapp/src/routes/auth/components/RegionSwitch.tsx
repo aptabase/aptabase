@@ -1,6 +1,8 @@
-import { region } from "@app/primitives";
+import { isManagedCloud, region } from "@app/env";
 
 export function RegionSwitch() {
+  if (!isManagedCloud) return null;
+
   const otherRegion = region === "eu" ? "us" : "eu";
   const href = `https://${otherRegion}.aptabase.com`;
 

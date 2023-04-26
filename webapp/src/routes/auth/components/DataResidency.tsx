@@ -1,6 +1,9 @@
-import { RegionFlag, region } from "@app/primitives";
+import { isManagedCloud, region } from "@app/env";
+import { RegionFlag } from "@app/primitives";
 
 export function DataResidency() {
+  if (!isManagedCloud) return null;
+
   return (
     <div className="justify-center text-xs tracking-normal text-secondary flex items-center p-2">
       <div className="p-1">
