@@ -12,6 +12,12 @@ using Aptabase.Application.Notification;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
+using System.Collections;
+
+foreach (DictionaryEntry e in System.Environment.GetEnvironmentVariables())
+{
+    Console.WriteLine(e.Key + "=" + e.Value);
+}
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
