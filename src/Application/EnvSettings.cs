@@ -4,39 +4,56 @@ namespace Aptabase.Application;
 
 public class EnvSettings
 {
+    // Required
     public string SelfBaseUrl { get; private set; } = "";
     public string Region { get; private set; } = "";
     public string ConnectionString { get; private set; } = "";
     public string TinybirdBaseUrl { get; private set; } = "";
     public string TinybirdToken { get; private set; } = "";
+    public byte[] AuthSecret { get; private set; } = new byte[0];
+
+    public bool IsManagedCloud => Region == "EU" || Region == "US";
+    public bool IsProduction => !IsProduction;
+    public bool IsDevelopment { get; private set; }
+
+    // OAuth (Optional)
     public string OAuthGitHubClientId { get; private set; } = "";
     public string OAuthGitHubClientSecret { get; private set; } = "";
     public string OAuthGoogleClientId { get; private set; } = "";
     public string OAuthGoogleClientSecret { get; private set; } = "";
-    public byte[] AuthSecret { get; private set; } = new byte[0];
-    public bool IsProduction => Region != "DEV";
-    public bool IsDevelopment => !IsProduction;
+
+    public static EnvSettings Load()
+    {
+        var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+        var region = isDevelopment ? "DEV" : Get("REGION").ToUpper();
+        if (string.IsNullOrEmpty(region))
+            region = "SH"; // Self Hosted
+
+        return new EnvSettings
+        {
+            IsDevelopment = isDevelopment,
+            Region = region,
+            SelfBaseUrl = MustGet("BASE_URL"),
+            ConnectionString = MustGet("DATABASE_URL"),
+            TinybirdBaseUrl = MustGet("TINYBIRD_BASE_URL"),
+            TinybirdToken = MustGet("TINYBIRD_TOKEN"),
+            AuthSecret = Encoding.ASCII.GetBytes(MustGet("AUTH_SECRET")),
+
+            OAuthGitHubClientId = Get("OAUTH_GITHUB_CLIENT_ID"),
+            OAuthGitHubClientSecret = Get("OAUTH_GITHUB_CLIENT_SECRET"),
+            OAuthGoogleClientId = Get("OAUTH_GOOGLE_CLIENT_ID"),
+            OAuthGoogleClientSecret = Get("OAUTH_GOOGLE_CLIENT_SECRET"),
+        };
+    }
 
     private EnvSettings()
     {
 
     }
 
-    public static EnvSettings Load()
+    private static string Get(string name)
     {
-        return new EnvSettings
-        {
-            Region = MustGet("REGION").ToUpper(),
-            SelfBaseUrl = MustGet("BASE_URL"),
-            ConnectionString = MustGet("DATABASE_URL"),
-            TinybirdBaseUrl = MustGet("TINYBIRD_BASE_URL"),
-            TinybirdToken = MustGet("TINYBIRD_TOKEN"),
-            OAuthGitHubClientId = MustGet("OAUTH_GITHUB_CLIENT_ID"),
-            OAuthGitHubClientSecret = MustGet("OAUTH_GITHUB_CLIENT_SECRET"),
-            OAuthGoogleClientId = MustGet("OAUTH_GOOGLE_CLIENT_ID"),
-            OAuthGoogleClientSecret = MustGet("OAUTH_GOOGLE_CLIENT_SECRET"),
-            AuthSecret = Encoding.ASCII.GetBytes(MustGet("AUTH_SECRET")),
-        };
+        return Environment.GetEnvironmentVariable(name) ?? "";
     }
 
     private static string MustGet(string name)
