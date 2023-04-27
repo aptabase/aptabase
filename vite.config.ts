@@ -9,6 +9,7 @@ export default defineConfig({
   define: {
     "import.meta.env.APP_VERSION": JSON.stringify(pkg.version),
   },
+  publicDir: "webapp/public",
   build: {
     outDir: "wwwroot",
     rollupOptions: {
