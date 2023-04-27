@@ -35,12 +35,6 @@ public class EventsController : Controller
         CancellationToken cancellationToken
     )
     {
-        if (string.IsNullOrEmpty(regionName))
-        {
-            _logger.LogWarning("Missing CloudFront-Viewer-Country-Region-Name header");
-            _logger.LogWarning("CloudFront-Viewer-Country-Region={Region}", this.Request.Headers["CloudFront-Viewer-Country-Region"].ToString());
-        }
-        
         appKey = appKey?.ToUpper() ?? "";
         countryCode = countryCode?.ToUpper() ?? "";
         regionName = Uri.UnescapeDataString(regionName ?? "");
