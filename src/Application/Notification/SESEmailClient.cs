@@ -1,22 +1,16 @@
-using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
 
 namespace Aptabase.Application.Notification;
 
-public interface IEmailClient
-{
-    Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string> properties, CancellationToken cancellationToken);
-}
-
-public class EmailClient : IEmailClient
+public class SESEmailClient : IEmailClient
 {
     private readonly IAmazonSimpleEmailService _ses;
     private readonly EnvSettings _env;
     private readonly TemplateEngine _engine = new();
 
-    public EmailClient(EnvSettings env)
+    public SESEmailClient(EnvSettings env)
     {
         _env = env ?? throw new ArgumentNullException(nameof(env));
         _ses = CreateClient();
@@ -24,9 +18,6 @@ public class EmailClient : IEmailClient
 
     public async Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string> properties, CancellationToken cancellationToken)
     {
-        if (_env.IsDevelopment)
-            to = "goenning@aptabase.com";
-
         var body = await _engine.Render(templateName, properties);
         var request = NewRequest(to, subject, body);
         await _ses.SendEmailAsync(request, cancellationToken);

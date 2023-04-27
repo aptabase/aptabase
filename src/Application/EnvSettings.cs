@@ -16,6 +16,10 @@ public class EnvSettings
     public bool IsProduction => !IsDevelopment;
     public bool IsDevelopment { get; private set; }
 
+    // SMTP
+    public string SmtpHost { get; private set; } = "";
+    public int SmtpPort { get; private set; } = 0;
+
     // OAuth (Optional)
     public string OAuthGitHubClientId { get; private set; } = "";
     public string OAuthGitHubClientSecret { get; private set; } = "";
@@ -39,6 +43,9 @@ public class EnvSettings
             TinybirdToken = MustGet("TINYBIRD_TOKEN"),
             AuthSecret = Encoding.ASCII.GetBytes(MustGet("AUTH_SECRET")),
 
+            SmtpHost = Get("SMTP_HOST"),
+            SmtpPort = GetInt("SMTP_PORT"),
+
             OAuthGitHubClientId = Get("OAUTH_GITHUB_CLIENT_ID"),
             OAuthGitHubClientSecret = Get("OAUTH_GITHUB_CLIENT_SECRET"),
             OAuthGoogleClientId = Get("OAUTH_GOOGLE_CLIENT_ID"),
@@ -54,6 +61,14 @@ public class EnvSettings
     private static string Get(string name)
     {
         return Environment.GetEnvironmentVariable(name) ?? "";
+    }
+
+    private static int GetInt(string name)
+    {
+        var value = Environment.GetEnvironmentVariable(name) ?? "";
+        if (int.TryParse(value, out var result))
+            return result;
+        return 0;
     }
 
     private static string MustGet(string name)
