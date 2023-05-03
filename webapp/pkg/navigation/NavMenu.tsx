@@ -132,15 +132,6 @@ export function NavMenu() {
           </div>
         ))}
       </div>
-
-      <div className="text-sm p-2 border border-default rounded-lg border-dashed bg-primary-50">
-        <span className="text-xs font-semibold text-primary-600">
-          Public Beta
-        </span>
-        <p className="mt-2">
-          Some features are not available while in beta. Coming soon!
-        </p>
-      </div>
     </div>
   );
 }
