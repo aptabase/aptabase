@@ -36,13 +36,13 @@ const navigation: NavCategory[] = [
     title: "",
     items: [
       { name: "Dashboard", href: "/", icon: Squares2X2Icon },
-      {
-        name: "Insights",
-        href: "#",
-        icon: ArrowTrendingUpIcon,
-        disabled: true,
-      },
-      { name: "Share", href: "#", icon: ShareIcon, disabled: true },
+      // {
+      //   name: "Insights",
+      //   href: "#",
+      //   icon: ArrowTrendingUpIcon,
+      //   disabled: true,
+      // },
+      // { name: "Share", href: "#", icon: ShareIcon, disabled: true },
       { name: "Settings", href: "/settings", icon: Cog8ToothIcon },
       {
         name: "Instructions",
@@ -55,12 +55,12 @@ const navigation: NavCategory[] = [
     title: "Resources",
     items: [
       { name: "Support", onClick: toggleChat, icon: QuestionMarkCircleIcon },
-      {
-        name: "Documentation",
-        href: "#",
-        icon: DocumentTextIcon,
-        disabled: true,
-      },
+      // {
+      //   name: "Documentation",
+      //   href: "#",
+      //   icon: DocumentTextIcon,
+      //   disabled: true,
+      // },
       {
         name: "Feedback",
         onClick: toggleChat,
