@@ -33,21 +33,31 @@ You can also host Aptabase on your servers. It's free, but you are responsible f
 
 Aptabase is a platform that can be used to track events from any app. We provide SDKs for the most popular frameworks and languages to make it easy to integrate Aptabase into your app.
 
-These are the SDKs currently available (✅), as well as the ones we plan to build (🚧).
+These are the SDKs currently available, as well as the ones we plan to build.
 
-If you're interested on a specific SDK, please follow the link and upvote it so I can focus on the ones that are most requested.
+| Framework                                                                                                | Aptabase Cloud | Aptabase Self-Hosted | Offline Tracking | Opt-in / Opt-out |
+| -------------------------------------------------------------------------------------------------------- | -------------- | -------------------- | ---------------- | ---------------- |
+| [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)                                               | ✅             | 🚧                   | 🚧               | 🚧               |
+| [Flutter](https://github.com/aptabase/aptabase_flutter)                                                  | ✅             | 🚧                   | 🚧               | 🚧               |
+| [Web Apps](https://github.com/aptabase/aptabase-js)                                                      | ✅             | 🚧                   | 🚧               | 🚧               |
+| [Swift (Apple)](https://github.com/aptabase/aptabase-swift)                                              | ✅             | 🚧                   | 🚧               | 🚧               |
+| [.NET MAUI](https://github.com/aptabase/aptabase-maui)                                                   | ✅             | 🚧                   | 🚧               | 🚧               |
+| [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase) | ✅             | 🚧                   | 🚧               | 🚧               |
+| [React Native](https://github.com/aptabase/aptabase/issues/2)                                            | 🚧             | 🚧                   | 🚧               | 🚧               |
+| [Electron](https://github.com/aptabase/aptabase/issues/3)                                                | 🚧             | 🚧                   | 🚧               | 🚧               |
+| [Android (Kotlin)](https://github.com/aptabase/aptabase/issues/4)                                        | 🚧             | 🚧                   | 🚧               | 🚧               |
+| [Capacitor.js](https://github.com/aptabase/aptabase/issues/6)                                            | 🚧             | 🚧                   | 🚧               | 🚧               |
+| [Unity](https://github.com/aptabase/aptabase/issues/10)                                                  | 🚧             | 🚧                   | 🚧               | 🚧               |
+| [Unreal Engine](https://github.com/aptabase/aptabase/issues/12)                                          | 🚧             | 🚧                   | 🚧               | 🚧               |
 
-- ✅ [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)
-- ✅ [Flutter](https://github.com/aptabase/aptabase_flutter)
-- ✅ [Web Apps (JavaScript/TypeScript)](https://github.com/aptabase/aptabase-js)
-- ✅ [Swift (Apple)](https://github.com/aptabase/aptabase-swift)
-- ✅ [.NET MAUI](https://github.com/aptabase/aptabase-maui)
-- ✅ [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase)
-- 🚧 [React Native](https://github.com/aptabase/aptabase/issues/2)
-- 🚧 [Electron](https://github.com/aptabase/aptabase/issues/3)
-- 🚧 [Android (Kotlin)](https://github.com/aptabase/aptabase/issues/4)
-- 🚧 [Capacitor.js](https://github.com/aptabase/aptabase/issues/6)
-- 🚧 [Unity](https://github.com/aptabase/aptabase/issues/10)
+**Legend:**
+
+- **Aptabase Cloud:** Does the SDK work with Aptabase Cloud?
+- **Aptabase Self Hosted:** Does the SDK work with Aptabase Cloud?
+- **Offline Tracking:** Does the SDK work when the device is offline?
+- **Opt-in/Opt-out:** Does the SDK provide an easy way for developers to implement opt-in/opt-out?
+
+All SDKs are open-source and contributions are welcome!
 
 # Need help?
 
