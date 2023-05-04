@@ -41,6 +41,12 @@ const frameworks: { [id: string]: FrameworkInstructions } = {
       "https://raw.githubusercontent.com/aptabase/aptabase-swift/main/README.md",
     repository: "https://github.com/aptabase/aptabase-swift",
   },
+  android: {
+    name: "Android (Kotlin)",
+    readme:
+      "https://raw.githubusercontent.com/aptabase/aptabase-kotlin/main/README.md",
+    repository: "https://github.com/aptabase/aptabase-kotlin",
+  },
   nativescript: {
     name: "NativeScript",
     readme:
@@ -61,10 +67,6 @@ const frameworks: { [id: string]: FrameworkInstructions } = {
   electron: {
     name: "Electron",
     repository: "https://github.com/aptabase/aptabase/issues/3",
-  },
-  android: {
-    name: "Android (Kotlin)",
-    repository: "https://github.com/aptabase/aptabase/issues/4",
   },
   capacitor: {
     name: "Capacitor.js",

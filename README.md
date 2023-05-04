@@ -31,7 +31,7 @@ You can also host Aptabase on your servers. It's free, but you are responsible f
 
 # SDKs
 
-Aptabase is a platform that can be used to track events from any app. We provide SDKs for the most popular frameworks and languages to make it easy to integrate Aptabase into your app.
+Aptabase is a platform that can be used to track events from any app. We provide SDKs for the most popular frameworks and languages to make it easier to integrate it into your app.
 
 These are the SDKs currently available, as well as the ones we plan to build.
 
@@ -43,9 +43,9 @@ These are the SDKs currently available, as well as the ones we plan to build.
 | [Swift (Apple)](https://github.com/aptabase/aptabase-swift)                                              | ✅             | 🚧                   | 🚧               | 🚧               |
 | [.NET MAUI](https://github.com/aptabase/aptabase-maui)                                                   | ✅             | 🚧                   | 🚧               | 🚧               |
 | [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase) | ✅             | 🚧                   | 🚧               | 🚧               |
+| [Android (Kotlin)](https://github.com/aptabase/aptabase-kotlin)                                          | ✅             | 🚧                   | 🚧               | 🚧               |
 | [React Native](https://github.com/aptabase/aptabase/issues/2)                                            | 🚧             | 🚧                   | 🚧               | 🚧               |
 | [Electron](https://github.com/aptabase/aptabase/issues/3)                                                | 🚧             | 🚧                   | 🚧               | 🚧               |
-| [Android (Kotlin)](https://github.com/aptabase/aptabase/issues/4)                                        | 🚧             | 🚧                   | 🚧               | 🚧               |
 | [Capacitor.js](https://github.com/aptabase/aptabase/issues/6)                                            | 🚧             | 🚧                   | 🚧               | 🚧               |
 | [Unity](https://github.com/aptabase/aptabase/issues/10)                                                  | 🚧             | 🚧                   | 🚧               | 🚧               |
 | [Unreal Engine](https://github.com/aptabase/aptabase/issues/12)                                          | 🚧             | 🚧                   | 🚧               | 🚧               |
