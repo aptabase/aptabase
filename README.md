@@ -37,13 +37,13 @@ These are the SDKs currently available, as well as the ones we plan to build.
 
 | Framework                                                                                                | Aptabase Cloud | Aptabase Self-Hosted | Offline Tracking | Opt-in / Opt-out |
 | -------------------------------------------------------------------------------------------------------- | -------------- | -------------------- | ---------------- | ---------------- |
-| [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)                                               | ✅             | 🚧                   | 🚧               | 🚧               |
-| [Flutter](https://github.com/aptabase/aptabase_flutter)                                                  | ✅             | 🚧                   | 🚧               | 🚧               |
-| [Web Apps](https://github.com/aptabase/aptabase-js)                                                      | ✅             | 🚧                   | 🚧               | 🚧               |
-| [Swift (Apple)](https://github.com/aptabase/aptabase-swift)                                              | ✅             | 🚧                   | 🚧               | 🚧               |
-| [.NET MAUI](https://github.com/aptabase/aptabase-maui)                                                   | ✅             | 🚧                   | 🚧               | 🚧               |
-| [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase) | ✅             | 🚧                   | 🚧               | 🚧               |
+| [Swift (Apple)](https://github.com/aptabase/aptabase-swift)                                              | ✅             | ✅                   | 🚧               | 🚧               |
 | [Android (Kotlin)](https://github.com/aptabase/aptabase-kotlin)                                          | ✅             | 🚧                   | 🚧               | 🚧               |
+| [Flutter](https://github.com/aptabase/aptabase_flutter)                                                  | ✅             | 🚧                   | 🚧               | 🚧               |
+| [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)                                               | ✅             | 🚧                   | 🚧               | 🚧               |
+| [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase) | ✅             | 🚧                   | 🚧               | 🚧               |
+| [Web Apps](https://github.com/aptabase/aptabase-js)                                                      | ✅             | 🚧                   | 🚧               | 🚧               |
+| [.NET MAUI](https://github.com/aptabase/aptabase-maui)                                                   | ✅             | 🚧                   | 🚧               | 🚧               |
 | [React Native](https://github.com/aptabase/aptabase/issues/2)                                            | 🚧             | 🚧                   | 🚧               | 🚧               |
 | [Electron](https://github.com/aptabase/aptabase/issues/3)                                                | 🚧             | 🚧                   | 🚧               | 🚧               |
 | [Capacitor.js](https://github.com/aptabase/aptabase/issues/6)                                            | 🚧             | 🚧                   | 🚧               | 🚧               |
