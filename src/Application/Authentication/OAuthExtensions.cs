@@ -41,7 +41,7 @@ public static class OAuthExtensions
             o.ClientId = env.OAuthGitHubClientId;
             o.ClientSecret = env.OAuthGitHubClientSecret;
             o.CallbackPath = new PathString("/api/_auth/github/callback");
-            o.CorrelationCookie.SameSite = SameSiteMode.Unspecified;
+            o.CorrelationCookie.SameSite = env.IsDevelopment ? SameSiteMode.Unspecified : SameSiteMode.None;
             o.CorrelationCookie.HttpOnly = true;
             o.CorrelationCookie.IsEssential = true;
             o.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
@@ -86,7 +86,7 @@ public static class OAuthExtensions
             o.Scope.Add("profile");
             o.Scope.Add("email");
             o.CallbackPath = new PathString("/api/_auth/google/callback");
-            o.CorrelationCookie.SameSite = SameSiteMode.Unspecified;
+            o.CorrelationCookie.SameSite = env.IsDevelopment ? SameSiteMode.Unspecified : SameSiteMode.None;
             o.CorrelationCookie.HttpOnly = true;
             o.CorrelationCookie.IsEssential = true;
             o.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
