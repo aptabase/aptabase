@@ -41,7 +41,10 @@ public class EventsController : Controller
 
         var (valid, errorMessage) = _validator.IsValidBody(body);
         if (!valid)
+        {
+            _logger.LogWarning(errorMessage);
             return BadRequest(errorMessage);
+        }
 
         var (appId, result) = await ValidateAppKey(appKey);
         if (result is not null)
@@ -95,6 +98,7 @@ public class EventsController : Controller
     private async Task<(string, IActionResult?)> ValidateAppKey(string appKey)
     {
         var (appId, status) = await _validator.IsAppKeyValid(appKey);
+
         IActionResult? result = status switch
         {
             AppKeyStatus.Missing => BadRequest("Missing App-Key header. Find your app key on Aptabase console."),
