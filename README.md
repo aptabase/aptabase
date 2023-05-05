@@ -39,8 +39,8 @@ These are the SDKs currently available, as well as the ones we plan to build.
 | -------------------------------------------------------------------------------------------------------- | -------------- | -------------------- | ---------------- | ---------------- |
 | [Swift (Apple)](https://github.com/aptabase/aptabase-swift)                                              | ✅             | ✅                   | 🚧               | 🚧               |
 | [Android (Kotlin)](https://github.com/aptabase/aptabase-kotlin)                                          | ✅             | 🚧                   | 🚧               | 🚧               |
-| [Flutter](https://github.com/aptabase/aptabase_flutter)                                                  | ✅             | 🚧                   | 🚧               | 🚧               |
-| [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)                                               | ✅             | 🚧                   | 🚧               | 🚧               |
+| [Flutter](https://github.com/aptabase/aptabase_flutter)                                                  | ✅             | ✅                   | 🚧               | 🚧               |
+| [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)                                               | ✅             | ✅                   | 🚧               | 🚧               |
 | [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase) | ✅             | 🚧                   | 🚧               | 🚧               |
 | [Web Apps](https://github.com/aptabase/aptabase-js)                                                      | ✅             | 🚧                   | 🚧               | 🚧               |
 | [.NET MAUI](https://github.com/aptabase/aptabase-maui)                                                   | ✅             | 🚧                   | 🚧               | 🚧               |
@@ -53,7 +53,7 @@ These are the SDKs currently available, as well as the ones we plan to build.
 **Legend:**
 
 - **Aptabase Cloud:** Does the SDK work with Aptabase Cloud?
-- **Aptabase Self Hosted:** Does the SDK work with Aptabase Cloud?
+- **Aptabase Self Hosted:** Does the SDK work with Self Hosted instances?
 - **Offline Tracking:** Does the SDK work when the device is offline?
 - **Opt-in/Opt-out:** Does the SDK provide an easy way for developers to implement opt-in/opt-out?
 
