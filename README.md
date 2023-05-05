@@ -38,7 +38,7 @@ These are the SDKs currently available, as well as the ones we plan to build.
 | Framework                                                                                                | Aptabase Cloud | Aptabase Self-Hosted | Offline Tracking | Opt-in / Opt-out |
 | -------------------------------------------------------------------------------------------------------- | -------------- | -------------------- | ---------------- | ---------------- |
 | [Swift (Apple)](https://github.com/aptabase/aptabase-swift)                                              | ✅             | ✅                   | 🚧               | 🚧               |
-| [Android (Kotlin)](https://github.com/aptabase/aptabase-kotlin)                                          | ✅             | 🚧                   | 🚧               | 🚧               |
+| [Android (Kotlin)](https://github.com/aptabase/aptabase-kotlin)                                          | ✅             | ✅                   | 🚧               | 🚧               |
 | [Flutter](https://github.com/aptabase/aptabase_flutter)                                                  | ✅             | ✅                   | 🚧               | 🚧               |
 | [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)                                               | ✅             | ✅                   | 🚧               | 🚧               |
 | [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase) | ✅             | 🚧                   | 🚧               | 🚧               |
