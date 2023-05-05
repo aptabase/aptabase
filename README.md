@@ -25,9 +25,7 @@ The easiest and quickest way to get started. A fully managed services by the cre
 
 ## 🏢 Self-Hosted
 
-You can also host Aptabase on your servers. It's free, but you are responsible for maintenance and updates.
-
-> ⚠️ The docker image is already available on [GitHub](https://github.com/aptabase/aptabase/pkgs/container/aptabase), but documentation for how to self-host Aptabase is still in progress.
+You can also host Aptabase on your servers. It's free, but you are responsible for maintenance and updates. [Learn how](https://github.com/aptabase/aptabase/wiki/How-to-Self-Host-Aptabase).
 
 # SDKs
 
