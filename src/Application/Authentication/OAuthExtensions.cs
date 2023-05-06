@@ -18,6 +18,16 @@ public static class OAuthExtensions
         [JsonPropertyName("email")]
         public string Email { get; set; } = "";
     }
+    
+    public class GitHubEmail
+    {
+        [JsonPropertyName("email")]
+        public string email { get; set; } = "";
+        [JsonPropertyName("primary")]
+        public bool Primary { get; set; }
+        [JsonPropertyName("verified")]
+        public bool Verified { get; set; }
+    }
 
     public class GoogleUser
     {
@@ -41,6 +51,8 @@ public static class OAuthExtensions
             o.ClientId = env.OAuthGitHubClientId;
             o.ClientSecret = env.OAuthGitHubClientSecret;
             o.CallbackPath = new PathString("/api/_auth/github/callback");
+            o.Scope.Add("read:user");
+            o.Scope.Add("user:email");
             o.CorrelationCookie.SameSite = env.IsDevelopment ? SameSiteMode.Unspecified : SameSiteMode.None;
             o.CorrelationCookie.HttpOnly = true;
             o.CorrelationCookie.IsEssential = true;
@@ -55,15 +67,15 @@ public static class OAuthExtensions
             {
                 OnCreatingTicket = async context =>
                 {
-                    var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-                    var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-                    response.EnsureSuccessStatusCode();
-
-                    var ghUser = await response.Content.ReadFromJsonAsync<GitHubUser>();
+                    var ghUser = await MakeOAuthRequest<GitHubUser>(context, context.Options.UserInformationEndpoint);
                     if (ghUser is null)
                         throw new Exception("Failed to retrieve GitHub user information.");
+
+                    if (string.IsNullOrWhiteSpace(ghUser.Email))
+                        ghUser.Email = await GetGitHubPreferredEmail(context);
+
+                    if (string.IsNullOrWhiteSpace(ghUser.Email))
+                        throw new Exception("Could not find a verified email, can't login with GitHub.");
 
                     var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
                     var user = await authService.FindOrCreateAccountWithOAuth(ghUser.Name, ghUser.Email, "github", ghUser.Id.ToString(), context.HttpContext.RequestAborted);
@@ -100,13 +112,7 @@ public static class OAuthExtensions
             {
                 OnCreatingTicket = async context =>
                 {
-                    var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-                    var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-                    response.EnsureSuccessStatusCode();
-
-                    var googleUser = await response.Content.ReadFromJsonAsync<GoogleUser>();
+                    var googleUser = await MakeOAuthRequest<GoogleUser>(context, context.Options.UserInformationEndpoint);
                     if (googleUser is null)
                         throw new Exception("Failed to retrieve Google user information.");
 
@@ -120,4 +126,21 @@ public static class OAuthExtensions
             };
         });
     }
+
+    private static async Task<T?> MakeOAuthRequest<T>(OAuthCreatingTicketContext context, string endpoint)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+        var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<T>();
+    }
+
+    private static async Task<string> GetGitHubPreferredEmail(OAuthCreatingTicketContext context)
+    {
+        var emails = await MakeOAuthRequest<GitHubEmail[]>(context, "https://api.github.com/user/emails");
+        return emails?.Where(e => e.Verified).OrderBy(e => e.Primary ? 0 : 1).FirstOrDefault()?.email ?? "";
+    }
+
 }
