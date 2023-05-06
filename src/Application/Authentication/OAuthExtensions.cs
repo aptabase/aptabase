@@ -129,10 +129,10 @@ public static class OAuthExtensions
 
     private static async Task<T?> MakeOAuthRequest<T>(OAuthCreatingTicketContext context, string endpoint)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+        using var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-        var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+        using var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<T>();
     }
