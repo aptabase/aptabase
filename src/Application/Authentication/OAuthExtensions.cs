@@ -15,6 +15,8 @@ public static class OAuthExtensions
         public long Id { get; set; }
         [JsonPropertyName("name")]
         public string Name { get; set; } = "";
+        [JsonPropertyName("login")]
+        public string Login { get; set; } = "";
         [JsonPropertyName("email")]
         public string Email { get; set; } = "";
     }
@@ -22,7 +24,7 @@ public static class OAuthExtensions
     public class GitHubEmail
     {
         [JsonPropertyName("email")]
-        public string email { get; set; } = "";
+        public string Email { get; set; } = "";
         [JsonPropertyName("primary")]
         public bool Primary { get; set; }
         [JsonPropertyName("verified")]
@@ -70,6 +72,9 @@ public static class OAuthExtensions
                     var ghUser = await MakeOAuthRequest<GitHubUser>(context, context.Options.UserInformationEndpoint);
                     if (ghUser is null)
                         throw new Exception("Failed to retrieve GitHub user information.");
+
+                    if (string.IsNullOrWhiteSpace(ghUser.Name))
+                        ghUser.Name = ghUser.Login;
 
                     if (string.IsNullOrWhiteSpace(ghUser.Email))
                         ghUser.Email = await GetGitHubPreferredEmail(context);
@@ -140,7 +145,7 @@ public static class OAuthExtensions
     private static async Task<string> GetGitHubPreferredEmail(OAuthCreatingTicketContext context)
     {
         var emails = await MakeOAuthRequest<GitHubEmail[]>(context, "https://api.github.com/user/emails");
-        return emails?.Where(e => e.Verified).OrderBy(e => e.Primary ? 0 : 1).FirstOrDefault()?.email ?? "";
+        return emails?.Where(e => e.Verified).OrderBy(e => e.Primary ? 0 : 1).FirstOrDefault()?.Email ?? "";
     }
 
 }
