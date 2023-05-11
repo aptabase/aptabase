@@ -70,7 +70,11 @@ const navigation: NavCategory[] = [
   },
 ];
 
-const NavLink = (props: { current: boolean; item: NavItem }) => {
+const NavLink = (props: {
+  current: boolean;
+  item: NavItem;
+  onNavigation?: VoidFunction;
+}) => {
   const baseClassName =
     "group flex items-center rounded-md py-2 lg:py-1 px-2 text-sm";
 
@@ -96,18 +100,27 @@ const NavLink = (props: { current: boolean; item: NavItem }) => {
     baseClassName
   );
 
+  const onButtonClick = () => {
+    props.onNavigation?.();
+    props.item.onClick?.();
+  };
+
   return props.item.href ? (
-    <Link to={props.item.href} className={className}>
+    <Link
+      to={props.item.href}
+      className={className}
+      onClick={props.onNavigation}
+    >
       {content}
     </Link>
   ) : (
-    <button onClick={props.item.onClick} className={className}>
+    <button onClick={onButtonClick} className={className}>
       {content}
     </button>
   );
 };
 
-export function NavMenu() {
+export function NavMenu(props: { onNavigation?: VoidFunction }) {
   const location = useLocation();
 
   return (
@@ -126,6 +139,7 @@ export function NavMenu() {
                   key={item.name}
                   current={item.href === location.pathname}
                   item={item}
+                  onNavigation={props.onNavigation}
                 />
               ))}
             </nav>

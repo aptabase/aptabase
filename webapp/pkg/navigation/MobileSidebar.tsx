@@ -9,7 +9,11 @@ type ButtonProps = {
 
 MobileSidebar.Button = (props: ButtonProps) => {
   return (
-    <button type="button" className="border-r border-default px-4 text-default lg:hidden" onClick={props.onClick}>
+    <button
+      type="button"
+      className="border-r border-default px-4 text-default lg:hidden"
+      onClick={props.onClick}
+    >
       <Bars3BottomLeftIcon className="h-6 w-6" />
     </button>
   );
@@ -25,7 +29,11 @@ export function MobileSidebar(props: Props) {
 
   return (
     <Transition.Root show={props.open} as={Fragment}>
-      <Dialog as="div" className="relative z-40 lg:hidden" onClose={props.onClose}>
+      <Dialog
+        as="div"
+        className="relative z-40 lg:hidden"
+        onClose={props.onClose}
+      >
         <Transition.Child
           as={Fragment}
           enter="transition-opacity ease-linear duration-300"
@@ -59,17 +67,23 @@ export function MobileSidebar(props: Props) {
                 leaveTo="opacity-0"
               >
                 <div className="absolute top-0 right-0 -mr-12 pt-2">
-                  <button type="button" className="ml-1 flex h-10 w-10 items-center justify-center rounded-full" onClick={close}>
+                  <button
+                    type="button"
+                    className="ml-1 flex h-10 w-10 items-center justify-center rounded-full"
+                    onClick={close}
+                  >
                     <XMarkIcon className="h-6 w-6 text-white" />
                   </button>
                 </div>
               </Transition.Child>
               <div className="p-2 h-0 flex-1 overflow-y-auto">
-                <NavMenu />
+                <NavMenu onNavigation={close} />
               </div>
             </Dialog.Panel>
           </Transition.Child>
-          <div className="w-14 flex-shrink-0">{/* Dummy element to force sidebar to shrink to fit close icon */}</div>
+          <div className="w-14 flex-shrink-0">
+            {/* Dummy element to force sidebar to shrink to fit close icon */}
+          </div>
         </div>
       </Dialog>
     </Transition.Root>
