@@ -148,7 +148,7 @@ export function MetricsChart(props: Props) {
             },
             beginAtZero: true,
             ticks: {
-              maxTicksLimit: 8,
+              maxTicksLimit: 4,
             },
             border: {
               display: false,
@@ -163,7 +163,7 @@ export function MetricsChart(props: Props) {
             },
             beginAtZero: true,
             ticks: {
-              maxTicksLimit: 8,
+              maxTicksLimit: 4,
             },
             border: {
               display: false,
