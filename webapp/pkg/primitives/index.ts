@@ -12,3 +12,4 @@ export * from "./Region";
 export * from "./TextInput";
 export * from "./api";
 export * from "./useDelay";
+export * from "./useLazyLoad";

@@ -20,20 +20,35 @@ export function TopEventsWidget(props: Props) {
     isLoading,
     isError,
     data: rows,
-  } = useQuery(["top-events", props.appId, period, countryCode, appVersion, eventName, osName], () =>
-    topEvents({ appId: props.appId, period, countryCode, appVersion, eventName, osName })
+  } = useQuery(
+    [
+      "top-events",
+      props.appId,
+      period,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
+    () =>
+      topEvents({
+        appId: props.appId,
+        period,
+        countryCode,
+        appVersion,
+        eventName,
+        osName,
+      })
   );
 
   return (
-    <Card>
-      <TopNChart
-        title="Events"
-        searchParamKey="eventName"
-        isLoading={isLoading}
-        isError={isError}
-        labels={["Name", "Count"]}
-        items={rows || []}
-      />
-    </Card>
+    <TopNChart
+      title="Events"
+      searchParamKey="eventName"
+      isLoading={isLoading}
+      isError={isError}
+      labels={["Name", "Count"]}
+      items={rows || []}
+    />
   );
 }

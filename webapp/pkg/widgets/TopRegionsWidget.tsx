@@ -22,29 +22,47 @@ export function TopRegionsWidget(props: Props) {
     isLoading,
     isError,
     data: rows,
-  } = useQuery(["top-regions", props.appId, period, countryCode, appVersion, eventName, osName], () =>
-    topRegions({ appId: props.appId, period, countryCode, appVersion, eventName, osName })
+  } = useQuery(
+    [
+      "top-regions",
+      props.appId,
+      period,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
+    () =>
+      topRegions({
+        appId: props.appId,
+        period,
+        countryCode,
+        appVersion,
+        eventName,
+        osName,
+      })
   );
 
   const targetUrl = new URL(window.location.href);
   targetUrl.searchParams.delete("countryCode");
 
   return (
-    <Card>
-      <TopNChart
-        title={
-          <CardTitle backProperty="countryCode">
-            <div className="flex items-center space-x-2">
-              <img src={getCountryFlagUrl(countryCode)} className="h-5 w-5 shadow rounded-full" />
-              <p>{getCountryName(countryCode) || "Unknown"}</p>
-            </div>
-          </CardTitle>
-        }
-        isLoading={isLoading}
-        isError={isError}
-        labels={["Name", "Sessions"]}
-        items={rows || []}
-      />
-    </Card>
+    <TopNChart
+      title={
+        <CardTitle backProperty="countryCode">
+          <div className="flex items-center space-x-2">
+            <img
+              src={getCountryFlagUrl(countryCode)}
+              className="h-5 w-5 shadow rounded-full"
+            />
+            <p>{getCountryName(countryCode) || "Unknown"}</p>
+          </div>
+        </CardTitle>
+      }
+      isLoading={isLoading}
+      isError={isError}
+      labels={["Name", "Sessions"]}
+      items={rows || []}
+    />
   );
 }

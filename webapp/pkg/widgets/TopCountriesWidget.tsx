@@ -21,26 +21,44 @@ export function TopCountriesWidget(props: Props) {
     isLoading,
     isError,
     data: rows,
-  } = useQuery(["top-countries", props.appId, period, countryCode, appVersion, eventName, osName], () =>
-    topCountries({ appId: props.appId, period, countryCode, appVersion, eventName, osName })
+  } = useQuery(
+    [
+      "top-countries",
+      props.appId,
+      period,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
+    () =>
+      topCountries({
+        appId: props.appId,
+        period,
+        countryCode,
+        appVersion,
+        eventName,
+        osName,
+      })
   );
 
   return (
-    <Card>
-      <TopNChart
-        title="Countries"
-        searchParamKey="countryCode"
-        isLoading={isLoading}
-        isError={isError}
-        labels={["Name", "Sessions"]}
-        items={rows || []}
-        renderRow={(item) => (
-          <span className="flex items-center space-x-2 px-2">
-            <img src={getCountryFlagUrl(item.name)} className="h-5 w-5 shadow rounded-full" />
-            <p>{getCountryName(item.name) || "Unknown"}</p>
-          </span>
-        )}
-      />
-    </Card>
+    <TopNChart
+      title="Countries"
+      searchParamKey="countryCode"
+      isLoading={isLoading}
+      isError={isError}
+      labels={["Name", "Sessions"]}
+      items={rows || []}
+      renderRow={(item) => (
+        <span className="flex items-center space-x-2 px-2">
+          <img
+            src={getCountryFlagUrl(item.name)}
+            className="h-5 w-5 shadow rounded-full"
+          />
+          <p>{getCountryName(item.name) || "Unknown"}</p>
+        </span>
+      )}
+    />
   );
 }

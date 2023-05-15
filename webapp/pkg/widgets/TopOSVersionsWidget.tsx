@@ -22,26 +22,41 @@ export function TopOSVersionsWidget(props: Props) {
     isLoading,
     isError,
     data: rows,
-  } = useQuery(["top-osversions", props.appId, period, countryCode, appVersion, eventName, osName], () =>
-    topOSVersions({ appId: props.appId, period, countryCode, appVersion, eventName, osName })
+  } = useQuery(
+    [
+      "top-osversions",
+      props.appId,
+      period,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
+    () =>
+      topOSVersions({
+        appId: props.appId,
+        period,
+        countryCode,
+        appVersion,
+        eventName,
+        osName,
+      })
   );
 
   return (
-    <Card>
-      <TopNChart
-        title={
-          <CardTitle backProperty="osName">
-            <span className="flex items-center space-x-2 px-2">
-              <img src={getOperatingSystemImageUrl(osName)} className="h-5 w-5" />
-              <p>{osName || "Unknown"}</p>
-            </span>
-          </CardTitle>
-        }
-        isLoading={isLoading}
-        isError={isError}
-        labels={["Version", "Sessions"]}
-        items={rows || []}
-      />
-    </Card>
+    <TopNChart
+      title={
+        <CardTitle backProperty="osName">
+          <span className="flex items-center space-x-2 px-2">
+            <img src={getOperatingSystemImageUrl(osName)} className="h-5 w-5" />
+            <p>{osName || "Unknown"}</p>
+          </span>
+        </CardTitle>
+      }
+      isLoading={isLoading}
+      isError={isError}
+      labels={["Version", "Sessions"]}
+      items={rows || []}
+    />
   );
 }

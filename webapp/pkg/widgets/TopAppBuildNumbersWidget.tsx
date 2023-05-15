@@ -21,19 +21,34 @@ export function TopAppBuildNumbersWidget(props: Props) {
     isLoading,
     isError,
     data: rows,
-  } = useQuery(["top-appbuildnumbers", props.appId, period, countryCode, appVersion, eventName, osName], () =>
-    topAppBuildNumbers({ appId: props.appId, period, countryCode, appVersion, eventName, osName })
+  } = useQuery(
+    [
+      "top-appbuildnumbers",
+      props.appId,
+      period,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
+    () =>
+      topAppBuildNumbers({
+        appId: props.appId,
+        period,
+        countryCode,
+        appVersion,
+        eventName,
+        osName,
+      })
   );
 
   return (
-    <Card>
-      <TopNChart
-        title={<CardTitle backProperty="appVersion">{appVersion}</CardTitle>}
-        isLoading={isLoading}
-        isError={isError}
-        labels={["Build Number", "Sessions"]}
-        items={rows || []}
-      />
-    </Card>
+    <TopNChart
+      title={<CardTitle backProperty="appVersion">{appVersion}</CardTitle>}
+      isLoading={isLoading}
+      isError={isError}
+      labels={["Build Number", "Sessions"]}
+      items={rows || []}
+    />
   );
 }

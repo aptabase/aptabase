@@ -1,4 +1,6 @@
 import clsx from "clsx";
+import { useRef } from "react";
+import { useLazyLoad } from "./useLazyLoad";
 
 type Props = {
   className?: string;
@@ -6,5 +8,18 @@ type Props = {
 };
 
 export function Card(props: Props) {
-  return <div className={clsx("flex flex-col min-h-[28rem] rounded border border-default p-4", props.className)}>{props.children}</div>;
+  const ref: any = useRef<HTMLDivElement>();
+  const show: boolean = useLazyLoad<HTMLDivElement>(ref);
+
+  return (
+    <div
+      ref={ref}
+      className={clsx(
+        "flex flex-col min-h-[28rem] rounded border border-default p-4",
+        props.className
+      )}
+    >
+      {show && props.children}
+    </div>
+  );
 }

@@ -20,20 +20,35 @@ export function TopAppVersionsWidget(props: Props) {
     isLoading,
     isError,
     data: rows,
-  } = useQuery(["top-appversions", props.appId, period, countryCode, appVersion, eventName, osName], () =>
-    topAppVersions({ appId: props.appId, period, countryCode, appVersion, eventName, osName })
+  } = useQuery(
+    [
+      "top-appversions",
+      props.appId,
+      period,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
+    () =>
+      topAppVersions({
+        appId: props.appId,
+        period,
+        countryCode,
+        appVersion,
+        eventName,
+        osName,
+      })
   );
 
   return (
-    <Card>
-      <TopNChart
-        title="App Versions"
-        searchParamKey="appVersion"
-        isLoading={isLoading}
-        isError={isError}
-        labels={["Version", "Sessions"]}
-        items={rows || []}
-      />
-    </Card>
+    <TopNChart
+      title="App Versions"
+      searchParamKey="appVersion"
+      isLoading={isLoading}
+      isError={isError}
+      labels={["Version", "Sessions"]}
+      items={rows || []}
+    />
   );
 }

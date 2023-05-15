@@ -1,5 +1,5 @@
 import { useCurrentApp } from "@app/navigation";
-import { DateRangePicker, Head, PageHeading } from "@app/primitives";
+import { Card, DateRangePicker, Head, PageHeading } from "@app/primitives";
 import {
   EventPropsWidget,
   MainChartWidget,
@@ -14,6 +14,7 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 Component.displayName = "Dashboard";
+
 export function Component() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -36,24 +37,40 @@ export function Component() {
         <MainChartWidget appId={app.id} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {countryCode ? (
-            <TopRegionsWidget appId={app.id} />
+            <Card>
+              <TopRegionsWidget appId={app.id} />
+            </Card>
           ) : (
-            <TopCountriesWidget appId={app.id} />
+            <Card>
+              <TopCountriesWidget appId={app.id} />
+            </Card>
           )}
           {osName ? (
-            <TopOSVersionsWidget appId={app.id} />
+            <Card>
+              <TopOSVersionsWidget appId={app.id} />
+            </Card>
           ) : (
-            <TopOperatingSystemsWidget appId={app.id} />
+            <Card>
+              <TopOperatingSystemsWidget appId={app.id} />
+            </Card>
           )}
           {eventName ? (
-            <EventPropsWidget appId={app.id} />
+            <Card>
+              <EventPropsWidget appId={app.id} />
+            </Card>
           ) : (
-            <TopEventsWidget appId={app.id} />
+            <Card>
+              <TopEventsWidget appId={app.id} />
+            </Card>
           )}
           {appVersion ? (
-            <TopAppBuildNumbersWidget appId={app.id} />
+            <Card>
+              <TopAppBuildNumbersWidget appId={app.id} />
+            </Card>
           ) : (
-            <TopAppVersionsWidget appId={app.id} />
+            <Card>
+              <TopAppVersionsWidget appId={app.id} />
+            </Card>
           )}
         </div>
       </div>
