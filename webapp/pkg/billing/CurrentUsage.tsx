@@ -17,7 +17,7 @@ export function CurrentUsage() {
   const perc = (data.count / data.quota) * 100;
 
   return (
-    <div className="flex flex-col space-y-1">
+    <div className="p-2 flex flex-col space-y-1">
       <p className="text-sm font-medium text-gray-900 mb-1">Current Usage</p>
       <div className="text-sm text-secondary">
         {data.count?.toLocaleString()} / {data.quota?.toLocaleString()} events (

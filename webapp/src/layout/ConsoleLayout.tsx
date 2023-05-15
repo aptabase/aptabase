@@ -27,7 +27,7 @@ export function ConsoleLayout() {
             <NavMenu />
           </div>
           {isBillingEnabled && (
-            <div className="px-2 py-4 border-t border-default">
+            <div className="p-2 border-t border-default">
               <CurrentUsage />
             </div>
           )}
