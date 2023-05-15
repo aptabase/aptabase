@@ -1,5 +1,3 @@
-using Aptabase.Application.Ingestion;
-
 namespace Aptabase.Application.Demo;
 
 public static class DemoDataGenerator
