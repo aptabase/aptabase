@@ -21,7 +21,6 @@ public class EventsController : Controller
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    [HttpPost("/v0/event")]
     [HttpPost("/api/v0/event")]
     [EnableCors("AllowAny")]
     [EnableRateLimiting("EventIngestion")]
@@ -60,7 +59,7 @@ public class EventsController : Controller
     }
 
     // Disabled, not yet used. Revisit this in future and think about Rate Limiting
-    // [HttpPost("/v0/events")]
+    // [HttpPost("/api/v0/events")]
     // [EnableCors("AllowAny")]
     // public async Task<IActionResult> Multiple(
     //     [FromHeader(Name = "App-Key")] string? appKey,
