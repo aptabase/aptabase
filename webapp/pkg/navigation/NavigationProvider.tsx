@@ -1,5 +1,6 @@
 import { Application, useApps } from "@app/apps";
 import { createContext, useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   children: React.ReactNode;
@@ -12,15 +13,23 @@ type NavigationContextType = {
 
 const APP_ID_STORAGE_KEY = "aptabase:app-id";
 
-const NavigationContext = createContext<NavigationContextType>({ currentApp: undefined, switchApp: () => {} });
+const NavigationContext = createContext<NavigationContextType>({
+  currentApp: undefined,
+  switchApp: () => {},
+});
 
-const findApp = (apps: Application[], appId?: string | null) => apps.find((app) => app.id === appId);
+const findApp = (apps: Application[], appId?: string | null) =>
+  apps.find((app) => app.id === appId);
 
 export function NavigationProvider(props: Props) {
   const { apps } = useApps();
+  const navigate = useNavigate();
 
-  const initialApp = findApp(apps, localStorage.getItem(APP_ID_STORAGE_KEY)) || apps[0];
-  const [currentApp, setCurrentApp] = useState<Application | undefined>(initialApp);
+  const initialApp =
+    findApp(apps, localStorage.getItem(APP_ID_STORAGE_KEY)) || apps[0];
+  const [currentApp, setCurrentApp] = useState<Application | undefined>(
+    initialApp
+  );
 
   // If the app list changes, check if the current app is still in the list
   // If not, switch to the first app in the list
@@ -36,9 +45,14 @@ export function NavigationProvider(props: Props) {
   const switchApp = (app: Application) => {
     localStorage.setItem(APP_ID_STORAGE_KEY, app.id);
     setCurrentApp(app);
+    navigate("/");
   };
 
-  return <NavigationContext.Provider value={{ currentApp, switchApp }}>{props.children}</NavigationContext.Provider>;
+  return (
+    <NavigationContext.Provider value={{ currentApp, switchApp }}>
+      {props.children}
+    </NavigationContext.Provider>
+  );
 }
 
 export function useNavigationContext(): NavigationContextType {

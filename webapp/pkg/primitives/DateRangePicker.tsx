@@ -41,7 +41,12 @@ function StyledOption(props: StyledOptionProps) {
   return (
     <Listbox.Option
       key={props.option.value}
-      className={({ active }) => clsx(active && "bg-gray-100", "relative rounded cursor-default select-none py-1.5 pl-3 pr-9 mx-1")}
+      className={({ active }) =>
+        clsx(
+          active && "bg-gray-100",
+          "relative rounded cursor-default select-none py-1.5 pl-3 pr-9 mx-1"
+        )
+      }
       value={props.option}
     >
       {() => <span className="block truncate">{props.option?.name}</span>}
@@ -52,13 +57,16 @@ function StyledOption(props: StyledOptionProps) {
 export function DateRangePicker() {
   let [searchParams, setSearchParams] = useSearchParams();
   const period = searchParams.get("period") || "24h";
-  const initial = options.find((option) => option.value === period) || options[0];
-  const [selected, setSelected] = useState<Option>(initial);
 
   const onChange = (option: Option) => {
-    setSearchParams({ ...searchParams, period: option.value });
-    setSelected(option);
+    setSearchParams((params) => {
+      params.set("period", option.value);
+      return params;
+    });
   };
+
+  const selected =
+    options.find((option) => option.value === period) || options[0];
 
   return (
     <Listbox value={selected} onChange={onChange}>
@@ -71,7 +79,13 @@ export function DateRangePicker() {
             </span>
           </Listbox.Button>
 
-          <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+          <Transition
+            show={open}
+            as={Fragment}
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
             <Listbox.Options className="absolute z-10 mt-1 max-h-fit w-50 lg:w-40 right-0 overflow-auto rounded-md bg-white py-1 text-base shadow-lg focus-ring sm:text-sm">
               {options.map((option) => (
                 <StyledOption key={option.value} option={option} />
