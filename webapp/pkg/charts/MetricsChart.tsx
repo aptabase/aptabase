@@ -1,18 +1,41 @@
 import { EmptyState, ErrorState, LoadingState } from "@app/primitives";
-import { BarController, BarElement, CategoryScale, Chart, LinearScale, Tooltip } from "chart.js";
+import {
+  BarController,
+  LineController,
+  BarElement,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  Chart,
+  LinearScale,
+  Tooltip,
+  ScriptableContext,
+} from "chart.js";
 import Annotation, { LineAnnotationOptions } from "chartjs-plugin-annotation";
 import { useEffect, useRef, useState } from "react";
 import colors from "./colors";
 
-Chart.defaults.font.family = "'Inter var', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
+Chart.defaults.font.family =
+  "'Inter var', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
 
-Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Annotation);
+Chart.register(
+  BarController,
+  BarElement,
+  LineController,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Annotation
+);
 
 type Props = {
-  category: string;
   hasPartialData: boolean;
+  metrics: string[];
   labels: string[];
-  values: number[];
+  sessions: number[];
+  events: number[];
   showAllLabels: boolean;
   isEmpty?: boolean;
   isLoading?: boolean;
@@ -23,38 +46,71 @@ type Props = {
 
 type TooltipDataPoint = {
   label: string;
-  value: number;
+  points: Array<{
+    name: string;
+    value: number;
+  }>;
 };
 
-export function BarChart(props: Props) {
+export function MetricsChart(props: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const [tooltipDataPoint, setTooltipDataPoint] = useState<TooltipDataPoint | null>(null);
+  const [tooltipDataPoint, setTooltipDataPoint] =
+    useState<TooltipDataPoint | null>(null);
   let chartInstance: Chart;
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
     chartInstance = new Chart(canvasRef.current, {
-      type: "bar",
       data: {
         labels: props.labels,
         datasets: [
           {
-            label: props.category,
-            data: props.values,
+            order: 2,
+            type: "bar",
+            label: "Sessions",
+            yAxisID: "sessions",
+            hidden: !props.metrics.includes("sessions"),
+            data: props.sessions,
             backgroundColor: props.hasPartialData
-              ? (ctx) => {
-                  ctx.chart.canvas;
+              ? (ctx: ScriptableContext<"bar">) => {
                   const total = ctx.chart.data.datasets[0].data.length;
-                  return total - 1 === ctx.dataIndex ? colors.primaryStripped : colors.primary;
+                  return total - 1 === ctx.dataIndex
+                    ? colors.primaryStripped
+                    : colors.primary;
                 }
               : colors.primary,
             borderRadius: 2,
           },
+          {
+            order: 1,
+            type: "line",
+            label: "Events",
+            data: props.events,
+            yAxisID: "events",
+            hidden: !props.metrics.includes("events"),
+            borderColor: "#374151",
+            tension: 0.1,
+            pointRadius: 0,
+            pointHoverRadius: 0,
+            segment: {
+              borderDash: props.hasPartialData
+                ? (ctx) => {
+                    const total =
+                      chartInstance?.data.datasets[0].data.length || 0;
+                    return total - 1 === ctx.p1DataIndex ? [8, 8] : [];
+                  }
+                : [],
+            },
+          },
         ],
       },
       options: {
+        animation: {
+          duration: 200,
+          easing: "linear",
+        },
         interaction: {
           mode: "index",
           intersect: false,
@@ -74,7 +130,10 @@ export function BarChart(props: Props) {
               autoSkipPadding: props.showAllLabels ? 0 : 20,
               maxTicksLimit: props.showAllLabels ? 0 : 8,
               callback: function (value) {
-                const label = typeof value === "number" ? this.getLabelForValue(value) : value;
+                const label =
+                  typeof value === "number"
+                    ? this.getLabelForValue(value)
+                    : value;
                 return props.formatLabel(label);
               },
             },
@@ -82,13 +141,29 @@ export function BarChart(props: Props) {
               display: false,
             },
           },
-          y: {
+          sessions: {
+            display: props.metrics.includes("sessions"),
             grid: {
               tickWidth: 0,
             },
             beginAtZero: true,
             ticks: {
-              maxTicksLimit: 4,
+              maxTicksLimit: 8,
+            },
+            border: {
+              display: false,
+              dash: [4, 4],
+            },
+          },
+          events: {
+            display: props.metrics.includes("events"),
+            position: props.metrics.length === 1 ? "left" : "right",
+            grid: {
+              tickWidth: 0,
+            },
+            beginAtZero: true,
+            ticks: {
+              maxTicksLimit: 8,
             },
             border: {
               display: false,
@@ -118,7 +193,8 @@ export function BarChart(props: Props) {
             external: function ({ tooltip, chart }) {
               if (!tooltipRef.current) return;
 
-              const annotations = chartInstance.options.plugins?.annotation?.annotations as LineAnnotationOptions[];
+              const annotations = chartInstance.options.plugins?.annotation
+                ?.annotations as LineAnnotationOptions[];
               const highlight = annotations[0];
 
               if (tooltip.opacity === 0) {
@@ -130,9 +206,12 @@ export function BarChart(props: Props) {
 
               const dataPoint = tooltip.dataPoints[0];
               const label = dataPoint.label;
-              const value = dataPoint.parsed.y;
+              const points = tooltip.dataPoints.map((dataPoint) => ({
+                name: dataPoint.dataset.label ?? "",
+                value: dataPoint.parsed.y ?? 0,
+              }));
 
-              setTooltipDataPoint({ label, value });
+              setTooltipDataPoint({ label, points });
 
               if (highlight && highlight.xMin !== dataPoint.dataIndex) {
                 highlight.display = true;
@@ -142,10 +221,21 @@ export function BarChart(props: Props) {
               }
 
               tooltipRef.current.style.opacity = "1";
-              const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
+
+              var offsetY = Math.min(
+                ...tooltip.dataPoints.map(
+                  (x) => x.element.tooltipPosition(true).y
+                )
+              );
+
+              const { offsetLeft: positionX } = chart.canvas;
               tooltipRef.current.style.left = positionX + tooltip.caretX + "px";
-              tooltipRef.current.style.top = positionY + tooltip.caretY - 50 + "px";
-              tooltipRef.current.style.padding = tooltip.options.padding + "px " + tooltip.options.padding + "px";
+              tooltipRef.current.style.top = offsetY + 100 + "px";
+              tooltipRef.current.style.padding =
+                tooltip.options.padding +
+                "px " +
+                tooltip.options.padding +
+                "px";
             },
           },
         },

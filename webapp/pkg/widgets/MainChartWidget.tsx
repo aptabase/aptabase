@@ -1,54 +1,31 @@
-import { BarChart, Metric } from "@app/charts";
+import { MetricsChart } from "@app/charts";
 import { Card } from "@app/primitives";
 import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";
-import { format, formatDuration, intervalToDuration, parseJSON } from "date-fns";
-import { useEffect } from "react";
+import { format, parseJSON } from "date-fns";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Granularity, keyMetrics, periodicStats } from "./query";
+import { Granularity, periodicStats } from "./query";
+import { KeyMetrics } from "./KeyMetrics";
 
 type Props = {
   appId: string;
 };
 
-function KeyMetrics(props: Props) {
-  const [searchParams] = useSearchParams();
-  const period = searchParams.get("period") || "";
-  const countryCode = searchParams.get("countryCode") || "";
-  const appVersion = searchParams.get("appVersion") || "";
-  const eventName = searchParams.get("eventName") || "";
-  const osName = searchParams.get("osName") || "";
-
-  const {
-    isLoading,
-    isError,
-    data: metrics,
-  } = useQuery(["key-metrics", props.appId, period, countryCode, appVersion, eventName, osName], () =>
-    keyMetrics({ appId: props.appId, period, countryCode, appVersion, eventName, osName })
-  );
-
-  const formatDistanceLocale: Record<string, string> = { xSeconds: "{{count}}s", xMinutes: "{{count}}m", xHours: "{{count}}h" };
-  const shortEnLocale: Locale = { formatDistance: (token, count) => formatDistanceLocale[token].replace("{{count}}", count) };
-
-  const duration = formatDuration(intervalToDuration({ start: 0, end: (metrics?.durationSeconds || 0) * 1000 }), {
-    format: ["hours", "minutes", "seconds"],
-    locale: shortEnLocale,
-  });
-
-  return (
-    <div className="flex justify-between sm:justify-start sm:divide-x sm:space-x-8 sm:divide-gray-200 mb-8">
-      {!isLoading && !isError && (
-        <>
-          <Metric label="Sessions" value={metrics?.sessions.toString() || "0"} />
-          <Metric label="Avg. Duration" value={duration || "0s"} />
-          <Metric label="Events" value={metrics?.events.toString() || "0"} />
-        </>
-      )}
-    </div>
-  );
-}
-
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const months = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 function formatPeriod(granularity: Granularity, period: string) {
   try {
@@ -70,53 +47,110 @@ function formatPeriod(granularity: Granularity, period: string) {
   }
 }
 
-function TooltipContent(props: { granularity: Granularity; value: number; label: string }) {
+function TooltipContent(props: {
+  granularity: Granularity;
+  label: string;
+  points: Array<{
+    name: string;
+    value: number;
+  }>;
+}) {
   return (
     <div className="text-sm">
-      <p className="text-center text-secondary">{formatPeriod(props.granularity, props.label)}</p>
-      <p>
-        <span className="font-medium">{props.value}</span> {props.value === 1 ? "session" : "sessions"}
+      <p className="text-center text-secondary">
+        {formatPeriod(props.granularity, props.label)}
       </p>
+      {props.points.map((point) => (
+        <p key={point.name}>
+          <span className="font-medium">{point.value}</span>{" "}
+          {point.value === 1
+            ? point.name.toLowerCase().slice(0, -1)
+            : point.name.toLowerCase()}
+        </p>
+      ))}
     </div>
   );
 }
 
 export function MainChartWidget(props: Props) {
   const [searchParams] = useSearchParams();
+  const [activeMetrics, setActiveMetrics] = useState<string[]>(["sessions"]);
+
+  const toggleMetric = (metric: string) => {
+    if (activeMetrics.includes(metric)) {
+      if (activeMetrics.length > 1) {
+        setActiveMetrics(activeMetrics.filter((x) => x !== metric));
+      }
+    } else {
+      setActiveMetrics([...activeMetrics, metric]);
+    }
+  };
+
   const period = searchParams.get("period") || "";
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
   const osName = searchParams.get("osName") || "";
 
-  const { isLoading, isError, data } = useQuery(["periodic-stats", props.appId, period, countryCode, appVersion, eventName, osName], () =>
-    periodicStats({ appId: props.appId, period, countryCode, appVersion, eventName, osName })
+  const { isLoading, isError, data } = useQuery(
+    [
+      "periodic-stats",
+      props.appId,
+      period,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
+    () =>
+      periodicStats({
+        appId: props.appId,
+        period,
+        countryCode,
+        appVersion,
+        eventName,
+        osName,
+      })
   );
 
   useEffect(() => {
     trackEvent("dashboard_viewed", { period });
   }, [period]);
 
-  const values = (data?.rows || []).map((x) => x.sessions);
+  const sessions = (data?.rows || []).map((x) => x.sessions);
+  const events = (data?.rows || []).map((x) => x.events);
   const labels = (data?.rows || []).map((x) => x.period);
-  const total = values.reduce((a, b) => a + b, 0);
+  const total = sessions.reduce((a, b) => a + b, 0);
 
   const granularity = data?.granularity || "day";
   return (
     <Card>
-      <KeyMetrics {...props} />
-      <BarChart
-        category="Sessions"
-        isEmpty={total === 0}
-        isError={isError}
-        isLoading={isLoading}
-        hasPartialData={period !== "last-month"}
-        values={values}
-        showAllLabels={granularity === "month"}
-        labels={labels}
-        formatLabel={(label) => formatPeriod(granularity, label.toString())}
-        renderTooltip={({ value, label }) => <TooltipContent granularity={granularity} value={value} label={label} />}
+      <KeyMetrics
+        activeMetrics={activeMetrics}
+        onChangeMetric={toggleMetric}
+        {...props}
       />
+      {activeMetrics.length > 0 && (
+        <MetricsChart
+          isEmpty={total === 0}
+          metrics={activeMetrics}
+          isError={isError}
+          isLoading={isLoading}
+          hasPartialData={period !== "last-month"}
+          sessions={sessions}
+          events={events}
+          showAllLabels={granularity === "month"}
+          labels={labels}
+          formatLabel={(label) => formatPeriod(granularity, label.toString())}
+          renderTooltip={({ label, points }) => (
+            <TooltipContent
+              granularity={granularity}
+              label={label}
+              points={points}
+            />
+          )}
+        />
+      )}
     </Card>
   );
 }

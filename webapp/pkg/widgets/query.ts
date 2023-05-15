@@ -59,6 +59,7 @@ type PeriodicStats = {
   rows: {
     period: string;
     sessions: number;
+    events: number;
   }[];
 };
 

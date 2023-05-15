@@ -17,6 +17,7 @@ public class PeriodicStatsRow
 {
     public string Period { get; set; } = "";
     public int Sessions { get; set; } = 0;
+    public int Events { get; set; } = 0;
 }
 
 public class KeyMetrics
@@ -229,7 +230,8 @@ public class StatsController : Controller
         var (rows, stats) = await _queryClient.QueryAsync<PeriodicStatsRow>(
             $@"SELECT
                     {query.ToGranularPeriod("timestamp")} as Period,
-                    uniq(session_id) as Sessions
+                    uniq(session_id) as Sessions,
+                    count() as Events
                 FROM events
                 WHERE {query.ToFilter()}
                 GROUP by {query.ToGranularPeriod("timestamp")}
