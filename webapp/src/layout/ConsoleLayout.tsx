@@ -1,4 +1,6 @@
 import { useAuthState } from "@app/auth";
+import { CurrentUsage } from "@app/billing";
+import { isBillingEnabled } from "@app/env";
 import { AppSelector, MobileSidebar, NavMenu, UserMenu } from "@app/navigation";
 import { useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
@@ -24,6 +26,11 @@ export function ConsoleLayout() {
           <div className="p-2 flex flex-grow flex-col mt-2">
             <NavMenu />
           </div>
+          {isBillingEnabled && (
+            <div className="px-2 py-4 border-t border-default">
+              <CurrentUsage />
+            </div>
+          )}
           <div className="p-2 border-t border-default">
             <UserMenu user={auth.user} />
           </div>

@@ -1,0 +1,25 @@
+NODE billing_usage_v1
+DESCRIPTION >
+    Monthly count of events per app for billing purposes
+
+SQL >
+    SELECT
+        app_id,
+        toYear(timestamp) AS year,
+        toMonth(timestamp) AS month,
+        toDayOfMonth(timestamp) AS day,
+        countState() AS events
+    FROM
+      events
+    GROUP BY
+      app_id,
+      year,
+      month,
+      day
+
+TYPE materialized
+DATASOURCE billing_usage_v1_mv
+ENGINE "AggregatingMergeTree"
+ENGINE_SETTINGS "index_granularity = 1024"
+ENGINE_SORTING_KEY "app_id, year, month, day"
+ENGINE_PARTITION_KEY "(year, month)"

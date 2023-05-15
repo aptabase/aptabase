@@ -17,6 +17,7 @@
     "jsx": "react-jsx",
     "paths": {
       "@app/*": ["./webapp/src/*"],
+      "@app/billing": ["./webapp/pkg/billing"],
       "@app/env": ["./webapp/pkg/env"],
       "@app/charts": ["./webapp/pkg/charts"],
       "@app/widgets": ["./webapp/pkg/widgets"],

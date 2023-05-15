@@ -2,6 +2,8 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { NavMenu } from "./NavMenu";
 import { IconMenu2, IconX } from "@tabler/icons-react";
+import { isBillingEnabled } from "@app/env";
+import { CurrentUsage } from "@app/billing";
 
 type ButtonProps = {
   onClick: () => void;
@@ -76,9 +78,14 @@ export function MobileSidebar(props: Props) {
                   </button>
                 </div>
               </Transition.Child>
-              <div className="p-2 h-0 flex-1 overflow-y-auto">
+              <div className="p-2">
                 <NavMenu onNavigation={close} />
               </div>
+              {isBillingEnabled && (
+                <div className="px-2 py-4 border-t border-default">
+                  <CurrentUsage />
+                </div>
+              )}
             </Dialog.Panel>
           </Transition.Child>
           <div className="w-14 flex-shrink-0">
