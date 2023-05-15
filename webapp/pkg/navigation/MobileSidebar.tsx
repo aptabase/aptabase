@@ -1,7 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Bars3BottomLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Fragment } from "react";
 import { NavMenu } from "./NavMenu";
+import { IconMenu2, IconX } from "@tabler/icons-react";
 
 type ButtonProps = {
   onClick: () => void;
@@ -14,7 +14,7 @@ MobileSidebar.Button = (props: ButtonProps) => {
       className="border-r border-default px-4 text-default lg:hidden"
       onClick={props.onClick}
     >
-      <Bars3BottomLeftIcon className="h-6 w-6" />
+      <IconMenu2 strokeWidth={2} className="h-6 w-6" />
     </button>
   );
 };
@@ -72,7 +72,7 @@ export function MobileSidebar(props: Props) {
                     className="ml-1 flex h-10 w-10 items-center justify-center rounded-full"
                     onClick={close}
                   >
-                    <XMarkIcon className="h-6 w-6 text-white" />
+                    <IconX className="h-6 w-6 text-white" />
                   </button>
                 </div>
               </Transition.Child>

@@ -1,7 +1,6 @@
 import {
   IconCode,
   IconHelpCircle,
-  IconLayoutDashboard,
   IconLayoutGrid,
   IconMessageCircle,
   IconSettings,

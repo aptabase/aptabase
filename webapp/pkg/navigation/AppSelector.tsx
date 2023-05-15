@@ -1,6 +1,6 @@
+import clsx from "clsx";
 import { Application, useApps } from "@app/apps";
 import { Listbox, Transition } from "@headlessui/react";
-import clsx from "clsx";
 import { Fragment, useState } from "react";
 import { CreateAppModal } from "./CreateAppModal";
 import { useNavigationContext } from "./NavigationProvider";
