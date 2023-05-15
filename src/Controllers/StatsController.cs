@@ -1,6 +1,7 @@
 using System.Data;
 using Aptabase.Application;
 using Aptabase.Application.Authentication;
+using Aptabase.Application.Query;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
@@ -144,13 +145,13 @@ public class QueryRequestBody
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class StatsController : Controller
 {
-    private readonly ITinybirdClient _tinybird;
+    private readonly IQueryClient _queryClient;
     private readonly IDbConnection _db;
 
-    public StatsController(IDbConnection db, ITinybirdClient tinybird)
+    public StatsController(IDbConnection db, IQueryClient queryClient)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
-        _tinybird = tinybird ?? throw new ArgumentNullException(nameof(tinybird));
+        _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));
     }
 
     [HttpGet("/api/_stats/top-countries")]
@@ -203,7 +204,7 @@ public class StatsController : Controller
             return BadRequest();
 
 
-        var (row, stats) = await _tinybird.QuerySingleAsync<KeyMetrics>(
+        var (row, stats) = await _queryClient.QuerySingleAsync<KeyMetrics>(
             $@"SELECT uniq(session_id) as Sessions,
                       count(*) as Events,
                       (SELECT if(isNaN(median(duration_seconds)), 0, median(duration_seconds)) FROM (
@@ -225,7 +226,7 @@ public class StatsController : Controller
         if (query == null)
             return BadRequest();
 
-        var (rows, stats) = await _tinybird.QueryAsync<PeriodicStatsRow>(
+        var (rows, stats) = await _queryClient.QueryAsync<PeriodicStatsRow>(
             $@"SELECT
                     {query.ToGranularPeriod("timestamp")} as Period,
                     uniq(session_id) as Sessions
@@ -250,7 +251,7 @@ public class StatsController : Controller
         if (query == null)
             return BadRequest();
 
-        var (rows, stats) = await _tinybird.QueryAsync<EventPropsItem>(
+        var (rows, stats) = await _queryClient.QueryAsync<EventPropsItem>(
             $@"SELECT row.1 AS Key,
                       row.2 AS Value,
                       count() as Events
@@ -278,7 +279,7 @@ public class StatsController : Controller
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
 
-        var (rows, stats) = await _tinybird.QueryAsync<TopNItem>(
+        var (rows, stats) = await _queryClient.QueryAsync<TopNItem>(
             $@"SELECT {fieldName} as Name,
                       {valueField} as Value
               FROM events

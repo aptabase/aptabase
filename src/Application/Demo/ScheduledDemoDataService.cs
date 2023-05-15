@@ -10,15 +10,15 @@ public class ScheduledDemoDataService : IHostedService, IDisposable
     private Timer? _timer;
     private readonly string _appId;
     private readonly ILogger _logger;
-    private readonly ITinybirdClient _tinybirdClient;
+    private readonly IIngestionClient _ingestionClient;
     private readonly CancellationTokenSource _stoppingCts = new CancellationTokenSource();
     private readonly TimeSpan _interval = TimeSpan.FromMinutes(10);
 
 
-    public ScheduledDemoDataService(ITinybirdClient tinybirdClient, ILogger<ScheduledDemoDataService> logger)
+    public ScheduledDemoDataService(IIngestionClient ingestionClient, ILogger<ScheduledDemoDataService> logger)
     {
         _logger = logger;
-        _tinybirdClient = tinybirdClient;
+        _ingestionClient = ingestionClient;
         _appId = Environment.GetEnvironmentVariable("DEMO_APP_ID") ?? "";
     }
 
@@ -75,7 +75,7 @@ public class ScheduledDemoDataService : IHostedService, IDisposable
         try
         {
             var header = new EventHeader(_appId, countryCode, regionName, city);
-            var result = await _tinybirdClient.SendMultipleAsync(header, events.ToArray(), cancellationToken);
+            var result = await _ingestionClient.SendMultipleAsync(header, events.ToArray(), cancellationToken);
             _logger.LogInformation("{Count} demo events ingested.", result.SuccessfulRows);
         }
         catch (Exception ex)

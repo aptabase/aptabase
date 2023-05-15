@@ -12,6 +12,7 @@ using Aptabase.Application.Notification;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
+using Aptabase.Application.Query;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
@@ -89,7 +90,8 @@ builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
 builder.Services.AddSingleton(appEnv);
 builder.Services.AddSingleton<IIngestionValidator, IngestionValidator>();
 
-builder.Services.AddSingleton<ITinybirdClient, TinybirdClient>();
+builder.Services.AddSingleton<IQueryClient, TinybirdQueryClient>();
+builder.Services.AddSingleton<IIngestionClient, TinybirdIngestionClient>();
 builder.Services.AddHttpClient("Tinybird", client =>
 {
     client.BaseAddress = new Uri(appEnv.TinybirdBaseUrl);

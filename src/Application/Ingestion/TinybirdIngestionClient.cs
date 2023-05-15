@@ -1,43 +1,8 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Aptabase.Application.Ingestion;
-using System.Net;
 
-namespace Aptabase.Application;
+namespace Aptabase.Application.Ingestion;
 
-public class InsertResult
-{
-    [JsonPropertyName("successful_rows")]
-    public int SuccessfulRows { get; set; }
-    [JsonPropertyName("quarantined_rows")]
-    public int QuarantinedRows { get; set; }
-}
-
-public class QueryStatistics
-{
-    [JsonPropertyName("bytes_read")]
-    public int BytesRead { get; set; }
-    [JsonPropertyName("rows_read")]
-    public int RowsRead { get; set; }
-}
-
-public class QueryResult<T>
-{
-    [JsonPropertyName("data")]
-    public IEnumerable<T> Data { get; set; } = Enumerable.Empty<T>();
-    [JsonPropertyName("statistics")]
-    public QueryStatistics Statistics { get; set; } = new QueryStatistics();
-}
-
-public interface ITinybirdClient
-{
-    Task<InsertResult> SendSingleAsync(EventHeader header, EventBody body, CancellationToken cancellationToken);
-    Task<InsertResult> SendMultipleAsync(EventHeader header, EventBody[] body, CancellationToken cancellationToken);
-    Task<(IEnumerable<T>, QueryStatistics)> QueryAsync<T>(string query, CancellationToken cancellationToken);
-    Task<(T, QueryStatistics)> QuerySingleAsync<T>(string query, CancellationToken cancellationToken) where T : new();
-}
-
-public class TinybirdClient : ITinybirdClient
+public class TinybirdIngestionClient : IIngestionClient
 {
     private static readonly JsonSerializerOptions JsonSettings = new()
     {
@@ -48,7 +13,7 @@ public class TinybirdClient : ITinybirdClient
     private HttpClient _httpClient;
     private ILogger _logger;
 
-    public TinybirdClient(IHttpClientFactory factory, ILogger<TinybirdClient> logger)
+    public TinybirdIngestionClient(IHttpClientFactory factory, ILogger<TinybirdIngestionClient> logger)
     {
         _httpClient = factory.CreateClient("Tinybird");
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -77,25 +42,6 @@ public class TinybirdClient : ITinybirdClient
         var response = await _httpClient.PostAsync(EventsPath, content, cancellationToken);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<InsertResult>() ?? new InsertResult();
-    }
-
-    public async Task<(IEnumerable<T>, QueryStatistics)> QueryAsync<T>(string query, CancellationToken cancellationToken)
-    {
-        var q = WebUtility.UrlEncode($"{query} FORMAT JSON");
-        var path = $"/v0/sql?q={q}";
-        var response = await _httpClient.GetAsync(path, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<QueryResult<T>>() ?? new QueryResult<T>();
-        return (result.Data, result.Statistics);
-    }
-
-    public async Task<(T, QueryStatistics)> QuerySingleAsync<T>(string query, CancellationToken cancellationToken) where T : new()
-    {
-        var (result, stats) = await QueryAsync<T>(query, cancellationToken);
-        if (result.Any())
-            return (result.First(), stats);
-
-        return (new T(), stats);
     }
 
     private EventRow ToEventRow(EventHeader header, EventBody body)

@@ -12,12 +12,12 @@ public class EventsController : Controller
 {
     private readonly ILogger _logger;
     private readonly IIngestionValidator _validator;
-    private readonly ITinybirdClient _tinybirdClient;
+    private readonly IIngestionClient _ingestionClient;
 
-    public EventsController(IIngestionValidator validator, ITinybirdClient tinybirdClient, ILogger<EventsController> logger)
+    public EventsController(IIngestionValidator validator, IIngestionClient ingestionClient, ILogger<EventsController> logger)
     {
         _validator = validator ?? throw new ArgumentNullException(nameof(validator));
-        _tinybirdClient = tinybirdClient ?? throw new ArgumentNullException(nameof(tinybirdClient));
+        _ingestionClient = ingestionClient ?? throw new ArgumentNullException(nameof(ingestionClient));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -52,7 +52,7 @@ public class EventsController : Controller
         body.EnrichWith(userAgent);
 
         var header = new EventHeader(appId, countryCode, regionName, city);
-        await _tinybirdClient.SendSingleAsync(header, body, cancellationToken);
+        await _ingestionClient.SendSingleAsync(header, body, cancellationToken);
 
         // TODO: return how many rows were inserted, how many invalid
         return Ok(new { });
