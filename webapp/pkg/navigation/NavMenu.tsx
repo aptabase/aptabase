@@ -1,13 +1,12 @@
 import {
-  ArrowTrendingUpIcon,
-  ChatBubbleBottomCenterTextIcon,
-  CodeBracketSquareIcon,
-  Cog8ToothIcon,
-  DocumentTextIcon,
-  QuestionMarkCircleIcon,
-  ShareIcon,
-  Squares2X2Icon,
-} from "@heroicons/react/24/outline";
+  IconCode,
+  IconHelpCircle,
+  IconLayoutDashboard,
+  IconLayoutGrid,
+  IconMessageCircle,
+  IconSettings,
+  TablerIconsProps,
+} from "@tabler/icons-react";
 import clsx from "clsx";
 import { Link, useLocation } from "react-router-dom";
 
@@ -15,9 +14,7 @@ type NavItem = {
   name: string;
   href?: string;
   onClick?: () => void;
-  icon: React.ForwardRefExoticComponent<
-    Omit<React.SVGProps<SVGSVGElement>, "ref">
-  >;
+  icon: (props: TablerIconsProps) => JSX.Element;
   disabled?: boolean;
 };
 
@@ -35,7 +32,7 @@ const navigation: NavCategory[] = [
   {
     title: "",
     items: [
-      { name: "Dashboard", href: "/", icon: Squares2X2Icon },
+      { name: "Dashboard", href: "/", icon: IconLayoutGrid },
       // {
       //   name: "Insights",
       //   href: "#",
@@ -43,18 +40,18 @@ const navigation: NavCategory[] = [
       //   disabled: true,
       // },
       // { name: "Share", href: "#", icon: ShareIcon, disabled: true },
-      { name: "Settings", href: "/settings", icon: Cog8ToothIcon },
+      { name: "Settings", href: "/settings", icon: IconSettings },
       {
         name: "Instructions",
         href: "/instructions",
-        icon: CodeBracketSquareIcon,
+        icon: IconCode,
       },
     ],
   },
   {
     title: "Resources",
     items: [
-      { name: "Support", onClick: toggleChat, icon: QuestionMarkCircleIcon },
+      { name: "Support", onClick: toggleChat, icon: IconHelpCircle },
       // {
       //   name: "Documentation",
       //   href: "#",
@@ -64,7 +61,7 @@ const navigation: NavCategory[] = [
       {
         name: "Feedback",
         onClick: toggleChat,
-        icon: ChatBubbleBottomCenterTextIcon,
+        icon: IconMessageCircle,
       },
     ],
   },
@@ -80,7 +77,10 @@ const NavLink = (props: {
 
   const content = (
     <>
-      <props.item.icon className="text-secondary mr-2 h-5 w-5 flex-shrink-0" />
+      <props.item.icon
+        strokeWidth={1.75}
+        className="text-secondary mr-2 h-5 w-5 flex-shrink-0"
+      />
       {props.item.name}
     </>
   );

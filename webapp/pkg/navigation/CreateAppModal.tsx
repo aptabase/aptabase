@@ -1,10 +1,10 @@
 import { useApps } from "@app/apps";
 import { Button, TextInput } from "@app/primitives";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Fragment, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNavigationContext } from ".";
+import { IconX } from "@tabler/icons-react";
 
 type Props = {
   open: boolean;
@@ -55,17 +55,33 @@ export function CreateAppModal(props: Props) {
             >
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
                 <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
-                  <button type="button" className="rounded-md bg-white text-secondary hover:text-gray-800" onClick={props.onClose}>
-                    <XMarkIcon className="h-6 w-6" />
+                  <button
+                    type="button"
+                    className="rounded-md bg-white text-secondary hover:text-gray-800"
+                    onClick={props.onClose}
+                  >
+                    <IconX className="h-6 w-6" />
                   </button>
                 </div>
                 <Dialog.Title as="h3" className="text-lg font-medium">
                   Create an app
                 </Dialog.Title>
-                <div className="text-sm text-secondary">Each app has its own dashboard and metrics</div>
+                <div className="text-sm text-secondary">
+                  Each app has its own dashboard and metrics
+                </div>
                 <form onSubmit={handleSubmit} className="mt-8 space-y-2">
-                  <TextInput label="App Name" name="name" placeholder="My App Name" required={true} value={name} onChange={setName} />
-                  <Button variant="primary" disabled={name.length < 2 || name.length > 40}>
+                  <TextInput
+                    label="App Name"
+                    name="name"
+                    placeholder="My App Name"
+                    required={true}
+                    value={name}
+                    onChange={setName}
+                  />
+                  <Button
+                    variant="primary"
+                    disabled={name.length < 2 || name.length > 40}
+                  >
                     Create
                   </Button>
                 </form>

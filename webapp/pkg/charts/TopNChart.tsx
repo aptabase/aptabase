@@ -18,7 +18,9 @@ type Props = {
   searchParamKey?: string;
 };
 
-const defaultRenderRow = (item: Item) => <span className="px-2">{item.name || "Unknown"}</span>;
+const defaultRenderRow = (item: Item) => (
+  <span className="px-2">{item.name || "Unknown"}</span>
+);
 
 export function TopNChart(props: Props) {
   const total = props.items.reduce((acc, item) => acc + item.value, 0);
@@ -33,12 +35,21 @@ export function TopNChart(props: Props) {
   ) : (
     <>
       <div className="flex w-full flex-row justify-between items-center">
-        <p className="text-secondary text-sm font-normal">{props.renderLabel ? props.renderLabel() : props.labels[0]}</p>
-        <p className="text-secondary text-sm font-normal pr-1">{props.labels[1]}</p>
+        <p className="text-secondary text-sm font-normal">
+          {props.renderLabel ? props.renderLabel() : props.labels[0]}
+        </p>
+        <p className="text-secondary text-sm font-normal pr-1">
+          {props.labels[1]}
+        </p>
       </div>
       <div className="grid text-sm mt-2 max-h-80 overflow-y-auto">
         {props.items.map((item) => (
-          <TopNRow key={item.name} item={item} percentage={item.value / total} searchParamKey={props.searchParamKey}>
+          <TopNRow
+            key={item.name}
+            item={item}
+            percentage={item.value / total}
+            searchParamKey={props.searchParamKey}
+          >
             {renderLabel(item)}
           </TopNRow>
         ))}

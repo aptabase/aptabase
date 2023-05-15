@@ -1,4 +1,4 @@
-import { ArrowUturnLeftIcon } from "@heroicons/react/20/solid";
+import { IconArrowBackUp } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 
 type Props = {
@@ -16,14 +16,17 @@ export function CardTitle(props: Props) {
 
   return (
     <span className="inline-flex items-center relative group">
-      <div className="group-hover:blur-sm group-hover:opacity-50 transition-all">{props.children}</div>
+      <div className="group-hover:blur-sm group-hover:opacity-50 transition-all">
+        {props.children}
+      </div>
       {props.backProperty && (
         <Link
           to={targetUrl.toString()}
           className="text-sm items-center space-x-2 absolute m-2 hidden group-hover:flex transition-all"
           preventScrollReset={true}
         >
-          <ArrowUturnLeftIcon className="h-4 w-4" /> <span>Back</span>
+          <IconArrowBackUp strokeWidth={1.75} className="h-5 w-5" />{" "}
+          <span>Back</span>
         </Link>
       )}
     </span>

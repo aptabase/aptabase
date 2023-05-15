@@ -1,5 +1,5 @@
 import { Listbox, Transition } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { IconChevronDown } from "@tabler/icons-react";
 import clsx from "clsx";
 import { Fragment, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -75,7 +75,7 @@ export function DateRangePicker() {
           <Listbox.Button className="relative w-full cursor-default tracking-tighter rounded-md py-1.5 pl-3 pr-6 text-default focus-ring hover:bg-gray-100">
             <span className="block truncate">{selected.name}</span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center">
-              <ChevronDownIcon className="h-5 w-5 text-secondary" />
+              <IconChevronDown className="h-4 w-4 text-secondary mr-1" />
             </span>
           </Listbox.Button>
 
