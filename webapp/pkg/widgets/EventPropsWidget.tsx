@@ -1,4 +1,4 @@
-import { TopNChart } from "@app/charts";
+import { TopNChart } from "./charts";
 import { Card } from "@app/primitives";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -24,13 +24,32 @@ export function EventPropsWidget(props: Props) {
     isLoading,
     isError,
     data: rows,
-  } = useQuery(["top-event-props", props.appId, period, countryCode, appVersion, eventName, osName], () =>
-    topEventProps({ appId: props.appId, period, countryCode, appVersion, eventName, osName })
+  } = useQuery(
+    [
+      "top-event-props",
+      props.appId,
+      period,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
+    () =>
+      topEventProps({
+        appId: props.appId,
+        period,
+        countryCode,
+        appVersion,
+        eventName,
+        osName,
+      })
   );
 
   const keys = [...new Set((rows || []).map((row) => row.key))];
 
-  const items = (rows || []).filter((x) => x.key === keys[index]).map((row) => ({ name: row.value, value: row.events }));
+  const items = (rows || [])
+    .filter((x) => x.key === keys[index])
+    .map((row) => ({ name: row.value, value: row.events }));
 
   return (
     <Card>
@@ -39,7 +58,11 @@ export function EventPropsWidget(props: Props) {
         labels={[keys[index], "Events"]}
         renderLabel={() =>
           keys.length > 0 && (
-            <select className="form-select compact min-w-[6rem]" defaultValue={0} onChange={(e) => setIndex(e.currentTarget.selectedIndex)}>
+            <select
+              className="form-select compact min-w-[6rem]"
+              defaultValue={0}
+              onChange={(e) => setIndex(e.currentTarget.selectedIndex)}
+            >
               {keys.map((key, i) => (
                 <option key={key} value={i}>
                   {key}

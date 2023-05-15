@@ -1,4 +1,4 @@
-import { MetricsChart } from "@app/charts";
+import { MetricsChart } from "./charts";
 import { Card } from "@app/primitives";
 import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";

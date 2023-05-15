@@ -19,7 +19,6 @@
       "@app/*": ["./webapp/src/*"],
       "@app/billing": ["./webapp/pkg/billing"],
       "@app/env": ["./webapp/pkg/env"],
-      "@app/charts": ["./webapp/pkg/charts"],
       "@app/widgets": ["./webapp/pkg/widgets"],
       "@app/primitives": ["./webapp/pkg/primitives"],
       "@app/apps": ["./webapp/pkg/apps"],

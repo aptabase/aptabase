@@ -45,10 +45,6 @@ export default defineConfig({
         replacement: path.resolve(__dirname, "./webapp/pkg/billing"),
       },
       {
-        find: "@app/charts",
-        replacement: path.resolve(__dirname, "./webapp/pkg/charts"),
-      },
-      {
         find: "@app/primitives",
         replacement: path.resolve(__dirname, "./webapp/pkg/primitives"),
       },

@@ -1,4 +1,4 @@
-import { TopNChart } from "@app/charts";
+import { TopNChart } from "./charts";
 import { Card } from "@app/primitives";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
