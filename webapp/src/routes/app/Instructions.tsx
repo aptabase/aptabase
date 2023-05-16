@@ -17,35 +17,31 @@ type FrameworkInstructions = {
 };
 
 const frameworks: { [id: string]: FrameworkInstructions } = {
-  tauri: {
-    name: "Tauri",
+  android: {
+    name: "Android (Kotlin)",
     readme:
-      "https://raw.githubusercontent.com/aptabase/tauri-plugin-aptabase/main/README.md",
-    repository: "https://github.com/aptabase/tauri-plugin-aptabase",
+      "https://raw.githubusercontent.com/aptabase/aptabase-kotlin/main/README.md",
+    repository: "https://github.com/aptabase/aptabase-kotlin",
+  },
+  swift: {
+    name: "Apple (Swift)",
+    readme:
+      "https://raw.githubusercontent.com/aptabase/aptabase-swift/main/README.md",
+    repository: "https://github.com/aptabase/aptabase-swift",
+  },
+  capacitor: {
+    name: "Capacitor.js",
+    repository: "https://github.com/aptabase/aptabase/issues/6",
+  },
+  electron: {
+    name: "Electron",
+    repository: "https://github.com/aptabase/aptabase/issues/3",
   },
   flutter: {
     name: "Flutter",
     readme:
       "https://raw.githubusercontent.com/aptabase/aptabase_flutter/main/README.md",
     repository: "https://github.com/aptabase/aptabase_flutter",
-  },
-  webapp: {
-    name: "Web App",
-    readme:
-      "https://raw.githubusercontent.com/aptabase/aptabase-js/main/README.md",
-    repository: "https://github.com/aptabase/aptabase-js",
-  },
-  swift: {
-    name: "Swift (Apple)",
-    readme:
-      "https://raw.githubusercontent.com/aptabase/aptabase-swift/main/README.md",
-    repository: "https://github.com/aptabase/aptabase-swift",
-  },
-  android: {
-    name: "Android (Kotlin)",
-    readme:
-      "https://raw.githubusercontent.com/aptabase/aptabase-kotlin/main/README.md",
-    repository: "https://github.com/aptabase/aptabase-kotlin",
   },
   nativescript: {
     name: "NativeScript",
@@ -64,21 +60,25 @@ const frameworks: { [id: string]: FrameworkInstructions } = {
     name: "React Native",
     repository: "https://github.com/aptabase/aptabase/issues/2",
   },
-  electron: {
-    name: "Electron",
-    repository: "https://github.com/aptabase/aptabase/issues/3",
-  },
-  capacitor: {
-    name: "Capacitor.js",
-    repository: "https://github.com/aptabase/aptabase/issues/6",
-  },
-  xamarin: {
-    name: "Xamarin",
-    repository: "https://github.com/aptabase/aptabase/issues/9",
+  tauri: {
+    name: "Tauri",
+    readme:
+      "https://raw.githubusercontent.com/aptabase/tauri-plugin-aptabase/main/README.md",
+    repository: "https://github.com/aptabase/tauri-plugin-aptabase",
   },
   unity: {
     name: "Unity",
     repository: "https://github.com/aptabase/aptabase/issues/10",
+  },
+  webapp: {
+    name: "Web App",
+    readme:
+      "https://raw.githubusercontent.com/aptabase/aptabase-js/main/README.md",
+    repository: "https://github.com/aptabase/aptabase-js",
+  },
+  xamarin: {
+    name: "Xamarin",
+    repository: "https://github.com/aptabase/aptabase/issues/9",
   },
 };
 
@@ -123,6 +123,11 @@ export function Component() {
     setSelected(e.target.value);
   };
 
+  const availableFws = Object.entries(frameworks).filter(([, fw]) => fw.readme);
+  const comingSoonFws = Object.entries(frameworks).filter(
+    ([, fw]) => !fw.readme
+  );
+
   return (
     <>
       <Head title={`${app.name} - Instructions`} />
@@ -155,7 +160,15 @@ export function Component() {
               <option value="" disabled>
                 Framework
               </option>
-              {Object.entries(frameworks).map(([id, fw]) => (
+              {availableFws.map(([id, fw]) => (
+                <option key={fw.name} value={id}>
+                  {fw.name}
+                </option>
+              ))}
+              <option value="" disabled>
+                Coming soon
+              </option>
+              {comingSoonFws.map(([id, fw]) => (
                 <option key={id} value={id}>
                   {fw.name}
                 </option>
