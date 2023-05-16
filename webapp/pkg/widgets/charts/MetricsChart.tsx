@@ -90,8 +90,9 @@ export function MetricsChart(props: Props) {
             data: props.events,
             yAxisID: "events",
             hidden: !props.metrics.includes("events"),
-            borderColor: "#374151",
+            borderColor: colors.secondary,
             tension: 0.1,
+            borderWidth: 3,
             pointRadius: 0,
             pointHoverRadius: 0,
             segment: {

@@ -1,4 +1,8 @@
-function createLinearGradient(color1: string, color2: string, color3: string): CanvasGradient | string {
+function createLinearGradient(
+  color1: string,
+  color2: string,
+  color3: string
+): CanvasGradient | string {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 
@@ -40,6 +44,7 @@ function createDiagonalPattern(color: string): CanvasPattern | string {
 const colors = {
   primary: createLinearGradient("#2563eb", "#3b82f6", "#eff6ff"),
   primaryStripped: createDiagonalPattern("#2563eb"),
+  secondary: "#374151",
   highlight: "rgb(0, 0, 0, 0.05)",
 };
 
