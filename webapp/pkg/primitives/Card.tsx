@@ -15,7 +15,7 @@ export function Card(props: Props) {
     <div
       ref={ref}
       className={clsx(
-        "flex flex-col min-h-[28rem] rounded border border-default p-4",
+        "flex flex-col min-h-[28rem] bg-white p-4",
         props.className
       )}
     >

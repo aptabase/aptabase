@@ -38,7 +38,7 @@ export function ConsoleLayout() {
       </div>
 
       <div className="lg:pl-64">
-        <div className="flex flex-col lg:max-w-6xl">
+        <div className="flex flex-col">
           {/* sidebar for mobile */}
           <div className="lg:hidden sticky top-0 z-30 flex h-12 flex-shrink-0 border-b border-default bg-gray-50">
             <MobileSidebar.Button onClick={() => setSidebarOpen(true)} />
@@ -50,7 +50,7 @@ export function ConsoleLayout() {
             </div>
           </div>
 
-          <main className="flex-1 p-4 lg:px-8">
+          <main className="flex-1 p-4 lg:px-8 mx-auto w-full max-w-6xl">
             <Outlet />
           </main>
         </div>

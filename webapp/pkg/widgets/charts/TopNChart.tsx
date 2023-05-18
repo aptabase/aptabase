@@ -42,7 +42,7 @@ export function TopNChart(props: Props) {
           {props.labels[1]}
         </p>
       </div>
-      <div className="grid text-sm mt-2 max-h-80 overflow-y-auto">
+      <div className="grid text-sm mt-2 max-h-[22rem] overflow-y-auto">
         {props.items.map((item) => (
           <TopNRow
             key={item.name}
