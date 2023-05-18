@@ -78,6 +78,7 @@ public class QueryParams
         };
 
         List<String> conditions = new();
+        conditions.Add($"app_id = '{AppId}'");
 
         if (!string.IsNullOrEmpty(dateFilter))
             conditions.Add(dateFilter);
@@ -210,8 +211,7 @@ public class StatsController : Controller
                FROM (
                     SELECT min(timestamp) as min, max(timestamp) as max, session_id, count(*) as count
                     FROM events
-                    PREWHERE app_id = {body.AppId}
-                    WHERE {query.ToFilter()}
+                    PREWHERE {query.ToFilter()}
                     GROUP BY session_id
                )", cancellationToken);
 
@@ -231,7 +231,6 @@ public class StatsController : Controller
                     uniq(session_id) as Sessions,
                     count() as Events
                 FROM events
-                PREWHERE app_id = {body.AppId}
                 WHERE {query.ToFilter()}
                 GROUP by {query.ToGranularPeriod("timestamp")}
                 ORDER BY {query.ToGranularPeriod("timestamp")} ASC
@@ -259,7 +258,6 @@ public class StatsController : Controller
                FROM (
                  SELECT arrayJoin(JSONExtractKeysAndValuesRaw(string_props)) as row
                  FROM events
-                 PREWHERE app_id = {body.AppId}
                  WHERE {query.ToFilter()}
                )
                GROUP BY Key, Value
@@ -285,7 +283,6 @@ public class StatsController : Controller
             $@"SELECT {fieldName} as Name,
                       {valueField} as Value
               FROM events
-              PREWHERE app_id = {body.AppId}
               WHERE {query.ToFilter()}
               GROUP BY Name
               ORDER BY Value DESC", cancellationToken);
