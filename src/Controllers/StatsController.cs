@@ -204,18 +204,16 @@ public class StatsController : Controller
         if (query == null)
             return BadRequest();
 
-
         var (row, stats) = await _queryClient.QuerySingleAsync<KeyMetrics>(
             $@"SELECT uniq(session_id) as Sessions,
-                      count(*) as Events,
-                      (SELECT if(isNaN(median(duration_seconds)), 0, median(duration_seconds)) FROM (
-                          SELECT session_id, max(timestamp) - min(timestamp) as duration_seconds
-                          FROM events
-                          WHERE {query.ToFilter()}
-                          GROUP BY session_id
-                      )) as DurationSeconds
-                FROM events
-                WHERE {query.ToFilter()}", cancellationToken);
+                      if(isNaN(median(max - min)), 0, median(max - min)) as DurationSeconds,
+                      sum(count) as Events
+               FROM (
+                    SELECT min(timestamp) as min, max(timestamp) as max, session_id, count(*) as count
+                    FROM events
+                    PREWHERE {query.ToFilter()}
+                    GROUP BY session_id
+               )", cancellationToken);
 
         return OkWithStats(row, stats);
     }
