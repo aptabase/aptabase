@@ -78,7 +78,6 @@ public class QueryParams
         };
 
         List<String> conditions = new();
-        conditions.Add($"app_id = '{AppId}'");
 
         if (!string.IsNullOrEmpty(dateFilter))
             conditions.Add(dateFilter);
@@ -95,7 +94,9 @@ public class QueryParams
         if (!string.IsNullOrEmpty(AppVersion))
             conditions.Add($"app_version = '{AppVersion}'");
 
-        return String.Join(" AND ", conditions);
+        var where = conditions.Count > 0 ? $"WHERE {String.Join(" AND ", conditions)}" : string.Empty;
+
+        return $"PREWHERE app_id = '{AppId}' {where}";
     }
 
     public string ToGranularPeriod(string columnOrValue)
@@ -211,7 +212,7 @@ public class StatsController : Controller
                FROM (
                     SELECT min(timestamp) as min, max(timestamp) as max, session_id, count(*) as count
                     FROM events
-                    PREWHERE {query.ToFilter()}
+                    {query.ToFilter()}
                     GROUP BY session_id
                )", cancellationToken);
 
@@ -231,7 +232,7 @@ public class StatsController : Controller
                     uniq(session_id) as Sessions,
                     count() as Events
                 FROM events
-                WHERE {query.ToFilter()}
+                {query.ToFilter()}
                 GROUP by {query.ToGranularPeriod("timestamp")}
                 ORDER BY {query.ToGranularPeriod("timestamp")} ASC
                 {query.ToFill()}", cancellationToken);
@@ -258,7 +259,7 @@ public class StatsController : Controller
                FROM (
                  SELECT arrayJoin(JSONExtractKeysAndValuesRaw(string_props)) as row
                  FROM events
-                 WHERE {query.ToFilter()}
+                {query.ToFilter()}
                )
                GROUP BY Key, Value
                ORDER BY Key, Events DESC", cancellationToken);
@@ -283,7 +284,7 @@ public class StatsController : Controller
             $@"SELECT {fieldName} as Name,
                       {valueField} as Value
               FROM events
-              WHERE {query.ToFilter()}
+              {query.ToFilter()}
               GROUP BY Name
               ORDER BY Value DESC", cancellationToken);
 
