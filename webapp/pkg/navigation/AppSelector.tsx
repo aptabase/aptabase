@@ -5,6 +5,7 @@ import { Fragment, useState } from "react";
 import { CreateAppModal } from "./CreateAppModal";
 import { useNavigationContext } from "./NavigationProvider";
 import { IconBox, IconPlus, IconSelector } from "@tabler/icons-react";
+import { useNavigate } from "react-router-dom";
 
 type OptionProps = {
   value?: Application;
@@ -31,6 +32,7 @@ const Divider = () => <div className="border-t my-1 border-default" />;
 
 export function AppSelector() {
   const { apps } = useApps();
+  const navigate = useNavigate();
   const { currentApp, switchApp } = useNavigationContext();
 
   const [showCreateAppModal, setShowCreateAppModal] = useState(false);
@@ -41,6 +43,7 @@ export function AppSelector() {
     }
 
     switchApp(app);
+    navigate("/");
   };
 
   if (!currentApp) {

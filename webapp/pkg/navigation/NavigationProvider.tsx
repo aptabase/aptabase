@@ -23,7 +23,6 @@ const findApp = (apps: Application[], appId?: string | null) =>
 
 export function NavigationProvider(props: Props) {
   const { apps } = useApps();
-  const navigate = useNavigate();
 
   const initialApp =
     findApp(apps, localStorage.getItem(APP_ID_STORAGE_KEY)) || apps[0];
@@ -45,7 +44,6 @@ export function NavigationProvider(props: Props) {
   const switchApp = (app: Application) => {
     localStorage.setItem(APP_ID_STORAGE_KEY, app.id);
     setCurrentApp(app);
-    navigate("/");
   };
 
   return (
