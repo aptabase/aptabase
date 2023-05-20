@@ -1,6 +1,6 @@
-import { ErrorState, LoadingState } from "@app/primitives";
+import { ErrorState, LoadingState, useLocalStorage } from "@app/primitives";
 import { useQuery } from "@tanstack/react-query";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { Application, createApp, deleteApp, listApps, updateApp } from "./apps";
@@ -9,17 +9,26 @@ type Props = {
   children: React.ReactNode;
 };
 
+type BuildMode = "debug" | "release";
+
 type AppsContextType = {
   apps: Application[];
+  buildMode: BuildMode;
   createApp: (name: string) => Promise<Application>;
   deleteApp: (appId: string) => Promise<void>;
   updateApp: (appId: string, name: string) => Promise<Application>;
+  switchBuildMode: (mode: BuildMode) => void;
 };
 
-const AppsContext = createContext<AppsContextType>({ apps: [], createApp, deleteApp, updateApp });
+const AppsContext = createContext<AppsContextType | undefined>(undefined);
 
 export function AppsProvider(props: Props) {
   const location = useLocation();
+  const [buildMode, setBuildMode] = useLocalStorage<BuildMode>(
+    "buildmode",
+    "debug"
+  );
+
   const { isLoading, isError, data, refetch } = useQuery(["apps"], listApps);
 
   const createAppAndRefresh = async (name: string): Promise<Application> => {
@@ -34,7 +43,10 @@ export function AppsProvider(props: Props) {
     await refetch();
   };
 
-  const updateAppAndRefresh = async (appId: string, name: string): Promise<Application> => {
+  const updateAppAndRefresh = async (
+    appId: string,
+    name: string
+  ): Promise<Application> => {
     const app = await updateApp(appId, name);
     await refetch();
     return app;
@@ -49,7 +61,14 @@ export function AppsProvider(props: Props) {
 
   return (
     <AppsContext.Provider
-      value={{ apps: data ?? [], createApp: createAppAndRefresh, deleteApp: deleteAppAndRefresh, updateApp: updateAppAndRefresh }}
+      value={{
+        apps: data ?? [],
+        buildMode,
+        switchBuildMode: setBuildMode,
+        createApp: createAppAndRefresh,
+        deleteApp: deleteAppAndRefresh,
+        updateApp: updateAppAndRefresh,
+      }}
     >
       {isLoading ? null : props.children}
     </AppsContext.Provider>
@@ -57,5 +76,10 @@ export function AppsProvider(props: Props) {
 }
 
 export function useApps(): AppsContextType {
-  return useContext(AppsContext);
+  const ctx = useContext(AppsContext);
+  if (!ctx) {
+    throw new Error("useApps must be used within a AppsProvider");
+  }
+
+  return ctx;
 }

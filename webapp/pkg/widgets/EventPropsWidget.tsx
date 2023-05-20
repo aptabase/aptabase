@@ -5,12 +5,14 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CardTitle } from "./CardTitle";
 import { topEventProps } from "./query";
+import { useApps } from "@app/apps";
 
 type Props = {
   appId: string;
 };
 
 export function EventPropsWidget(props: Props) {
+  const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";
   const countryCode = searchParams.get("countryCode") || "";
@@ -27,6 +29,7 @@ export function EventPropsWidget(props: Props) {
   } = useQuery(
     [
       "top-event-props",
+      buildMode,
       props.appId,
       period,
       countryCode,
@@ -36,6 +39,7 @@ export function EventPropsWidget(props: Props) {
     ],
     () =>
       topEventProps({
+        buildMode,
         appId: props.appId,
         period,
         countryCode,

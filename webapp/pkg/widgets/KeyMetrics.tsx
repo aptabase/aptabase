@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { formatDuration, intervalToDuration } from "date-fns";
 import { useSearchParams } from "react-router-dom";
 import { keyMetrics } from "./query";
+import { useApps } from "@app/apps";
 
 type Props = {
   appId: string;
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function KeyMetrics(props: Props) {
+  const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";
   const countryCode = searchParams.get("countryCode") || "";
@@ -25,6 +27,7 @@ export function KeyMetrics(props: Props) {
   } = useQuery(
     [
       "key-metrics",
+      buildMode,
       props.appId,
       period,
       countryCode,
@@ -34,6 +37,7 @@ export function KeyMetrics(props: Props) {
     ],
     () =>
       keyMetrics({
+        buildMode,
         appId: props.appId,
         period,
         countryCode,

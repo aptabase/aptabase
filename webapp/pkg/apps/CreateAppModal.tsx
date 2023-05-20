@@ -3,8 +3,8 @@ import { Button, TextInput } from "@app/primitives";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useNavigationContext } from ".";
 import { IconX } from "@tabler/icons-react";
+import { useNavigationContext } from "@app/navigation";
 
 type Props = {
   open: boolean;

@@ -54,7 +54,6 @@ public class EventsController : Controller
         var header = new EventHeader(appId, countryCode, regionName, city);
         await _ingestionClient.SendSingleAsync(header, body, cancellationToken);
 
-        // TODO: return how many rows were inserted, how many invalid
         return Ok(new { });
     }
 

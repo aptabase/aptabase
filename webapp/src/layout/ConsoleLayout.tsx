@@ -1,7 +1,8 @@
+import { AppConfigMenu, AppSelector, BuildModeSelector } from "@app/apps";
 import { useAuthState } from "@app/auth";
 import { CurrentUsage } from "@app/billing";
 import { isBillingEnabled } from "@app/env";
-import { AppSelector, MobileSidebar, NavMenu, UserMenu } from "@app/navigation";
+import { MobileSidebar, NavMenu, UserMenu } from "@app/navigation";
 import { useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
@@ -20,8 +21,9 @@ export function ConsoleLayout() {
       {/* Static sidebar for desktop */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-grow flex-col overflow-y-auto border-r border-default bg-gray-50">
-          <div className="p-2 border-b border-default">
+          <div className="flex justify-between items-center p-2 border-b border-default">
             <AppSelector />
+            <AppConfigMenu />
           </div>
           <div className="p-2 flex flex-grow flex-col mt-2">
             <NavMenu />
@@ -42,8 +44,9 @@ export function ConsoleLayout() {
           {/* sidebar for mobile */}
           <div className="lg:hidden sticky top-0 z-30 flex h-12 flex-shrink-0 border-b border-default bg-gray-50">
             <MobileSidebar.Button onClick={() => setSidebarOpen(true)} />
-            <div className="flex flex-grow items-center px-2 border-r border-default">
+            <div className="flex justify-between flex-grow items-center px-2 border-r border-default">
               <AppSelector />
+              <AppConfigMenu />
             </div>
             <div className="flex items-center px-2">
               <UserMenu user={auth.user} />

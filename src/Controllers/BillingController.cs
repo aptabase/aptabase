@@ -29,7 +29,9 @@ public class BillingController : Controller
     public async Task<IActionResult> BillingState(CancellationToken cancellationToken)
     {
         var user = this.GetCurrentUser();
-        var appIds = await _db.QueryAsync<string>(@"SELECT id FROM apps WHERE owner_id = @userId", new { userId = user.Id });
+        var releaseAppIds = await _db.QueryAsync<string>(@"SELECT id FROM apps WHERE owner_id = @userId", new { userId = user.Id });
+        var debugAppIds = releaseAppIds.Select(id => $"{id}_DEBUG");
+        var appIds = releaseAppIds.Concat(debugAppIds);
 
         var (year, month) = (DateTime.UtcNow.Year, DateTime.UtcNow.Month);
 

@@ -44,7 +44,7 @@ function StyledOption(props: StyledOptionProps) {
       className={({ active }) =>
         clsx(
           active && "bg-gray-100",
-          "relative rounded cursor-default select-none py-1.5 pl-3 pr-9 mx-1"
+          "relative rounded cursor-pointer select-none py-1.5 pl-3 pr-9 mx-1"
         )
       }
       value={props.option}
@@ -72,7 +72,7 @@ export function DateRangePicker() {
     <Listbox value={selected} onChange={onChange}>
       {({ open }) => (
         <div className="relative">
-          <Listbox.Button className="relative w-full cursor-default tracking-tighter rounded-md py-1.5 pl-3 pr-6 text-default focus-ring hover:bg-gray-100">
+          <Listbox.Button className="relative w-full tracking-tighter rounded-md py-1.5 pl-3 pr-6 text-default focus-ring hover:bg-gray-100">
             <span className="block truncate">{selected.name}</span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center">
               <IconChevronDown className="h-4 w-4 text-secondary mr-1" />
@@ -86,7 +86,7 @@ export function DateRangePicker() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="absolute z-10 mt-1 max-h-fit w-50 lg:w-40 right-0 overflow-auto rounded-md bg-white py-1 text-base shadow-lg focus-ring sm:text-sm">
+            <Listbox.Options className="absolute z-10 mt-1 max-h-fit w-50 lg:w-40 right-0 overflow-auto border border-default rounded-md bg-white py-1 text-base shadow-lg focus-ring sm:text-sm">
               {options.map((option) => (
                 <StyledOption key={option.value} option={option} />
               ))}

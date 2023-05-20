@@ -1,14 +1,15 @@
 import { TopNChart } from "./charts";
-import { Card } from "@app/primitives";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { topAppVersions } from "./query";
+import { useApps } from "@app/apps";
 
 type Props = {
   appId: string;
 };
 
 export function TopAppVersionsWidget(props: Props) {
+  const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";
   const countryCode = searchParams.get("countryCode") || "";
@@ -23,6 +24,7 @@ export function TopAppVersionsWidget(props: Props) {
   } = useQuery(
     [
       "top-appversions",
+      buildMode,
       props.appId,
       period,
       countryCode,
@@ -32,6 +34,7 @@ export function TopAppVersionsWidget(props: Props) {
     ],
     () =>
       topAppVersions({
+        buildMode,
         appId: props.appId,
         period,
         countryCode,

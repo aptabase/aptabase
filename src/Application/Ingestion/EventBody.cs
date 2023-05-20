@@ -6,6 +6,8 @@ namespace Aptabase.Application.Ingestion;
 
 public class SystemProperties
 {
+    public bool IsDebug { get; set; }
+
     [StringLength(30)]
     public string? OSName { get; set; }
 

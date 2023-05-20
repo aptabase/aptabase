@@ -6,6 +6,7 @@ type TopNItem = {
 };
 
 type QueryParams = {
+  buildMode: "release" | "debug";
   appId: string;
   period?: string;
   countryCode?: string;

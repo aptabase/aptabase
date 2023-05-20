@@ -12,6 +12,7 @@ import {
   TopRegionsWidget,
 } from "@app/widgets";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useApps } from "@app/apps";
 
 Component.displayName = "Dashboard";
 
@@ -22,6 +23,7 @@ export function Component() {
   const countryCode = searchParams.get("countryCode") || "";
   const osName = searchParams.get("osName") || "";
   const appVersion = searchParams.get("appVersion") || "";
+  const { buildMode } = useApps();
   const app = useCurrentApp();
 
   const resetFilters = () => navigate("/");
@@ -31,7 +33,14 @@ export function Component() {
       <Head title={app.name} />
       <div className="space-y-4">
         <div className="flex justify-between items-end">
-          <PageHeading title="Dashboard" onClick={resetFilters} />
+          <div className="flex space-x-2 items-center">
+            <PageHeading title="Dashboard" onClick={resetFilters} />
+            {buildMode === "debug" && (
+              <span className="inline-flex rounded bg-orange-300/10 px-2 py-1 font-medium text-xs sm:text-sm text-orange-700">
+                Debug
+              </span>
+            )}
+          </div>
           <DateRangePicker />
         </div>
         <MainChartWidget appId={app.id} />

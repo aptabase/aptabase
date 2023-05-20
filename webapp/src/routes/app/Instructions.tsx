@@ -138,11 +138,11 @@ export function Component() {
       <div className="flex flex-col space-y-8 mt-8">
         <div className="px-4 py-2 bg-primary-50 max-w-fit rounded border border-primary-100">
           <p className="text-secondary text-sm mb-1">
-            👇 This is the app key for {app.name}
+            👇 App key for <span className="text-black">{app.name}</span>
           </p>
           <span className="font-medium text-xl mb-2">{app.appKey} </span>
-          <p className="text-secondary mt-2">
-            Used by the SDK to identify this app.
+          <p className="text-secondary text-sm mt-2">
+            It is used by the SDK to identify your app
           </p>
         </div>
 

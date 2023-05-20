@@ -1,16 +1,17 @@
 import { TopNChart } from "./charts";
-import { Card } from "@app/primitives";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { CardTitle } from "./CardTitle";
 import { getCountryFlagUrl, getCountryName } from "./countries";
 import { topRegions } from "./query";
+import { useApps } from "@app/apps";
 
 type Props = {
   appId: string;
 };
 
 export function TopRegionsWidget(props: Props) {
+  const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";
   const appVersion = searchParams.get("appVersion") || "";
@@ -25,6 +26,7 @@ export function TopRegionsWidget(props: Props) {
   } = useQuery(
     [
       "top-regions",
+      buildMode,
       props.appId,
       period,
       countryCode,
@@ -34,6 +36,7 @@ export function TopRegionsWidget(props: Props) {
     ],
     () =>
       topRegions({
+        buildMode,
         appId: props.appId,
         period,
         countryCode,

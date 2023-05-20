@@ -33,20 +33,20 @@ Aptabase is a platform that can be used to track events from any app. We provide
 
 These are the SDKs currently available, as well as the ones we plan to build.
 
-| Framework                                                                                                | Aptabase Cloud | Aptabase Self-Hosted | Offline Tracking | Opt-in / Opt-out |
-| -------------------------------------------------------------------------------------------------------- | -------------- | -------------------- | ---------------- | ---------------- |
-| [Swift (Apple)](https://github.com/aptabase/aptabase-swift)                                              | ✅             | ✅                   | 🚧               | 🚧               |
-| [Android (Kotlin)](https://github.com/aptabase/aptabase-kotlin)                                          | ✅             | ✅                   | 🚧               | 🚧               |
-| [Flutter](https://github.com/aptabase/aptabase_flutter)                                                  | ✅             | ✅                   | 🚧               | 🚧               |
-| [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)                                               | ✅             | ✅                   | 🚧               | 🚧               |
-| [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase) | ✅             | 🚧                   | 🚧               | 🚧               |
-| [Web Apps](https://github.com/aptabase/aptabase-js)                                                      | ✅             | 🚧                   | 🚧               | 🚧               |
-| [.NET MAUI](https://github.com/aptabase/aptabase-maui)                                                   | ✅             | 🚧                   | 🚧               | 🚧               |
-| [React Native](https://github.com/aptabase/aptabase/issues/2)                                            | 🚧             | 🚧                   | 🚧               | 🚧               |
-| [Electron](https://github.com/aptabase/aptabase/issues/3)                                                | 🚧             | 🚧                   | 🚧               | 🚧               |
-| [Capacitor.js](https://github.com/aptabase/aptabase/issues/6)                                            | 🚧             | 🚧                   | 🚧               | 🚧               |
-| [Unity](https://github.com/aptabase/aptabase/issues/10)                                                  | 🚧             | 🚧                   | 🚧               | 🚧               |
-| [Unreal Engine](https://github.com/aptabase/aptabase/issues/12)                                          | 🚧             | 🚧                   | 🚧               | 🚧               |
+| Framework                                                                                                | Aptabase Cloud | Aptabase Self-Hosted | Debug Mode | Offline Tracking | Opt-in / Opt-out |
+| -------------------------------------------------------------------------------------------------------- | -------------- | -------------------- | ---------- | ---------------- | ---------------- |
+| [Swift (Apple)](https://github.com/aptabase/aptabase-swift)                                              | ✅             | ✅                   | ✅         | 🚧               | 🚧               |
+| [Android (Kotlin)](https://github.com/aptabase/aptabase-kotlin)                                          | ✅             | ✅                   | 🚧         | 🚧               | 🚧               |
+| [Flutter](https://github.com/aptabase/aptabase_flutter)                                                  | ✅             | ✅                   | 🚧         | 🚧               | 🚧               |
+| [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)                                               | ✅             | ✅                   | ✅         | 🚧               | 🚧               |
+| [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase) | ✅             | 🚧                   | 🚧         | 🚧               | 🚧               |
+| [Web Apps](https://github.com/aptabase/aptabase-js)                                                      | ✅             | 🚧                   | 🚧         | 🚧               | 🚧               |
+| [.NET MAUI](https://github.com/aptabase/aptabase-maui)                                                   | ✅             | 🚧                   | 🚧         | 🚧               | 🚧               |
+| [React Native](https://github.com/aptabase/aptabase/issues/2)                                            | 🚧             | 🚧                   | 🚧         | 🚧               | 🚧               |
+| [Electron](https://github.com/aptabase/aptabase/issues/3)                                                | 🚧             | 🚧                   | 🚧         | 🚧               | 🚧               |
+| [Capacitor.js](https://github.com/aptabase/aptabase/issues/6)                                            | 🚧             | 🚧                   | 🚧         | 🚧               | 🚧               |
+| [Unity](https://github.com/aptabase/aptabase/issues/10)                                                  | 🚧             | 🚧                   | 🚧         | 🚧               | 🚧               |
+| [Unreal Engine](https://github.com/aptabase/aptabase/issues/12)                                          | 🚧             | 🚧                   | 🚧         | 🚧               | 🚧               |
 
 **Legend:**
 
@@ -62,6 +62,10 @@ All SDKs are open-source and contributions are welcome!
 - Find us on [Discord](https://discord.gg/d9d97unCUk) or [Twitter](https://twitter.com/aptabase)
 - Open a Github issue or a discussion on this repo
 - Shoot us an email [hi@aptabase.com](mailto:hi@aptabase.com)
+
+# Credits
+
+Aptabase is highly inspired by [Plausible](https://plausible.io/). If you're looking for privacy-friendly website analytics, to check them out.
 
 # License
 

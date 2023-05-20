@@ -4,6 +4,12 @@ namespace Aptabase.Application.Ingestion;
 
 public class TinybirdIngestionClient : IIngestionClient
 {
+    // Events from Debug builds are kept for 6 months
+    private static readonly TimeSpan DebugTTL = TimeSpan.FromDays(182);
+
+    // Events from Release builds are kept for 5 years
+    private static readonly TimeSpan ReleaseTTL = TimeSpan.FromDays(5 * 365);
+
     private static readonly JsonSerializerOptions JsonSettings = new()
     {
         WriteIndented = false,
@@ -46,10 +52,12 @@ public class TinybirdIngestionClient : IIngestionClient
 
     private EventRow ToEventRow(EventHeader header, EventBody body)
     {
+        var ttlTimeSpan = body.SystemProps.IsDebug ? DebugTTL : ReleaseTTL;
+        var appId = body.SystemProps.IsDebug ? $"{header.AppId}_DEBUG" : header.AppId;
         var (stringProps, numericProps) = body.SplitProps();
         return new EventRow
         {
-            AppId = header.AppId,
+            AppId = appId,
             EventName = body.EventName,
             Timestamp = body.Timestamp.ToUniversalTime().ToString("o"),
             SessionId = body.SessionId,
@@ -66,7 +74,7 @@ public class TinybirdIngestionClient : IIngestionClient
             City = header.City ?? "",
             StringProps = stringProps.ToJsonString(),
             NumericProps = numericProps.ToJsonString(),
-            TTL = body.Timestamp.ToUniversalTime().AddYears(5).ToString("o"),
+            TTL = body.Timestamp.ToUniversalTime().Add(ttlTimeSpan).ToString("o"),
         };
     }
 

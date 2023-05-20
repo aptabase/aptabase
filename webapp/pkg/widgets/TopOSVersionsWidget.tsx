@@ -1,16 +1,17 @@
 import { TopNChart } from "./charts";
-import { Card } from "@app/primitives";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { CardTitle } from "./CardTitle";
 import { getOperatingSystemImageUrl } from "./os";
 import { topOSVersions } from "./query";
+import { useApps } from "@app/apps";
 
 type Props = {
   appId: string;
 };
 
 export function TopOSVersionsWidget(props: Props) {
+  const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";
   const appVersion = searchParams.get("appVersion") || "";
@@ -25,6 +26,7 @@ export function TopOSVersionsWidget(props: Props) {
   } = useQuery(
     [
       "top-osversions",
+      buildMode,
       props.appId,
       period,
       countryCode,
@@ -34,6 +36,7 @@ export function TopOSVersionsWidget(props: Props) {
     ],
     () =>
       topOSVersions({
+        buildMode,
         appId: props.appId,
         period,
         countryCode,

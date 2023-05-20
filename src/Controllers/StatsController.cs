@@ -53,11 +53,18 @@ public enum Granularity
     Month
 }
 
+public enum BuildMode
+{
+    Debug,
+    Release
+}
+
 public class QueryParams
 {
     private const string DATE_FORMAT = "yyyy-MM-dd";
     private const string DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
+    public BuildMode BuildMode { get; set; }
     public string AppId { get; set; } = "";
     public DateTime? DateFrom { get; set; }
     public DateTime? DateTo { get; set; }
@@ -96,7 +103,8 @@ public class QueryParams
 
         var where = conditions.Count > 0 ? $"WHERE {String.Join(" AND ", conditions)}" : string.Empty;
 
-        return $"PREWHERE app_id = '{AppId}' {where}";
+        var appId = BuildMode == BuildMode.Debug ? $"{AppId}_DEBUG" : AppId;
+        return $"PREWHERE app_id = '{appId}' {where}";
     }
 
     public string ToGranularPeriod(string columnOrValue)
@@ -135,6 +143,7 @@ public class QueryParams
 
 public class QueryRequestBody
 {
+    public string BuildMode { get; set; } = "";
     public string AppId { get; set; } = "";
     public string? Period { get; set; }
     public string? CountryCode { get; set; }
@@ -320,9 +329,16 @@ public class StatsController : Controller
             _ => (DateTime.UtcNow.AddHours(-24), null, Granularity.Hour), // default to 24 hours
         };
 
+        var buildMode = body.BuildMode.ToLower() switch
+        {
+            "debug" => BuildMode.Debug,
+            _ => BuildMode.Release,
+        };
+
         return new QueryParams
         {
             AppId = body.AppId,
+            BuildMode = buildMode,
             DateFrom = dateFrom,
             DateTo = dateTo,
             Granularity = granularity,

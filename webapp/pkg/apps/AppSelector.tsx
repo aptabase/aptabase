@@ -3,7 +3,7 @@ import { Application, useApps } from "@app/apps";
 import { Listbox, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { CreateAppModal } from "./CreateAppModal";
-import { useNavigationContext } from "./NavigationProvider";
+import { useNavigationContext } from "@app/navigation";
 import { IconBox, IconPlus, IconSelector } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 
@@ -84,9 +84,7 @@ export function AppSelector() {
                 <Listbox.Options className="absolute z-10 mt-1 max-h-80 w-60 overflow-auto border border-default rounded-md bg-white py-1 shadow-lg text-sm focus-ring">
                   {apps.map((app) => (
                     <StyledOption key={app.id} value={app}>
-                      <span className="vfont-normal block truncate">
-                        {app.name}
-                      </span>
+                      <span className="block truncate">{app.name}</span>
                     </StyledOption>
                   ))}
                   <Divider />

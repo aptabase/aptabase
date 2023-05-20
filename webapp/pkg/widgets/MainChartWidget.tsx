@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Granularity, periodicStats } from "./query";
 import { KeyMetrics } from "./KeyMetrics";
+import { useApps } from "@app/apps";
 
 type Props = {
   appId: string;
@@ -73,6 +74,7 @@ function TooltipContent(props: {
 }
 
 export function MainChartWidget(props: Props) {
+  const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const [activeMetrics, setActiveMetrics] = useState<string[]>(["sessions"]);
 
@@ -95,6 +97,7 @@ export function MainChartWidget(props: Props) {
   const { isLoading, isError, data } = useQuery(
     [
       "periodic-stats",
+      buildMode,
       props.appId,
       period,
       countryCode,
@@ -104,6 +107,7 @@ export function MainChartWidget(props: Props) {
     ],
     () =>
       periodicStats({
+        buildMode,
         appId: props.appId,
         period,
         countryCode,
