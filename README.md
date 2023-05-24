@@ -41,7 +41,7 @@ These are the SDKs currently available, as well as the ones we plan to build.
 | [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)                                               | ✅             | ✅                   | ✅         | 🚧               |
 | [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase) | ✅             | ✅                   | ✅         | 🚧               |
 | [.NET MAUI](https://github.com/aptabase/aptabase-maui)                                                   | ✅             | ✅                   | ✅         | 🚧               |
-| [Electron](https://github.com/aptabase/aptabase/issues/3)                                                | ✅             | ✅                   | ✅         | 🚧               |
+| [Electron](https://github.com/aptabase/aptabase-electron)                                                | ✅             | ✅                   | ✅         | 🚧               |
 | [Web Apps](https://github.com/aptabase/aptabase-js)                                                      | ✅             | ✅                   | ✅         | 🚧               |
 | [React Native](https://github.com/aptabase/aptabase/issues/2)                                            | 🚧             | 🚧                   | 🚧         | 🚧               |
 | [Capacitor.js](https://github.com/aptabase/aptabase/issues/6)                                            | 🚧             | 🚧                   | 🚧         | 🚧               |
