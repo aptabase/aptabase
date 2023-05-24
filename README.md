@@ -41,9 +41,9 @@ These are the SDKs currently available, as well as the ones we plan to build.
 | [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)                                               | ✅             | ✅                   | ✅         | 🚧               |
 | [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase) | ✅             | ✅                   | ✅         | 🚧               |
 | [.NET MAUI](https://github.com/aptabase/aptabase-maui)                                                   | ✅             | ✅                   | ✅         | 🚧               |
+| [Electron](https://github.com/aptabase/aptabase/issues/3)                                                | ✅             | ✅                   | ✅         | 🚧               |
 | [Web Apps](https://github.com/aptabase/aptabase-js)                                                      | ✅             | ✅                   | ✅         | 🚧               |
 | [React Native](https://github.com/aptabase/aptabase/issues/2)                                            | 🚧             | 🚧                   | 🚧         | 🚧               |
-| [Electron](https://github.com/aptabase/aptabase/issues/3)                                                | 🚧             | 🚧                   | 🚧         | 🚧               |
 | [Capacitor.js](https://github.com/aptabase/aptabase/issues/6)                                            | 🚧             | 🚧                   | 🚧         | 🚧               |
 | [Unity](https://github.com/aptabase/aptabase/issues/10)                                                  | 🚧             | 🚧                   | 🚧         | 🚧               |
 | [Unreal Engine](https://github.com/aptabase/aptabase/issues/12)                                          | 🚧             | 🚧                   | 🚧         | 🚧               |
@@ -65,7 +65,7 @@ All SDKs are open-source and contributions are welcome!
 
 # Credits
 
-Aptabase is highly inspired by [Plausible](https://plausible.io/). If you're looking for privacy-friendly website analytics, to check them out.
+Aptabase is highly inspired by [Plausible](https://github.com/plausible/analytics). If you're looking for privacy-friendly website analytics, to check them out.
 
 # License
 

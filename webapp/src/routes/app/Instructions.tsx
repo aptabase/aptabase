@@ -35,7 +35,9 @@ const frameworks: { [id: string]: FrameworkInstructions } = {
   },
   electron: {
     name: "Electron",
-    repository: "https://github.com/aptabase/aptabase/issues/3",
+    readme:
+      "https://raw.githubusercontent.com/aptabase/aptabase-electron/main/README.md",
+    repository: "https://github.com/aptabase/aptabase-electron",
   },
   flutter: {
     name: "Flutter",
