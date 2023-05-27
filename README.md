@@ -43,10 +43,7 @@ These are the SDKs currently available, as well as the ones we plan to build.
 | [.NET MAUI](https://github.com/aptabase/aptabase-maui)                                                   | ✅             | ✅                   | ✅         | 🚧               |
 | [Electron](https://github.com/aptabase/aptabase-electron)                                                | ✅             | ✅                   | ✅         | 🚧               |
 | [Web Apps](https://github.com/aptabase/aptabase-js)                                                      | ✅             | ✅                   | ✅         | 🚧               |
-| [React Native](https://github.com/aptabase/aptabase/issues/2)                                            | 🚧             | 🚧                   | 🚧         | 🚧               |
-| [Capacitor.js](https://github.com/aptabase/aptabase/issues/6)                                            | 🚧             | 🚧                   | 🚧         | 🚧               |
-| [Unity](https://github.com/aptabase/aptabase/issues/10)                                                  | 🚧             | 🚧                   | 🚧         | 🚧               |
-| [Unreal Engine](https://github.com/aptabase/aptabase/issues/12)                                          | 🚧             | 🚧                   | 🚧         | 🚧               |
+| [React Native](https://github.com/aptabase/aptabase/issues/2)                                            | ✅             | ✅                   | ✅         | 🚧               |
 
 **Legend:**
 

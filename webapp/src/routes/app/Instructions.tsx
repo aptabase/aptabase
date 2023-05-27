@@ -60,7 +60,9 @@ const frameworks: { [id: string]: FrameworkInstructions } = {
   },
   "react-native": {
     name: "React Native",
-    repository: "https://github.com/aptabase/aptabase/issues/2",
+    readme:
+      "https://raw.githubusercontent.com/aptabase/aptabase-react-native/main/README.md",
+    repository: "https://github.com/aptabase/aptabase-react-native",
   },
   tauri: {
     name: "Tauri",
