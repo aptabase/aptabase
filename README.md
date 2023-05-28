@@ -50,7 +50,7 @@ These are the SDKs currently available, as well as the ones we plan to build.
 - **Aptabase Cloud:** Does the SDK work with Aptabase Cloud?
 - **Aptabase Self Hosted:** Does the SDK work with Self Hosted instances?
 - **Offline Tracking:** Does the SDK work when the device is offline?
-- **Opt-in/Opt-out:** Does the SDK provide an easy way for developers to implement opt-in/opt-out?
+- **Debug Mode:** Does the SDK separate events from Debug and Release builds?
 
 All SDKs are open-source and contributions are welcome!
 
