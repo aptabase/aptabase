@@ -1,4 +1,5 @@
 export * from "./EventPropsWidget";
+export * from "./CurrentFilters";
 export * from "./MainChartWidget";
 export * from "./TopAppBuildNumbersWidget";
 export * from "./TopAppVersionsWidget";

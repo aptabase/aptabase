@@ -1,6 +1,7 @@
 import { useCurrentApp } from "@app/navigation";
 import { Card, DateRangePicker, Head, PageHeading } from "@app/primitives";
 import {
+  CurrentFilters,
   EventPropsWidget,
   MainChartWidget,
   TopAppBuildNumbersWidget,
@@ -42,6 +43,9 @@ export function Component() {
             )}
           </div>
           <DateRangePicker />
+        </div>
+        <div className="flex w-full justify-end">
+          <CurrentFilters />
         </div>
         <MainChartWidget appId={app.id} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] pt-[1px] bg-gray-200">
