@@ -266,7 +266,9 @@ public class StatsController : Controller
                       row.2 AS Value,
                       count() as Events
                FROM (
-                 SELECT arrayJoin(JSONExtractKeysAndValuesRaw(string_props)) as row
+                 SELECT arrayJoin(
+                            arrayConcat(JSONExtractKeysAndValuesRaw(string_props), JSONExtractKeysAndValuesRaw(numeric_props))
+                        ) as row
                  FROM events
                 {query.ToFilter()}
                )
