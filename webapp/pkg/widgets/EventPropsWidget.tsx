@@ -1,5 +1,4 @@
 import { TopNChart } from "./charts";
-import { Card } from "@app/primitives";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -56,29 +55,27 @@ export function EventPropsWidget(props: Props) {
     .map((row) => ({ name: row.value, value: row.events }));
 
   return (
-    <Card>
-      <TopNChart
-        title={<CardTitle backProperty="eventName">{eventName}</CardTitle>}
-        labels={[keys[index], "Events"]}
-        renderLabel={() =>
-          keys.length > 0 && (
-            <select
-              className="form-select compact min-w-[6rem]"
-              defaultValue={0}
-              onChange={(e) => setIndex(e.currentTarget.selectedIndex)}
-            >
-              {keys.map((key, i) => (
-                <option key={key} value={i}>
-                  {key}
-                </option>
-              ))}
-            </select>
-          )
-        }
-        isLoading={isLoading}
-        isError={isError}
-        items={items}
-      />
-    </Card>
+    <TopNChart
+      title={<CardTitle backProperty="eventName">{eventName}</CardTitle>}
+      labels={[keys[index], "Events"]}
+      renderLabel={() =>
+        keys.length > 0 && (
+          <select
+            className="form-select compact min-w-[6rem]"
+            defaultValue={0}
+            onChange={(e) => setIndex(e.currentTarget.selectedIndex)}
+          >
+            {keys.map((key, i) => (
+              <option key={key} value={i}>
+                {key}
+              </option>
+            ))}
+          </select>
+        )
+      }
+      isLoading={isLoading}
+      isError={isError}
+      items={items}
+    />
   );
 }

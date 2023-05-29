@@ -19,7 +19,7 @@ type Props = {
 };
 
 const defaultRenderRow = (item: Item) => (
-  <span className="px-2">{item.name || "Unknown"}</span>
+  <span className="px-2">{item.name || <i>Empty</i>}</span>
 );
 
 export function TopNChart(props: Props) {
