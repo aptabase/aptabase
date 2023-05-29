@@ -8,6 +8,7 @@ import { useSearchParams } from "react-router-dom";
 import { Granularity, periodicStats } from "./query";
 import { KeyMetrics } from "./KeyMetrics";
 import { useApps } from "@app/apps";
+import { hourCycle } from "@app/env";
 
 type Props = {
   appId: string;
@@ -31,7 +32,10 @@ const months = [
 function formatPeriod(granularity: Granularity, period: string) {
   try {
     if (granularity === "hour") {
-      return format(parseJSON(period), "haaaaa'm'");
+      return format(
+        parseJSON(period),
+        hourCycle === "h12" ? "haaaaa'm'" : "HH:mm"
+      );
     }
 
     const [year, month, day] = period.substring(0, 10).split("-");

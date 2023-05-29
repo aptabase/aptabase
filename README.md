@@ -62,7 +62,7 @@ All SDKs are open-source and contributions are welcome!
 
 # Credits
 
-Aptabase is highly inspired by [Plausible](https://github.com/plausible/analytics). If you're looking for privacy-friendly website analytics, to check them out.
+Aptabase is highly inspired by [Plausible](https://github.com/plausible/analytics). If you're looking for privacy-friendly website analytics, go check them out.
 
 # License
 
