@@ -75,7 +75,7 @@ public class IngestionValidator : IIngestionValidator
         if (body is null)
             return (false, "Missing event body.");
 
-        if (body.Timestamp > DateTime.UtcNow.AddMinutes(5))
+        if (body.Timestamp > DateTime.UtcNow.AddMinutes(10))
             return (false, "Future events are not allowed.");
 
         if (body.Timestamp < DateTime.UtcNow.AddDays(-1))

@@ -41,7 +41,13 @@ public class EventsController : Controller
         var (valid, errorMessage) = _validator.IsValidBody(body);
         if (!valid)
         {
-            _logger.LogWarning(errorMessage);
+            using (_logger.BeginScope(new Dictionary<string, object> {
+                { "Body", body },
+                { "AppKey", appKey }
+            }))
+            {
+                _logger.LogWarning(errorMessage);
+            }
             return BadRequest(errorMessage);
         }
 
