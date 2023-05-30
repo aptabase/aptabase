@@ -91,8 +91,8 @@ public class IngestionValidator : IIngestionValidator
                 if (prop.Key.Length > 40)
                     return (false, "Property key must be less than or equal to 40 characters.");
 
-                if (prop.Value?.ToJsonString().Length > 120)
-                    return (false, "Property value must be less than or equal to 120 characters.");
+                if (prop.Value?.ToJsonString().Length > 200)
+                    return (false, "Property value must be less than or equal to 200 characters.");
             }
         }
 
