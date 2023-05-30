@@ -63,6 +63,12 @@ public class EventBody
 
     public JsonObject? Props { get; set; }
 
+    public void Normalize()
+    {
+        // if the timestamp is in the future, normalize it to now
+        if (Timestamp > DateTime.UtcNow)
+            Timestamp = DateTime.UtcNow;
+    }
 
     public void EnrichWith(string? userAgent)
     {

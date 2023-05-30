@@ -75,7 +75,7 @@ public class IngestionValidator : IIngestionValidator
         if (body is null)
             return (false, "Missing event body.");
 
-        if (body.Timestamp > DateTime.UtcNow.AddMinutes(10))
+        if (body.Timestamp > DateTime.UtcNow.AddMinutes(1))
             return (false, "Future events are not allowed.");
 
         if (body.Timestamp < DateTime.UtcNow.AddDays(-1))
@@ -88,11 +88,11 @@ public class IngestionValidator : IIngestionValidator
                 if (string.IsNullOrWhiteSpace(prop.Key))
                     return (false, "Property key must not be empty.");
 
-                if (prop.Key.Length >= 40)
+                if (prop.Key.Length > 40)
                     return (false, "Property key must be less than or equal to 40 characters.");
 
-                if (prop.Value?.ToJsonString().Length >= 100)
-                    return (false, "Property value must be less than or equal to 100 characters.");
+                if (prop.Value?.ToJsonString().Length > 120)
+                    return (false, "Property value must be less than or equal to 120 characters.");
             }
         }
 

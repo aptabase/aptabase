@@ -1,4 +1,3 @@
-using Aptabase.Application;
 using Aptabase.Application.Ingestion;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -38,16 +37,12 @@ public class EventsController : Controller
         countryCode = countryCode?.ToUpper() ?? "";
         regionName = Uri.UnescapeDataString(regionName ?? "");
 
+        body.Normalize();
+
         var (valid, errorMessage) = _validator.IsValidBody(body);
         if (!valid)
         {
-            using (_logger.BeginScope(new Dictionary<string, object> {
-                { "Body", body },
-                { "AppKey", appKey }
-            }))
-            {
-                _logger.LogWarning(errorMessage);
-            }
+            _logger.LogWarning(errorMessage);
             return BadRequest(errorMessage);
         }
 
