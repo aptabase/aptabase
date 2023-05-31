@@ -80,10 +80,6 @@ const frameworks: { [id: string]: FrameworkInstructions } = {
       "https://raw.githubusercontent.com/aptabase/aptabase-js/main/README.md",
     repository: "https://github.com/aptabase/aptabase-js",
   },
-  xamarin: {
-    name: "Xamarin",
-    repository: "https://github.com/aptabase/aptabase/issues/9",
-  },
 };
 
 const fetchInstructions = async (id: string): Promise<[string, string]> => {
