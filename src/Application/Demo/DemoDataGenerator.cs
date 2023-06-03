@@ -5,7 +5,7 @@ public static class DemoDataGenerator
     private static Random _random = new Random();
     private static string[] sdk_version = new[] { "en_US", "en_IE", "de_DE", "pt_PT", "pt_BR", "es_ES" };
     private static string[] locales = new[] { "en_US", "en_IE", "de_DE", "pt_PT", "pt_BR", "es_ES" };
-    private static string[] events = new[] { "play_music", "skip_music", "like_music", "add_to_playlist", "remove_from_playlist" };
+    private static string[] events = new[] { "play_music", "skip_music", "like_music", "add_to_playlist", "remove_from_playlist", "change_volume" };
 
     private static (string, string)[] musics = new[] {
         ("Adele","Hello"),
@@ -207,8 +207,16 @@ public static class DemoDataGenerator
         var eventName = events[_random.Next(0, events.Length)];
         var (artist, music) = musics[_random.Next(0, musics.Length)];
 
-        var props = new Dictionary<string, object> { { "artist", artist }, { "music", music } };
+        var props = new Dictionary<string, object>();
 
+        if (eventName == "change_volume")
+        {
+            props.Add("volume", _random.Next(10, 90));
+            return (eventName, props);
+        }
+
+        props.Add("artist", artist);
+        props.Add("music", music);
         if (eventName == "like_music")
             props.Add("like_count", _random.Next(1, 10));
 
