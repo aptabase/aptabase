@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@aptabase/web": "0.1.2",
-    "@fontsource/inter": "4.5.15",
-    "@headlessui/react": "1.7.14",
-    "@tabler/icons-react": "2.18.0",
-    "@tanstack/react-query": "4.29.7",
+    "@fontsource/inter": "5.0.2",
+    "@headlessui/react": "1.7.15",
+    "@tabler/icons-react": "2.21.0",
+    "@tanstack/react-query": "4.29.12",
     "cal-sans": "1.0.1",
     "chart.js": "4.3.0",
     "chartjs-plugin-annotation": "3.0.1",
@@ -22,10 +22,10 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-markdown": "8.0.7",
-    "react-router-dom": "6.11.1",
+    "react-router-dom": "6.11.2",
     "rehype-highlight": "6.0.0",
     "remark-gfm": "3.0.1",
-    "sonner": "0.3.5"
+    "sonner": "0.4.0"
   },
   "devDependencies": {
     "@tailwindcss/forms": "0.5.3",
