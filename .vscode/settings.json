@@ -4,6 +4,7 @@
   "csharp.referencesCodeLens.enabled": false,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "tinybird.dataProjectSubdir": "etc/tinybird",
   "files.exclude": {
     "**/.git": true,
     "**/.svn": true,
