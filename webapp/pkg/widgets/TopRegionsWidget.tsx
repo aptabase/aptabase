@@ -58,7 +58,7 @@ export function TopRegionsWidget(props: Props) {
               src={getCountryFlagUrl(countryCode)}
               className="h-5 w-5 shadow rounded-full"
             />
-            <p>{getCountryName(countryCode) || "Unknown"}</p>
+            <span>{getCountryName(countryCode) || "Unknown"}</span>
           </div>
         </CardTitle>
       }
