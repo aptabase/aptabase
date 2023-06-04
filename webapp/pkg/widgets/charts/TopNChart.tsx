@@ -35,12 +35,12 @@ export function TopNChart(props: Props) {
   ) : (
     <>
       <div className="flex w-full flex-row justify-between items-center">
-        <p className="text-secondary text-sm font-normal">
+        <div className="text-secondary text-sm font-normal">
           {props.renderLabel ? props.renderLabel() : props.labels[0]}
-        </p>
-        <p className="text-secondary text-sm font-normal pr-1">
+        </div>
+        <div className="text-secondary text-sm font-normal pr-1">
           {props.labels[1]}
-        </p>
+        </div>
       </div>
       <div className="grid text-sm mt-2 max-h-[22rem] overflow-y-auto">
         {props.items.map((item) => (
@@ -59,7 +59,7 @@ export function TopNChart(props: Props) {
 
   return (
     <>
-      <p className="font-medium mb-1">{props.title}</p>
+      <div className="font-medium mb-1">{props.title}</div>
       {content}
     </>
   );
