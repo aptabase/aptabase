@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@aptabase/web": "0.1.2",
+    "@aptabase/web": "0.1.3",
     "@fontsource/inter": "5.0.2",
     "@headlessui/react": "1.7.15",
     "@tabler/icons-react": "2.21.0",
@@ -30,14 +30,15 @@
   "devDependencies": {
     "@tailwindcss/forms": "0.5.3",
     "@tailwindcss/typography": "0.5.9",
-    "@types/node": "20.1.4",
-    "@types/react": "18.2.6",
+    "@types/node": "20.2.5",
+    "@types/react": "18.2.8",
     "@types/react-dom": "18.2.4",
-    "@vitejs/plugin-react-swc": "3.3.1",
+    "@vitejs/plugin-react-swc": "3.3.2",
     "autoprefixer": "10.4.14",
-    "postcss": "8.4.23",
+    "postcss": "8.4.24",
     "tailwindcss": "3.3.2",
-    "typescript": "5.0.4",
-    "vite": "4.3.5"
+    "tw-colors": "1.2.6",
+    "typescript": "5.1.3",
+    "vite": "4.3.9"
   }
 }
