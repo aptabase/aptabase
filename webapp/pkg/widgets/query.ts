@@ -69,9 +69,14 @@ export function periodicStats(params: QueryParams): Promise<PeriodicStats> {
 }
 
 type EventPropsItem = {
-  key: string;
-  value: string;
+  stringKey: string;
+  stringValue: string;
+  numericKey: string;
   events: number;
+  median: number;
+  min: number;
+  max: number;
+  sum: number;
 };
 
 export function topEventProps(params: QueryParams): Promise<EventPropsItem[]> {

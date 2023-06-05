@@ -1,6 +1,7 @@
 import { EmptyState, ErrorState } from "@app/primitives";
 import { Link } from "react-router-dom";
 import { TopNSkeleton } from "./TopNSkeleton";
+import { CardTitle } from "../CardTitle";
 
 type Item = {
   name: string;
@@ -11,7 +12,8 @@ type Props = {
   title: string | JSX.Element;
   labels: [string, string];
   items: Item[];
-  renderLabel?: () => React.ReactNode;
+  renderKeyLabel?: React.ReactNode;
+  renderValueLabel?: React.ReactNode;
   renderRow?: (item: Item) => React.ReactNode;
   isLoading?: boolean;
   isError?: boolean;
@@ -24,7 +26,7 @@ const defaultRenderRow = (item: Item) => (
 
 export function TopNChart(props: Props) {
   const total = props.items.reduce((acc, item) => acc + item.value, 0);
-  const renderLabel = props.renderRow ?? defaultRenderRow;
+  const renderRow = props.renderRow ?? defaultRenderRow;
 
   const content = props.isError ? (
     <ErrorState />
@@ -36,10 +38,10 @@ export function TopNChart(props: Props) {
     <>
       <div className="flex w-full flex-row justify-between items-center">
         <div className="text-secondary text-sm font-normal">
-          {props.renderLabel ? props.renderLabel() : props.labels[0]}
+          {props.renderKeyLabel ? props.renderKeyLabel : props.labels[0]}
         </div>
         <div className="text-secondary text-sm font-normal pr-1">
-          {props.labels[1]}
+          {props.renderValueLabel ? props.renderValueLabel : props.labels[1]}
         </div>
       </div>
       <div className="grid text-sm mt-2 max-h-[22rem] overflow-y-auto">
@@ -50,7 +52,7 @@ export function TopNChart(props: Props) {
             percentage={item.value / total}
             searchParamKey={props.searchParamKey}
           >
-            {renderLabel(item)}
+            {renderRow(item)}
           </TopNRow>
         ))}
       </div>
@@ -59,7 +61,11 @@ export function TopNChart(props: Props) {
 
   return (
     <>
-      <div className="font-medium mb-1">{props.title}</div>
+      {typeof props.title === "string" ? (
+        <CardTitle>{props.title}</CardTitle>
+      ) : (
+        props.title
+      )}
       {content}
     </>
   );

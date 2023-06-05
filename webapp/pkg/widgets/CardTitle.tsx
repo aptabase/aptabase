@@ -8,14 +8,14 @@ type Props = {
 
 export function CardTitle(props: Props) {
   if (!props.backProperty) {
-    return <>{props.children}</>;
+    return <span className="font-medium mb-1">{props.children}</span>;
   }
 
   const targetUrl = new URL(window.location.href);
   targetUrl.searchParams.delete(props.backProperty);
 
   return (
-    <span className="inline-flex items-center relative group">
+    <span className="font-medium mb-1 inline-flex items-center relative group">
       <div className="group-hover:blur-sm group-hover:opacity-50 transition-all">
         {props.children}
       </div>

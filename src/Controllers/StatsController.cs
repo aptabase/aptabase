@@ -33,11 +33,22 @@ public class TopNItem
     public int Value { get; set; }
 }
 
+public class EventPropKeys
+{
+    public string[] StringKeys { get; set; } = Array.Empty<string>();
+    public string[] NumericKeys { get; set; } = Array.Empty<string>();
+}
+
 public class EventPropsItem
 {
-    public string Key { get; set; } = "";
-    public string Value { get; set; } = "";
+    public string StringKey { get; set; } = "";
+    public string StringValue { get; set; } = "";
+    public string NumericKey { get; set; } = "";
     public int Events { get; set; }
+    public decimal Median { get; set; }
+    public decimal Min { get; set; }
+    public decimal Max { get; set; }
+    public decimal Sum { get; set; }
 }
 
 public enum TopNValue
@@ -262,18 +273,23 @@ public class StatsController : Controller
             return BadRequest();
 
         var (rows, stats) = await _queryClient.QueryAsync<EventPropsItem>(
-            $@"SELECT row.1 AS Key,
-                      row.2 AS Value,
-                      count() as Events
-               FROM (
-                 SELECT arrayJoin(
-                            arrayConcat(JSONExtractKeysAndValues(string_props, 'String'), JSONExtractKeysAndValues(numeric_props, 'String'))
-                        ) as row
-                 FROM events
-                {query.ToFilter()}
-               )
-               GROUP BY Key, Value
-               ORDER BY Key, Events DESC", cancellationToken);
+            $@"SELECT string_arr.1 as StringKey,
+                      string_arr.2 as StringValue,
+                      numeric_arr.1 as NumericKey,
+                      count() as Events,
+                      median(numeric_arr.2) as Median,
+                      min(numeric_arr.2) as Min,
+                      max(numeric_arr.2) as Max,
+                      sum(numeric_arr.2) as Sum
+                FROM (
+                    SELECT * FROM (
+                        SELECT JSONExtractKeysAndValues(string_props, 'String') as string_arr, JSONExtractKeysAndValues(numeric_props, 'Float') as numeric_arr
+                        FROM events
+                        {query.ToFilter()}
+                    ) LEFT ARRAY JOIN string_arr
+                ) LEFT ARRAY JOIN numeric_arr
+                GROUP BY StringKey, StringValue, NumericKey
+                ORDER BY StringKey, Events DESC", cancellationToken);
 
         return OkWithStats(rows, stats);
     }
