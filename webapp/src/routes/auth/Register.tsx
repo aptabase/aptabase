@@ -16,7 +16,11 @@ type StatusMessageProps = {
 
 const StatusMessage = (props: StatusMessageProps) => {
   if (props.status === "success") {
-    return <span className="text-green-700">Woo-hoo! Email sent, go check your inbox!</span>;
+    return (
+      <span className="text-success">
+        Woo-hoo! Email sent, go check your inbox!
+      </span>
+    );
   }
 
   return (
@@ -54,23 +58,33 @@ export function Component() {
         <DataResidency />
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="py-8 px-4 sm:rounded-lg sm:px-10">
           <div className="space-y-2">
             <SignInWithGitHub />
             <SignInWithGoogle />
           </div>
 
           <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center" aria-hidden="true">
-              <div className="w-full border-t border-gray-300" />
+            <div
+              className="absolute inset-0 flex items-center"
+              aria-hidden="true"
+            >
+              <div className="w-full border-t border-default" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-gray-500">OR</span>
+              <span className="px-2 text-muted bg-muted">OR</span>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-            <TextInput label="Name" name="name" placeholder="Peter Parker" value={name} required={true} onChange={setName} />
+            <TextInput
+              label="Name"
+              name="name"
+              placeholder="Peter Parker"
+              value={name}
+              required={true}
+              onChange={setName}
+            />
             <TextInput
               label="Email Address"
               name="email"
@@ -84,7 +98,7 @@ export function Component() {
             <Button loading={status === "loading"} variant="primary">
               Send magic link
             </Button>
-            <p className="text-center text-sm h-10 text-secondary">
+            <p className="text-center text-sm h-10 text-subtle">
               <StatusMessage status={status} />
             </p>
           </form>

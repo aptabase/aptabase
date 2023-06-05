@@ -7,7 +7,7 @@ export function RegionSwitch() {
   const href = `https://${otherRegion}.aptabase.com`;
 
   return (
-    <div className="justify-center text-xs tracking-normal text-secondary flex items-center p-2">
+    <div className="justify-center text-xs tracking-normal text-subtle flex items-center p-2">
       Looking for {otherRegion.toUpperCase()} hosting?
       <a href={href} className="text-primary ml-1">
         Switch →

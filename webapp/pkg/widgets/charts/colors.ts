@@ -41,11 +41,14 @@ function createDiagonalPattern(color: string): CanvasPattern | string {
   return context.createPattern(canvas, "repeat") || color;
 }
 
+const root = getComputedStyle(document.documentElement);
+const primaryColor = root.getPropertyValue("--apta-chart-primary");
+
 const colors = {
-  primary: createLinearGradient("#2563eb", "#3b82f6", "#eff6ff"),
-  primaryStripped: createDiagonalPattern("#2563eb"),
-  secondary: "#374151",
-  highlight: "rgb(0, 0, 0, 0.05)",
+  primary: createLinearGradient(primaryColor, "#3b82f6", "#eff6ff"),
+  primaryStripped: createDiagonalPattern(primaryColor),
+  secondary: root.getPropertyValue("--apta-chart-secondary"),
+  highlight: root.getPropertyValue("--apta-chart-highlight"),
 };
 
 export default colors;

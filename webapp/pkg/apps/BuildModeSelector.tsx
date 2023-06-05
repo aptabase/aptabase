@@ -22,9 +22,7 @@ export function BuildModeSelector() {
               value={option.value}
               className={({ checked }) =>
                 clsx(
-                  checked
-                    ? "text-black bg-gray-100 font-medium"
-                    : "text-secondary",
+                  checked ? "bg-subtle" : "text-subtle",
                   "flex cursor-pointer items-center justify-center rounded p-2 focus-ring"
                 )
               }
@@ -40,7 +38,7 @@ export function BuildModeSelector() {
           ))}
         </div>
       </RadioGroup>
-      <p className="text-secondary text-xs">
+      <p className="text-subtle text-xs">
         Events sent from Debug builds are separated from Release builds.
       </p>
     </div>

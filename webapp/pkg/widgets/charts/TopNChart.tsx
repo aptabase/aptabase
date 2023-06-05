@@ -37,10 +37,10 @@ export function TopNChart(props: Props) {
   ) : (
     <>
       <div className="flex w-full flex-row justify-between items-center">
-        <div className="text-secondary text-sm font-normal">
+        <div className="text-subtle text-sm font-normal">
           {props.renderKeyLabel ? props.renderKeyLabel : props.labels[0]}
         </div>
-        <div className="text-secondary text-sm font-normal pr-1">
+        <div className="text-subtle text-sm font-normal pr-1">
           {props.renderValueLabel ? props.renderValueLabel : props.labels[1]}
         </div>
       </div>
@@ -86,15 +86,15 @@ function TopNRow(props: TopNRowProps) {
 
   const content = (
     <div className="flex items-center justify-between group py-2 relative">
-      <div className="hidden group-hover:block absolute h-8 origin-left rounded bg-black/5 w-full" />
+      <div className="hidden group-hover:block group-hover:bg-subtle absolute h-8 origin-left rounded w-full" />
       <div className="relative z-10 flex w-full max-w-[calc(100%-3rem)] items-center">
         <div
-          className="absolute h-8 origin-left bg-primary-100 rounded group-hover:bg-primary-300/70 transition-all"
+          className="absolute h-8 origin-left bg-primary-100 dark:bg-primary-950 rounded transition-all"
           style={{ width: `${props.percentage * 100}%` }}
         />
-        <div className="flex z-20">{props.children}</div>
+        <div className="flex z-10">{props.children}</div>
       </div>
-      <p className="text-sm pr-2">{props.item.value}</p>
+      <p className="text-sm pr-2 z-10">{props.item.value}</p>
     </div>
   );
 

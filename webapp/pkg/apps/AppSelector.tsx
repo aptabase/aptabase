@@ -17,8 +17,8 @@ function StyledOption(props: OptionProps) {
     <Listbox.Option
       className={({ active }) =>
         clsx(
-          active ? "bg-gray-100" : "",
-          "relative rounded cursor-pointer select-none p-2 mx-1 text-sm flex items-center space-x-2"
+          active ? "text-inverted bg-subtle" : "",
+          "relative rounded cursor-pointer select-none p-2 mx-1 text-sm flex items-center space-x-1"
         )
       }
       value={props.value}
@@ -60,17 +60,14 @@ export function AppSelector() {
         {({ open }) => (
           <>
             <div className="relative">
-              <Listbox.Button className="relative flex items-center space-x-1 rounded-md py-1.5 text-left hover:bg-gray-200/70 text-base px-2">
+              <Listbox.Button className="relative flex items-center space-x-1 rounded-md py-1.5 text-left hover:bg-emphasis px-2">
                 <IconBox
                   strokeWidth={1.75}
-                  className="h-5 w-5 p-0.5 bg-white border rounded border-default text-secondary"
+                  className="h-5 w-5 p-0.5 border rounded border-default"
                 />
                 <div className="flex items-center space-x-2">
                   <span className="block">{currentApp?.name}</span>
-                  <IconSelector
-                    strokeWidth={2}
-                    className="h-4 w-4 text-secondary"
-                  />
+                  <IconSelector strokeWidth={2} className="h-4 w-4" />
                 </div>
               </Listbox.Button>
 
@@ -81,7 +78,7 @@ export function AppSelector() {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <Listbox.Options className="absolute z-10 mt-1 max-h-80 w-60 overflow-auto border border-default rounded-md bg-white py-1 shadow-lg text-sm focus-ring">
+                <Listbox.Options className="absolute z-10 mt-1 max-h-80 w-60 overflow-auto border border-default rounded-md bg-default py-1 shadow-lg text-sm focus-ring">
                   {apps.map((app) => (
                     <StyledOption key={app.id} value={app}>
                       <span className="block truncate">{app.name}</span>
@@ -90,9 +87,7 @@ export function AppSelector() {
                   <Divider />
                   <StyledOption>
                     <IconPlus strokeWidth={1.75} className="h-4 w-4" />
-                    <span className="tracking-tight uppercase font-semibold">
-                      Create new App
-                    </span>
+                    <span className="tracking-tight">Create new App</span>
                   </StyledOption>
                 </Listbox.Options>
               </Transition>

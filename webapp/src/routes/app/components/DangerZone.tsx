@@ -14,7 +14,11 @@ export function DangerZone(props: Props) {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (window.confirm(`Are you really sure you want to delete application '${props.appName}'?`)) {
+    if (
+      window.confirm(
+        `Are you really sure you want to delete application '${props.appName}'?`
+      )
+    ) {
       await deleteApp(props.appId);
       toast(`${props.appName} app was deleted.`);
       navigate("/");
@@ -22,9 +26,14 @@ export function DangerZone(props: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-40 border border-red-600 rounded bg-white p-4 max-w-sm">
+    <form
+      onSubmit={handleSubmit}
+      className="mt-40 border border-error rounded p-4 max-w-sm"
+    >
       <h2 className="text-lg">Delete App</h2>
-      <div className="text-sm text-secondary">This will permanently delete this app and its events.</div>
+      <div className="text-sm text-subtle">
+        This will permanently delete this app and its events.
+      </div>
       <div className="mt-4">
         <div className="w-20">
           <Button variant="danger">Delete</Button>

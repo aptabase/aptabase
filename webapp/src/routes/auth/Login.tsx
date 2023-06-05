@@ -26,13 +26,19 @@ const SignUpMessage = () => (
 
 const StatusMessage = (props: StatusMessageProps) => {
   if (props.status === "success") {
-    return <span className="text-green-700">Woo-hoo! Email sent, go check your inbox!</span>;
+    return (
+      <span className="text-success">
+        Woo-hoo! Email sent, go check your inbox!
+      </span>
+    );
   }
 
   if (props.status === "notfound") {
     return (
       <>
-        <span className="text-red-700">We did not find an account with that email.</span>
+        <span className="text-error">
+          Could not find an account with that email.
+        </span>
         <SignUpMessage />
       </>
     );
@@ -48,9 +54,14 @@ const RedirectErrorMessage = () => {
   if (!error) {
     return null;
   }
-  const message = error === "expired" ? "This link has expired." : "This link is invalid.";
+  const message =
+    error === "expired" ? "This link has expired." : "This link is invalid.";
 
-  return <p className="mx-auto text-center mb-10 text-red-700 text-sm">{message} Please request a new one.</p>;
+  return (
+    <p className="mx-auto text-center mb-10 text-error text-sm">
+      {message} Please request a new one.
+    </p>
+  );
 };
 
 Component.displayName = "Login";
@@ -75,22 +86,27 @@ export function Component() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Logo className="mx-auto h-20 w-auto text-primary" />
-        <h2 className="text-center text-3xl font-bold">Sign in to your account</h2>
+        <h2 className="text-center text-3xl text-inverted font-bold">
+          Sign in to your account
+        </h2>
         <DataResidency />
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="py-8 px-4 sm:rounded-lg sm:px-10">
           <div className="space-y-2">
             <SignInWithGitHub />
             <SignInWithGoogle />
           </div>
 
           <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center" aria-hidden="true">
-              <div className="w-full border-t border-gray-300" />
+            <div
+              className="absolute inset-0 flex items-center"
+              aria-hidden="true"
+            >
+              <div className="w-full border-t border-default" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-gray-500">OR</span>
+              <span className="px-2 text-muted bg-muted">OR</span>
             </div>
           </div>
 
@@ -108,7 +124,7 @@ export function Component() {
             <Button loading={status === "loading"} variant="primary">
               Send magic link
             </Button>
-            <p className="text-center text-sm h-10 text-secondary">
+            <p className="text-center text-sm h-10 text-subtle">
               <StatusMessage status={status} />
             </p>
           </form>

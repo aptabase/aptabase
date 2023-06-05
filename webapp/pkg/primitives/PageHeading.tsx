@@ -17,7 +17,7 @@ export function PageHeading(props: Props) {
       >
         {props.title}
       </h1>
-      {props.subtitle && <p className="text-secondary">{props.subtitle}</p>}
+      {props.subtitle && <p className="text-subtle">{props.subtitle}</p>}
     </div>
   );
 }

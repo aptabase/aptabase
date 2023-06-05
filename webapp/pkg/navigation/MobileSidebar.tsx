@@ -58,7 +58,7 @@ export function MobileSidebar(props: Props) {
             leaveFrom="translate-x-0"
             leaveTo="-translate-x-full"
           >
-            <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white pt-2 pb-4">
+            <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-muted pt-2 pb-4 border-r border-default">
               <Transition.Child
                 as={Fragment}
                 enter="ease-in-out duration-300"

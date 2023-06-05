@@ -14,8 +14,8 @@ const sizes = {
 };
 
 const colors = {
-  default: "text-gray-100 fill-gray-600",
-  primary: "text-gray-100 fill-primary",
+  default: "text-white fill-primary",
+  primary: "text-white fill-primary",
 };
 
 export function LoadingState(props: Props) {

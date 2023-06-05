@@ -14,6 +14,7 @@ import {
 } from "@app/widgets";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useApps } from "@app/apps";
+import { DebugModeBanner } from "./components/DebugModeBanner";
 
 Component.displayName = "Dashboard";
 
@@ -32,23 +33,17 @@ export function Component() {
   return (
     <>
       <Head title={app.name} />
+      {buildMode === "debug" && <DebugModeBanner />}
       <div className="space-y-4">
         <div className="flex justify-between items-end">
-          <div className="flex space-x-2 items-center">
-            <PageHeading title="Dashboard" onClick={resetFilters} />
-            {buildMode === "debug" && (
-              <span className="inline-flex rounded bg-orange-300/10 px-2 py-1 font-medium text-xs sm:text-sm text-orange-700">
-                Debug
-              </span>
-            )}
-          </div>
+          <PageHeading title="Dashboard" onClick={resetFilters} />
           <DateRangePicker />
         </div>
         <div className="flex w-full justify-end">
           <CurrentFilters />
         </div>
         <MainChartWidget appId={app.id} />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] pt-[1px] bg-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] pt-[1px] bg-subtle">
           {countryCode ? (
             <Card>
               <TopRegionsWidget appId={app.id} />

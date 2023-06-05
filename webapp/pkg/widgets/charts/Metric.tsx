@@ -14,12 +14,12 @@ export function Metric(props: Props) {
   return (
     <Container
       className={clsx("flex flex-col py-2 px-4 rounded min-w-[6rem]", {
-        "hover:bg-gray-100": props.onClick,
+        "hover:bg-subtle": props.onClick,
       })}
       onClick={props.onClick}
     >
       <div className="text-2xl font-semibold">{props.value}</div>
-      <div className="text-sm text-secondary">
+      <div className="text-sm text-subtle">
         {props.label}{" "}
         <div
           className={clsx("p-1 inline-block rounded", props.activeClassName, {

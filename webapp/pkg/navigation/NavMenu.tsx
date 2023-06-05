@@ -71,14 +71,13 @@ const NavLink = (props: {
   item: NavItem;
   onNavigation?: VoidFunction;
 }) => {
-  const baseClassName =
-    "group flex items-center rounded-md py-2 lg:py-1 px-2 text-sm";
+  const baseClassName = "group flex items-center rounded-md py-2 px-2 text-sm";
 
   const content = (
     <>
       <props.item.icon
         strokeWidth={1.75}
-        className="text-secondary mr-2 h-5 w-5 flex-shrink-0"
+        className="mr-2 h-5 w-5 flex-shrink-0"
       />
       {props.item.name}
     </>
@@ -94,8 +93,8 @@ const NavLink = (props: {
 
   const className = clsx(
     props.current
-      ? "bg-gray-200/70"
-      : "w-full text-default hover:bg-gray-200/70",
+      ? "bg-emphasis"
+      : "w-full hover:text-inverted hover:bg-emphasis",
     baseClassName
   );
 
@@ -128,7 +127,7 @@ export function NavMenu(props: { onNavigation?: VoidFunction }) {
         {navigation.map((category) => (
           <div key={category.title}>
             {category.title && (
-              <span className="text-xs tracking-tight font-semibold ml-2 leading-6 text-secondary">
+              <span className="text-xs tracking-tight font-semibold ml-2 leading-6 text-subtle">
                 {category.title}
               </span>
             )}

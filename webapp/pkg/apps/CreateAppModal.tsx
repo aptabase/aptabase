@@ -39,7 +39,7 @@ export function CreateAppModal(props: Props) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-10 backdrop-blur-sm transition-opacity" />
+          <div className="fixed inset-0 bg-black bg-opacity-10 backdrop-blur-sm transition-opacity" />
         </Transition.Child>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -53,11 +53,11 @@ export function CreateAppModal(props: Props) {
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-default border border-default px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
                 <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
                   <button
                     type="button"
-                    className="rounded-md bg-white text-secondary hover:text-gray-800"
+                    className="rounded-md text-subtle hover:text-inverted"
                     onClick={props.onClose}
                   >
                     <IconX className="h-6 w-6" />
@@ -66,7 +66,7 @@ export function CreateAppModal(props: Props) {
                 <Dialog.Title as="h3" className="text-lg font-medium">
                   Create an app
                 </Dialog.Title>
-                <div className="text-sm text-secondary">
+                <div className="text-sm text-subtle">
                   Each app has its own dashboard and metrics
                 </div>
                 <form onSubmit={handleSubmit} className="mt-8 space-y-2">

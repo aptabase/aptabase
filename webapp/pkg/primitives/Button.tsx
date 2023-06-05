@@ -9,8 +9,20 @@ type Props = {
 const Loading = () => {
   return (
     <div className="flex flex-row items-center justify-center">
-      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <svg
+        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
         <path
           className="opacity-75"
           fill="currentColor"
@@ -23,16 +35,21 @@ const Loading = () => {
 };
 
 const classNames = {
-  primary: "btn btn-primary",
+  primary: "btn bg-primary text-white hover:opacity-90",
   secondary: "btn btn-secondary",
-  danger: "btn btn-danger",
+  danger: "btn btn-danger bg-error text-white hover:opacity-90",
 };
 
 export function Button(props: Props) {
   const className = classNames[props.variant];
 
   return (
-    <button type="submit" disabled={props.loading || props.disabled} className={className} onClick={props.onClick}>
+    <button
+      type="submit"
+      disabled={props.loading || props.disabled}
+      className={className}
+      onClick={props.onClick}
+    >
       {props.loading ? <Loading /> : props.children}
     </button>
   );

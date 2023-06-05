@@ -62,7 +62,7 @@ function TooltipContent(props: {
 }) {
   return (
     <div className="text-sm whitespace-nowrap">
-      <p className="text-center text-secondary">
+      <p className="text-center text-subtle">
         {formatPeriod(props.granularity, props.label)}
       </p>
       {props.points.map((point) => (
