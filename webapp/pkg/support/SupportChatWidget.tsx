@@ -19,7 +19,7 @@ export function SupportChatWidget() {
             s.src = "https://client.crisp.chat/l.js";
             s.async = 1;
             d.getElementsByTagName("head")[0].appendChild(s);
-          }, 5000);
+          }, 3000);
         });
         `,
       }}
