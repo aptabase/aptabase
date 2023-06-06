@@ -1,5 +1,5 @@
 interface CrispClient {
-  push: (args: string[]) => void;
+  push: (args: Array<string, string[]>) => void;
 }
 
 interface Window {
