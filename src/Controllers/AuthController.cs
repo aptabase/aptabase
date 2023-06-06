@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Aptabase.Application;
 using Aptabase.Application.Authentication;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
@@ -75,7 +76,9 @@ public class AuthController : Controller
         return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "google");
     }
 
-    [HttpGet("/api/_auth/me"), IsAuthenticated]
+    [HttpGet("/api/_auth/me")]
+    [IsAuthenticated]
+    [EnableCors("AllowAptabaseCom")]
     public IActionResult Me()
     {
         var user = this.GetCurrentUser();

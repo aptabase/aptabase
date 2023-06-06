@@ -27,6 +27,14 @@ var appEnv = EnvSettings.Load();
 
 builder.Services.AddCors(options =>
 {
+    options.AddPolicy(name: "AllowAptabaseCom", policy =>
+    {
+        policy.WithOrigins("aptabase.com")
+              .WithMethods("GET")
+              .AllowCredentials()
+              .SetPreflightMaxAge(TimeSpan.FromHours(1));
+    });
+    
     options.AddPolicy(name: "AllowAny", policy =>
     {
         policy.AllowAnyOrigin()
