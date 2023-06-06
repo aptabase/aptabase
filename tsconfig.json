@@ -18,6 +18,7 @@
     "paths": {
       "@app/*": ["./webapp/src/*"],
       "@app/billing": ["./webapp/pkg/billing"],
+      "@app/support": ["./webapp/pkg/support"],
       "@app/env": ["./webapp/pkg/env"],
       "@app/widgets": ["./webapp/pkg/widgets"],
       "@app/primitives": ["./webapp/pkg/primitives"],
