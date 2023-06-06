@@ -29,7 +29,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "AllowAptabaseCom", policy =>
     {
-        policy.WithOrigins("aptabase.com")
+        policy.WithOrigins("https://aptabase.com")
               .WithMethods("GET")
               .AllowCredentials()
               .SetPreflightMaxAge(TimeSpan.FromHours(1));
