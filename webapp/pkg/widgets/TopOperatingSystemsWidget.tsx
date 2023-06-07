@@ -1,9 +1,9 @@
 import { TopNChart } from "./charts";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { getOperatingSystemImageUrl } from "./os";
 import { topOperatingSystem } from "./query";
 import { useApps } from "@app/apps";
+import { OSIcon } from "./icons/os";
 
 type Props = {
   appId: string;
@@ -55,10 +55,7 @@ export function TopOperatingSystemsWidget(props: Props) {
       items={rows || []}
       renderRow={(item) => (
         <span className="flex items-center space-x-2 px-2">
-          <img
-            src={getOperatingSystemImageUrl(item.name)}
-            className="h-5 w-5"
-          />
+          <OSIcon name={item.name} className="h-5 w-5" />
           <p>{item.name || "Unknown"}</p>
         </span>
       )}

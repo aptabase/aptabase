@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
-import { getOperatingSystemImageUrl } from "./os";
 import { IconX } from "@tabler/icons-react";
 import { getCountryFlagUrl, getCountryName } from "./countries";
+import { OSIcon } from "./icons/os";
 
 type ChipProps = {
   children: React.ReactNode;
@@ -54,7 +54,7 @@ export function CurrentFilters() {
       )}
       {osName && (
         <FilterChip removeProperty="osName">
-          <img src={getOperatingSystemImageUrl(osName)} className="h-5 w-5" />
+          <OSIcon name={osName} className="h-5 w-5" />
           <p>{osName}</p>
         </FilterChip>
       )}
