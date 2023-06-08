@@ -8,6 +8,7 @@ import "./Markdown.css";
 
 type Props = {
   content: string;
+  baseURL: string;
 };
 
 export function Markdown(props: Props) {
@@ -28,9 +29,9 @@ export function Markdown(props: Props) {
         blockquote: ({ node, ...props }) => (
           <div className="border-l-4 border-default pl-2">{props.children}</div>
         ),
-        img: ({ node, ...props }) => {
-          if (props.src?.endsWith("og.png")) return null;
-          return <img {...props} />;
+        img: ({ node, ...imgProps }) => {
+          if (imgProps.src?.endsWith("og.png")) return null;
+          return <img {...imgProps} src={`${props.baseURL}/${imgProps.src}`} />;
         },
         a: ({ node, ...props }) => (
           <a target="_blank" className="inline-block" {...props} />

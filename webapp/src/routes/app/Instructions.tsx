@@ -12,91 +12,87 @@ import { useState } from "react";
 
 type FrameworkInstructions = {
   name: string;
-  readme?: string;
+  baseURL: string;
   repository: string;
 };
 
 const frameworks: { [id: string]: FrameworkInstructions } = {
   android: {
     name: "Android (Kotlin)",
-    readme:
-      "https://raw.githubusercontent.com/aptabase/aptabase-kotlin/main/README.md",
+    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-kotlin/main/",
     repository: "https://github.com/aptabase/aptabase-kotlin",
   },
   swift: {
     name: "Apple (Swift)",
-    readme:
-      "https://raw.githubusercontent.com/aptabase/aptabase-swift/main/README.md",
+    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-swift/main/",
     repository: "https://github.com/aptabase/aptabase-swift",
-  },
-  capacitor: {
-    name: "Capacitor.js",
-    repository: "https://github.com/aptabase/aptabase/issues/6",
   },
   electron: {
     name: "Electron",
-    readme:
-      "https://raw.githubusercontent.com/aptabase/aptabase-electron/main/README.md",
+    baseURL:
+      "https://raw.githubusercontent.com/aptabase/aptabase-electron/main/",
     repository: "https://github.com/aptabase/aptabase-electron",
   },
   flutter: {
     name: "Flutter",
-    readme:
-      "https://raw.githubusercontent.com/aptabase/aptabase_flutter/main/README.md",
+    baseURL:
+      "https://raw.githubusercontent.com/aptabase/aptabase_flutter/main/",
     repository: "https://github.com/aptabase/aptabase_flutter",
   },
   nativescript: {
     name: "NativeScript",
-    readme:
-      "https://raw.githubusercontent.com/goenning/nativescript-plugins/main/packages/nativescript-aptabase/README.md",
+    baseURL:
+      "https://raw.githubusercontent.com/goenning/nativescript-plugins/main//packages/nativescript-aptabase",
     repository:
-      "https://github.com/nstudio/nativescript-plugins/blob/main/packages/nativescript-aptabase",
+      "https://github.com/nstudio/nativescript-plugins/blob/main//packages/nativescript-aptabase",
   },
   maui: {
     name: ".NET MAUI",
-    readme:
-      "https://raw.githubusercontent.com/aptabase/aptabase-maui/main/README.md",
+    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-maui/main/",
     repository: "https://github.com/aptabase/aptabase-maui",
   },
   "react-native": {
     name: "React Native",
-    readme:
-      "https://raw.githubusercontent.com/aptabase/aptabase-react-native/main/README.md",
+    baseURL:
+      "https://raw.githubusercontent.com/aptabase/aptabase-react-native/main/",
     repository: "https://github.com/aptabase/aptabase-react-native",
   },
   tauri: {
     name: "Tauri",
-    readme:
-      "https://raw.githubusercontent.com/aptabase/tauri-plugin-aptabase/main/README.md",
+    baseURL:
+      "https://raw.githubusercontent.com/aptabase/tauri-plugin-aptabase/main/",
     repository: "https://github.com/aptabase/tauri-plugin-aptabase",
   },
-  unity: {
-    name: "Unity",
-    repository: "https://github.com/aptabase/aptabase/issues/10",
+  unreal: {
+    name: "Unreal Engine",
+    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-unreal/main/",
+    repository: "https://github.com/aptabase/aptabase-unreal",
   },
   webapp: {
     name: "Web App",
-    readme:
-      "https://raw.githubusercontent.com/aptabase/aptabase-js/main/README.md",
+    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-js/main/",
     repository: "https://github.com/aptabase/aptabase-js",
   },
 };
 
-const fetchInstructions = async (id: string): Promise<[string, string]> => {
+const fetchInstructions = async (
+  id: string
+): Promise<[FrameworkInstructions, string]> => {
   const fw = frameworks[id];
   if (!fw) {
-    return ["", ""];
+    return [fw, ""];
   }
 
   trackEvent("instructions_viewed", { framework: id });
 
-  if (fw.readme) {
-    const response = await fetch(fw.readme);
+  if (fw.baseURL) {
+    const response = await fetch(`${fw.baseURL}/README.md`);
     const content = await response.text();
-    return [content, fw.repository];
+    return [fw, content];
   }
 
   return [
+    fw,
     `
   # ${fw.name} for Aptabase
   
@@ -105,7 +101,6 @@ const fetchInstructions = async (id: string): Promise<[string, string]> => {
   If you're insterested in using Aptabase with ${fw.name}, please upvote [this issue](${fw.repository}) on GitHub.
 
   `,
-    fw.repository,
   ];
 };
 
@@ -117,16 +112,11 @@ export function Component() {
   const { isLoading, isError, data } = useQuery(["markdown", selected], () =>
     fetchInstructions(selected)
   );
-  const [content, repository] = data || [];
+  const [fw, content] = data || [];
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelected(e.target.value);
   };
-
-  const availableFws = Object.entries(frameworks).filter(([, fw]) => fw.readme);
-  const comingSoonFws = Object.entries(frameworks).filter(
-    ([, fw]) => !fw.readme
-  );
 
   return (
     <>
@@ -160,26 +150,18 @@ export function Component() {
               <option value="" disabled>
                 Framework
               </option>
-              {availableFws.map(([id, fw]) => (
+              {Object.entries(frameworks).map(([id, fw]) => (
                 <option key={fw.name} value={id}>
-                  {fw.name}
-                </option>
-              ))}
-              <option value="" disabled>
-                Coming soon
-              </option>
-              {comingSoonFws.map(([id, fw]) => (
-                <option key={id} value={id}>
                   {fw.name}
                 </option>
               ))}
             </select>
           </div>
-          {repository && (
+          {fw?.repository && (
             <a
               target="_blank"
               className="hidden md:flex hover:bg-muted text-sm rounded p-2 items-center space-x-1"
-              href={repository}
+              href={fw?.repository}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -200,6 +182,7 @@ export function Component() {
         ) : (
           <div>
             <Markdown
+              baseURL={fw?.baseURL ?? ""}
               content={(content || "").replace("<YOUR_APP_KEY>", app.appKey)}
             />
           </div>
