@@ -3,3 +3,4 @@ export * from "./AppSelector";
 export * from "./AppConfigMenu";
 export * from "./BuildModeSelector";
 export * from "./AppsProvider";
+export * from "./AppIconUpload";

@@ -5,6 +5,7 @@ export type Application = {
   id: string;
   name: string;
   appKey: string;
+  iconPath: string;
 };
 
 export async function listApps(): Promise<Application[]> {
@@ -18,8 +19,12 @@ export async function createApp(name: string): Promise<Application> {
   return app;
 }
 
-export async function updateApp(appId: string, name: string): Promise<Application> {
-  return await api.put<Application>(`/_apps/${appId}`, { name });
+export async function updateApp(
+  appId: string,
+  name: string,
+  icon: string
+): Promise<Application> {
+  return await api.put<Application>(`/_apps/${appId}`, { name, icon });
 }
 
 export async function deleteApp(appId: string): Promise<void> {

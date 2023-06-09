@@ -25,11 +25,15 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
+      "/uploads": {
+        target: "http://localhost:5251",
+        changeOrigin: true,
+        secure: false,
+      },
       "/api": {
         target: "http://localhost:5251",
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, "/api"),
       },
     },
   },

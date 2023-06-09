@@ -6,6 +6,7 @@ import { CreateAppModal } from "./CreateAppModal";
 import { useNavigationContext } from "@app/navigation";
 import { IconBox, IconPlus, IconSelector } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
+import { AppIcon } from "./AppIcon";
 
 type OptionProps = {
   value?: Application;
@@ -61,12 +62,9 @@ export function AppSelector() {
           <>
             <div className="relative">
               <Listbox.Button className="relative flex items-center space-x-1 rounded-md py-1.5 text-left hover:bg-emphasis px-2">
-                <IconBox
-                  strokeWidth={1.75}
-                  className="h-5 w-5 p-0.5 border rounded border-default"
-                />
+                <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />
                 <div className="flex items-center space-x-2">
-                  <span className="block">{currentApp?.name}</span>
+                  <span className="block">{currentApp.name}</span>
                   <IconSelector strokeWidth={2} className="h-4 w-4" />
                 </div>
               </Listbox.Button>
@@ -81,6 +79,10 @@ export function AppSelector() {
                 <Listbox.Options className="absolute z-10 mt-1 max-h-80 w-60 overflow-auto border border-default rounded-md bg-default py-1 shadow-lg text-sm focus-ring">
                   {apps.map((app) => (
                     <StyledOption key={app.id} value={app}>
+                      <AppIcon
+                        className="w-5 h-5 mr-1"
+                        iconPath={app.iconPath}
+                      />
                       <span className="block truncate">{app.name}</span>
                     </StyledOption>
                   ))}

@@ -13,6 +13,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using Aptabase.Application.Query;
+using Aptabase.Application.Blob;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
@@ -97,6 +98,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
 builder.Services.AddSingleton(appEnv);
 builder.Services.AddSingleton<IIngestionValidator, IngestionValidator>();
+builder.Services.AddSingleton<IBlobService, DatabaseBlobService>();
 
 builder.Services.AddSingleton<IQueryClient, TinybirdQueryClient>();
 builder.Services.AddSingleton<IIngestionClient, TinybirdIngestionClient>();

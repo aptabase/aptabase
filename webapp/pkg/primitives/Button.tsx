@@ -36,7 +36,7 @@ const Loading = () => {
 
 const classNames = {
   primary: "btn bg-primary text-white hover:opacity-90",
-  secondary: "btn btn-secondary",
+  secondary: "btn bg-subtle text-default hover:opacity-90",
   danger: "btn btn-danger bg-error text-white hover:opacity-90",
 };
 
