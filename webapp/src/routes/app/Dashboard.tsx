@@ -13,7 +13,7 @@ import {
   TopRegionsWidget,
 } from "@app/widgets";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useApps } from "@app/apps";
+import { AppConfigMenu, useApps } from "@app/apps";
 import { DebugModeBanner } from "./components/DebugModeBanner";
 
 Component.displayName = "Dashboard";
@@ -37,7 +37,10 @@ export function Component() {
       <div className="space-y-4">
         <div className="flex justify-between items-end">
           <PageHeading title="Dashboard" onClick={resetFilters} />
-          <DateRangePicker />
+          <div className="flex items-center">
+            <AppConfigMenu />
+            <DateRangePicker />
+          </div>
         </div>
         <div className="flex w-full justify-end">
           <CurrentFilters />

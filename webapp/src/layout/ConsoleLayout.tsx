@@ -1,4 +1,4 @@
-import { AppConfigMenu, AppSelector, BuildModeSelector } from "@app/apps";
+import { AppSelector } from "@app/apps";
 import { useAuthState } from "@app/auth";
 import { CurrentUsage } from "@app/billing";
 import { isBillingEnabled } from "@app/env";
@@ -23,7 +23,6 @@ export function ConsoleLayout() {
         <div className="flex flex-grow flex-col overflow-y-auto border-r border-default bg-muted">
           <div className="flex justify-between items-center p-2 border-b border-default">
             <AppSelector />
-            <AppConfigMenu />
           </div>
           <div className="p-2 flex flex-grow flex-col mt-2">
             <NavMenu />
@@ -46,7 +45,6 @@ export function ConsoleLayout() {
             <MobileSidebar.Button onClick={() => setSidebarOpen(true)} />
             <div className="flex justify-between flex-grow items-center px-2 border-r border-default">
               <AppSelector />
-              <AppConfigMenu />
             </div>
             <div className="flex items-center px-2">
               <UserMenu user={auth.user} />

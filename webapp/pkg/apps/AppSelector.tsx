@@ -64,7 +64,7 @@ export function AppSelector() {
               <Listbox.Button className="relative flex items-center space-x-1 rounded-md py-1.5 text-left hover:bg-emphasis px-2">
                 <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />
                 <div className="flex items-center space-x-2">
-                  <span className="block">{currentApp.name}</span>
+                  <span className="block truncate w-44">{currentApp.name}</span>
                   <IconSelector strokeWidth={2} className="h-4 w-4" />
                 </div>
               </Listbox.Button>
