@@ -54,6 +54,11 @@ public class TinybirdIngestionClient : IIngestionClient
     {
         var ttlTimeSpan = body.SystemProps.IsDebug ? DebugTTL : ReleaseTTL;
         var appId = body.SystemProps.IsDebug ? $"{header.AppId}_DEBUG" : header.AppId;
+
+        var locale = LocaleFormatter.FormatLocale(body.SystemProps.Locale);
+        if (locale is null)
+            _logger.LogWarning("Invalid locale {Locale} received from {OS} using {SdkVersion}", locale, body.SystemProps.OSName, body.SystemProps.SdkVersion);
+
         var (stringProps, numericProps) = body.SplitProps();
         return new EventRow
         {
@@ -63,7 +68,7 @@ public class TinybirdIngestionClient : IIngestionClient
             SessionId = body.SessionId,
             OSName = body.SystemProps.OSName ?? "",
             OSVersion = body.SystemProps.OSVersion ?? "",
-            Locale = FormatLocale(body.SystemProps.Locale),
+            Locale = locale ?? "",
             AppVersion = body.SystemProps.AppVersion ?? "",
             EngineName = body.SystemProps.EngineName ?? "",
             EngineVersion = body.SystemProps.EngineVersion ?? "",
@@ -76,42 +81,5 @@ public class TinybirdIngestionClient : IIngestionClient
             NumericProps = numericProps.ToJsonString(),
             TTL = body.Timestamp.ToUniversalTime().Add(ttlTimeSpan).ToString("o"),
         };
-    }
-
-    // List of locales that are longer than 5 characters
-    // In future we might want to extend this to more locales
-    private Dictionary<string, string> LongerLocales = new()
-    {
-        { "es-419", "es-419" },
-        { "zh-hans", "zh-Hans" },
-        { "zh-hans-cn", "zh-Hans-CN" },
-        { "zh-hans-hk", "zh-Hans-HK" },
-        { "zh-hans-mo", "zh-Hans-MO" },
-        { "zh-hans-sg", "zh-Hans-SG" },
-        { "zh-hant", "zh-Hant" },
-        { "zh-hant-hk", "zh-Hant-HK" },
-        { "zh-hant-mo", "zh-Hant-MO" },
-        { "zh-hant-tw", "zh-Hant-TW" },
-    };
-
-    private string FormatLocale(string? locale)
-    {
-        if (string.IsNullOrEmpty(locale))
-            return "";
-
-        if (locale.Length != 2 && locale.Length != 5)
-        {
-            if (LongerLocales.TryGetValue(locale.ToLower(), out var formattedLocale))
-                return formattedLocale;
-
-            _logger.LogWarning("Invalid locale {Locale}", locale);
-            return "";
-        }
-
-        var parts = locale.Replace("_", "-").Split('-');
-        if (parts.Length == 1)
-            return parts[0].ToLower();
-
-        return $"{parts[0].ToLower()}-{parts[1].ToUpper()}";
     }
 }
