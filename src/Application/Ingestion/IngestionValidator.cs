@@ -83,15 +83,15 @@ public class IngestionValidator : IIngestionValidator
 
         if (body.Props is not null)
         {
-            foreach (var prop in body.Props)
+            foreach (var prop in body.Props.RootElement.EnumerateObject())
             {
-                if (string.IsNullOrWhiteSpace(prop.Key))
+                if (string.IsNullOrWhiteSpace(prop.Name))
                     return (false, "Property key must not be empty.");
 
-                if (prop.Key.Length > 40)
+                if (prop.Name.Length > 40)
                     return (false, "Property key must be less than or equal to 40 characters.");
 
-                if (prop.Value?.ToJsonString().Length > 200)
+                if (prop.Value.ToString().Length > 200)
                     return (false, "Property value must be less than or equal to 200 characters.");
             }
         }

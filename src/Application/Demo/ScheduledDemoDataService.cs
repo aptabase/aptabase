@@ -14,7 +14,6 @@ public class ScheduledDemoDataService : IHostedService, IDisposable
     private readonly CancellationTokenSource _stoppingCts = new CancellationTokenSource();
     private readonly TimeSpan _interval = TimeSpan.FromMinutes(10);
 
-
     public ScheduledDemoDataService(IIngestionClient ingestionClient, ILogger<ScheduledDemoDataService> logger)
     {
         _logger = logger;
@@ -68,7 +67,7 @@ public class ScheduledDemoDataService : IHostedService, IDisposable
                     AppBuildNumber = appBuildNumber,
                     SdkVersion = sdkVersion,
                 },
-                Props = JsonObject.Create(JsonSerializer.SerializeToElement(props)),
+                Props = JsonDocument.Parse(JsonSerializer.Serialize(props)),
             });
         }
 
