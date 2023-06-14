@@ -81,20 +81,17 @@ public class AuthService : IAuthService
             { "url", GenerateAuthUrl(token) }
         };
 
-        await _emailClient.SendEmailAsync(email, "Welcome to Aptabase!", "Register", properties, cancellationToken);
+        await _emailClient.SendEmailAsync(email, "Here's your magic link!", "Register", properties, cancellationToken);
     }
 
     public async Task<UserAccount> CreateAccountAsync(string name, string email, CancellationToken cancellationToken)
     {
-        _db.Open();
-
-        using var transaction = _db.BeginTransaction();
-
         var userId = NanoId.New();
         var insertUser = new CommandDefinition("INSERT INTO users (id, name, email) VALUES (@userId, @name, @email)", new { userId, name, email }, cancellationToken: cancellationToken);
-        await transaction.Connection.ExecuteAsync(insertUser);
+        await _db.ExecuteAsync(insertUser);
 
-        transaction.Commit();
+        if (_env.IsManagedCloud)
+            await _emailClient.SendEmailAsync(email, "Hello from Aptabase 👋", "Welcome", null, cancellationToken);
 
         return new UserAccount(userId, name, email);
     }
