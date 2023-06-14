@@ -16,7 +16,7 @@ public class SESEmailClient : IEmailClient
         _ses = CreateClient();
     }
 
-    public async Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string> properties, CancellationToken cancellationToken)
+    public async Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string>? properties, CancellationToken cancellationToken)
     {
         var body = await _engine.Render(templateName, properties);
         var request = NewRequest(to, subject, body);

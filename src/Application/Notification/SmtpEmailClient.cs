@@ -14,9 +14,13 @@ public class SmtpEmailClient : IEmailClient
         _smtp = new SmtpClient(env.SmtpHost, env.SmtpPort);
     }
 
-    public async Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string> properties, CancellationToken cancellationToken)
+    public async Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string>? properties, CancellationToken cancellationToken)
     {
         var body = await _engine.Render(templateName, properties);
-        await _smtp.SendMailAsync("Aptabase <notification@aptabase.com>", to, subject, body, cancellationToken);
+        var msg = new MailMessage("Aptabase <notification@aptabase.com>", to, subject, body)
+        {
+            IsBodyHtml = true
+        };
+        await _smtp.SendMailAsync(msg, cancellationToken);
     }
 }
