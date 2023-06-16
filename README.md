@@ -15,9 +15,23 @@
   </p>
 </div>
 
+# About the Project
+
+[Aptabase](https://aptabase.com) is an open-source alternative to Firebase/Google Analytics, specifically built for Mobile, Destkop and Web apps.
+
+📱 **Extensive list of SDK**: No matter what framework or language you use, we have an SDK for you. Swift, Flutter, Electron, Kotlin and many others. Visit [aptabase.com](https://aptabase.com) to see all more.
+
+😇 **Privacy-First**: We prioritize user privacy and collect minimal usage data without using unique identifiers. Instead, we focus on monitoring sessions, complying fully with GDPR, CCPA, and PECR regulations.
+
+🚀 **Simple**: Built-in and user-friendly dashboard for all your essential metrics, enabling you to gain insights effortlessly and grasp the dynamics of your apps.
+
+💯 **Open-Source**: Our source code is 100% open source. There is nothing hidden. All the server code and SDKs are available for you to inspect and contribute to.
+
+> Like what you see? Don't forget to give us a ⭐️ on GitHub!
+
 # How to get started?
 
-## ☁️ Managed Aptabase
+## ☁️ Managed Cloud
 
 The easiest and quickest way to get started. A fully managed services by the creators of Aptabase to help you get started in minutes. Forget about managing software updates and patches, we do it all for you!
 
@@ -25,34 +39,24 @@ The easiest and quickest way to get started. A fully managed services by the cre
 
 ## 🏢 Self-Hosted
 
-You can also host Aptabase on your servers. It's free, but you are responsible for maintenance and updates. [Learn how](https://github.com/aptabase/aptabase/wiki/How-to-Self-Host-Aptabase).
+You can also host Aptabase on your servers. It's free, but you are responsible for maintenance and updates.
+
+[Learn how →](https://github.com/aptabase/aptabase/wiki/How-to-Self-Host-Aptabase).
 
 # SDKs
 
-Aptabase is a platform that can be used to track events from any app. We provide SDKs for the most popular frameworks and languages to make it easier to integrate it into your app.
+We provide SDKs for the most popular frameworks and languages to make it easier to integrate it into your app.
 
-These are the SDKs currently available, as well as the ones we plan to build.
-
-| Framework                                                                                                | Aptabase Cloud | Aptabase Self-Hosted | Debug Mode | Offline Tracking |
-| -------------------------------------------------------------------------------------------------------- | -------------- | -------------------- | ---------- | ---------------- |
-| [Swift (Apple)](https://github.com/aptabase/aptabase-swift)                                              | ✅             | ✅                   | ✅         | 🚧               |
-| [Android (Kotlin)](https://github.com/aptabase/aptabase-kotlin)                                          | ✅             | ✅                   | ✅         | 🚧               |
-| [Flutter](https://github.com/aptabase/aptabase_flutter)                                                  | ✅             | ✅                   | ✅         | 🚧               |
-| [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)                                               | ✅             | ✅                   | ✅         | 🚧               |
-| [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase) | ✅             | ✅                   | ✅         | 🚧               |
-| [.NET MAUI](https://github.com/aptabase/aptabase-maui)                                                   | ✅             | ✅                   | ✅         | 🚧               |
-| [Electron](https://github.com/aptabase/aptabase-electron)                                                | ✅             | ✅                   | ✅         | 🚧               |
-| [Web Apps](https://github.com/aptabase/aptabase-js)                                                      | ✅             | ✅                   | ✅         | 🚧               |
-| [React Native](https://github.com/aptabase/aptabase/issues/2)                                            | ✅             | ✅                   | ✅         | 🚧               |
-
-**Legend:**
-
-- **Aptabase Cloud:** Does the SDK work with Aptabase Cloud?
-- **Aptabase Self Hosted:** Does the SDK work with Self Hosted instances?
-- **Offline Tracking:** Does the SDK work when the device is offline?
-- **Debug Mode:** Does the SDK separate events from Debug and Release builds?
-
-All SDKs are open-source and contributions are welcome!
+- [Swift (Apple)](https://github.com/aptabase/aptabase-swift)
+- [Android (Kotlin)](https://github.com/aptabase/aptabase-kotlin)
+- [React Native](https://github.com/aptabase/aptabase-react-native)
+- [Flutter](https://github.com/aptabase/aptabase_flutter)
+- [Tauri](https://github.com/aptabase/tauri-plugin-aptabase)
+- [NativeScript](https://github.com/nstudio/nativescript-plugins/tree/main/packages/nativescript-aptabase)
+- [.NET MAUI](https://github.com/aptabase/aptabase-maui)
+- [Electron](https://github.com/aptabase/aptabase-electron)
+- [Web Apps](https://github.com/aptabase/aptabase-js)
+- [Unreal Engine](https://github.com/aptabase/aptabase-unreal)
 
 # Need help?
 
@@ -62,7 +66,7 @@ All SDKs are open-source and contributions are welcome!
 
 # Credits
 
-Aptabase is highly inspired by [Plausible](https://github.com/plausible/analytics). If you're looking for privacy-friendly website analytics, go check them out.
+Aptabase is highly inspired by [Plausible](https://github.com/plausible/analytics). If you're looking for privacy-friendly website analytics, go check them out. They're awesome! ❤️
 
 # License
 
