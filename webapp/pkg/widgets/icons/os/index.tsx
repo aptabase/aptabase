@@ -1,3 +1,4 @@
+import { Icon3dCubeSphere, IconCube } from "@tabler/icons-react";
 import { IconApple } from "./apple";
 
 type Props = {
@@ -7,13 +8,13 @@ type Props = {
 
 const fallbackImageUrl = new URL(`./default.svg`, import.meta.url);
 
-function getOperatingSystemImageUrl(name: string) {
+function getOperatingSystemImageUrl(name: string): string | undefined {
   const svg = new URL(`./${name}.svg`, import.meta.url);
   if (svg.pathname !== "/undefined") {
     return svg.href;
   }
 
-  return fallbackImageUrl.href;
+  return undefined;
 }
 
 export function OSIcon(props: Props) {
@@ -22,7 +23,10 @@ export function OSIcon(props: Props) {
     return <IconApple className={props.className} />;
   }
 
-  return (
-    <img src={getOperatingSystemImageUrl(lcName)} className={props.className} />
-  );
+  const imageUrl = getOperatingSystemImageUrl(lcName);
+  if (imageUrl) {
+    return <Icon3dCubeSphere className={props.className} />;
+  }
+
+  return <img src={imageUrl} className={props.className} />;
 }
