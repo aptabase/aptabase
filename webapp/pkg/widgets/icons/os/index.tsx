@@ -24,7 +24,7 @@ export function OSIcon(props: Props) {
   }
 
   const imageUrl = getOperatingSystemImageUrl(lcName);
-  if (imageUrl) {
+  if (!imageUrl) {
     return <Icon3dCubeSphere className={props.className} />;
   }
 
