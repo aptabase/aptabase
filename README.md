@@ -19,7 +19,7 @@
 
 [Aptabase](https://aptabase.com) is an open-source alternative to Firebase/Google Analytics, specifically built for Mobile, Destkop and Web apps.
 
-📱 **Extensive list of SDK**: No matter what framework or language you use, we have an SDK for you. Swift, Flutter, Electron, Kotlin and many others. Visit [aptabase.com](https://aptabase.com) to see all more.
+📱 **Extensive list of SDK**: No matter what framework or language you use, we have an SDK for you. Swift, Flutter, Electron, Kotlin and many others.
 
 😇 **Privacy-First**: We prioritize user privacy and collect minimal usage data without using unique identifiers. Instead, we focus on monitoring sessions, complying fully with GDPR, CCPA, and PECR regulations.
 
