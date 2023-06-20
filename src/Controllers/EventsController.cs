@@ -32,7 +32,6 @@ public class EventsController : Controller
         [FromHeader(Name = "App-Key")] string? appKey,
         [FromHeader(Name = "CloudFront-Viewer-Country")] string? countryCode,
         [FromHeader(Name = "CloudFront-Viewer-Country-Region-Name")] string? regionName,
-        [FromHeader(Name = "CloudFront-Viewer-City")] string? city,
         [FromHeader(Name = "User-Agent")] string? userAgent,
         [FromBody] EventBody body,
         CancellationToken cancellationToken
@@ -41,7 +40,6 @@ public class EventsController : Controller
         appKey = appKey?.ToUpper() ?? "";
         countryCode = countryCode?.ToUpper() ?? "";
         regionName = Uri.UnescapeDataString(regionName ?? "");
-        city = Uri.UnescapeDataString(city ?? "");
 
         body.Normalize();
 
@@ -76,7 +74,7 @@ public class EventsController : Controller
         if (!isWeb)
             userAgent = $"{body.SystemProps.OSName}/{body.SystemProps.OSVersion} {body.SystemProps.EngineName}/{body.SystemProps.EngineVersion} {body.SystemProps.Locale}";
 
-        var header = new EventHeader(appId, countryCode, regionName, city);
+        var header = new EventHeader(appId, countryCode, regionName);
         var userId = await _userHashService.CalculateHash(body.Timestamp, appId, HttpContext.ResolveClientIpAddress(), userAgent ?? "");
         var row = NewEventRow(userId, header, body);
         await _ingestionClient.SendSingleAsync(row, cancellationToken);
@@ -126,7 +124,7 @@ public class EventsController : Controller
             SdkVersion = body.SystemProps.SdkVersion ?? "",
             CountryCode = header.CountryCode ?? "",
             RegionName = header.RegionName ?? "",
-            City = header.City ?? "",
+            City = "",
             StringProps = stringProps.ToJsonString(),
             NumericProps = numericProps.ToJsonString(),
             TTL = body.Timestamp.ToUniversalTime().Add(body.TTL).ToString("o"),
