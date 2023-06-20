@@ -26,7 +26,7 @@ public class DailyUserHashService : IUserHashService
     {
         var salt = await GetSaltFor(timestamp.Date.ToString("yyyy-MM-dd"), appId);
         var bytes = Encoding.UTF8.GetBytes($"{clientIP}|${userAgent}");
-        var id = MD5.HashData(bytes.Concat(salt).ToArray());
+        var id = SHA256.HashData(bytes.Concat(salt).ToArray());
         return Convert.ToHexString(id);
     }
 
