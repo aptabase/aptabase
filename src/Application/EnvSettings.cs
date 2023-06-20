@@ -39,6 +39,14 @@ public class EnvSettings
     // Variable Name: SMTP_PORT
     public int SmtpPort { get; private set; } = 0;
 
+    // The username for the SMTP server
+    // Variable Name: SMTP_USERNAME
+    public string SmtpUsername { get; private set; } = "";
+
+    // The password for the SMTP server
+    // Variable Name: SMTP_PASSWORD
+    public string SmtpPassword { get; private set; } = "";
+
     // The GitHub Client ID for OAuth (optional)
     // Variable Name: OAUTH_GITHUB_CLIENT_ID
     public string OAuthGitHubClientId { get; private set; } = "";
@@ -81,6 +89,8 @@ public class EnvSettings
 
             SmtpHost = Get("SMTP_HOST"),
             SmtpPort = GetInt("SMTP_PORT"),
+            SmtpUsername = Get("SMTP_USERNAME"),
+            SmtpPassword = Get("SMTP_PASSWORD"),
 
             OAuthGitHubClientId = Get("OAUTH_GITHUB_CLIENT_ID"),
             OAuthGitHubClientSecret = Get("OAUTH_GITHUB_CLIENT_SECRET"),
