@@ -1,8 +1,11 @@
+namespace Aptabase.Application.Ingestion;
+
 public class EventRow
 {
     public string AppId { get; set; } = "";
     public string Timestamp { get; set; } = "";
     public string EventName { get; set; } = "";
+    public string UserId { get; set; } = "";
     public string SessionId { get; set; } = "";
     public string OSName { get; set; } = "";
     public string OSVersion { get; set; } = "";

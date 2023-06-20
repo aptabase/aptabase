@@ -12,7 +12,7 @@ public class InsertResult
 
 public interface IIngestionClient
 {
-    Task<InsertResult> SendSingleAsync(EventHeader header, EventBody body, CancellationToken cancellationToken);
-    Task<InsertResult> SendMultipleAsync(EventHeader header, EventBody[] body, CancellationToken cancellationToken);
+    Task<InsertResult> SendSingleAsync(EventRow row, CancellationToken cancellationToken);
+    Task<InsertResult> SendMultipleAsync(EventRow[] rows, CancellationToken cancellationToken);
 }
 

@@ -1,5 +1,4 @@
-namespace Aptabase.Migrations;
-
+namespace Microsoft.AspNetCore.Http;
 
 internal static class HttpContextExtensions
 {

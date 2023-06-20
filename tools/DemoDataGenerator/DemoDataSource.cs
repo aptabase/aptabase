@@ -1,6 +1,6 @@
-namespace Aptabase.Application.Demo;
+namespace Aptabase.Tools.DemoDataGenerator;
 
-public static class DemoDataGenerator
+public static class DemoDataSource
 {
     private static Random _random = new Random();
     private static string[] sdk_version = new[] { "en_US", "en_IE", "de_DE", "pt_PT", "pt_BR", "es_ES" };
@@ -163,11 +163,10 @@ public static class DemoDataGenerator
         ("3.1.0", "", "tauri-plugin-aptabase@1.0.0"),
     };
 
-    public static (string, DateTime[]) NewSession()
+    public static (string, DateTime[]) NewSession(DateTime startedAt, int maxEventsPerSession)
     {
-        var eventsCount = _random.Next(2, 10);
+        var eventsCount = _random.Next(2, maxEventsPerSession);
         var sessionId = Guid.NewGuid().ToString().ToLower();
-        var startedAt = DateTime.UtcNow.AddMinutes(_random.Next(-30, -10));
 
         var timestamps = Enumerable.Range(0, eventsCount)
             .Select(i => startedAt.AddSeconds(i * 15).AddSeconds(_random.Next(1, 10)))
@@ -202,7 +201,7 @@ public static class DemoDataGenerator
         return locales[index];
     }
 
-    public static (string, Dictionary<string, object>) GetEvent()
+    public static (string, Dictionary<string, object>) NewEvent()
     {
         var eventName = events[_random.Next(0, events.Length)];
         var (artist, music) = musics[_random.Next(0, musics.Length)];

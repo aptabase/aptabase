@@ -3,7 +3,6 @@ using Aptabase.Migrations;
 using Aptabase.Application;
 using System.Net.Http.Headers;
 using Aptabase.Application.Ingestion;
-using Aptabase.Application.Demo;
 using Aptabase.Data;
 using Aptabase.Application.Authentication;
 using System.Data;
@@ -93,8 +92,8 @@ builder.Services.AddRateLimiter(c =>
     );
 });
 
-builder.Services.AddHostedService<ScheduledDemoDataService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<IUserHashService, DailyUserHashService>();
 builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
 builder.Services.AddSingleton(appEnv);
 builder.Services.AddSingleton<IIngestionValidator, IngestionValidator>();

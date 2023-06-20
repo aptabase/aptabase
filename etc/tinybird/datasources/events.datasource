@@ -5,6 +5,7 @@ SCHEMA >
     `app_id` String `json:$.appId`,
     `timestamp` DateTime `json:$.timestamp`,
     `event_name` String `json:$.eventName`,
+    `user_id` String `json:$.userId`,
     `session_id` String `json:$.sessionId`,
     `os_name` LowCardinality(String) `json:$.osName`,
     `os_version` String `json:$.osVersion`,

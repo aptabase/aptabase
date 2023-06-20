@@ -78,7 +78,7 @@ public class IngestionValidator : IIngestionValidator
         if (body.Timestamp > DateTime.UtcNow.AddMinutes(1))
             return (false, "Future events are not allowed.");
 
-        if (body.Timestamp < DateTime.UtcNow.AddDays(-1))
+        if (body.Timestamp < DateTime.UtcNow.AddDays(-1) && !_env.IsDevelopment)
             return (false, "Event is too old.");
 
         if (body.Props is not null)

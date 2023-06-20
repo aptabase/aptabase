@@ -12,12 +12,17 @@ public class EventsController : Controller
     private readonly ILogger _logger;
     private readonly IIngestionValidator _validator;
     private readonly IIngestionClient _ingestionClient;
+    private readonly IUserHashService _userHashService;
 
-    public EventsController(IIngestionValidator validator, IIngestionClient ingestionClient, ILogger<EventsController> logger)
+    public EventsController(IIngestionValidator validator,
+                            IIngestionClient ingestionClient,
+                            IUserHashService userHashService,
+                            ILogger<EventsController> logger)
     {
         _validator = validator ?? throw new ArgumentNullException(nameof(validator));
         _ingestionClient = ingestionClient ?? throw new ArgumentNullException(nameof(ingestionClient));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _userHashService = userHashService ?? throw new ArgumentNullException(nameof(userHashService));
     }
 
     [HttpPost("/api/v0/event")]
@@ -36,6 +41,7 @@ public class EventsController : Controller
         appKey = appKey?.ToUpper() ?? "";
         countryCode = countryCode?.ToUpper() ?? "";
         regionName = Uri.UnescapeDataString(regionName ?? "");
+        city = Uri.UnescapeDataString(city ?? "");
 
         body.Normalize();
 
@@ -50,15 +56,84 @@ public class EventsController : Controller
         if (result is not null)
             return result;
 
-        body.EnrichWith(userAgent);
+        // We never expect the Web SDK to send the OS name, so it's safe to assume that if it's missing the event is coming from a browser
+        var isWeb = string.IsNullOrEmpty(body.SystemProps.OSName);
+
+        // For web events, we need to parse the user agent to get the OS name and version
+        if (isWeb && !string.IsNullOrEmpty(userAgent))
+        {
+            var (osName, osVersion) = UserAgentParser.ParseOperatingSystem(userAgent);
+            body.SystemProps.OSName = osName;
+            body.SystemProps.OSVersion = osVersion;
+
+            var (engineName, engineVersion) = UserAgentParser.ParseBrowser(userAgent);
+            body.SystemProps.EngineName = engineName;
+            body.SystemProps.EngineVersion = engineVersion;
+        }
+
+        // We can't rely on User-Agent header sent by the SDK for non-web events, so we fabricate one
+        // This can be removed when this issue is implemented: https://github.com/aptabase/aptabase/issues/23
+        if (!isWeb)
+            userAgent = $"{body.SystemProps.OSName}/{body.SystemProps.OSVersion} {body.SystemProps.EngineName}/{body.SystemProps.EngineVersion} {body.SystemProps.Locale}";
 
         var header = new EventHeader(appId, countryCode, regionName, city);
-        await _ingestionClient.SendSingleAsync(header, body, cancellationToken);
+        var userId = await _userHashService.CalculateHash(body.Timestamp, appId, HttpContext.ResolveClientIpAddress(), userAgent ?? "");
+        var row = NewEventRow(userId, header, body);
+        await _ingestionClient.SendSingleAsync(row, cancellationToken);
 
         return Ok(new { });
     }
 
-    // Disabled, not yet used. Revisit this in future and think about Rate Limiting
+    private async Task<(string, IActionResult?)> ValidateAppKey(string appKey)
+    {
+        var (appId, status) = await _validator.IsAppKeyValid(appKey);
+
+        IActionResult? result = status switch
+        {
+            AppKeyStatus.Missing => BadRequest("Missing App-Key header. Find your app key on Aptabase console."),
+            AppKeyStatus.InvalidFormat => BadRequest($"Invalid format for app key '{appKey}'. Find your app key on Aptabase console."),
+            AppKeyStatus.InvalidRegion => BadRequest("Invalid App Key region. This key is meant for another region. Find your app key on Aptabase console."),
+            AppKeyStatus.NotFound => NotFound($"Appplication not found with given app key '{appKey}'. Find your app key on Aptabase console."),
+            _ => null
+        };
+
+        return (appId, result);
+    }
+
+    private EventRow NewEventRow(string userId, EventHeader header, EventBody body)
+    {
+        var appId = body.SystemProps.IsDebug ? $"{header.AppId}_DEBUG" : header.AppId;
+
+        var locale = LocaleFormatter.FormatLocale(body.SystemProps.Locale);
+        if (locale is null)
+            _logger.LogWarning("Invalid locale {Locale} received from {OS} using {SdkVersion}", locale, body.SystemProps.OSName, body.SystemProps.SdkVersion);
+
+        var (stringProps, numericProps) = body.SplitProps();
+        return new EventRow
+        {
+            AppId = appId,
+            EventName = body.EventName,
+            Timestamp = body.Timestamp.ToUniversalTime().ToString("o"),
+            UserId = userId,
+            SessionId = body.SessionId,
+            OSName = body.SystemProps.OSName ?? "",
+            OSVersion = body.SystemProps.OSVersion ?? "",
+            Locale = locale ?? "",
+            AppVersion = body.SystemProps.AppVersion ?? "",
+            EngineName = body.SystemProps.EngineName ?? "",
+            EngineVersion = body.SystemProps.EngineVersion ?? "",
+            AppBuildNumber = body.SystemProps.AppBuildNumber ?? "",
+            SdkVersion = body.SystemProps.SdkVersion ?? "",
+            CountryCode = header.CountryCode ?? "",
+            RegionName = header.RegionName ?? "",
+            City = header.City ?? "",
+            StringProps = stringProps.ToJsonString(),
+            NumericProps = numericProps.ToJsonString(),
+            TTL = body.Timestamp.ToUniversalTime().Add(body.TTL).ToString("o"),
+        };
+    }
+
+    // Disabled, not yet used. Revisit this in future and think about Rate Limiting, Max Payload Size, etc.
     // [HttpPost("/api/v0/events")]
     // [EnableCors("AllowAny")]
     // public async Task<IActionResult> Multiple(
@@ -93,20 +168,4 @@ public class EventsController : Controller
     //     // TODO: return how many rows were inserted, how many invalid
     //     return Ok(new { });
     // }
-
-    private async Task<(string, IActionResult?)> ValidateAppKey(string appKey)
-    {
-        var (appId, status) = await _validator.IsAppKeyValid(appKey);
-
-        IActionResult? result = status switch
-        {
-            AppKeyStatus.Missing => BadRequest("Missing App-Key header. Find your app key on Aptabase console."),
-            AppKeyStatus.InvalidFormat => BadRequest($"Invalid format for app key '{appKey}'. Find your app key on Aptabase console."),
-            AppKeyStatus.InvalidRegion => BadRequest("Invalid App Key region. This key is meant for another region. Find your app key on Aptabase console."),
-            AppKeyStatus.NotFound => NotFound($"Appplication not found with given app key '{appKey}'. Find your app key on Aptabase console."),
-            _ => null
-        };
-
-        return (appId, result);
-    }
 }
