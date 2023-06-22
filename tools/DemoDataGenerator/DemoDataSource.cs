@@ -123,6 +123,18 @@ public static class DemoDataSource
     };
 
     private static (string, string, string, string)[] devices = new[] {
+        ("visionOS", "1.0.0", "", ""),
+        ("visionOS", "1.0.2", "", ""),
+        ("visionOS", "1.0.3", "", ""),
+        ("iPadOS", "16.4", "", ""),
+        ("iPadOS", "16.3", "", ""),
+        ("iPadOS", "17.0", "", ""),
+        ("watchOS", "10.0", "", ""),
+        ("watchOS", "10.0", "", ""),
+        ("watchOS", "9.4", "", ""),
+        ("iOS", "16.4", "", ""),
+        ("iOS", "16.2", "", ""),
+        ("iOS", "17.0", "", ""),
         ("macOS", "13.2.1", "WebKit", "16611.2.7.1.4"),
         ("macOS", "13.1", "WebKit", "17612.4.9.1.8"),
         ("macOS", "13.0.1", "WebKit", "17613.2.7.1.8"),

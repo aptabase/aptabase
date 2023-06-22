@@ -6,8 +6,6 @@ type Props = {
   className: string;
 };
 
-const fallbackImageUrl = new URL(`./default.svg`, import.meta.url);
-
 function getOperatingSystemImageUrl(name: string): string | undefined {
   const svg = new URL(`./${name}.svg`, import.meta.url);
   if (svg.pathname !== "/undefined") {
