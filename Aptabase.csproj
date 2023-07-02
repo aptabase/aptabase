@@ -19,6 +19,7 @@
     <PackageReference Include="AWSSDK.SSO" Version="3.7.100.140" />
     <PackageReference Include="AWSSDK.SSOOIDC" Version="3.7.100.140" />
     <PackageReference Include="Amazon.AspNetCore.DataProtection.SSM" Version="3.1.0" />
+    <PackageReference Include="Sgbj.Cron.CronTimer" Version="1.0.2" />
   </ItemGroup>
 
   <ItemGroup>
