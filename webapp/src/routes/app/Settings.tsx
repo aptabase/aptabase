@@ -23,7 +23,7 @@ export function Component() {
       <Tabs defaultValue="general" className="mt-8">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="sharing">Sharing</TabsTrigger>
+          {/* <TabsTrigger value="sharing">Sharing</TabsTrigger> */}
           <TabsTrigger value="danger">Danger Zone</TabsTrigger>
         </TabsList>
         <TabsContent value="general">

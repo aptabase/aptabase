@@ -41,7 +41,7 @@ export function ConsoleLayout() {
       <div className="lg:pl-64">
         <div className="flex flex-col">
           {/* sidebar for mobile */}
-          <div className="lg:hidden sticky top-0 z-30 flex h-12 flex-shrink-0 border-b bg-muted">
+          <div className="lg:hidden sticky top-0 z-30 flex h-12 flex-shrink-0 border-b">
             <MobileSidebar.Button onClick={() => setSidebarOpen(true)} />
             <div className="flex justify-between flex-grow items-center px-2 border-r">
               <AppSelector />
