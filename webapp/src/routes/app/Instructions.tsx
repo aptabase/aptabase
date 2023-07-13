@@ -83,7 +83,7 @@ const frameworks: { [id: string]: FrameworkInstructions } = {
     name: "Unreal Engine",
     baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-unreal/main/",
     repository: "https://github.com/aptabase/aptabase-unreal",
-    icon: "http://localhost:4000/tools/unreal.svg",
+    icon: "https://aptabase.com/tools/unreal.svg",
   },
   webapp: {
     name: "Web App",
