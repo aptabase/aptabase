@@ -1,14 +1,11 @@
 import { useApps } from "@app/apps";
+import { useCurrentApp } from "@app/navigation";
 import { Button } from "@app/primitives";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-type Props = {
-  appId: string;
-  appName: string;
-};
-
-export function DangerZone(props: Props) {
+export function DangerZone() {
+  const app = useCurrentApp();
   const { deleteApp } = useApps();
   const navigate = useNavigate();
 
@@ -16,11 +13,11 @@ export function DangerZone(props: Props) {
     event.preventDefault();
     if (
       window.confirm(
-        `Are you really sure you want to delete application '${props.appName}'?`
+        `Are you really sure you want to delete application '${app.name}'?`
       )
     ) {
-      await deleteApp(props.appId);
-      toast(`${props.appName} app was deleted.`);
+      await deleteApp(app.id);
+      toast(`${app.name} app was deleted.`);
       navigate("/");
     }
   };
@@ -28,7 +25,7 @@ export function DangerZone(props: Props) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-40 border border-error rounded p-4 max-w-sm"
+      className="border border-error rounded p-4 max-w-sm"
     >
       <h2 className="text-lg">Delete App</h2>
       <div className="text-sm text-subtle">

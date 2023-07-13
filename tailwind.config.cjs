@@ -43,6 +43,7 @@ module.exports = {
       },
     },
     borderColor: {
+      inverted: "var(--apta-inverted)",
       default: "var(--apta-border-default)",
       success: "var(--apta-success)",
       warning: "var(--apta-warning)",
