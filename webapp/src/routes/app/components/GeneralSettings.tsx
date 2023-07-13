@@ -18,7 +18,7 @@ export function GeneralSettings() {
   const [icon, setIcon] = useState("");
 
   return (
-    <form onSubmit={handleSubmit} className="mt-8 space-y-2 w-80">
+    <form onSubmit={handleSubmit} className="space-y-2 w-80">
       <AppIconUpload iconPath={app.iconPath} onIconChanged={setIcon} />
 
       <TextInput

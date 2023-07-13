@@ -46,7 +46,7 @@ export function Component() {
           <CurrentFilters />
         </div>
         <MainChartWidget appId={app.id} />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] pt-[1px] bg-subtle">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] pt-[1px] bg-accent">
           {countryCode ? (
             <Card>
               <TopRegionsWidget appId={app.id} />

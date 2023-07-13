@@ -1,9 +1,15 @@
 import { useCurrentApp } from "@app/navigation";
-import { Head, PageHeading } from "@app/primitives";
+import {
+  Head,
+  PageHeading,
+  Tabs,
+  TabsList,
+  TabsContent,
+  TabsTrigger,
+} from "@app/primitives";
 import { DangerZone } from "./components/DangerZone";
 import { AppSharing } from "./components/AppSharing";
 import { GeneralSettings } from "./components/GeneralSettings";
-import * as Tabs from "@radix-ui/react-tabs";
 
 Component.displayName = "Settings";
 export function Component() {
@@ -14,22 +20,22 @@ export function Component() {
       <Head title={`${app.name} - Settings`} />
       <PageHeading title="Settings" subtitle="Manage your app settings" />
 
-      <Tabs.Root defaultValue="general" className="">
-        <Tabs.List className="inline-flex h-9 items-center text-subtle w-full justify-start rounded-none border-b bg-transparent p-0">
-          <Tabs.Trigger value="general">General</Tabs.Trigger>
-          <Tabs.Trigger value="sharing">Sharing</Tabs.Trigger>
-          <Tabs.Trigger value="danger">Danger Zone</Tabs.Trigger>
-        </Tabs.List>
-        <Tabs.Content value="general">
+      <Tabs defaultValue="general" className="mt-8">
+        <TabsList>
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="sharing">Sharing</TabsTrigger>
+          <TabsTrigger value="danger">Danger Zone</TabsTrigger>
+        </TabsList>
+        <TabsContent value="general">
           <GeneralSettings />
-        </Tabs.Content>
-        <Tabs.Content value="sharing">
+        </TabsContent>
+        <TabsContent value="sharing">
           <AppSharing />
-        </Tabs.Content>
-        <Tabs.Content value="danger">
+        </TabsContent>
+        <TabsContent value="danger">
           <DangerZone />
-        </Tabs.Content>
-      </Tabs.Root>
+        </TabsContent>
+      </Tabs>
     </>
   );
 }

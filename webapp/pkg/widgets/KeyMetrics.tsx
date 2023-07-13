@@ -83,7 +83,7 @@ export function KeyMetrics(props: Props) {
           <Metric label="Avg. Duration" value={duration || "0s"} />
           <Metric
             label="Events"
-            activeClassName="bg-chartsecondary"
+            activeClassName="bg-foreground"
             value={metrics?.events.toString() || "0"}
             active={props.activeMetrics.includes("events")}
             onClick={() => props.onChangeMetric("events")}

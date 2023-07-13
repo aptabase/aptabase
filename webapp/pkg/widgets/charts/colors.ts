@@ -42,13 +42,13 @@ function createDiagonalPattern(color: string): CanvasPattern | string {
 }
 
 const root = getComputedStyle(document.documentElement);
-const primaryColor = root.getPropertyValue("--apta-chart-primary");
+const primaryColor = root.getPropertyValue("--primary");
 
 const colors = {
-  primary: createLinearGradient(primaryColor, "#3b82f6", "#eff6ff"),
+  primary: createLinearGradient("#2563eb", "#3b82f6", "#eff6ff"),
   primaryStripped: createDiagonalPattern(primaryColor),
-  secondary: root.getPropertyValue("--apta-chart-secondary"),
-  highlight: root.getPropertyValue("--apta-chart-highlight"),
+  secondary: `hsl(${root.getPropertyValue("--foreground")})`,
+  highlight: root.getPropertyValue("--chart-highlight"),
 };
 
 export default colors;

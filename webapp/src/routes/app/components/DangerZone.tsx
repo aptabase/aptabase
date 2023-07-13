@@ -25,10 +25,10 @@ export function DangerZone() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="border border-error rounded p-4 max-w-sm"
+      className="border border-destructive rounded p-4 max-w-sm"
     >
       <h2 className="text-lg">Delete App</h2>
-      <div className="text-sm text-subtle">
+      <div className="text-sm text-muted-foreground">
         This will permanently delete this app and its events.
       </div>
       <div className="mt-4">

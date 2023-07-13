@@ -260,7 +260,7 @@ export function MetricsChart(props: Props) {
           <div
             ref={tooltipRef}
             style={{ opacity: 0 }}
-            className="absolute pointer-events-none shadow border border-default bg-default p-2 rounded transform -translate-x-1/2"
+            className="absolute pointer-events-none shadow border bg-background p-2 rounded transform -translate-x-1/2"
           >
             {tooltipDataPoint ? props.renderTooltip(tooltipDataPoint) : null}
           </div>

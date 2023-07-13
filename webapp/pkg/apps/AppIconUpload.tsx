@@ -94,7 +94,7 @@ export function AppIconUpload(props: Props) {
         ) : props.iconPath ? (
           <AppIcon iconPath={props.iconPath} className="w-9 h-9" />
         ) : (
-          <IconCube className="w-9 h-9 border border-default p-1.5 rounded" />
+          <IconCube className="w-9 h-9 border p-1.5 rounded" />
         )}
 
         <input
@@ -110,7 +110,7 @@ export function AppIconUpload(props: Props) {
         </div>
       </div>
 
-      {error && <p className="text-sm text-error">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }

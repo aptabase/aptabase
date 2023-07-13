@@ -126,17 +126,17 @@ export function Component() {
         subtitle="Instrument your app with our SDK"
       />
       <div className="flex flex-col space-y-8 mt-8">
-        <div className="px-4 py-2 bg-muted max-w-fit rounded border border-default">
-          <p className="text-subtle text-sm mb-1">
-            👇 App key for <span className="text-inverted">{app.name}</span>
+        <div className="px-4 py-2 bg-muted max-w-fit rounded">
+          <p className="text-muted-foreground text-sm mb-1">
+            👇 App key for <span className="text-foreground">{app.name}</span>
           </p>
           <span className="font-medium text-xl mb-2">{app.appKey} </span>
-          <p className="text-subtle text-sm mt-2">
+          <p className="text-muted-foreground text-sm mt-2">
             It is used by the SDK to identify your app
           </p>
         </div>
 
-        <div className="flex items-center border-b pb-4 border-default justify-between">
+        <div className="flex items-center border-b pb-4 justify-between">
           <div className="flex items-center space-x-4">
             <span className="whitespace-nowrap">
               Which framework are you using?
@@ -160,7 +160,7 @@ export function Component() {
           {fw?.repository && (
             <a
               target="_blank"
-              className="hidden md:flex hover:bg-muted text-sm rounded p-2 items-center space-x-1"
+              className="hidden md:flex hover:bg-accent text-sm rounded p-2 items-center space-x-1"
               href={fw?.repository}
             >
               <svg

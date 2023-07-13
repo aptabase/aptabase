@@ -1,42 +1,57 @@
 :root {
-  --apta-default: white;
-  --apta-muted: #f9fafb;
-  --apta-inverted: black;
-  --apta-subtle: #f3f4f6;
-  --apta-emphasis: #e5e7eb;
-  --apta-error: #b91c1c;
-  --apta-success: #15803d;
-  --apta-warning: #f97316;
+  color-scheme: light;
 
-  --apta-text-default: black;
-  --apta-text-subtle: #6b7280;
-
-  --apta-border-default: #eaeaea;
-
-  --apta-chart-primary: #2563eb;
-  --apta-chart-secondary: #374151;
-  --apta-chart-highlight: rgb(0, 0, 0, 0.08);
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --muted: 210 20% 98%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --success: 142 72% 29%;
+  --success-foreground: 0 0% 98%;
+  --warning: 25 95% 53%;
+  --warning-foreground: 0 0% 98%;
+  --chart-highlight: rgb(0, 0, 0, 0.08);
+  --ring: 213 94% 68%;
+  --radius: 0.5rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --apta-default: black;
-    --apta-muted: #141414;
-    --apta-inverted: white;
-    --apta-subtle: #1f1f1f;
-    --apta-emphasis: #2b2b2b;
-    --apta-error: #ef4444;
-    --apta-success: #22c55e;
-    --apta-warning: #f97316;
 
-    --apta-text-default: #d6d6d6;
-    --apta-text-subtle: #999;
-
-    --apta-border-default: #333;
-
-    --apta-chart-primary: #2563eb;
-    --apta-chart-secondary: #eff6ff;
-    --apta-chart-highlight: rgb(255, 255, 255, 0.1);
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 240 5% 64.9%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 98%;
+    --warning: 25 95% 53%;
+    --warning-foreground: 0 0% 98%;
+    --chart-highlight: rgb(255, 255, 255, 0.1);
+    --ring: 213 94% 68%;
+    --radius: 0.5rem;
   }
 }

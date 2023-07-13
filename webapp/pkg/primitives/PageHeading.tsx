@@ -17,7 +17,9 @@ export function PageHeading(props: Props) {
       >
         {props.title}
       </h1>
-      {props.subtitle && <p className="text-subtle">{props.subtitle}</p>}
+      {props.subtitle && (
+        <p className="text-muted-foreground">{props.subtitle}</p>
+      )}
     </div>
   );
 }

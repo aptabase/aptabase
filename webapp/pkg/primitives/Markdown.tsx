@@ -27,11 +27,15 @@ export function Markdown(props: Props) {
       ]}
       components={{
         blockquote: ({ node, ...props }) => (
-          <div className="border-l-4 border-default pl-2">{props.children}</div>
+          <div className="border-l-4 pl-2">{props.children}</div>
         ),
         img: ({ node, ...imgProps }) => {
           if (imgProps.src?.endsWith("og.png")) return null;
-          return <img {...imgProps} src={`${props.baseURL}/${imgProps.src}`} />;
+          const src = imgProps.src?.startsWith("http")
+            ? imgProps.src
+            : `${props.baseURL}/${imgProps.src}`;
+
+          return <img {...imgProps} src={src} />;
         },
         a: ({ node, ...props }) => (
           <a target="_blank" className="inline-block" {...props} />

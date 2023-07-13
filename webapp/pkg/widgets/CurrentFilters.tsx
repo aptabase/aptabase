@@ -13,7 +13,7 @@ function FilterChip(props: ChipProps) {
   targetUrl.searchParams.delete(props.removeProperty);
 
   return (
-    <span className="inline-flex items-center relative group border border-default rounded py-2 px-2 text-sm min-w-[6rem] bg-muted">
+    <span className="inline-flex items-center relative group border rounded py-2 px-2 text-sm min-w-[6rem] bg-muted">
       <div className="flex items-center space-x-1 group-hover:blur-sm group-hover:opacity-50 transition-all">
         {props.children}
       </div>
@@ -22,7 +22,7 @@ function FilterChip(props: ChipProps) {
         className="hidden absolute w-full h-full group-hover:flex"
         preventScrollReset={true}
       >
-        <span className="flex space-x-2 items-center text-error">
+        <span className="flex space-x-2 items-center text-destructive">
           <IconX strokeWidth={1.5} className="h-5 w-5" />
           <span>Remove</span>
         </span>

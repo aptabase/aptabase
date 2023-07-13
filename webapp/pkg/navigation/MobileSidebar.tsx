@@ -13,7 +13,7 @@ MobileSidebar.Button = (props: ButtonProps) => {
   return (
     <button
       type="button"
-      className="border-r border-default px-4 text-default lg:hidden"
+      className="border-r px-4 lg:hidden"
       onClick={props.onClick}
     >
       <IconMenu2 strokeWidth={2} className="h-6 w-6" />
@@ -58,7 +58,7 @@ export function MobileSidebar(props: Props) {
             leaveFrom="translate-x-0"
             leaveTo="-translate-x-full"
           >
-            <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-muted pt-2 pb-4 border-r border-default">
+            <Dialog.Panel className="relative flex w-full max-w-xs flex-1 bg-background flex-col pt-2 pb-4 border-r">
               <Transition.Child
                 as={Fragment}
                 enter="ease-in-out duration-300"
@@ -82,7 +82,7 @@ export function MobileSidebar(props: Props) {
                 <NavMenu onNavigation={close} />
               </div>
               {isBillingEnabled && (
-                <div className="px-2 py-4 border-t border-default">
+                <div className="px-2 py-4 border-t">
                   <CurrentUsage />
                 </div>
               )}

@@ -36,8 +36,9 @@ const Loading = () => {
 
 const classNames = {
   primary: "btn bg-primary text-white hover:opacity-90",
-  secondary: "btn bg-subtle text-default hover:opacity-90",
-  danger: "btn btn-danger bg-error text-white hover:opacity-90",
+  secondary: "btn bg-accent hover:opacity-90",
+  danger:
+    "btn btn-danger bg-destructive text-destructive-foreground hover:opacity-90",
 };
 
 export function Button(props: Props) {

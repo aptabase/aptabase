@@ -22,9 +22,7 @@ export function NavItem(props: Props) {
   );
 
   const className = clsx(
-    props.href === location.pathname
-      ? "bg-emphasis"
-      : "w-full hover:text-inverted hover:bg-emphasis",
+    props.href === location.pathname ? "bg-accent" : "w-full hover:bg-accent",
     baseClassName
   );
 

@@ -26,7 +26,7 @@ const StatusMessage = (props: StatusMessageProps) => {
   return (
     <>
       Already registered?{" "}
-      <Link className="font-medium text-default" to="/auth">
+      <Link className="font-medium text-foreground" to="/auth">
         Sign in
       </Link>{" "}
       to your account.
@@ -69,7 +69,7 @@ export function Component() {
               className="absolute inset-0 flex items-center"
               aria-hidden="true"
             >
-              <div className="w-full border-t border-default" />
+              <div className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 text-muted bg-muted">OR</span>
@@ -98,7 +98,7 @@ export function Component() {
             <Button loading={status === "loading"} variant="primary">
               Send magic link
             </Button>
-            <p className="text-center text-sm h-10 text-subtle">
+            <p className="text-center text-sm h-10 text-muted-foreground">
               <StatusMessage status={status} />
             </p>
           </form>

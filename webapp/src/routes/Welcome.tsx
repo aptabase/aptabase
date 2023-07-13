@@ -23,8 +23,11 @@ export function Component() {
 
   return (
     <div className="mx-auto pt-8 lg:pt-24 max-w-3xl text-base">
-      <h2 className="text-3xl font-bold text-default sm:text-4xl">👋 Hey {user.name}</h2>
-      <p className="mt-8">Register your Application and configure the analytics SDK to get started.</p>
+      <h2 className="text-3xl font-bold sm:text-4xl">👋 Hey {user.name}</h2>
+      <p className="mt-8">
+        Register your Application and configure the analytics SDK to get
+        started.
+      </p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-2 w-80">
         <TextInput
@@ -36,7 +39,10 @@ export function Component() {
           onChange={setName}
         />
         <div className="w-20">
-          <Button variant="primary" disabled={name.length < 2 || name.length > 40}>
+          <Button
+            variant="primary"
+            disabled={name.length < 2 || name.length > 40}
+          >
             Create
           </Button>
         </div>

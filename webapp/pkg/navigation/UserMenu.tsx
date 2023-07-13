@@ -10,7 +10,7 @@ type Props = {
 
 const nav = [{ name: "Sign out", href: signOutUrl() }];
 
-const Divider = () => <div className="border-t my-1 border-default" />;
+const Divider = () => <div className="border-t my-1" />;
 
 export function UserMenu(props: Props) {
   return (
@@ -18,9 +18,7 @@ export function UserMenu(props: Props) {
       <div>
         <Menu.Button className="flex max-w-xs px-2 py-1 items-center rounded text-sm focus-ring">
           <UserAvatar user={props.user} />
-          <div className="hidden lg:block ml-2 text-default">
-            {props.user.name}
-          </div>
+          <div className="hidden lg:block ml-2">{props.user.name}</div>
         </Menu.Button>
       </div>
       <Transition
@@ -32,11 +30,11 @@ export function UserMenu(props: Props) {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute right-0 lg:bottom-8 lg:right-auto z-10 mt-2 w-60 origin-top-right rounded-md py-1 shadow-lg border bg-default border-default focus-ring">
+        <Menu.Items className="absolute right-0 lg:bottom-8 lg:right-auto z-10 mt-2 w-60 origin-top-right rounded-md py-1 shadow-lg border bg-background focus-ring">
           <div className="px-3 py-1 text-xs flex items-center justify-between">
             <div>
-              <span className="text-subtle">Signed in as</span>
-              <span className="block truncate text-sm font-medium text-default">
+              <span className="text-muted-foreground">Signed in as</span>
+              <span className="block truncate text-sm font-medium">
                 {props.user.email}
               </span>
             </div>
@@ -49,8 +47,8 @@ export function UserMenu(props: Props) {
                 <a
                   href={item.href}
                   className={clsx(
-                    active ? "bg-subtle text-inverted" : "",
-                    "block mx-1 rounded px-4 py-2 text-sm text-default"
+                    active ? "bg-accent text-foreground" : "",
+                    "block mx-1 rounded px-4 py-2 text-sm"
                   )}
                 >
                   {item.name}

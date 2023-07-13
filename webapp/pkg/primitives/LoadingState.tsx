@@ -14,7 +14,7 @@ const sizes = {
 };
 
 const colors = {
-  default: "fill-inverted",
+  default: "fill-foreground",
   primary: "fill-primary-400",
 };
 

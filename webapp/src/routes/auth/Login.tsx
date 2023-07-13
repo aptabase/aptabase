@@ -17,7 +17,7 @@ type StatusMessageProps = {
 const SignUpMessage = () => (
   <span className="block">
     Don't have an account?{" "}
-    <Link className="font-semibold text-default" to="/auth/register">
+    <Link className="font-semibold text-foreground" to="/auth/register">
       Sign up
     </Link>{" "}
     for free.
@@ -36,7 +36,7 @@ const StatusMessage = (props: StatusMessageProps) => {
   if (props.status === "notfound") {
     return (
       <>
-        <span className="text-error">
+        <span className="text-destructive">
           Could not find an account with that email.
         </span>
         <SignUpMessage />
@@ -58,7 +58,7 @@ const RedirectErrorMessage = () => {
     error === "expired" ? "This link has expired." : "This link is invalid.";
 
   return (
-    <p className="mx-auto text-center mb-10 text-error text-sm">
+    <p className="mx-auto text-center mb-10 text-destructive text-sm">
       {message} Please request a new one.
     </p>
   );
@@ -86,7 +86,7 @@ export function Component() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Logo className="mx-auto h-20 w-auto text-primary" />
-        <h2 className="text-center text-3xl text-inverted font-bold">
+        <h2 className="text-center text-3xl text-foreground font-bold">
           Sign in to your account
         </h2>
         <DataResidency />
@@ -103,7 +103,7 @@ export function Component() {
               className="absolute inset-0 flex items-center"
               aria-hidden="true"
             >
-              <div className="w-full border-t border-default" />
+              <div className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 text-muted bg-muted">OR</span>
@@ -124,7 +124,7 @@ export function Component() {
             <Button loading={status === "loading"} variant="primary">
               Send magic link
             </Button>
-            <p className="text-center text-sm h-10 text-subtle">
+            <p className="text-center text-sm h-10 text-muted-foreground">
               <StatusMessage status={status} />
             </p>
           </form>

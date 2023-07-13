@@ -20,19 +20,19 @@ export function ConsoleLayout() {
 
       {/* Static sidebar for desktop */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-grow flex-col overflow-y-auto border-r border-default bg-muted">
-          <div className="flex justify-between items-center p-2 border-b border-default">
+        <div className="flex flex-grow flex-col overflow-y-auto border-r">
+          <div className="flex justify-between items-center p-2 border-b">
             <AppSelector />
           </div>
           <div className="p-2 flex flex-grow flex-col mt-2">
             <NavMenu />
           </div>
           {isBillingEnabled && (
-            <div className="p-2 border-t border-default">
+            <div className="p-2 border-t">
               <CurrentUsage />
             </div>
           )}
-          <div className="p-2 border-t border-default">
+          <div className="p-2 border-t">
             <UserMenu user={auth.user} />
           </div>
         </div>
@@ -41,9 +41,9 @@ export function ConsoleLayout() {
       <div className="lg:pl-64">
         <div className="flex flex-col">
           {/* sidebar for mobile */}
-          <div className="lg:hidden sticky top-0 z-30 flex h-12 flex-shrink-0 border-b border-default bg-muted">
+          <div className="lg:hidden sticky top-0 z-30 flex h-12 flex-shrink-0 border-b bg-muted">
             <MobileSidebar.Button onClick={() => setSidebarOpen(true)} />
-            <div className="flex justify-between flex-grow items-center px-2 border-r border-default">
+            <div className="flex justify-between flex-grow items-center px-2 border-r">
               <AppSelector />
             </div>
             <div className="flex items-center px-2">

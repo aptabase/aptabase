@@ -19,7 +19,7 @@ export function AppIcon(props: Props) {
   return (
     <IconBox
       strokeWidth={1.75}
-      className={`${props.className} p-0.5 border rounded border-default`}
+      className={`${props.className} p-0.5 border rounded`}
     />
   );
 }

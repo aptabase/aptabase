@@ -18,7 +18,7 @@ function StyledOption(props: OptionProps) {
     <Listbox.Option
       className={({ active }) =>
         clsx(
-          active ? "text-inverted bg-subtle" : "",
+          active ? "text-foreground bg-accent" : "",
           "relative rounded cursor-pointer select-none p-2 mx-1 text-sm flex items-center space-x-1"
         )
       }
@@ -29,7 +29,7 @@ function StyledOption(props: OptionProps) {
   );
 }
 
-const Divider = () => <div className="border-t my-1 border-default" />;
+const Divider = () => <div className="border-t my-1" />;
 
 export function AppSelector() {
   const { apps } = useApps();
@@ -61,7 +61,7 @@ export function AppSelector() {
         {({ open }) => (
           <>
             <div className="relative">
-              <Listbox.Button className="relative flex items-center space-x-1 rounded-md py-1.5 text-left hover:bg-emphasis px-2">
+              <Listbox.Button className="relative flex items-center space-x-1 rounded-md py-1.5 text-left hover:bg-accent px-2">
                 <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />
                 <div className="flex items-center space-x-2">
                   <span className="block truncate w-44">{currentApp.name}</span>
@@ -76,7 +76,7 @@ export function AppSelector() {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <Listbox.Options className="absolute z-10 mt-1 max-h-80 w-60 overflow-auto border border-default rounded-md bg-default py-1 shadow-lg text-sm focus-ring">
+                <Listbox.Options className="absolute z-10 mt-1 max-h-80 w-60 overflow-auto border rounded-md bg-background py-1 shadow-lg text-sm focus-ring">
                   {apps.map((app) => (
                     <StyledOption key={app.id} value={app}>
                       <AppIcon

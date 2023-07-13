@@ -37,10 +37,10 @@ export function TopNChart(props: Props) {
   ) : (
     <>
       <div className="flex w-full flex-row justify-between items-center">
-        <div className="text-subtle text-sm font-normal">
+        <div className="text-muted-foreground text-sm font-normal">
           {props.renderKeyLabel ? props.renderKeyLabel : props.labels[0]}
         </div>
-        <div className="text-subtle text-sm font-normal pr-1">
+        <div className="text-muted-foreground text-sm font-normal pr-1">
           {props.renderValueLabel ? props.renderValueLabel : props.labels[1]}
         </div>
       </div>
@@ -86,7 +86,7 @@ function TopNRow(props: TopNRowProps) {
 
   const content = (
     <div className="flex items-center justify-between group py-2 relative">
-      <div className="hidden group-hover:block group-hover:bg-subtle absolute h-8 origin-left rounded w-full" />
+      <div className="hidden group-hover:block group-hover:bg-accent absolute h-8 origin-left rounded w-full" />
       <div className="relative z-10 flex w-full max-w-[calc(100%-3rem)] items-center">
         <div
           className="absolute h-8 origin-left bg-primary-100 dark:bg-primary-950 rounded transition-all"
