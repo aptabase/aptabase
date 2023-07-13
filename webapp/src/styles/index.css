@@ -28,42 +28,18 @@
     @apply font-title tracking-normal;
   }
 
-  .btn {
-    @apply w-full p-2 rounded text-sm shadow-sm tracking-normal;
-  }
-
-  .btn:disabled {
-    @apply cursor-not-allowed opacity-70;
-  }
-
   /*
   Forms
 */
-  .form-input,
   .form-select {
-    @apply block text-sm rounded text-foreground border py-2 bg-background shadow-sm;
+    @apply block text-sm rounded text-foreground border py-2 pl-3 pr-10 bg-background shadow-sm;
   }
-  .form-input::placeholder,
   .form-select::placeholder {
     @apply text-muted-foreground opacity-50;
   }
 
-  .form-input:focus,
   .form-select:focus {
-    @apply outline outline-2 outline-offset-1 outline-ring;
-  }
-
-  .form-input:focus,
-  .form-select:focus {
-    @apply ring-0;
-  }
-
-  .form-input {
-    @apply px-3;
-  }
-
-  .form-select {
-    @apply pl-3 pr-10;
+    @apply outline outline-2 outline-offset-1 outline-ring ring-0;
   }
 
   .form-select.compact {

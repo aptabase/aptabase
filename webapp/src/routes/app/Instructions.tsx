@@ -5,6 +5,13 @@ import {
   LoadingState,
   Markdown,
   PageHeading,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectLabel,
+  SelectItem,
 } from "@app/primitives";
 import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";
@@ -14,6 +21,7 @@ type FrameworkInstructions = {
   name: string;
   baseURL: string;
   repository: string;
+  icon: string;
 };
 
 const frameworks: { [id: string]: FrameworkInstructions } = {
@@ -21,23 +29,27 @@ const frameworks: { [id: string]: FrameworkInstructions } = {
     name: "Android (Kotlin)",
     baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-kotlin/main/",
     repository: "https://github.com/aptabase/aptabase-kotlin",
+    icon: "https://aptabase.com/tools/android.svg",
   },
   swift: {
     name: "Apple (Swift)",
     baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-swift/main/",
     repository: "https://github.com/aptabase/aptabase-swift",
+    icon: "https://aptabase.com/tools/apple.svg",
   },
   electron: {
     name: "Electron",
     baseURL:
       "https://raw.githubusercontent.com/aptabase/aptabase-electron/main/",
     repository: "https://github.com/aptabase/aptabase-electron",
+    icon: "https://aptabase.com/tools/electron.svg",
   },
   flutter: {
     name: "Flutter",
     baseURL:
       "https://raw.githubusercontent.com/aptabase/aptabase_flutter/main/",
     repository: "https://github.com/aptabase/aptabase_flutter",
+    icon: "https://aptabase.com/tools/flutter.svg",
   },
   nativescript: {
     name: "NativeScript",
@@ -45,33 +57,39 @@ const frameworks: { [id: string]: FrameworkInstructions } = {
       "https://raw.githubusercontent.com/goenning/nativescript-plugins/main//packages/nativescript-aptabase",
     repository:
       "https://github.com/nstudio/nativescript-plugins/blob/main//packages/nativescript-aptabase",
+    icon: "https://aptabase.com/tools/nativescript.svg",
   },
   maui: {
     name: ".NET MAUI",
     baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-maui/main/",
     repository: "https://github.com/aptabase/aptabase-maui",
+    icon: "https://aptabase.com/tools/dotnet.svg",
   },
   "react-native": {
     name: "React Native",
     baseURL:
       "https://raw.githubusercontent.com/aptabase/aptabase-react-native/main/",
     repository: "https://github.com/aptabase/aptabase-react-native",
+    icon: "https://aptabase.com/tools/react-native.svg",
   },
   tauri: {
     name: "Tauri",
     baseURL:
       "https://raw.githubusercontent.com/aptabase/tauri-plugin-aptabase/main/",
     repository: "https://github.com/aptabase/tauri-plugin-aptabase",
+    icon: "https://aptabase.com/tools/tauri.svg",
   },
   unreal: {
     name: "Unreal Engine",
     baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-unreal/main/",
     repository: "https://github.com/aptabase/aptabase-unreal",
+    icon: "http://localhost:4000/tools/unreal.svg",
   },
   webapp: {
     name: "Web App",
     baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-js/main/",
     repository: "https://github.com/aptabase/aptabase-js",
+    icon: "https://aptabase.com/tools/javascript.svg",
   },
 };
 
@@ -112,11 +130,8 @@ export function Component() {
   const { isLoading, isError, data } = useQuery(["markdown", selected], () =>
     fetchInstructions(selected)
   );
-  const [fw, content] = data || [];
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelected(e.target.value);
-  };
+  const [fw, content] = data || [];
 
   return (
     <>
@@ -138,24 +153,23 @@ export function Component() {
 
         <div className="flex items-center border-b pb-4 justify-between">
           <div className="flex items-center space-x-4">
-            <span className="whitespace-nowrap">
-              Which framework are you using?
-            </span>
-            <select
-              name="framework"
-              defaultValue={selected}
-              onChange={handleChange}
-              className="form-select max-w-fit"
-            >
-              <option value="" disabled>
-                Framework
-              </option>
-              {Object.entries(frameworks).map(([id, fw]) => (
-                <option key={fw.name} value={id}>
-                  {fw.name}
-                </option>
-              ))}
-            </select>
+            <Select onValueChange={setSelected}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a framework" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {Object.entries(frameworks).map(([id, fw]) => (
+                    <SelectItem key={fw.name} value={id}>
+                      <div className="flex gap-2 items-center">
+                        <img src={fw.icon} className="h-4 w-4" />
+                        <span>{fw.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
           {fw?.repository && (
             <a

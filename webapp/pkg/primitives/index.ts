@@ -9,6 +9,7 @@ export * from "./Logo";
 export * from "./Markdown";
 export * from "./PageHeading";
 export * from "./Region";
+export * from "./Select";
 export * from "./Tabs";
 export * from "./TextInput";
 export * from "./api";
