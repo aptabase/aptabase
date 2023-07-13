@@ -18,7 +18,7 @@ export function GeneralSettings() {
   const [icon, setIcon] = useState("");
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2 w-80">
+    <form onSubmit={handleSubmit} className="space-y-4 w-80">
       <AppIconUpload iconPath={app.iconPath} onIconChanged={setIcon} />
 
       <TextInput
@@ -26,15 +26,10 @@ export function GeneralSettings() {
         name="name"
         required={true}
         value={name}
-        onChange={setName}
+        onChange={(e) => setName(e.target.value)}
       />
       <div className="w-20">
-        <Button
-          variant="primary"
-          disabled={name.length < 2 || name.length > 40}
-        >
-          Save
-        </Button>
+        <Button disabled={name.length < 2 || name.length > 40}>Save</Button>
       </div>
     </form>
   );

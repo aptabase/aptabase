@@ -83,7 +83,7 @@ export function Component() {
               placeholder="Peter Parker"
               value={name}
               required={true}
-              onChange={setName}
+              onChange={(e) => setName(e.target.value)}
             />
             <TextInput
               label="Email Address"
@@ -93,11 +93,9 @@ export function Component() {
               autoComplete="email"
               value={email}
               required={true}
-              onChange={setEmail}
+              onChange={(e) => setEmail(e.target.value)}
             />
-            <Button loading={status === "loading"} variant="primary">
-              Send magic link
-            </Button>
+            <Button loading={status === "loading"}>Send magic link</Button>
             <p className="text-center text-sm h-10 text-muted-foreground">
               <StatusMessage status={status} />
             </p>

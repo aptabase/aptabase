@@ -36,15 +36,10 @@ export function Component() {
           placeholder="My App Name"
           required={true}
           value={name}
-          onChange={setName}
+          onChange={(e) => setName(e.target.value)}
         />
         <div className="w-20">
-          <Button
-            variant="primary"
-            disabled={name.length < 2 || name.length > 40}
-          >
-            Create
-          </Button>
+          <Button disabled={name.length < 2 || name.length > 40}>Create</Button>
         </div>
       </form>
     </div>

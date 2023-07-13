@@ -33,7 +33,7 @@ export function DangerZone() {
       </div>
       <div className="mt-4">
         <div className="w-20">
-          <Button variant="danger">Delete</Button>
+          <Button variant="destructive">Delete</Button>
         </div>
       </div>
     </form>

@@ -88,9 +88,12 @@ export function AppIconUpload(props: Props) {
 
   return (
     <div>
+      <label className="text-sm mb-2 block font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        Icon
+      </label>
       <div className="flex gap-2 items-center">
         {imgSrc ? (
-          <img src={imgSrc} className="w-9 h-9" />
+          <img src={imgSrc} className="w-9 h-9 rounded" />
         ) : props.iconPath ? (
           <AppIcon iconPath={props.iconPath} className="w-9 h-9" />
         ) : (
@@ -104,7 +107,7 @@ export function AppIconUpload(props: Props) {
           className="hidden"
         />
         <div>
-          <Button variant="secondary" onClick={handleClick}>
+          <Button variant="ghost" onClick={handleClick}>
             Change
           </Button>
         </div>

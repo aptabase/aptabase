@@ -76,12 +76,9 @@ export function CreateAppModal(props: Props) {
                     placeholder="My App Name"
                     required={true}
                     value={name}
-                    onChange={setName}
+                    onChange={(e) => setName(e.target.value)}
                   />
-                  <Button
-                    variant="primary"
-                    disabled={name.length < 2 || name.length > 40}
-                  >
+                  <Button disabled={name.length < 2 || name.length > 40}>
                     Create
                   </Button>
                 </form>
