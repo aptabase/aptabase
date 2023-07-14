@@ -47,6 +47,11 @@ public class EnvSettings
     // Variable Name: SMTP_PASSWORD
     public string SmtpPassword { get; private set; } = "";
 
+    // The reply address for send email for example notification@aptabase.com 
+    // Variable Name: SMTP_REPLY_ADDRESS
+    public string SmtpReplyAddress { get; private set; } = "";
+
+
     // The GitHub Client ID for OAuth (optional)
     // Variable Name: OAUTH_GITHUB_CLIENT_ID
     public string OAuthGitHubClientId { get; private set; } = "";
@@ -91,6 +96,7 @@ public class EnvSettings
             SmtpPort = GetInt("SMTP_PORT"),
             SmtpUsername = Get("SMTP_USERNAME"),
             SmtpPassword = Get("SMTP_PASSWORD"),
+            SmtpReplyAddress = Get("SMTP_REPLY_ADDRESS"),
 
             OAuthGitHubClientId = Get("OAUTH_GITHUB_CLIENT_ID"),
             OAuthGitHubClientSecret = Get("OAUTH_GITHUB_CLIENT_SECRET"),

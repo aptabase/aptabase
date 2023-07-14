@@ -13,17 +13,18 @@ public class SmtpEmailClient : IEmailClient
     {
         _env = env ?? throw new ArgumentNullException(nameof(env));
         _smtp = new SmtpClient(env.SmtpHost, env.SmtpPort);
-
+        _smtp.EnableSsl = true;
         if (!string.IsNullOrEmpty(env.SmtpUsername))
         {
             _smtp.Credentials = new NetworkCredential(env.SmtpUsername, env.SmtpPassword);
         }
+
     }
 
     public async Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string>? properties, CancellationToken cancellationToken)
     {
         var body = await _engine.Render(templateName, properties);
-        var msg = new MailMessage("Aptabase <notification@aptabase.com>", to, subject, body)
+        var msg = new MailMessage("Aptabase <" + _env.SmtpReplyAddress + ">", to, subject, body)
         {
             IsBodyHtml = true
         };
