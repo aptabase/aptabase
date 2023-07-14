@@ -15,7 +15,7 @@ export function Card(props: Props) {
     <div
       ref={ref}
       className={clsx(
-        "flex flex-col min-h-[28rem] bg-background p-4",
+        "flex flex-col min-h-[12rem] bg-background p-4",
         props.className
       )}
     >
