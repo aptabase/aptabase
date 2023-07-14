@@ -51,7 +51,6 @@ public class EnvSettings
     // Variable Name: SMTP_REPLY_ADDRESS
     public string SmtpReplyAddress { get; private set; } = "";
 
-
     // The GitHub Client ID for OAuth (optional)
     // Variable Name: OAUTH_GITHUB_CLIENT_ID
     public string OAuthGitHubClientId { get; private set; } = "";
