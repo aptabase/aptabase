@@ -106,7 +106,7 @@ export function Component() {
               <div className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 text-muted bg-muted">OR</span>
+              <span className="px-2 bg-muted">OR</span>
             </div>
           </div>
 
