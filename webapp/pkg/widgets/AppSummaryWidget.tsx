@@ -37,7 +37,7 @@ export function AppSummaryWidget(props: Props) {
       key={props.app.id}
       className="border rounded shadow hover:bg-muted"
     >
-      <div className="flex items-center p-4 justify-between">
+      <div className="flex items-center p-2 lg:p-4 justify-between">
         <div className="flex items-center space-x-2 truncate">
           <AppIcon className="w-6 h-6" iconPath={props.app.iconPath} />
           <span className="truncate">{props.app.name}</span>

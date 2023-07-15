@@ -36,8 +36,8 @@ export function AppSelector() {
   const navigate = useNavigate();
   const [showCreateAppModal, setShowCreateAppModal] = useState(false);
 
-  if (apps.length === 0) {
-    return <div className="h-8" />;
+  if (apps.length === 0 || !currentApp) {
+    return <div className="h-9" />;
   }
 
   const onChange = async (app: Application | undefined) => {
@@ -57,15 +57,11 @@ export function AppSelector() {
       <Listbox defaultValue={currentApp} onChange={onChange}>
         {({ open }) => (
           <>
-            <div className="relative w-full">
+            <div className="relative w-full h-9">
               <Listbox.Button className="relative flex items-center space-x-1 rounded-md py-1.5 text-left hover:bg-accent px-2 w-full">
-                {currentApp && (
-                  <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />
-                )}
+                <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />
                 <div className="flex items-center justify-between truncate w-full">
-                  <span className="block truncate">
-                    {currentApp?.name ?? "Select an App"}
-                  </span>
+                  <span className="block truncate">{currentApp.name}</span>
                   <IconSelector
                     strokeWidth={2}
                     className="min-h-4 max-h-4 min-w-4 max-w-4"
