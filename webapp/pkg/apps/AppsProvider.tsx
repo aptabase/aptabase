@@ -1,7 +1,7 @@
 import { ErrorState, LoadingState, useLocalStorage } from "@app/primitives";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Application, createApp, deleteApp, listApps, updateApp } from "./apps";
 
@@ -53,6 +53,7 @@ export function AppsProvider(props: Props) {
     icon: string
   ): Promise<Application> => {
     const app = await updateApp(appId, name, icon);
+    toast(`${name} app was successfully updated.`);
     await refetch();
     return app;
   };
@@ -60,8 +61,8 @@ export function AppsProvider(props: Props) {
   if (isLoading) return <LoadingState size="lg" color="primary" delay={0} />;
   if (isError) return <ErrorState />;
 
-  if (data?.length === 0 && location.pathname !== "/welcome") {
-    return <Navigate to="/welcome" />;
+  if (data?.length === 0 && location.pathname !== "/") {
+    return <Navigate to="/" />;
   }
 
   return (
@@ -75,7 +76,7 @@ export function AppsProvider(props: Props) {
         updateApp: updateAppAndRefresh,
       }}
     >
-      {isLoading ? null : props.children}
+      {props.children}
     </AppsContext.Provider>
   );
 }
@@ -87,4 +88,11 @@ export function useApps(): AppsContextType {
   }
 
   return ctx;
+}
+
+export function useCurrentApp(): Application | undefined {
+  const { apps } = useApps();
+  let { id } = useParams();
+
+  return apps.find((app) => app.id === id);
 }

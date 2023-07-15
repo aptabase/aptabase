@@ -1,4 +1,3 @@
-import { useCurrentApp } from "@app/navigation";
 import { Card, DateRangePicker, Head, PageHeading } from "@app/primitives";
 import {
   CurrentFilters,
@@ -12,8 +11,8 @@ import {
   TopOperatingSystemsWidget,
   TopRegionsWidget,
 } from "@app/widgets";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { AppConfigMenu, useApps } from "@app/apps";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { AppConfigMenu, useApps, useCurrentApp } from "@app/apps";
 import { DebugModeBanner } from "./components/DebugModeBanner";
 
 Component.displayName = "Dashboard";
@@ -28,7 +27,9 @@ export function Component() {
   const { buildMode } = useApps();
   const app = useCurrentApp();
 
-  const resetFilters = () => navigate("/");
+  if (!app) return <Navigate to="/" />;
+
+  const resetFilters = () => navigate(`${app.id}/`);
 
   return (
     <>

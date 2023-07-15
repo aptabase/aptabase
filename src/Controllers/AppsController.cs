@@ -56,7 +56,8 @@ public class AppsController : Controller
             @"SELECT id, name, icon_path, app_key
               FROM apps
               WHERE owner_id = @userId
-              AND deleted_at IS NULL", new { userId = user.Id });
+              AND deleted_at IS NULL
+              ORDER by name", new { userId = user.Id });
         return Ok(apps);
     }
 
@@ -88,7 +89,6 @@ public class AppsController : Controller
         var app = await FindAppById(appId);
         if (app == null)
             return NotFound();
-
 
         if (!string.IsNullOrEmpty(body.Icon))
         {            

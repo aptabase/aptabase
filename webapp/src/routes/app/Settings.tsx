@@ -1,4 +1,3 @@
-import { useCurrentApp } from "@app/navigation";
 import {
   Head,
   PageHeading,
@@ -10,10 +9,14 @@ import {
 import { DangerZone } from "./components/DangerZone";
 import { AppSharing } from "./components/AppSharing";
 import { GeneralSettings } from "./components/GeneralSettings";
+import { Navigate } from "react-router-dom";
+import { useCurrentApp } from "@app/apps";
 
 Component.displayName = "Settings";
 export function Component() {
   const app = useCurrentApp();
+
+  if (!app) return <Navigate to="/" />;
 
   return (
     <>
@@ -27,13 +30,13 @@ export function Component() {
           <TabsTrigger value="danger">Danger Zone</TabsTrigger>
         </TabsList>
         <TabsContent value="general">
-          <GeneralSettings />
+          <GeneralSettings app={app} />
         </TabsContent>
         <TabsContent value="sharing">
           <AppSharing />
         </TabsContent>
         <TabsContent value="danger">
-          <DangerZone />
+          <DangerZone app={app} />
         </TabsContent>
       </Tabs>
     </>

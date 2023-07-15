@@ -1,10 +1,9 @@
 import clsx from "clsx";
-import { Application, useApps } from "@app/apps";
+import { Application, useApps, useCurrentApp } from "@app/apps";
 import { Listbox, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { CreateAppModal } from "./CreateAppModal";
-import { useNavigationContext } from "@app/navigation";
-import { IconBox, IconPlus, IconSelector } from "@tabler/icons-react";
+import { IconPlus, IconSelector } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { AppIcon } from "./AppIcon";
 
@@ -33,23 +32,21 @@ const Divider = () => <div className="border-t my-1" />;
 
 export function AppSelector() {
   const { apps } = useApps();
+  const currentApp = useCurrentApp();
   const navigate = useNavigate();
-  const { currentApp, switchApp } = useNavigationContext();
-
   const [showCreateAppModal, setShowCreateAppModal] = useState(false);
+
+  if (apps.length === 0) {
+    return <div className="h-8" />;
+  }
 
   const onChange = async (app: Application | undefined) => {
     if (!app) {
       return setShowCreateAppModal(true);
     }
 
-    switchApp(app);
-    navigate("/");
+    navigate(`/${app.id}/`);
   };
-
-  if (!currentApp) {
-    return <div className="h-8" />;
-  }
 
   return (
     <>
@@ -57,14 +54,18 @@ export function AppSelector() {
         open={showCreateAppModal}
         onClose={() => setShowCreateAppModal(false)}
       />
-      <Listbox value={currentApp} onChange={onChange}>
+      <Listbox defaultValue={currentApp} onChange={onChange}>
         {({ open }) => (
           <>
-            <div className="relative">
-              <Listbox.Button className="relative flex items-center space-x-1 rounded-md py-1.5 text-left hover:bg-accent px-2">
-                <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />
-                <div className="flex items-center space-x-2">
-                  <span className="block truncate w-44">{currentApp.name}</span>
+            <div className="relative w-full">
+              <Listbox.Button className="relative flex items-center space-x-1 rounded-md py-1.5 text-left hover:bg-accent px-2 w-full">
+                {currentApp && (
+                  <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />
+                )}
+                <div className="flex items-center justify-between w-full">
+                  <span className="block truncate">
+                    {currentApp?.name ?? "Select an App"}
+                  </span>
                   <IconSelector strokeWidth={2} className="h-4 w-4" />
                 </div>
               </Listbox.Button>

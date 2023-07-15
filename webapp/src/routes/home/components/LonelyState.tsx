@@ -1,39 +1,34 @@
 import { useApps } from "@app/apps";
 import { useAuth } from "@app/auth";
-import { useNavigationContext } from "@app/navigation";
 import { Button, TextInput } from "@app/primitives";
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-Component.displayName = "Welcome";
-export function Component() {
+export function LonelyState() {
   const user = useAuth();
   const { createApp } = useApps();
-  const { currentApp } = useNavigationContext();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    await createApp(name);
+    const app = await createApp(name);
+    navigate(`${app.id}/instructions`);
   };
-
-  if (currentApp) {
-    return <Navigate to="/instructions" />;
-  }
 
   return (
     <div className="mx-auto pt-8 lg:pt-24 max-w-3xl text-base">
       <h2 className="text-3xl font-bold sm:text-4xl">👋 Hey {user.name}</h2>
-      <p className="mt-8">
-        Register your Application and configure the analytics SDK to get
-        started.
+      <p className="mt-8 text-muted-foreground">
+        Register your application and configure the analytics SDK to get
+        started. <br /> It doesn't take long!
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-2 w-80">
         <TextInput
-          label="What's the name of the app?"
+          label="What's your app name?"
           name="name"
-          placeholder="My App Name"
+          placeholder="Awesome App"
           required={true}
           value={name}
           onChange={(e) => setName(e.target.value)}
