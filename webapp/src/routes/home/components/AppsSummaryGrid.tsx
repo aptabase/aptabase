@@ -23,7 +23,7 @@ export function AppsSummaryGrid(props: Props) {
         </div>
       </div>
       {buildMode === "debug" && <DebugModeBanner />}
-      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
         {props.apps.map((app) => (
           <LazyLoad className="h-40" key={app.id}>
             <AppSummaryWidget app={app} buildMode={buildMode} />
