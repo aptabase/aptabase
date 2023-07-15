@@ -31,7 +31,7 @@ export function DangerZone(props: Props) {
     >
       <h2 className="text-lg">Delete {props.app.name}?</h2>
       <div className="text-sm text-muted-foreground">
-        This will permanently delete the {props.app.name} app and its events.
+        This will permanently delete the app and all events.
       </div>
       <div className="mt-4">
         <div className="w-20">

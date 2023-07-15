@@ -1,25 +1,33 @@
-import { Application, AppIcon } from "@app/apps";
-import { PageHeading } from "@app/primitives";
-import { Link } from "react-router-dom";
+import { AppConfigMenu, Application, useApps } from "@app/apps";
+import { DateRangePicker, LazyLoad, PageHeading } from "@app/primitives";
+import { DebugModeBanner } from "@app/routes/app/components/DebugModeBanner";
+import { AppSummaryWidget } from "@app/widgets";
 
 type Props = {
   apps: Application[];
 };
 
 export function AppsSummaryGrid(props: Props) {
+  const { buildMode } = useApps();
+
   return (
     <>
-      <PageHeading title="Your Apps" subtitle="Select an app to get started" />
-      <div className="grid lg:grid-cols-4 gap-6 mt-8">
+      <div className="flex justify-between items-end">
+        <PageHeading
+          title="Your Apps"
+          subtitle="Select an app to get started"
+        />
+        <div className="flex items-center">
+          <AppConfigMenu />
+          <DateRangePicker />
+        </div>
+      </div>
+      {buildMode === "debug" && <DebugModeBanner />}
+      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
         {props.apps.map((app) => (
-          <Link
-            to={`/${app.id}/`}
-            key={app.id}
-            className="flex items-center space-x-2 border rounded p-2 shadow hover:bg-muted"
-          >
-            <AppIcon className="w-5 h-5" iconPath={app.iconPath} />
-            <span className="truncate">{app.name}</span>
-          </Link>
+          <LazyLoad className="h-40" key={app.id}>
+            <AppSummaryWidget app={app} buildMode={buildMode} />
+          </LazyLoad>
         ))}
       </div>
     </>

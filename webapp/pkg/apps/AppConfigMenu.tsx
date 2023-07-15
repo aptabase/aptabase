@@ -13,7 +13,10 @@ export function AppConfigMenu() {
         {buildMode === "release" ? (
           <IconRocket className="h-5 w-5" stroke="1" />
         ) : (
-          <IconBug className="h-5 w-5" stroke="1" />
+          <>
+            <div className="absolute rounded-full bg-warning h-2 w-2 top-1 right-2" />
+            <IconBug className="h-5 w-5" stroke="1" />
+          </>
         )}
       </Menu.Button>
       <Transition

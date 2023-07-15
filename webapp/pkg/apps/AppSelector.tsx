@@ -62,11 +62,14 @@ export function AppSelector() {
                 {currentApp && (
                   <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />
                 )}
-                <div className="flex items-center justify-between w-full">
+                <div className="flex items-center justify-between truncate w-full">
                   <span className="block truncate">
                     {currentApp?.name ?? "Select an App"}
                   </span>
-                  <IconSelector strokeWidth={2} className="h-4 w-4" />
+                  <IconSelector
+                    strokeWidth={2}
+                    className="min-h-4 max-h-4 min-w-4 max-w-4"
+                  />
                 </div>
               </Listbox.Button>
 

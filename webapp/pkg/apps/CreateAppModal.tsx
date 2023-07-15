@@ -20,6 +20,7 @@ export function CreateAppModal(props: Props) {
 
     const app = await createApp(name);
     navigate(`${app.id}/instructions`);
+    setName("");
     props.onClose();
     return;
   };

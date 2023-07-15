@@ -1,6 +1,7 @@
-import { MutableRefObject, useState, useEffect } from "react";
+import { useRef, MutableRefObject, useState, useEffect } from "react";
+import clsx from "clsx";
 
-export function useLazyLoad<T extends Element>(
+function useLazyLoad<T extends Element>(
   ref: MutableRefObject<T>,
   rootMargin: string = "0px"
 ): boolean {
@@ -31,4 +32,20 @@ export function useLazyLoad<T extends Element>(
   }, []);
 
   return isIntersecting;
+}
+
+type Props = {
+  className?: string;
+  children: React.ReactNode;
+};
+
+export function LazyLoad(props: Props) {
+  const ref: any = useRef<HTMLDivElement>();
+  const show: boolean = useLazyLoad<HTMLDivElement>(ref);
+
+  return (
+    <div ref={ref} className={clsx("flex flex-col", props.className)}>
+      {show && props.children}
+    </div>
+  );
 }
