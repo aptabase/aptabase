@@ -23,6 +23,8 @@ export function GrowthIndicator(props: Props) {
   if (props.previous === undefined || props.previous === 0) return null;
 
   const growth = (props.current - props.previous) / props.previous;
+  if (growth === 0) return null;
+
   const isUp = growth > 0;
   const isDown = growth < 0;
 
