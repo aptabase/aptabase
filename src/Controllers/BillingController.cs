@@ -35,7 +35,7 @@ public class BillingController : Controller
 
         var (year, month) = (DateTime.UtcNow.Year, DateTime.UtcNow.Month);
 
-        var (rows, _) = await _queryClient.QueryAsync<BillingUsage>(
+        var rows = await _queryClient.QueryAsync<BillingUsage>(
             $@"SELECT countMerge(events) as Count
                FROM billing_usage_v1_mv
                WHERE app_id IN ('{string.Join("','", appIds)}')

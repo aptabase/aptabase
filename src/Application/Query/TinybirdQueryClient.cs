@@ -1,7 +1,15 @@
 using System.Text.Json;
 using System.Net;
+using System.Text.Json.Serialization;
 
 namespace Aptabase.Application.Query;
+
+public class QueryResult<T>
+{
+    [JsonPropertyName("data")]
+    public IEnumerable<T> Data { get; set; } = Enumerable.Empty<T>();
+}
+
 
 public class TinybirdQueryClient : IQueryClient
 {
@@ -20,22 +28,22 @@ public class TinybirdQueryClient : IQueryClient
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<(IEnumerable<T>, QueryStatistics)> QueryAsync<T>(string query, CancellationToken cancellationToken)
+    public async Task<IEnumerable<T>> QueryAsync<T>(string query, CancellationToken cancellationToken)
     {
         var q = WebUtility.UrlEncode($"{query} FORMAT JSON");
         var path = $"/v0/sql?q={q}";
         var response = await _httpClient.GetAsync(path, cancellationToken);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<QueryResult<T>>() ?? new QueryResult<T>();
-        return (result.Data, result.Statistics);
+        return result.Data;
     }
 
-    public async Task<(T, QueryStatistics)> QuerySingleAsync<T>(string query, CancellationToken cancellationToken) where T : new()
+    public async Task<T> QuerySingleAsync<T>(string query, CancellationToken cancellationToken) where T : new()
     {
-        var (result, stats) = await QueryAsync<T>(query, cancellationToken);
+        var result = await QueryAsync<T>(query, cancellationToken);
         if (result.Any())
-            return (result.First(), stats);
+            return result.First();
 
-        return (new T(), stats);
+        return new T();
     }
 }

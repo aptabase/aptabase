@@ -47,46 +47,33 @@ export function KeyMetrics(props: Props) {
       })
   );
 
-  const formatDistanceLocale: Record<string, string> = {
-    xSeconds: "{{count}}s",
-    xMinutes: "{{count}}m",
-    xHours: "{{count}}h",
-  };
-
-  const shortEnLocale: Locale = {
-    formatDistance: (token, count) =>
-      formatDistanceLocale[token].replace("{{count}}", count),
-  };
-
-  const duration = formatDuration(
-    intervalToDuration({
-      start: 0,
-      end: (metrics?.durationSeconds || 0) * 1000,
-    }),
-    {
-      format: ["hours", "minutes", "seconds"],
-      locale: shortEnLocale,
-    }
-  );
-
   return (
     <div className="flex justify-between sm:justify-start sm:space-x-4 mb-8">
       {!isLoading && !isError && (
         <>
           <Metric
             label="Sessions"
-            value={metrics?.sessions.toString() || "0"}
+            current={metrics?.current.sessions ?? 0}
+            previous={metrics?.previous?.sessions}
             activeClassName="bg-primary"
             active={props.activeMetrics.includes("sessions")}
             onClick={() => props.onChangeMetric("sessions")}
+            format="number"
           />
-          <Metric label="Avg. Duration" value={duration || "0s"} />
+          <Metric
+            label="Avg. Duration"
+            current={metrics?.current.durationSeconds || 0}
+            previous={metrics?.previous?.durationSeconds}
+            format="duration"
+          />
           <Metric
             label="Events"
             activeClassName="bg-foreground"
-            value={metrics?.events.toString() || "0"}
+            current={metrics?.current.events ?? 0}
+            previous={metrics?.previous?.events}
             active={props.activeMetrics.includes("events")}
             onClick={() => props.onChangeMetric("events")}
+            format="number"
           />
         </>
       )}

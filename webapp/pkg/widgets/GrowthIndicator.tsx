@@ -1,35 +1,53 @@
-import { IconArrowDownRight, IconArrowUpRight } from "@tabler/icons-react";
+import {
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+  Tooltip,
+} from "@app/primitives";
+import {
+  IconArrowDownRight,
+  IconArrowUpRight,
+  IconTrendingDown,
+  IconTrendingUp,
+} from "@tabler/icons-react";
 
 type Props = {
-  values: number[];
+  current: number;
+  previous?: number;
+  previousFormatted?: string;
+  className?: string;
 };
 
-export function calculateGrowth(arr: number[]): number {
-  const half = Math.ceil(arr.length / 2);
-
-  const firstHalf = arr.slice(0, half).reduce((a, b) => a + b, 0);
-  const secondHalf = arr.slice(half).reduce((a, b) => a + b, 0);
-  const growth = 1 - firstHalf / secondHalf;
-
-  if (isNaN(growth) || growth === -Infinity || growth === Infinity) return 0;
-
-  return growth;
-}
-
 export function GrowthIndicator(props: Props) {
-  const growth = calculateGrowth(props.values);
-  if (growth === 0) return null;
+  if (props.previous === 0 && props.current === 0) return null;
+  if (props.previous === undefined || props.previous === 0) return null;
 
+  const growth = (props.current - props.previous) / props.previous;
   const isUp = growth > 0;
   const isDown = growth < 0;
 
   const growthColor = isUp ? "text-success" : "text-destructive";
 
   return (
-    <span className={`text-sm flex font-medium items-center ${growthColor}`}>
-      {isUp && <IconArrowUpRight className="h-4 w-4" />}
-      {isDown && <IconArrowDownRight className="h-4 w-4" />}
-      <span>{Math.floor(growth * 100)}%</span>
-    </span>
+    <TooltipProvider>
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          <span
+            className={`text-sm flex font-medium items-center ${growthColor} ${props.className}`}
+          >
+            {isUp && <IconTrendingUp className="h-3 w-3" />}
+            {isDown && <IconTrendingDown className="h-3 w-3" />}
+            <span className="ml-0.5">{Math.floor(growth * 100)}%</span>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-muted-foreground">
+            Compared to{" "}
+            <span className="text-foreground">{props.previousFormatted}</span>{" "}
+            last period
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

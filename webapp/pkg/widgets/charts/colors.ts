@@ -44,8 +44,8 @@ function createDiagonalPattern(color: string): CanvasPattern | string {
 const root = getComputedStyle(document.documentElement);
 
 const colors = {
-  primary: createLinearGradient("#2563eb", "#3b82f6", "#eff6ff"),
-  primaryStripped: createDiagonalPattern("#2563eb"),
+  primary: createLinearGradient("#0ea5e9", "#3b82f6", "#eff6ff"),
+  primaryStripped: createDiagonalPattern("#0ea5e9"),
   secondary: `hsl(${root.getPropertyValue("--foreground")})`,
   highlight: root.getPropertyValue("--chart-highlight"),
 };

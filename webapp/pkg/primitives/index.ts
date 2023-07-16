@@ -16,3 +16,4 @@ export * from "./TextInput";
 export * from "./api";
 export * from "./useDelay";
 export * from "./useLocalStorage";
+export * from "./Tooltip";

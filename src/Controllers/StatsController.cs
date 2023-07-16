@@ -22,6 +22,23 @@ public class PeriodicStatsRow
 
 public class KeyMetrics
 {
+    public KeyMetricsRow Current { get; set; } = new KeyMetricsRow();
+    public KeyMetricsRow? Previous { get; set; }
+
+    public KeyMetrics(KeyMetricsRow current)
+    {
+        Current = current;
+    }
+
+    public KeyMetrics(KeyMetricsRow current, KeyMetricsRow previous)
+    {
+        Current = current;
+        Previous = previous;
+    }
+}
+
+public class KeyMetricsRow
+{
     public int Sessions { get; set; } = 0;
     public int Events { get; set; } = 0;
     public double DurationSeconds { get; set; } = 0;
@@ -221,32 +238,32 @@ public class StatsController : Controller
     [HttpGet("/api/_stats/metrics")]
     public async Task<IActionResult> KeyMetrics([FromQuery] QueryRequestBody body, CancellationToken cancellationToken)
     {
-        var query = await ToParams(body);
-        if (query == null)
+        var currentQuery = await ToParams(body, DateTime.UtcNow);
+        if (currentQuery == null)
             return BadRequest();
 
-        var (row, stats) = await _queryClient.QuerySingleAsync<KeyMetrics>(
-            $@"SELECT uniq(session_id) as Sessions,
-                      if(isNaN(median(max - min)), 0, median(max - min)) as DurationSeconds,
-                      sum(count) as Events
-               FROM (
-                    SELECT min(timestamp) as min, max(timestamp) as max, session_id, count(*) as count
-                    FROM events
-                    {query.ToFilter()}
-                    GROUP BY session_id
-               )", cancellationToken);
+        var current = await GetKeyMetrics(currentQuery, cancellationToken);
 
-        return OkWithStats(row, stats);
+        if (!currentQuery.DateFrom.HasValue) {
+            return Ok(new KeyMetrics(current));
+        }
+
+        var previousQuery = await ToParams(body, currentQuery.DateFrom.Value);
+        if (previousQuery == null)
+            return BadRequest();
+
+        var previous = await GetKeyMetrics(previousQuery, cancellationToken);
+        return Ok(new KeyMetrics(current, previous));
     }
 
     [HttpGet("/api/_stats/periodic")]
     public async Task<IActionResult> PeriodicStats([FromQuery] QueryRequestBody body, CancellationToken cancellationToken)
     {
-        var query = await ToParams(body);
+        var query = await ToParams(body, DateTime.UtcNow);
         if (query == null)
             return BadRequest();
 
-        var (rows, stats) = await _queryClient.QueryAsync<PeriodicStatsRow>(
+        var rows = await _queryClient.QueryAsync<PeriodicStatsRow>(
             $@"SELECT
                     {query.ToGranularPeriod("timestamp")} as Period,
                     uniq(session_id) as Sessions,
@@ -257,22 +274,21 @@ public class StatsController : Controller
                 ORDER BY {query.ToGranularPeriod("timestamp")} ASC
                 {query.ToFill()}", cancellationToken);
 
-        var result = new PeriodicStats
+        return Ok(new PeriodicStats
         {
             Rows = rows,
             Granularity = query.Granularity.ToString().ToLower()
-        };
-        return OkWithStats(result, stats);
+        });
     }
 
     [HttpGet("/api/_stats/top-props")]
     public async Task<IActionResult> EventProps([FromQuery] QueryRequestBody body, CancellationToken cancellationToken)
     {
-        var query = await ToParams(body);
+        var query = await ToParams(body, DateTime.UtcNow);
         if (query == null)
             return BadRequest();
 
-        var (rows, stats) = await _queryClient.QueryAsync<EventPropsItem>(
+        var rows = await _queryClient.QueryAsync<EventPropsItem>(
             $@"SELECT string_arr.1 as StringKey,
                       string_arr.2 as StringValue,
                       numeric_arr.1 as NumericKey,
@@ -291,12 +307,26 @@ public class StatsController : Controller
                 GROUP BY StringKey, StringValue, NumericKey
                 ORDER BY StringKey, Events DESC", cancellationToken);
 
-        return OkWithStats(rows, stats);
+        return Ok(rows);
+    }
+
+    private async Task<KeyMetricsRow> GetKeyMetrics(QueryParams query, CancellationToken cancellationToken)
+    {
+        return await _queryClient.QuerySingleAsync<KeyMetricsRow>(
+            $@"SELECT uniq(session_id) as Sessions,
+                    if(isNaN(median(max - min)), 0, median(max - min)) as DurationSeconds,
+                    sum(count) as Events
+            FROM (
+                    SELECT min(timestamp) as min, max(timestamp) as max, session_id, count(*) as count
+                    FROM events
+                    {query.ToFilter()}
+                    GROUP BY session_id
+            )", cancellationToken);
     }
 
     private async Task<IActionResult> TopN(string fieldName, TopNValue value, QueryRequestBody body, CancellationToken cancellationToken)
     {
-        var query = await ToParams(body);
+        var query = await ToParams(body, DateTime.UtcNow);
         if (query == null)
             return BadRequest();
 
@@ -307,7 +337,7 @@ public class StatsController : Controller
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
 
-        var (rows, stats) = await _queryClient.QueryAsync<TopNItem>(
+        var rows = await _queryClient.QueryAsync<TopNItem>(
             $@"SELECT {fieldName} as Name,
                       {valueField} as Value
               FROM events
@@ -315,36 +345,33 @@ public class StatsController : Controller
               GROUP BY Name
               ORDER BY Value DESC", cancellationToken);
 
-        return OkWithStats(rows, stats);
+        return Ok(rows);
     }
 
-    private IActionResult OkWithStats(object value, QueryStatistics stats)
-    {
-        this.Response.Headers.Add("x-stats-bytes", stats.BytesRead.ToString());
-        this.Response.Headers.Add("x-stats-rows", stats.RowsRead.ToString());
-        return Ok(value);
-    }
-
-    private async Task<QueryParams?> ToParams(QueryRequestBody body)
+    private async Task<QueryParams?> ToParams(QueryRequestBody body, DateTime relativeTo)
     {
         var allowed = await HasAccessTo(body.AppId);
         if (!allowed)
             return null;
 
+        // Go back 1 second so that when relativeTo is 00:00:00 we start with the previous day
+        // Happens when looking for previous period and "period" is "month" or "last-month"
+        relativeTo = relativeTo.AddSeconds(-1);
+
         (DateTime? dateFrom, DateTime? dateTo, Granularity granularity) = body.Period switch
         {
-            "24h" => (DateTime.UtcNow.AddHours(-24), null, Granularity.Hour),
-            "48h" => (DateTime.UtcNow.AddHours(-48), null, Granularity.Hour),
-            "7d" => (DateTime.UtcNow.Date.AddDays(-7), null, Granularity.Day),
-            "14d" => (DateTime.UtcNow.Date.AddDays(-14), null, Granularity.Day),
-            "30d" => (DateTime.UtcNow.Date.AddDays(-30), null, Granularity.Day),
-            "90d" => (DateTime.UtcNow.Date.AddDays(-90), null, Granularity.Day),
-            "180d" => (DateTime.UtcNow.Date.AddDays(-180), null, Granularity.Month),
-            "365d" => (DateTime.UtcNow.Date.AddDays(-365), null, Granularity.Month),
-            "month" => (new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1), null, Granularity.Day),
-            "last-month" => (new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1).AddMonths(-1), new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1), Granularity.Day),
+            "24h" => (relativeTo.AddHours(-24), relativeTo, Granularity.Hour),
+            "48h" => (relativeTo.AddHours(-48), relativeTo, Granularity.Hour),
+            "7d" => (relativeTo.Date.AddDays(-7), relativeTo, Granularity.Day),
+            "14d" => (relativeTo.Date.AddDays(-14), relativeTo, Granularity.Day),
+            "30d" => (relativeTo.Date.AddDays(-30), relativeTo, Granularity.Day),
+            "90d" => (relativeTo.Date.AddDays(-90), relativeTo, Granularity.Day),
+            "180d" => (relativeTo.Date.AddDays(-180), relativeTo, Granularity.Month),
+            "365d" => (relativeTo.Date.AddDays(-365), relativeTo, Granularity.Month),
+            "month" => (new DateTime(relativeTo.Year, relativeTo.Month, 1), new DateTime(relativeTo.Year, relativeTo.Month, 1).AddMonths(1).AddDays(-1), Granularity.Day),
+            "last-month" => (new DateTime(relativeTo.Year, relativeTo.Month, 1).AddMonths(-1), new DateTime(relativeTo.Year, relativeTo.Month, 1), Granularity.Day),
             "all" => (default(DateTime?), default(DateTime?), Granularity.Month),
-            _ => (DateTime.UtcNow.AddHours(-24), null, Granularity.Hour), // default to 24 hours
+            _ => (relativeTo.AddHours(-24), relativeTo, Granularity.Hour), // default to 24 hours
         };
 
         var buildMode = body.BuildMode.ToLower() switch
