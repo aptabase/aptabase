@@ -47,28 +47,29 @@ export function Metric(props: Props) {
 
   return (
     <Container
-      className={clsx("flex flex-col py-2 px-4 rounded min-w-[6rem]", {
-        "hover:bg-accent": props.onClick,
-      })}
+      className={clsx(
+        "flex flex-col text-center sm:text-left rounded p-2 min-w-[6rem]",
+        props.onClick ? "hover:bg-accent" : null
+      )}
       onClick={props.onClick}
     >
-      <div className="text-2xl font-semibold">
+      <div className="text-2xl font-semibold w-full">
         {formatNumber(props.current, props.format)}
       </div>
-      <div className="text-sm text-muted-foreground">
+      <div className="text-sm text-muted-foreground w-full">
         {props.label}{" "}
         <div
           className={clsx(
             "ml-1 p-1 inline-block rounded",
             props.activeClassName,
             {
-              invisible: !props.active,
+              hidden: !props.active,
             }
           )}
         />
       </div>
       <GrowthIndicator
-        className="mt-1"
+        className="mt-1 w-full sm:w-auto"
         current={props.current}
         previous={props.previous}
         previousFormatted={`${formatNumber(

@@ -48,7 +48,7 @@ export function KeyMetrics(props: Props) {
   );
 
   return (
-    <div className="flex justify-between sm:justify-start sm:space-x-4 mb-8">
+    <div className="h-24 flex justify-between sm:justify-start sm:space-x-4 mb-2">
       {!isLoading && !isError && (
         <>
           <Metric
@@ -61,12 +61,6 @@ export function KeyMetrics(props: Props) {
             format="number"
           />
           <Metric
-            label="Avg. Duration"
-            current={metrics?.current.durationSeconds || 0}
-            previous={metrics?.previous?.durationSeconds}
-            format="duration"
-          />
-          <Metric
             label="Events"
             activeClassName="bg-foreground"
             current={metrics?.current.events ?? 0}
@@ -74,6 +68,12 @@ export function KeyMetrics(props: Props) {
             active={props.activeMetrics.includes("events")}
             onClick={() => props.onChangeMetric("events")}
             format="number"
+          />
+          <Metric
+            label="Avg. Duration"
+            current={metrics?.current.durationSeconds || 0}
+            previous={metrics?.previous?.durationSeconds}
+            format="duration"
           />
         </>
       )}

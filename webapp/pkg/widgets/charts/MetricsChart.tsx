@@ -247,7 +247,7 @@ export function MetricsChart(props: Props) {
   }, [canvasRef, props]);
 
   return (
-    <div className="h-80 w-full">
+    <div className="h-60 md:h-80 w-full">
       {props.isError ? (
         <ErrorState />
       ) : props.isLoading ? (

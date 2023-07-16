@@ -35,7 +35,7 @@ export function GrowthIndicator(props: Props) {
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
           <span
-            className={`text-sm flex font-medium items-center ${growthColor} ${props.className}`}
+            className={`text-sm flex justify-center font-medium items-center ${growthColor} ${props.className}`}
           >
             {isUp && <IconTrendingUp className="h-3 w-3" />}
             {isDown && <IconTrendingDown className="h-3 w-3" />}

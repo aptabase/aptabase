@@ -9,7 +9,10 @@ type Props = {
 export function Card(props: Props) {
   return (
     <LazyLoad
-      className={clsx("min-h-[12rem] bg-background p-4", props.className)}
+      className={clsx(
+        "min-h-[12rem] bg-background py-4 sm:px-4",
+        props.className
+      )}
     >
       {props.children}
     </LazyLoad>

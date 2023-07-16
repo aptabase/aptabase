@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { keyMetrics, periodicStats } from "./query";
 import { NumbersChart } from "./NumbersChart";
 import { GrowthIndicator } from "./GrowthIndicator";
+import { useEffect } from "react";
 
 type Props = {
   app: Application;
@@ -28,7 +29,7 @@ export function AppSummaryWidget(props: Props) {
       })
   );
 
-  const { data } = useQuery(
+  const { data: values } = useQuery(
     ["periodic-stats", props.app.id, props.buildMode, period],
     () =>
       periodicStats({
@@ -39,11 +40,11 @@ export function AppSummaryWidget(props: Props) {
         appVersion: "",
         eventName: "",
         osName: "",
-      })
+      }).then((s) => s.rows.map((x) => x.sessions))
   );
 
   const params = period ? `?period=${period}` : "";
-  const values = data?.rows.map((x) => x.sessions) ?? [];
+
   return (
     <Link
       to={`/${props.app.id}/${params}`}
@@ -76,7 +77,7 @@ export function AppSummaryWidget(props: Props) {
         </div>
       </div>
       <div className="h-32">
-        <NumbersChart values={values} />
+        <NumbersChart values={values ?? []} />
       </div>
     </Link>
   );
