@@ -8,6 +8,7 @@ export * from "./LazyLoad";
 export * from "./LoadingState";
 export * from "./Logo";
 export * from "./Markdown";
+export * from "./format";
 export * from "./PageHeading";
 export * from "./Region";
 export * from "./Select";

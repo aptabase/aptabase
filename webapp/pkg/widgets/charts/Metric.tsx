@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { GrowthIndicator } from "../GrowthIndicator";
-import { formatDuration, intervalToDuration } from "date-fns";
+import { formatNumber } from "@app/primitives";
 
 type Props = {
   label: string;
@@ -11,36 +11,6 @@ type Props = {
   onClick?: VoidFunction;
   format: "duration" | "number";
 };
-
-const formatDistanceLocale: Record<string, string> = {
-  xSeconds: "{{count}}s",
-  xMinutes: "{{count}}m",
-  xHours: "{{count}}h",
-};
-
-const shortEnLocale: Locale = {
-  formatDistance: (token, count) =>
-    formatDistanceLocale[token].replace("{{count}}", count),
-};
-
-function formatNumber(value: number, format: Props["format"]): string {
-  if (format === "duration") {
-    if (value === 0) return "0s";
-
-    return formatDuration(
-      intervalToDuration({
-        start: 0,
-        end: value * 1000,
-      }),
-      {
-        format: ["hours", "minutes", "seconds"],
-        locale: shortEnLocale,
-      }
-    );
-  }
-
-  return value.toString();
-}
 
 export function Metric(props: Props) {
   const Container = props.onClick ? "button" : "div";

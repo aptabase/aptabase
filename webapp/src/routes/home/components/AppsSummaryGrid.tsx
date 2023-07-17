@@ -22,10 +22,7 @@ export function AppsSummaryGrid(props: Props) {
   return (
     <>
       <div className="flex justify-between items-end">
-        <PageHeading
-          title="Your Apps"
-          subtitle="Select an app to get started"
-        />
+        <PageHeading title="My Apps" subtitle="Select an app to see more" />
         <div className="flex items-center">
           <AppConfigMenu />
           <DateRangePicker />

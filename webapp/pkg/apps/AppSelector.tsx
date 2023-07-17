@@ -6,6 +6,7 @@ import { CreateAppModal } from "./CreateAppModal";
 import { IconPlus, IconSelector } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { AppIcon } from "./AppIcon";
+import { Button } from "@app/primitives";
 
 type OptionProps = {
   value?: Application;
@@ -36,17 +37,34 @@ export function AppSelector() {
   const navigate = useNavigate();
   const [showCreateAppModal, setShowCreateAppModal] = useState(false);
 
-  if (apps.length === 0 || !currentApp) {
-    return <div className="h-9" />;
-  }
-
   const onChange = async (app: Application | undefined) => {
     if (!app) {
-      return setShowCreateAppModal(true);
+      return openCreateAppModal();
     }
 
     navigate(`/${app.id}/`);
   };
+
+  const openCreateAppModal = () => setShowCreateAppModal(true);
+
+  if (apps.length === 0 || !currentApp) {
+    return (
+      <>
+        <CreateAppModal
+          open={showCreateAppModal}
+          onClose={() => setShowCreateAppModal(false)}
+        />
+        <Button
+          variant="ghost"
+          className="w-full justify-start space-x-1"
+          onClick={openCreateAppModal}
+        >
+          <IconPlus strokeWidth={1.75} className="h-4 w-4" />
+          <span>Create new App</span>
+        </Button>
+      </>
+    );
+  }
 
   return (
     <>

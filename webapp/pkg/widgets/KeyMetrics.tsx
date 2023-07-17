@@ -1,6 +1,5 @@
 import { Metric } from "./charts";
 import { useQuery } from "@tanstack/react-query";
-import { formatDuration, intervalToDuration } from "date-fns";
 import { useSearchParams } from "react-router-dom";
 import { keyMetrics } from "./query";
 import { useApps } from "@app/apps";

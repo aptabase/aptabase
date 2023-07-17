@@ -68,7 +68,7 @@ export function AppSummaryWidget(props: Props) {
           ) : null}
         </div>
         <div className="h-6">
-          {metrics?.current.sessions ? (
+          {metrics ? (
             <p className="text-sm text-muted-foreground text-right">sessions</p>
           ) : null}
         </div>
