@@ -46,4 +46,23 @@ public class TinybirdQueryClient : IQueryClient
 
         return new T();
     }
+
+    public async Task<IEnumerable<T>> NamedQueryAsync<T>(string name, KeyValuePair<string, string?>[] args, CancellationToken cancellationToken)
+    {
+        var qs = QueryString.Create(args).ToUriComponent();
+        var path = $"/v0/pipes/{name}.json{qs}";
+        var response = await _httpClient.GetAsync(path, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<QueryResult<T>>() ?? new QueryResult<T>();
+        return result.Data;
+    }
+
+    public async Task<T> NamedQuerySingleAsync<T>(string name, KeyValuePair<string, string?>[] args, CancellationToken cancellationToken) where T : new()
+    {
+        var result = await NamedQueryAsync<T>(name, args, cancellationToken);
+        if (result.Any())
+            return result.First();
+
+        return new T();
+    }
 }

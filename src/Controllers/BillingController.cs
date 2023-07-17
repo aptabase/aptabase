@@ -33,17 +33,14 @@ public class BillingController : Controller
         var debugAppIds = releaseAppIds.Select(id => $"{id}_DEBUG");
         var appIds = releaseAppIds.Concat(debugAppIds);
 
-        var (year, month) = (DateTime.UtcNow.Year, DateTime.UtcNow.Month);
-
-        var rows = await _queryClient.QueryAsync<BillingUsage>(
-            $@"SELECT countMerge(events) as Count
-               FROM billing_usage_v1_mv
-               WHERE app_id IN ('{string.Join("','", appIds)}')
-               AND year = {year}
-               AND month = {month}", cancellationToken);
+        var usage = await _queryClient.NamedQuerySingleAsync<BillingUsage>("get_billing_usage", new KeyValuePair<string, string?>[] {
+            new("app_ids", String.Join(",", appIds)),
+            new("year", DateTime.UtcNow.Year.ToString()),
+            new("month", DateTime.UtcNow.Month.ToString())
+        }, cancellationToken);
         
         return Ok(new {
-            Count = rows.FirstOrDefault()?.Count ?? 0,
+            Count = usage?.Count ?? 0,
             Quota = 20000
         });
     }

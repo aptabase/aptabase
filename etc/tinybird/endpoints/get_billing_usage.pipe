@@ -1,0 +1,8 @@
+NODE endpoint
+SQL >
+    %
+    SELECT countMerge(events) as Count
+    FROM billing_usage_v1_mv
+    WHERE app_id IN {{Array(app_ids, 'String')}}
+    AND year = {{Int32(year)}}
+    AND month = {{Int32(month)}}
