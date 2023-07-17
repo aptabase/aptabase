@@ -1,4 +1,4 @@
-import { EmptyState, ErrorState } from "@app/primitives";
+import { EmptyState, ErrorState, formatNumber } from "@app/primitives";
 import { Link } from "react-router-dom";
 import { TopNSkeleton } from "./TopNSkeleton";
 import { CardTitle } from "../CardTitle";
@@ -94,7 +94,7 @@ function TopNRow(props: TopNRowProps) {
         />
         <div className="flex z-10">{props.children}</div>
       </div>
-      <p className="text-sm pr-2 z-10">{props.item.value}</p>
+      <p className="text-sm pr-2 z-10">{formatNumber(props.item.value)}</p>
     </div>
   );
 

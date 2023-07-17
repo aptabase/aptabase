@@ -18,7 +18,7 @@ export function Metric(props: Props) {
   return (
     <Container
       className={clsx(
-        "flex flex-col text-center sm:text-left rounded p-2 min-w-[6rem]",
+        "inline-flex flex-col text-center rounded p-2 min-w-[6rem]",
         props.onClick ? "hover:bg-accent" : null
       )}
       onClick={props.onClick}
@@ -39,7 +39,7 @@ export function Metric(props: Props) {
         />
       </div>
       <GrowthIndicator
-        className="mt-1 w-full sm:w-auto"
+        className="mt-1 w-full"
         current={props.current}
         previous={props.previous}
         previousFormatted={`${formatNumber(

@@ -25,7 +25,7 @@ function formatLargeNumber(num: number): string {
 
 export function formatNumber(
   value: number | undefined,
-  format: "number" | "duration"
+  format?: "number" | "duration"
 ): string {
   if (format === "duration") {
     if (value === 0) return "0s";
