@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { AppIconUpload, Application, useApps, useCurrentApp } from "@app/apps";
+import { AppIconUpload, Application, useApps } from "@app/apps";
 import { Button, TextInput } from "@app/primitives";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 type Props = {
   app: Application;

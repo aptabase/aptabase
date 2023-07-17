@@ -1,11 +1,11 @@
-using System.ComponentModel.DataAnnotations;
-using System.Data;
-using Aptabase.Application;
-using Aptabase.Application.Authentication;
-using Aptabase.Application.Blob;
-using Aptabase.Data;
 using Dapper;
+using System.Data;
+using Aptabase.Data;
+using Aptabase.Application;
+using Aptabase.Application.Blob;
 using Microsoft.AspNetCore.Mvc;
+using Aptabase.Application.Authentication;
+using System.ComponentModel.DataAnnotations;
 
 namespace Aptabase.Controllers;
 
@@ -15,6 +15,13 @@ public class Application
     public string Name { get; set; } = "";
     public string AppKey { get; set; } = "";
     public string IconPath { get; set; } = "";
+    public bool HasOwnership { get; set; } = false;
+}
+
+public class ApplicationShare
+{
+    public string Email { get; set; } = "";
+    public DateTime CreatedAt { get; set; }
 }
 
 public class CreateAppRequestBody
@@ -52,12 +59,17 @@ public class AppsController : Controller
     public async Task<IActionResult> ListApps()
     {
         var user = this.GetCurrentUser();
+
         var apps = await _db.QueryAsync<Application>(
-            @"SELECT id, name, icon_path, app_key
-              FROM apps
-              WHERE owner_id = @userId
-              AND deleted_at IS NULL
-              ORDER by name", new { userId = user.Id });
+            @"SELECT a.id, a.name, a.icon_path, a.app_key, a.owner_id = @userId as has_ownership
+              FROM apps a
+              LEFT JOIN app_shares s
+              ON s.app_id = a.id
+              WHERE (a.owner_id = @userId OR s.email = @userEmail)
+              AND a.deleted_at IS NULL
+              GROUP BY a.id, a.name, a.icon_path, a.app_key
+              ORDER by a.name", new { userId = user.Id, userEmail = user.Email });
+              
         return Ok(apps);
     }
 
@@ -86,7 +98,7 @@ public class AppsController : Controller
     [HttpPut("/api/_apps/{appId}")]
     public async Task<IActionResult> Update(string appId, [FromBody] UpdateAppRequestBody body, CancellationToken cancellationToken)
     {
-        var app = await FindAppById(appId);
+        var app = await GetOwnedApp(appId);
         if (app == null)
             return NotFound();
 
@@ -110,7 +122,7 @@ public class AppsController : Controller
     [HttpDelete("/api/_apps/{appId}")]
     public async Task<IActionResult> Delete(string appId)
     {
-        var app = await FindAppById(appId);
+        var app = await GetOwnedApp(appId);
         if (app == null)
             return NotFound();
 
@@ -122,14 +134,63 @@ public class AppsController : Controller
         return Ok(new { });
     }
 
-    private async Task<Application?> FindAppById(string id)
+    [HttpGet("/api/_apps/{appId}/shares")]
+    public async Task<IActionResult> ListAppShares(string appId)
+    {
+        var app = await GetOwnedApp(appId);
+        if (app == null)
+            return NotFound();
+            
+        var shares = await _db.QueryAsync<ApplicationShare>(
+                            @"SELECT email, created_at
+                            FROM app_shares
+                            WHERE app_id = @appId", new { appId });
+        return Ok(shares);
+    }
+
+    [HttpPut("/api/_apps/{appId}/shares/{email}")]
+    public async Task<IActionResult> ShareApp(string appId, string email)
+    {
+        var app = await GetOwnedApp(appId);
+        if (app == null)
+            return NotFound();
+
+        await _db.ExecuteScalarAsync<string>(@"
+            INSERT INTO app_shares (app_id, email)
+            VALUES (@appId, @email)
+            ON CONFLICT DO NOTHING", new
+        {
+            appId = appId,
+            email = email,
+        });
+
+        return Ok(new { });
+    }
+
+    [HttpDelete("/api/_apps/{appId}/shares/{email}")]
+    public async Task<IActionResult> UnshareApp(string appId, string email)
+    {
+        var app = await GetOwnedApp(appId);
+        if (app == null)
+            return NotFound();
+
+        await _db.ExecuteScalarAsync<string>(@"DELETE FROM app_shares WHERE app_id = @appId AND email = @email", new
+        {
+            appId = appId,
+            email = email,
+        });
+
+        return Ok(new { });
+    }
+
+    private async Task<Application?> GetOwnedApp(string appId)
     {
         var user = this.GetCurrentUser();
         return await _db.QueryFirstOrDefaultAsync<Application>(
-                @"SELECT id, name, icon_path, app_key
+                @"SELECT id, name, icon_path, app_key, true as has_ownership
                 FROM apps
                 WHERE id = @appId
                 AND owner_id = @userId
-                AND deleted_at IS NULL", new { appId = id, userId = user.Id });
+                AND deleted_at IS NULL", new { appId, userId = user.Id });
     }
 }

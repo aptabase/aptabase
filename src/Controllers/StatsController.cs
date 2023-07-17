@@ -398,11 +398,14 @@ public class StatsController : Controller
     {
         var user = this.GetCurrentUser();
         var id = await _db.ExecuteScalarAsync<string>(
-            @"SELECT id
-              FROM apps
-              WHERE id = @appId
-              AND owner_id = @userId",
-              new { appId, userId = user.Id }
+            @"SELECT a.id
+              FROM apps a
+              LEFT JOIN app_shares s
+              ON s.app_id = a.id
+              WHERE a.id = @appId
+              AND (a.owner_id = @userId OR s.email = @userEmail)
+              LIMIT 1",
+              new { appId, userId = user.Id, userEmail = user.Email }
         );
         return id == appId;
     }

@@ -56,14 +56,14 @@ async function get<T>(path: string, params?: Record<string, any>): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-async function post<T>(path: string, body: any): Promise<T> {
+async function post<T>(path: string, body?: any): Promise<T> {
   const [status, response] = await _fetch("POST", path, body);
 
   await handleError(status, response);
   return response.json() as Promise<T>;
 }
 
-async function put<T>(path: string, body: any): Promise<T> {
+async function put<T>(path: string, body?: any): Promise<T> {
   const [status, response] = await _fetch("PUT", path, body);
 
   await handleError(status, response);
