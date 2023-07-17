@@ -4,7 +4,6 @@ import { Link, useSearchParams } from "react-router-dom";
 import { keyMetrics, periodicStats } from "./query";
 import { NumbersChart } from "./NumbersChart";
 import { GrowthIndicator } from "./GrowthIndicator";
-import { useEffect } from "react";
 
 type Props = {
   app: Application;
@@ -57,22 +56,20 @@ export function AppSummaryWidget(props: Props) {
             <AppIcon className="w-6 h-6" iconPath={props.app.iconPath} />
             <span className="truncate">{props.app.name}</span>
           </div>
-        </div>
-        <div className="h-6">
-          {metrics?.current.sessions ? (
-            <div className="flex items-center justify-between ">
-              <span className="text-sm text-muted-foreground mt-2 text-right">
-                <span className="text-foreground">
-                  {metrics?.current.sessions}
-                </span>{" "}
-                sessions
-              </span>
+          {metrics ? (
+            <div className="flex items-center space-x-2">
               <GrowthIndicator
                 current={metrics.current.sessions}
                 previous={metrics.previous?.sessions}
                 previousFormatted={`${metrics.previous?.sessions} sessions`}
               />
+              <span className="text-lg">{metrics?.current.sessions}</span>
             </div>
+          ) : null}
+        </div>
+        <div className="h-6">
+          {metrics?.current.sessions ? (
+            <p className="text-sm text-muted-foreground text-right">sessions</p>
           ) : null}
         </div>
       </div>
