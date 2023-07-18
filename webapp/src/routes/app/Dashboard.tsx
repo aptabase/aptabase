@@ -29,7 +29,7 @@ export function Component() {
 
   if (!app) return <Navigate to="/" />;
 
-  const resetFilters = () => navigate(`${app.id}/`);
+  const resetFilters = () => navigate(`/${app.id}/`);
 
   return (
     <>
