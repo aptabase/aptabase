@@ -46,24 +46,8 @@ export function AppSelector() {
   };
 
   const openCreateAppModal = () => setShowCreateAppModal(true);
-
-  if (apps.length === 0 || !currentApp) {
-    return (
-      <>
-        <CreateAppModal
-          open={showCreateAppModal}
-          onClose={() => setShowCreateAppModal(false)}
-        />
-        <Button
-          variant="ghost"
-          className="w-full justify-start space-x-1"
-          onClick={openCreateAppModal}
-        >
-          <IconPlus strokeWidth={1.75} className="h-4 w-4" />
-          <span>Create new App</span>
-        </Button>
-      </>
-    );
+  if (apps.length === 0) {
+    return <div className="h-8" />;
   }
 
   return (
@@ -77,12 +61,20 @@ export function AppSelector() {
           <>
             <div className="relative w-full h-9">
               <Listbox.Button className="relative flex items-center space-x-1 rounded-md py-1.5 text-left hover:bg-accent px-2 w-full">
-                <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />
+                {currentApp && (
+                  <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />
+                )}
                 <div className="flex items-center justify-between truncate w-full">
-                  <span className="block truncate">{currentApp.name}</span>
+                  <span className="block truncate">
+                    {currentApp?.name ?? (
+                      <span className="text-muted-foreground text-sm">
+                        Select an App
+                      </span>
+                    )}
+                  </span>
                   <IconSelector
                     strokeWidth={2}
-                    className="min-h-4 max-h-4 min-w-4 max-w-4"
+                    className="min-h-4 max-h-4 min-w-4 max-w-4 text-muted-foreground"
                   />
                 </div>
               </Listbox.Button>

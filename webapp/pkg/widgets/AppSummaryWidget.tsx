@@ -51,7 +51,7 @@ export function AppSummaryWidget(props: Props) {
       className="border rounded shadow hover:bg-muted"
     >
       <div className="p-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between h-6">
           <div className="flex items-center space-x-2 truncate">
             <AppIcon className="w-6 h-6" iconPath={props.app.iconPath} />
             <span className="truncate">{props.app.name}</span>
@@ -63,7 +63,7 @@ export function AppSummaryWidget(props: Props) {
                 previous={metrics.previous?.sessions}
                 previousFormatted={`${metrics.previous?.sessions} sessions`}
               />
-              <span className="text-lg">{metrics?.current.sessions}</span>
+              <span className="text-2xl">{metrics?.current.sessions}</span>
             </div>
           ) : null}
         </div>

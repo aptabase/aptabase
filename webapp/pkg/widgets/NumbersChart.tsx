@@ -43,7 +43,7 @@ export function NumbersChart(props: Props) {
             label: "Clicks",
             data: props.values,
             borderColor: "#0ea5e9",
-            tension: 0,
+            tension: 0.2,
             fill: "origin",
             backgroundColor: "rgb(14, 165, 233, 0.1)",
             borderWidth: 2,
@@ -58,9 +58,7 @@ export function NumbersChart(props: Props) {
             enabled: false,
           },
         },
-        animation: {
-          duration: 300,
-        },
+        animation: false,
         interaction: {
           mode: "index",
           intersect: false,
