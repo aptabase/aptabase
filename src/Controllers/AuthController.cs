@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using Aptabase.Application;
-using Aptabase.Application.Authentication;
+using Aptabase.Features;
+using Aptabase.Features.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;

@@ -1,10 +1,10 @@
 using Dapper;
 using System.Data;
 using Aptabase.Data;
-using Aptabase.Application;
-using Aptabase.Application.Blob;
+using Aptabase.Features;
+using Aptabase.Features.Blob;
 using Microsoft.AspNetCore.Mvc;
-using Aptabase.Application.Authentication;
+using Aptabase.Features.Authentication;
 using System.ComponentModel.DataAnnotations;
 
 namespace Aptabase.Controllers;
