@@ -1,21 +1,18 @@
-version: '3'
+version: "3"
 services:
   app:
-    # This example uses an image, but for your own application,
-    # you should use a Dockerfile. See the documentation for more information.
-    image: ergomake/ergomake-example
+    build: ../
     ports:
-      # The first port here will be the one our link points to.
-      - 3000:3000
+      - "8080:80"
     environment:
-      # Our application uses this environment variable to determine
-      # where to connect to the Redis instance.
-      REDIS_URL: "redis://redis:6379"
+      BASE_URL: https://{{ services.api.url }}
+      AUTH_SECRET: sTr0NGs3cr3t
+      DATABASE_URL: Server=db;Port=5432;User Id=aptabase;Password=aptabase_pw;Database=aptabase
 
-  # You can add databases in a similar way.
-  # We use the service name as the hostname in the URL.
-  redis:
-    image: redis
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: aptabase
+      POSTGRES_PASSWORD: aptabase_pw
     ports:
-        # We don't want to expose this port, so we don't bind it to localhost.
-        - "6379"
+      - 5432
