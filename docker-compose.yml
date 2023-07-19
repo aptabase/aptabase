@@ -7,18 +7,38 @@ services:
     volumes:
       - pgdev-data:/var/lib/postgresql/data
     ports:
-      - "5444:5432"
+      - "5432:5432"
     environment:
       POSTGRES_USER: aptabase
       POSTGRES_PASSWORD: aptabase_pw
+
+  clickhousedev:
+    container_name: aptabase_clickhousedev
+    image: clickhouse/clickhouse-server:23.3.8.21
+    restart: always
+    ports:
+      - "8123:8123"
+    volumes:
+      - clickhousedev-data:/var/lib/clickhouse
+    environment:
+      CLICKHOUSE_USER: aptabase
+      CLICKHOUSE_PASSWORD: aptabase_pw
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
   mailhog:
     container_name: aptabase_mailhog
     image: mailhog/mailhog
     logging:
-      driver: "none" # disable saving logs
+      driver: "none"
     ports:
-      - 1025:1025 # smtp server
-      - 8025:8025 # web ui
+      - 1025:1025
+      - 8025:8025
 
 volumes:
   pgdev-data:
+    driver: local
+  clickhousedev-data:
+    driver: local

@@ -31,12 +31,12 @@ public class BillingController : Controller
         var user = this.GetCurrentUser();
         var releaseAppIds = await _db.QueryAsync<string>(@"SELECT id FROM apps WHERE owner_id = @userId", new { userId = user.Id });
         var debugAppIds = releaseAppIds.Select(id => $"{id}_DEBUG");
-        var appIds = releaseAppIds.Concat(debugAppIds);
+        var appIds = releaseAppIds.Concat(debugAppIds).ToArray();
 
-        var usage = await _queryClient.NamedQuerySingleAsync<BillingUsage>("get_billing_usage", new KeyValuePair<string, string>[] {
-            new("app_ids", String.Join(",", appIds)),
-            new("year", DateTime.UtcNow.Year.ToString()),
-            new("month", DateTime.UtcNow.Month.ToString())
+        var usage = await _queryClient.NamedQuerySingleAsync<BillingUsage>("get_billing_usage", new {
+            app_ids = appIds,
+            year = DateTime.UtcNow.Year,
+            month = DateTime.UtcNow.Month
         }, cancellationToken);
         
         return Ok(new {

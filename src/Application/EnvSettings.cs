@@ -14,6 +14,11 @@ public class EnvSettings
     // Variable Name: DATABASE_URL
     public string ConnectionString { get; private set; } = "";
 
+    // The full connection string to ClickHouse using .NET format
+    // E.g: Host=my.clickhouse;Protocol=https;Port=12345;Username=user
+    // Variable Name: CLICKHOUSE_URL
+    public string ClickHouseConnectionString { get; private set; } = "";
+
     // The base URI of the Tinybird API
     // E.g: https://api.tinybird.co
     // Variable Name: TINYBIRD_BASE_URL
@@ -83,8 +88,9 @@ public class EnvSettings
             Region = region,
             SelfBaseUrl = MustGet("BASE_URL"),
             ConnectionString = MustGet("DATABASE_URL"),
-            TinybirdBaseUrl = MustGet("TINYBIRD_BASE_URL"),
-            TinybirdToken = MustGet("TINYBIRD_TOKEN"),
+            ClickHouseConnectionString = Get("CLICKHOUSE_URL"),
+            TinybirdBaseUrl = Get("TINYBIRD_BASE_URL"),
+            TinybirdToken = Get("TINYBIRD_TOKEN"),
             AuthSecret = Encoding.ASCII.GetBytes(MustGet("AUTH_SECRET")),
 
             SmtpHost = Get("SMTP_HOST"),

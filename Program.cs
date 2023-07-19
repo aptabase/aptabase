@@ -15,6 +15,8 @@ using Aptabase.Application.Query;
 using Aptabase.Application.Blob;
 using Aptabase.CronJobs;
 using Aptabase.Application.GeoIP;
+using ClickHouse.Client.ADO;
+using ClickHouse.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
@@ -101,17 +103,26 @@ builder.Services.AddSingleton(appEnv);
 builder.Services.AddSingleton<IIngestionValidator, IngestionValidator>();
 builder.Services.AddSingleton<IBlobService, DatabaseBlobService>();
 builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
-
-builder.Services.AddSingleton<IQueryClient, TinybirdQueryClient>();
-builder.Services.AddSingleton<IIngestionClient, TinybirdIngestionClient>();
-builder.Services.AddHttpClient("Tinybird", client =>
-{
-    client.BaseAddress = new Uri(appEnv.TinybirdBaseUrl);
-    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", appEnv.TinybirdToken);
-});
-
 builder.Services.AddGeoIPClient(appEnv);
 builder.Services.AddEmailClient(appEnv);
+
+if (!string.IsNullOrEmpty(appEnv.ClickHouseConnectionString))
+{
+    builder.Services.AddSingleton<IClickHouseConnection>(x => new ClickHouseConnection(appEnv.ClickHouseConnectionString));
+    builder.Services.AddSingleton<IClickHouseMigrationRunner, ClickHouseMigrationRunner>();
+    builder.Services.AddSingleton<IQueryClient, ClickHouseQueryClient>();
+    builder.Services.AddSingleton<IIngestionClient, ClickHouseIngestionClient>();
+}
+else
+{
+    builder.Services.AddSingleton<IQueryClient, TinybirdQueryClient>();
+    builder.Services.AddSingleton<IIngestionClient, TinybirdIngestionClient>();
+    builder.Services.AddHttpClient("Tinybird", client =>
+    {
+        client.BaseAddress = new Uri(appEnv.TinybirdBaseUrl);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", appEnv.TinybirdToken);
+    });
+}
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 var dbFactory = new DbConnectionFactory(appEnv.ConnectionString);
@@ -166,11 +177,18 @@ if (appEnv.IsProduction)
     });
 }
 
-// Execute database migrations
 using (var scope = app.Services.CreateScope())
 {
+    // Execute Postgres migrations
     var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
     runner.MigrateUp();
+
+    if (!string.IsNullOrEmpty(appEnv.ClickHouseConnectionString))
+    {
+        // Execute ClickHouse migrations (if applicable)
+        var chRunner = scope.ServiceProvider.GetRequiredService<IClickHouseMigrationRunner>();
+        chRunner.MigrateUp();
+    }
 }
 
 app.Run();
