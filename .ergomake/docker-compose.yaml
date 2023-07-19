@@ -7,8 +7,9 @@ services:
     environment:
       BASE_URL: https://{{ services.api.url }}
       AUTH_SECRET: sTr0NGs3cr3t
-      DATABASE_URL: Server=postgres_db;Port=5432;User Id=aptabase;Password=aptabase_pw;Database=aptabase
-      CLICKHOUSE_URL: Host=clickhouse_db;Port=8123;Username=aptabase;Password=aptabase_pw
+      DATABASE_URL: Server=postgres;Port=5432;User Id=aptabase;Password=aptabase_pw;Database=aptabase
+      CLICKHOUSE_URL: Host=clickhouse;Port=8123;Username=aptabase;Password=aptabase_pw
+      ASPNETCORE_URLS: http://+:8080
 
   postgres:
     image: postgres:15
