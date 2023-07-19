@@ -19,7 +19,7 @@ services:
     ports:
       - 5432
 
-  clickhouse_db:
+  clickhouse:
     container_name: aptabase_clickhousedev
     image: clickhouse/clickhouse-server:23.3.8.21
     restart: always
