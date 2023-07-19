@@ -12,7 +12,7 @@ public class LoggerEmailClient : IEmailClient
 
     public async Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string>? properties, CancellationToken cancellationToken)
     {
-        var body = await _engine.Render(templateName, properties);
-        _logger.LogInformation("Sending email to {to} with subject {subject} and body {body}", to, subject, body);
+        _logger.LogInformation("Sending email to '{to}' with template '{templateName}' and '{properties}'", to, templateName, properties);
+        await Task.CompletedTask;
     }
 }
