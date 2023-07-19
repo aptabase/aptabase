@@ -10,7 +10,7 @@ services:
       DATABASE_URL: Server=postgres_db;Port=5432;User Id=aptabase;Password=aptabase_pw;Database=aptabase
       CLICKHOUSE_URL: Host=clickhouse_db;Port=8123;Username=aptabase;Password=aptabase_pw
 
-  postgres_db:
+  postgres:
     image: postgres:15
     environment:
       POSTGRES_USER: aptabase
