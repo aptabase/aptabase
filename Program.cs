@@ -1,20 +1,20 @@
 using FluentMigrator.Runner;
 using Aptabase.Migrations;
-using Aptabase.Application;
+using Aptabase.Features;
 using System.Net.Http.Headers;
-using Aptabase.Application.Ingestion;
+using Aptabase.Features.Ingestion;
 using Aptabase.Data;
-using Aptabase.Application.Authentication;
+using Aptabase.Features.Authentication;
 using System.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Aptabase.Application.Notification;
+using Aptabase.Features.Notification;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
-using Aptabase.Application.Query;
-using Aptabase.Application.Blob;
+using Aptabase.Features.Query;
+using Aptabase.Features.Blob;
 using Aptabase.CronJobs;
-using Aptabase.Application.GeoIP;
+using Aptabase.Features.GeoIP;
 using ClickHouse.Client.ADO;
 using ClickHouse.Client;
 

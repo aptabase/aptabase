@@ -41,7 +41,7 @@ The easiest and quickest way to get started. A fully managed services by the cre
 
 You can also host Aptabase on your servers. It's free, but you are responsible for maintenance and updates.
 
-[Learn how →](https://github.com/aptabase/aptabase/wiki/How-to-Self-Host-Aptabase).
+[Learn how →](https://github.com/aptabase/self-hosting).
 
 # SDKs
 

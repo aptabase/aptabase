@@ -22,7 +22,9 @@ export function GrowthIndicator(props: Props) {
   if (props.previous === 0 && props.current === 0) return null;
   if (props.previous === undefined || props.previous === 0) return null;
 
-  const growth = (props.current - props.previous) / props.previous;
+  const growth = Math.floor(
+    ((props.current - props.previous) / props.previous) * 100
+  );
   if (growth === 0) return null;
 
   const isUp = growth > 0;
@@ -39,7 +41,7 @@ export function GrowthIndicator(props: Props) {
           >
             {isUp && <IconTrendingUp className="h-3 w-3" />}
             {isDown && <IconTrendingDown className="h-3 w-3" />}
-            <span className="ml-0.5">{Math.floor(growth * 100)}%</span>
+            <span className="ml-0.5">{growth}%</span>
           </span>
         </TooltipTrigger>
         <TooltipContent>
