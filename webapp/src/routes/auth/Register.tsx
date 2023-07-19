@@ -61,23 +61,24 @@ export function Component() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="py-8 px-4 sm:rounded-lg sm:px-10">
           {isOAuthEnabled && (
-            <div className="space-y-2">
-              <SignInWithGitHub />
-              <SignInWithGoogle />
-            </div>
+            <>
+              <div className="space-y-2">
+                <SignInWithGitHub />
+                <SignInWithGoogle />
+              </div>
+              <div className="relative my-4">
+                <div
+                  className="absolute inset-0 flex items-center"
+                  aria-hidden="true"
+                >
+                  <div className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-muted">OR</span>
+                </div>
+              </div>
+            </>
           )}
-
-          <div className="relative my-4">
-            <div
-              className="absolute inset-0 flex items-center"
-              aria-hidden="true"
-            >
-              <div className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-muted">OR</span>
-            </div>
-          </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
             <TextInput
