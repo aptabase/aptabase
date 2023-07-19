@@ -47,22 +47,36 @@ public class TinybirdQueryClient : IQueryClient
         return new T();
     }
 
-    public async Task<IEnumerable<T>> NamedQueryAsync<T>(string name, KeyValuePair<string, string>[] args, CancellationToken cancellationToken)
+    public async Task<IEnumerable<T>> NamedQueryAsync<T>(string name, object args, CancellationToken cancellationToken)
     {
-        var formData = new FormUrlEncodedContent(args);
-        var path = $"/v0/pipes/{name}.json";
-        var response = await _httpClient.PostAsync(path, formData, cancellationToken);
+        var nameValueCol = args.GetType().GetProperties().Select(x => new KeyValuePair<string, string>(x.Name, FormatArg(x.GetValue(args, null))));
+        var formData = new FormUrlEncodedContent(nameValueCol);
+        var response = await _httpClient.PostAsync($"/v0/pipes/{name}.json", formData, cancellationToken);
+
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<QueryResult<T>>() ?? new QueryResult<T>();
         return result.Data;
     }
 
-    public async Task<T> NamedQuerySingleAsync<T>(string name, KeyValuePair<string, string>[] args, CancellationToken cancellationToken) where T : new()
+    public async Task<T> NamedQuerySingleAsync<T>(string name, object args, CancellationToken cancellationToken) where T : new()
     {
         var result = await NamedQueryAsync<T>(name, args, cancellationToken);
         if (result.Any())
             return result.First();
 
         return new T();
+    }
+
+    private string FormatArg(object? value)
+    {
+        switch (value)
+        {
+            case string[] s:
+                return string.Join(",", s);
+            case DateTime d:
+                return $"'{d:yyyy-MM-dd HH:mm:ss}'";
+            default:
+                return value?.ToString() ?? "";
+        }
     }
 }
