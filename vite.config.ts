@@ -1,11 +1,11 @@
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { defineConfig, splitVendorChunkPlugin } from "vite";
+import { defineConfig } from "vite";
 const pkg = require("./package.json");
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), splitVendorChunkPlugin()],
+  plugins: [react()],
   define: {
     "import.meta.env.APP_VERSION": JSON.stringify(pkg.version),
   },
