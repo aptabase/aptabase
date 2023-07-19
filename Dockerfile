@@ -17,8 +17,12 @@ RUN npm run build
 # Final
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS final
 WORKDIR /app
-COPY LICENSE .
-COPY etc/geoip/GeoLite2-City.mmdb ./etc/geoip
+
 COPY --from=server /app/publish .
 COPY --from=webapp /src/wwwroot ./wwwroot
+
+COPY etc/geoip ./etc/geoip
+COPY etc/clickhouse ./etc/clickhouse
+COPY LICENSE .
+
 ENTRYPOINT ["dotnet", "Aptabase.dll"]
