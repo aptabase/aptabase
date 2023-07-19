@@ -1,6 +1,6 @@
 using System.Data;
-using Aptabase.Application.Authentication;
-using Aptabase.Application.Query;
+using Aptabase.Features.Authentication;
+using Aptabase.Features.Query;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
