@@ -110,16 +110,8 @@ builder.Services.AddHttpClient("Tinybird", client =>
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", appEnv.TinybirdToken);
 });
 
-if (appEnv.IsManagedCloud)
-{
-    builder.Services.AddSingleton<IEmailClient, SESEmailClient>();
-    builder.Services.AddSingleton<IGeoIPClient, CloudGeoClient>();
-}
-else
-{
-    builder.Services.AddSingleton<IEmailClient, SmtpEmailClient>();
-    builder.Services.AddSingleton<IGeoIPClient, DatabaseGeoClient>();
-}
+builder.Services.AddGeoIPClient(appEnv);
+builder.Services.AddEmailClient(appEnv);
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 var dbFactory = new DbConnectionFactory(appEnv.ConnectionString);
