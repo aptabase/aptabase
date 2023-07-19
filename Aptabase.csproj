@@ -9,8 +9,8 @@
     
   <ItemGroup>
     <PackageReference Include="Npgsql" Version="7.0.4" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.30.1" />
-    <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.0" />
+    <PackageReference Include="Dapper" Version="2.0.143" />
     <PackageReference Include="Nanoid" Version="2.1.0" />
     <PackageReference Include="FluentMigrator" Version="3.3.2" />
     <PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
@@ -18,8 +18,9 @@
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.100.140" />
     <PackageReference Include="AWSSDK.SSO" Version="3.7.100.140" />
     <PackageReference Include="AWSSDK.SSOOIDC" Version="3.7.100.140" />
-    <PackageReference Include="Amazon.AspNetCore.DataProtection.SSM" Version="3.1.0" />
+    <PackageReference Include="Amazon.AspNetCore.DataProtection.SSM" Version="3.1.1" />
     <PackageReference Include="Sgbj.Cron.CronTimer" Version="1.0.2" />
+    <PackageReference Include="MaxMind.GeoIP2" Version="5.1.0" />
   </ItemGroup>
 
   <ItemGroup>

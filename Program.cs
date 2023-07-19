@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Aptabase.Application.Query;
 using Aptabase.Application.Blob;
 using Aptabase.CronJobs;
+using Aptabase.Application.GeoIP;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
@@ -110,9 +111,15 @@ builder.Services.AddHttpClient("Tinybird", client =>
 });
 
 if (appEnv.IsManagedCloud)
+{
     builder.Services.AddSingleton<IEmailClient, SESEmailClient>();
+    builder.Services.AddSingleton<IGeoIPClient, CloudGeoClient>();
+}
 else
+{
     builder.Services.AddSingleton<IEmailClient, SmtpEmailClient>();
+    builder.Services.AddSingleton<IGeoIPClient, DatabaseGeoClient>();
+}
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 var dbFactory = new DbConnectionFactory(appEnv.ConnectionString);

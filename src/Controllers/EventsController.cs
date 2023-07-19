@@ -1,3 +1,4 @@
+using Aptabase.Application.GeoIP;
 using Aptabase.Application.Ingestion;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -13,16 +14,19 @@ public class EventsController : Controller
     private readonly IIngestionValidator _validator;
     private readonly IIngestionClient _ingestionClient;
     private readonly IUserHashService _userHashService;
+    private readonly IGeoIPClient _geoIP;
 
     public EventsController(IIngestionValidator validator,
                             IIngestionClient ingestionClient,
                             IUserHashService userHashService,
+                            IGeoIPClient geoIP,
                             ILogger<EventsController> logger)
     {
         _validator = validator ?? throw new ArgumentNullException(nameof(validator));
         _ingestionClient = ingestionClient ?? throw new ArgumentNullException(nameof(ingestionClient));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _userHashService = userHashService ?? throw new ArgumentNullException(nameof(userHashService));
+        _geoIP = geoIP ?? throw new ArgumentNullException(nameof(geoIP));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     [HttpPost("/api/v0/event")]
@@ -30,16 +34,12 @@ public class EventsController : Controller
     [EnableRateLimiting("EventIngestion")]
     public async Task<IActionResult> Single(
         [FromHeader(Name = "App-Key")] string? appKey,
-        [FromHeader(Name = "CloudFront-Viewer-Country")] string? countryCode,
-        [FromHeader(Name = "CloudFront-Viewer-Country-Region-Name")] string? regionName,
         [FromHeader(Name = "User-Agent")] string? userAgent,
         [FromBody] EventBody body,
         CancellationToken cancellationToken
     )
     {
         appKey = appKey?.ToUpper() ?? "";
-        countryCode = countryCode?.ToUpper() ?? "";
-        regionName = Uri.UnescapeDataString(regionName ?? "");
 
         body.Normalize();
 
@@ -74,7 +74,8 @@ public class EventsController : Controller
         if (!isWeb)
             userAgent = $"{body.SystemProps.OSName}/{body.SystemProps.OSVersion} {body.SystemProps.EngineName}/{body.SystemProps.EngineVersion} {body.SystemProps.Locale}";
 
-        var header = new EventHeader(appId, countryCode, regionName);
+        var location = _geoIP.GetClientLocation(HttpContext);
+        var header = new EventHeader(appId, location.CountryCode, location.RegionName);
         var userId = await _userHashService.CalculateHash(body.Timestamp, appId, HttpContext.ResolveClientIpAddress(), userAgent ?? "");
         var row = NewEventRow(userId, header, body);
         await _ingestionClient.SendSingleAsync(row, cancellationToken);
