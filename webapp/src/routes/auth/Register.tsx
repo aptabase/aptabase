@@ -7,6 +7,7 @@ import { LegalNotice } from "./components/LegalNotice";
 import { RegionSwitch } from "./components/RegionSwitch";
 import { SignInWithGitHub } from "./components/SignInWithGitHub";
 import { SignInWithGoogle } from "./components/SignInWithGoogle";
+import { isOAuthEnabled } from "@app/env";
 
 type FormStatus = "idle" | "loading" | "success";
 
@@ -59,10 +60,12 @@ export function Component() {
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="py-8 px-4 sm:rounded-lg sm:px-10">
-          <div className="space-y-2">
-            <SignInWithGitHub />
-            <SignInWithGoogle />
-          </div>
+          {isOAuthEnabled && (
+            <div className="space-y-2">
+              <SignInWithGitHub />
+              <SignInWithGoogle />
+            </div>
+          )}
 
           <div className="relative my-4">
             <div

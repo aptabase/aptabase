@@ -15,7 +15,7 @@ public class DatabaseGeoClient : IGeoIPClient
 
         return db.TryCity(ip, out var city) ? new GeoLocation
         {
-            CountryCode = city?.Country.IsoCode.ToUpper() ?? "",
+            CountryCode = city?.Country?.IsoCode?.ToUpper() ?? "",
             RegionName = city?.MostSpecificSubdivision.Name ?? ""
         } : GeoLocation.Empty;
     }
