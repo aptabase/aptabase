@@ -12,6 +12,8 @@ services:
       ASPNETCORE_URLS: http://+:8080
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
+    labels:
+      dev.ergomake.env.replace-env.BASE_URL: "https://{{ services.app.url }}"
 
   mailhog:
     image: mailhog/mailhog:v1.0.1
