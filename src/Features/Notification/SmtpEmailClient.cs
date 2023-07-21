@@ -13,12 +13,10 @@ public class SmtpEmailClient : IEmailClient
     {
         _env = env ?? throw new ArgumentNullException(nameof(env));
         _smtp = new SmtpClient(env.SmtpHost, env.SmtpPort);
-        _smtp.EnableSsl = true;
-        if (!string.IsNullOrEmpty(env.SmtpUsername))
-        {
-            _smtp.Credentials = new NetworkCredential(env.SmtpUsername, env.SmtpPassword);
-        }
+        _smtp.EnableSsl = IsTLSPort(env.SmtpPort);
 
+        if (!string.IsNullOrEmpty(env.SmtpUsername))
+            _smtp.Credentials = new NetworkCredential(env.SmtpUsername, env.SmtpPassword);
     }
 
     public async Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string>? properties, CancellationToken cancellationToken)
@@ -30,4 +28,6 @@ public class SmtpEmailClient : IEmailClient
         };
         await _smtp.SendMailAsync(msg, cancellationToken);
     }
+
+    private bool IsTLSPort(int port) => port == 587 || port == 465;
 }
