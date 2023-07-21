@@ -14,7 +14,7 @@ public class SubscriptionPlan
         VariantId = variantId;
     }
 
-    public static readonly SubscriptionPlan AptabaseFree = new SubscriptionPlan("Free", 20_000, 0, 0);
+    public static readonly SubscriptionPlan AptabaseFree = new SubscriptionPlan("Free", 2000, 0, 0);
     public static readonly SubscriptionPlan Aptabase200k = new SubscriptionPlan("200k", 200_000, 10, 85183);
     public static readonly SubscriptionPlan Aptabase1M = new SubscriptionPlan("1M", 1_000_000, 20, 85184);
     public static readonly SubscriptionPlan Aptabase2M = new SubscriptionPlan("2M", 2_000_000, 40, 85185);
