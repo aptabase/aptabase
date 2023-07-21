@@ -52,6 +52,11 @@ public class EnvSettings
     // Variable Name: SMTP_PASSWORD
     public string SmtpPassword { get; private set; } = "";
 
+    // Address to send the email from
+    // E.g.: notification@yourdomain.com 
+    // Variable Name: SMTP_FROM_ADDRESS
+    public string SmtpFromAddress { get; private set; } = "";
+
     // The GitHub Client ID for OAuth
     // Variable Name: OAUTH_GITHUB_CLIENT_ID
     public string OAuthGitHubClientId { get; private set; } = "";
@@ -101,6 +106,7 @@ public class EnvSettings
             SmtpPort = GetInt("SMTP_PORT"),
             SmtpUsername = Get("SMTP_USERNAME"),
             SmtpPassword = Get("SMTP_PASSWORD"),
+            SmtpFromAddress = Get("SMTP_FROM_ADDRESS"),
 
             OAuthGitHubClientId = Get("OAUTH_GITHUB_CLIENT_ID"),
             OAuthGitHubClientSecret = Get("OAUTH_GITHUB_CLIENT_SECRET"),
