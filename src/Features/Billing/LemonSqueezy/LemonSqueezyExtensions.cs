@@ -1,8 +1,8 @@
 using System.Net.Http.Headers;
 
-namespace Aptabase.Features.Billing;
+namespace Aptabase.Features.Billing.LemonSqueezy;
 
-public static class BillingExtensions
+public static class LemonSqueezyExtensions
 {
     public static void AddLemonSqueezy(this IServiceCollection services, EnvSettings env)
     {

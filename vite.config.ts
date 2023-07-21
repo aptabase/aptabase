@@ -35,6 +35,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "/webhook": {
+        target: "http://localhost:5251",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   resolve: {

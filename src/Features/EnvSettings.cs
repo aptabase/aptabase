@@ -75,6 +75,7 @@ public class EnvSettings
     public bool IsDevelopment { get; private set; }
     public string Region { get; private set; } = "";
     public string LemonSqueezyApiKey { get; private set; } = "";
+    public string LemonSqueezySigningSecret { get; private set; } = "";
 
     public static EnvSettings Load()
     {
@@ -94,6 +95,7 @@ public class EnvSettings
             TinybirdToken = Get("TINYBIRD_TOKEN"),
             AuthSecret = Encoding.ASCII.GetBytes(MustGet("AUTH_SECRET")),
             LemonSqueezyApiKey = Get("LEMONSQUEEZY_API_KEY"),
+            LemonSqueezySigningSecret = Get("LEMONSQUEEZY_SIGNING_SECRET"),
 
             SmtpHost = Get("SMTP_HOST"),
             SmtpPort = GetInt("SMTP_PORT"),

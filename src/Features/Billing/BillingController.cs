@@ -1,7 +1,8 @@
+using Dapper;
 using System.Data;
 using Aptabase.Features.Authentication;
+using Aptabase.Features.Billing.LemonSqueezy;
 using Aptabase.Features.Query;
-using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aptabase.Features.Billing;
@@ -40,10 +41,23 @@ public class BillingController : Controller
             year = DateTime.UtcNow.Year,
             month = DateTime.UtcNow.Month
         }, cancellationToken);
+
+        var sub = await GetUserSubscription(user);
+        var plan = sub is null || sub.Status == "expired" 
+            ? SubscriptionPlan.AptabaseFree
+            : SubscriptionPlan.GetByVariantId(sub.VariantId);
+        var state = (usage?.Count ?? 0) < plan.MonthlyEvents ? "OK" : "OVERUSE";
         
         return Ok(new {
-            Count = usage?.Count ?? 0,
-            Quota = 20000
+            State = state,
+            Usage = usage?.Count ?? 0,
+            Month = DateTime.UtcNow.Month,
+            Year = DateTime.UtcNow.Year,
+            Subscription = sub != null ? new {
+                Status = sub.Status,
+                EndsAt = sub.EndsAt,
+            } : null,
+            Plan = plan
         });
     }
 
@@ -51,8 +65,17 @@ public class BillingController : Controller
     public async Task<IActionResult> GenerateCheckoutUrl(CancellationToken cancellationToken)
     {
         var user = this.GetCurrentUser();
-        var url = await _lsClient.CreateCheckout(user.Name, user.Email, cancellationToken);
+        var url = await _lsClient.CreateCheckout(user, cancellationToken);
 
         return Ok(new { url });
+    }
+
+    private async Task<Subscription?> GetUserSubscription(UserAccount user)
+    {
+        return await _db.QueryFirstOrDefaultAsync<Subscription>(
+            @"SELECT * FROM subscriptions 
+              WHERE owner_id = @userId
+              ORDER BY created_at DESC LIMIT 1",
+            new { userId = user.Id });
     }
 }

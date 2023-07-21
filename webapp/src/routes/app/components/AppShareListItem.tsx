@@ -6,6 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
   api,
+  formatDate,
 } from "@app/primitives";
 import { IconShareOff } from "@tabler/icons-react";
 
@@ -29,7 +30,7 @@ export function AppShareListItem(props: Props) {
       <div className="truncate">
         <p className="truncate">{props.email}</p>
         <p className="text-xs text-muted-foreground mt-1">
-          {new Date(props.createdAt).toDateString()}
+          {formatDate(props.createdAt)}
         </p>
       </div>
       <TooltipProvider>

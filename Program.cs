@@ -2,9 +2,10 @@ using FluentMigrator.Runner;
 using Aptabase.Migrations;
 using Aptabase.Features;
 using System.Net.Http.Headers;
-using Aptabase.Features.Ingestion;
 using Aptabase.Data;
+using Aptabase.Features.Ingestion;
 using Aptabase.Features.Authentication;
+using Aptabase.Features.Billing.LemonSqueezy;
 using System.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Aptabase.Features.Notification;
@@ -17,7 +18,6 @@ using Aptabase.CronJobs;
 using Aptabase.Features.GeoIP;
 using ClickHouse.Client.ADO;
 using ClickHouse.Client;
-using Aptabase.Features.Billing;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
