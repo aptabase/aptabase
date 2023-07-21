@@ -1,30 +1,60 @@
-import { ErrorState, LoadingState, api } from "@app/primitives";
-import { useQuery } from "@tanstack/react-query";
+import { AttentionDot, cn } from "@app/primitives";
+import { BillingInfo } from "./useBilling";
 
-type CurrentUsageItem = {
-  count: number;
-  quota: number;
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+type Props = {
+  billing: BillingInfo;
 };
 
-export function CurrentUsage() {
-  const { isLoading, isError, data } = useQuery(["billing-usage"], () =>
-    api.get<CurrentUsageItem>(`/_billing`)
-  );
+const getUsageBarColor = (perc: number) => {
+  return perc >= 100
+    ? "bg-destructive"
+    : perc >= 90
+    ? "bg-warning"
+    : "bg-primary";
+};
 
-  if (isLoading) return <LoadingState />;
-  if (isError) return <ErrorState />;
-
-  const perc = (data.count / data.quota) * 100;
+export function CurrentUsage(props: Props) {
+  const perc = (props.billing.usage / props.billing.plan.monthlyEvents) * 100;
 
   return (
-    <div className="p-2 flex flex-col space-y-1">
-      <p className="text-sm font-medium mb-1">Current Usage</p>
-      <div className="text-sm text-muted-foreground">
-        {data.count?.toLocaleString()} / {data.quota?.toLocaleString()} events (
-        {perc.toFixed(1)}%)
+    <div className="flex flex-col h-full justify-between">
+      <div className="flex items-center mb-1 justify-between">
+        <span>Usage</span>
+        <span className="text-sm text-muted-foreground">
+          {months[props.billing.month - 1]} / {props.billing.year}
+        </span>
       </div>
-      <div className="overflow-hidden rounded bg-accent">
-        <div className="h-2 rounded bg-primary" style={{ width: `${perc}%` }} />
+      <div className="space-y-1">
+        <div className="text-sm flex items-center space-x-1">
+          <span>{props.billing.usage.toLocaleString()}</span>
+          <span className="text-muted-foreground">
+            / {props.billing.plan.monthlyEvents.toLocaleString()} events (
+            {perc.toFixed(1)}
+            %)
+          </span>
+          {props.billing.state === "OVERUSE" && <AttentionDot />}
+        </div>
+        <div className="overflow-hidden rounded bg-accent">
+          <div
+            className={cn("h-2 rounded", getUsageBarColor(perc))}
+            style={{ width: `${perc}%` }}
+          />
+        </div>
       </div>
     </div>
   );

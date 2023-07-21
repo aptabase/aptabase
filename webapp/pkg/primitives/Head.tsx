@@ -6,7 +6,7 @@ type Props = {
 
 export function Head(props: Props) {
   useEffect(() => {
-    document.title = `${props.title} - Aptabase`;
+    document.title = `${props.title} · Aptabase`;
   }, [props.title]);
 
   return null;

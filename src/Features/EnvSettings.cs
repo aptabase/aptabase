@@ -52,28 +52,30 @@ public class EnvSettings
     // Variable Name: SMTP_PASSWORD
     public string SmtpPassword { get; private set; } = "";
 
-    // The GitHub Client ID for OAuth (optional)
+    // The GitHub Client ID for OAuth
     // Variable Name: OAUTH_GITHUB_CLIENT_ID
     public string OAuthGitHubClientId { get; private set; } = "";
 
-    // The GitHub Client Secret for OAuth (optional)
+    // The GitHub Client Secret for OAuth
     // Variable Name: OAUTH_GITHUB_CLIENT_SECRET
     public string OAuthGitHubClientSecret { get; private set; } = "";
 
-    // The Google Client ID for OAuth (optional)
+    // The Google Client ID for OAuth
     // Variable Name: OAUTH_GOOGLE_CLIENT_ID
     public string OAuthGoogleClientId { get; private set; } = "";
 
-    // The Google Client Secret for OAuth (optional)
+    // The Google Client Secret for OAuth
     // Variable Name: OAUTH_GOOGLE_CLIENT_SECRET
     public string OAuthGoogleClientSecret { get; private set; } = "";
 
-
     //  The following properties are derived from the above settings
     public bool IsManagedCloud => Region == "EU" || Region == "US";
+    public bool IsBillingEnabled => IsManagedCloud || IsDevelopment;
     public bool IsProduction => !IsDevelopment;
     public bool IsDevelopment { get; private set; }
     public string Region { get; private set; } = "";
+    public string LemonSqueezyApiKey { get; private set; } = "";
+    public string LemonSqueezySigningSecret { get; private set; } = "";
 
     public static EnvSettings Load()
     {
@@ -92,6 +94,8 @@ public class EnvSettings
             TinybirdBaseUrl = Get("TINYBIRD_BASE_URL"),
             TinybirdToken = Get("TINYBIRD_TOKEN"),
             AuthSecret = Encoding.ASCII.GetBytes(MustGet("AUTH_SECRET")),
+            LemonSqueezyApiKey = Get("LEMONSQUEEZY_API_KEY"),
+            LemonSqueezySigningSecret = Get("LEMONSQUEEZY_SIGNING_SECRET"),
 
             SmtpHost = Get("SMTP_HOST"),
             SmtpPort = GetInt("SMTP_PORT"),

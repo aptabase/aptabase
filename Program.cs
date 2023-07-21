@@ -2,9 +2,10 @@ using FluentMigrator.Runner;
 using Aptabase.Migrations;
 using Aptabase.Features;
 using System.Net.Http.Headers;
-using Aptabase.Features.Ingestion;
 using Aptabase.Data;
+using Aptabase.Features.Ingestion;
 using Aptabase.Features.Authentication;
+using Aptabase.Features.Billing.LemonSqueezy;
 using System.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Aptabase.Features.Notification;
@@ -96,15 +97,16 @@ builder.Services.AddRateLimiter(c =>
     );
 });
 
+builder.Services.AddSingleton(appEnv);
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IUserHashService, DailyUserHashService>();
 builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
-builder.Services.AddSingleton(appEnv);
 builder.Services.AddSingleton<IIngestionValidator, IngestionValidator>();
 builder.Services.AddSingleton<IBlobService, DatabaseBlobService>();
 builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
 builder.Services.AddGeoIPClient(appEnv);
 builder.Services.AddEmailClient(appEnv);
+builder.Services.AddLemonSqueezy(appEnv);
 
 if (!string.IsNullOrEmpty(appEnv.ClickHouseConnectionString))
 {

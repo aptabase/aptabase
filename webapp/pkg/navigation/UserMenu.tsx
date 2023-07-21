@@ -1,26 +1,53 @@
+import React, { Fragment } from "react";
 import { signOutUrl, UserAccount, UserAvatar } from "@app/auth";
-import { RegionFlag } from "@app/primitives";
+import { AttentionDot, cn, RegionFlag } from "@app/primitives";
 import { Menu, Transition } from "@headlessui/react";
-import clsx from "clsx";
-import { Fragment } from "react";
+import { IconCreditCard, IconDoorExit } from "@tabler/icons-react";
+import { Link } from "react-router-dom";
+import { useBillingState } from "@app/billing";
+import { isBillingEnabled } from "@app/env";
 
 type Props = {
   user: UserAccount;
 };
 
-const nav = [{ name: "Sign out", href: signOutUrl() }];
-
 const Divider = () => <div className="border-t my-1" />;
 
+const MenuItem = (props: {
+  href: string;
+  reloadDocument?: boolean;
+  children: React.ReactNode;
+}) => (
+  <Menu.Item>
+    {({ active }) => (
+      <Link
+        to={props.href}
+        reloadDocument={props.reloadDocument}
+        className={cn(
+          "flex mx-1 rounded p-2 text-sm items-center space-x-2",
+          active ? "bg-accent text-foreground" : ""
+        )}
+      >
+        {props.children}
+      </Link>
+    )}
+  </Menu.Item>
+);
+
 export function UserMenu(props: Props) {
+  const billing = useBillingState();
+
   return (
     <Menu as="div" className="relative">
-      <div>
-        <Menu.Button className="flex max-w-xs px-2 py-1 items-center rounded text-sm focus-ring">
-          <UserAvatar user={props.user} />
-          <div className="hidden lg:block ml-2">{props.user.name}</div>
-        </Menu.Button>
-      </div>
+      <Menu.Button className="flex w-full p-2 gap-2 items-center rounded text-sm focus-ring hover:bg-accent">
+        {({ open }) => (
+          <>
+            <UserAvatar user={props.user} />
+            <div className="hidden lg:block">{props.user.name}</div>
+            {!open && billing === "OVERUSE" && <AttentionDot />}
+          </>
+        )}
+      </Menu.Button>
       <Transition
         as={Fragment}
         enter="transition ease-out duration-100"
@@ -40,22 +67,21 @@ export function UserMenu(props: Props) {
             </div>
             <RegionFlag />
           </div>
+          {isBillingEnabled && (
+            <>
+              <Divider />
+              <MenuItem href="/billing">
+                <IconCreditCard className="w-4 h-4" />
+                <span>Billing</span>
+                {billing === "OVERUSE" && <AttentionDot />}
+              </MenuItem>
+            </>
+          )}
           <Divider />
-          {nav.map((item) => (
-            <Menu.Item key={item.name}>
-              {({ active }) => (
-                <a
-                  href={item.href}
-                  className={clsx(
-                    active ? "bg-accent text-foreground" : "",
-                    "block mx-1 rounded px-4 py-2 text-sm"
-                  )}
-                >
-                  {item.name}
-                </a>
-              )}
-            </Menu.Item>
-          ))}
+          <MenuItem href={signOutUrl()} reloadDocument>
+            <IconDoorExit className="w-4 h-4" />
+            <span>Sign out</span>
+          </MenuItem>
         </Menu.Items>
       </Transition>
     </Menu>
