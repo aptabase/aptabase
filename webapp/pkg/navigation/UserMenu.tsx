@@ -13,11 +13,16 @@ type Props = {
 
 const Divider = () => <div className="border-t my-1" />;
 
-const MenuItem = (props: { href: string; children: React.ReactNode }) => (
+const MenuItem = (props: {
+  href: string;
+  reloadDocument?: boolean;
+  children: React.ReactNode;
+}) => (
   <Menu.Item>
     {({ active }) => (
       <Link
         to={props.href}
+        reloadDocument={props.reloadDocument}
         className={cn(
           "flex mx-1 rounded p-2 text-sm items-center space-x-2",
           active ? "bg-accent text-foreground" : ""
@@ -62,16 +67,18 @@ export function UserMenu(props: Props) {
             </div>
             <RegionFlag />
           </div>
-          <Divider />
           {isBillingEnabled && (
-            <MenuItem href="/billing">
-              <IconCreditCard className="w-4 h-4" />
-              <span>Billing</span>
-              {billing === "OVERUSE" && <AttentionDot />}
-            </MenuItem>
+            <>
+              <Divider />
+              <MenuItem href="/billing">
+                <IconCreditCard className="w-4 h-4" />
+                <span>Billing</span>
+                {billing === "OVERUSE" && <AttentionDot />}
+              </MenuItem>
+            </>
           )}
           <Divider />
-          <MenuItem href={signOutUrl()}>
+          <MenuItem href={signOutUrl()} reloadDocument>
             <IconDoorExit className="w-4 h-4" />
             <span>Sign out</span>
           </MenuItem>
