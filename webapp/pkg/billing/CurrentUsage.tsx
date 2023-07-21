@@ -21,7 +21,7 @@ export function CurrentUsage() {
       <p className="text-sm font-medium mb-1">Current Usage</p>
       <div className="text-sm text-muted-foreground">
         {data.count?.toLocaleString()} / {data.quota?.toLocaleString()} events (
-        {perc.toPrecision(2)}%)
+        {perc.toFixed(1)}%)
       </div>
       <div className="overflow-hidden rounded bg-accent">
         <div className="h-2 rounded bg-primary" style={{ width: `${perc}%` }} />
