@@ -24,7 +24,8 @@ public class TinybirdIngestionClient : IIngestionClient
     public async Task<InsertResult> SendSingleAsync(EventRow row, CancellationToken cancellationToken)
     {
         var response = await _httpClient.PostAsJsonAsync(EventsPath, row, JsonSettings, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        
+        response.EnsureSuccessWithLog(_logger);
         return await response.Content.ReadFromJsonAsync<InsertResult>() ?? new InsertResult();
     }
 
@@ -33,7 +34,8 @@ public class TinybirdIngestionClient : IIngestionClient
         var rowsAsString = rows.Select(row => JsonSerializer.Serialize(row, JsonSettings));
         var content = new StringContent(string.Join('\n', rowsAsString));
         var response = await _httpClient.PostAsync(EventsPath, content, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        
+        response.EnsureSuccessWithLog(_logger);
         return await response.Content.ReadFromJsonAsync<InsertResult>() ?? new InsertResult();
     }
 }

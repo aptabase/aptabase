@@ -33,7 +33,8 @@ public class TinybirdQueryClient : IQueryClient
         var q = WebUtility.UrlEncode($"{query} FORMAT JSON");
         var path = $"/v0/sql?q={q}";
         var response = await _httpClient.GetAsync(path, cancellationToken);
-        response.EnsureSuccessStatusCode();
+
+        response.EnsureSuccessWithLog(_logger);
         var result = await response.Content.ReadFromJsonAsync<QueryResult<T>>() ?? new QueryResult<T>();
         return result.Data;
     }
@@ -53,7 +54,7 @@ public class TinybirdQueryClient : IQueryClient
         var formData = new FormUrlEncodedContent(nameValueCol);
         var response = await _httpClient.PostAsync($"/v0/pipes/{name}.json", formData, cancellationToken);
 
-        response.EnsureSuccessStatusCode();
+        response.EnsureSuccessWithLog(_logger);
         var result = await response.Content.ReadFromJsonAsync<QueryResult<T>>() ?? new QueryResult<T>();
         return result.Data;
     }

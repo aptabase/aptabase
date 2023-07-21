@@ -63,7 +63,7 @@ public class LemonSqueezyClient
         };
         var response = await _httpClient.PostAsJsonAsync("/v1/checkouts", body, JsonSettings, cancellationToken);
         
-        response.EnsureSuccessStatusCode();
+        response.EnsureSuccessWithLog(_logger);
         var result = await response.Content.ReadFromJsonAsync<Checkout>();
         return result?.Data.Attributes.Url;
     }
