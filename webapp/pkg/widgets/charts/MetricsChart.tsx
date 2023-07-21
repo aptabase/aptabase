@@ -91,7 +91,7 @@ export function MetricsChart(props: Props) {
             yAxisID: "events",
             hidden: !props.metrics.includes("events"),
             borderColor: colors.secondary,
-            tension: 0.1,
+            tension: 0.2,
             borderWidth: 3,
             pointRadius: 0,
             pointHoverRadius: 0,
@@ -108,10 +108,7 @@ export function MetricsChart(props: Props) {
         ],
       },
       options: {
-        animation: {
-          duration: 200,
-          easing: "linear",
-        },
+        animation: false,
         interaction: {
           mode: "index",
           intersect: false,
@@ -247,7 +244,7 @@ export function MetricsChart(props: Props) {
   }, [canvasRef, props]);
 
   return (
-    <div className="h-80 w-full">
+    <div className="h-60 md:h-80 w-full">
       {props.isError ? (
         <ErrorState />
       ) : props.isLoading ? (

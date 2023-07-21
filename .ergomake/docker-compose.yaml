@@ -1,0 +1,40 @@
+version: "3"
+services:
+  app:
+    build: ../
+    ports:
+      - "8080:8080"
+    environment:
+      BASE_URL: http://localhost:8080
+      AUTH_SECRET: MdVsXMQs6B2CmKx7u400Etrog3xYpcpN
+      DATABASE_URL: Server=postgres;Port=5432;User Id=aptabase;Password=aptabase_pw;Database=aptabase
+      CLICKHOUSE_URL: Host=clickhouse;Port=8123;Username=aptabase;Password=aptabase_pw
+      ASPNETCORE_URLS: http://+:8080
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+    labels:
+      dev.ergomake.env.replace-env.BASE_URL: "https://{{ services.app.url }}"
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - 1025
+      - "8025:8025"
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: aptabase
+      POSTGRES_PASSWORD: aptabase_pw
+    ports:
+      - 5432
+
+  clickhouse:
+    container_name: aptabase_clickhousedev
+    image: clickhouse/clickhouse-server:23.3.8.21
+    restart: always
+    ports:
+      - 8123
+    environment:
+      CLICKHOUSE_USER: aptabase
+      CLICKHOUSE_PASSWORD: aptabase_pw

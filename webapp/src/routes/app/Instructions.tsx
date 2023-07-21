@@ -1,4 +1,4 @@
-import { useCurrentApp } from "@app/navigation";
+import { useCurrentApp } from "@app/apps";
 import {
   ErrorState,
   Head,
@@ -10,12 +10,12 @@ import {
   SelectValue,
   SelectContent,
   SelectGroup,
-  SelectLabel,
   SelectItem,
 } from "@app/primitives";
 import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
 
 type FrameworkInstructions = {
   name: string;
@@ -125,6 +125,9 @@ const fetchInstructions = async (
 Component.displayName = "Instructions";
 export function Component() {
   const app = useCurrentApp();
+
+  if (!app) return <Navigate to="/" />;
+
   const [selected, setSelected] = useState("");
 
   const { isLoading, isError, data } = useQuery(["markdown", selected], () =>

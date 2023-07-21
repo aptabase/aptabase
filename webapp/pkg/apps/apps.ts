@@ -6,6 +6,7 @@ export type Application = {
   name: string;
   appKey: string;
   iconPath: string;
+  hasOwnership: string;
 };
 
 export async function listApps(): Promise<Application[]> {

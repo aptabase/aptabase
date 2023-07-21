@@ -1,4 +1,4 @@
-import { EmptyState, ErrorState } from "@app/primitives";
+import { EmptyState, ErrorState, formatNumber } from "@app/primitives";
 import { Link } from "react-router-dom";
 import { TopNSkeleton } from "./TopNSkeleton";
 import { CardTitle } from "../CardTitle";
@@ -89,12 +89,12 @@ function TopNRow(props: TopNRowProps) {
       <div className="hidden group-hover:block group-hover:bg-accent absolute h-8 origin-left rounded w-full" />
       <div className="relative z-10 flex w-full max-w-[calc(100%-3rem)] items-center">
         <div
-          className="absolute h-8 origin-left bg-primary-100 dark:bg-primary-950 rounded transition-all"
+          className="absolute h-8 origin-left bg-primary-100 dark:bg-primary-900 rounded transition-all"
           style={{ width: `${props.percentage * 100}%` }}
         />
         <div className="flex z-10">{props.children}</div>
       </div>
-      <p className="text-sm pr-2 z-10">{props.item.value}</p>
+      <p className="text-sm pr-2 z-10">{formatNumber(props.item.value)}</p>
     </div>
   );
 

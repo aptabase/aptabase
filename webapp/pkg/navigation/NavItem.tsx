@@ -1,6 +1,6 @@
 import { TablerIconsProps } from "@tabler/icons-react";
 import clsx from "clsx";
-import { Link, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 
 type Props = {
   label: string;
@@ -8,6 +8,7 @@ type Props = {
   onClick?: () => void;
   icon: (props: TablerIconsProps) => JSX.Element;
   onNavigation?: VoidFunction;
+  disabled?: boolean;
 };
 
 export function NavItem(props: Props) {
@@ -31,10 +32,18 @@ export function NavItem(props: Props) {
     props.onClick?.();
   };
 
-  return props.href ? (
-    <Link to={props.href} className={className} onClick={props.onNavigation}>
+  return props.disabled ? (
+    <span className={clsx(baseClassName, "text-muted-foreground")}>
       {content}
-    </Link>
+    </span>
+  ) : props.href ? (
+    <NavLink
+      to={props.href}
+      className={({ isActive }) => clsx(className, isActive && "bg-accent")}
+      onClick={props.onNavigation}
+    >
+      {content}
+    </NavLink>
   ) : (
     <button onClick={onButtonClick} className={className}>
       {content}

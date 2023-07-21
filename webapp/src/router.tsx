@@ -1,6 +1,5 @@
 import { AppsProvider } from "@app/apps";
 import { AuthProvider } from "@app/auth";
-import { NavigationProvider } from "@app/navigation";
 import { createBrowserRouter } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthenticationLayout, ConsoleLayout } from "./layout";
@@ -26,9 +25,7 @@ const router = createBrowserRouter([
       <>
         <AuthProvider>
           <AppsProvider>
-            <NavigationProvider>
-              <ConsoleLayout />
-            </NavigationProvider>
+            <ConsoleLayout />
           </AppsProvider>
         </AuthProvider>
         <Toaster className="hidden lg:block" position="top-right" />
@@ -38,19 +35,23 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
+        lazy: () => import("./routes/home/Home"),
+      },
+      {
+        path: "/:id",
         lazy: () => import("./routes/app/Dashboard"),
       },
       {
-        path: "/welcome",
-        lazy: () => import("./routes/Welcome"),
-      },
-      {
-        path: "/instructions",
+        path: "/:id/instructions",
         lazy: () => import("./routes/app/Instructions"),
       },
       {
-        path: "/settings",
+        path: "/:id/settings",
         lazy: () => import("./routes/app/Settings"),
+      },
+      {
+        path: "/billing",
+        lazy: () => import("../pkg/billing/BillingPage"),
       },
     ],
   },

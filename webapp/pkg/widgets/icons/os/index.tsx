@@ -8,11 +8,11 @@ type Props = {
 
 function getOperatingSystemImageUrl(name: string): string | undefined {
   const svg = new URL(`./${name}.svg`, import.meta.url);
-  if (svg.pathname !== "/undefined") {
-    return svg.href;
+  if (svg.href.endsWith("/undefined")) {
+    return undefined;
   }
 
-  return undefined;
+  return svg.href;
 }
 
 export function OSIcon(props: Props) {

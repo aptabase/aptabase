@@ -10,7 +10,7 @@ function createLinearGradient(
 
   var gradient = context.createLinearGradient(0, 0, 0, 400);
   gradient.addColorStop(0, color1);
-  gradient.addColorStop(0.6, color2);
+  gradient.addColorStop(0.2, color2);
   gradient.addColorStop(1, color3);
 
   return gradient;
@@ -42,11 +42,10 @@ function createDiagonalPattern(color: string): CanvasPattern | string {
 }
 
 const root = getComputedStyle(document.documentElement);
-const primaryColor = root.getPropertyValue("--primary");
 
 const colors = {
-  primary: createLinearGradient("#2563eb", "#3b82f6", "#eff6ff"),
-  primaryStripped: createDiagonalPattern(primaryColor),
+  primary: createLinearGradient("#3b82f6", "#3b82f6", "#bfdbfe"),
+  primaryStripped: createDiagonalPattern("#3b82f6"),
   secondary: `hsl(${root.getPropertyValue("--foreground")})`,
   highlight: root.getPropertyValue("--chart-highlight"),
 };

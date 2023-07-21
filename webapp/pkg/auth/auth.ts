@@ -9,26 +9,31 @@ export type UserAccount = {
 };
 
 export async function requestSignInLink(email: string): Promise<boolean> {
-  const [status] = await api.fetch("POST", "/_auth/signin", { email });
+  const [status, response] = await api.fetch("POST", "/_auth/signin", {
+    email,
+  });
 
   if (status === 404) return false;
   if (status === 200) return true;
 
-  api.handleError(status);
+  await api.handleError(status, response);
   return false;
 }
 
-export async function requestRegisterLink(name: string, email: string): Promise<void> {
+export async function requestRegisterLink(
+  name: string,
+  email: string
+): Promise<void> {
   await api.post("/_auth/register", { name, email });
   trackEvent("register");
 }
 
 export async function me(): Promise<UserAccount | null> {
-  const [status, account] = await api.fetch<UserAccount>("GET", "/_auth/me");
+  const [status, account] = await api.fetch("GET", "/_auth/me");
 
   if (status === 401) return null;
 
-  return account;
+  return account.json() as Promise<UserAccount | null>;
 }
 
 export function signOutUrl(): string {

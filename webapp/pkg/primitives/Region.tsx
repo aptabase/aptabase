@@ -6,6 +6,7 @@ const flags: { [host: string]: string } = {
 };
 
 export function RegionFlag() {
+  if (!region) return null;
   if (!flags[region]) return null;
 
   return <img className="w-5 h-5 shadow rounded-full" src={flags[region]} />;

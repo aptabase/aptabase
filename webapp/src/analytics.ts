@@ -7,11 +7,7 @@ const appKeys: { [host: string]: string } = {
   eu: "A-EU-2458276968",
 };
 
-const appKey = isManagedCloud
-  ? appKeys[region]
-  : isDevelopment
-  ? devAppKey
-  : undefined;
+const appKey = region ? appKeys[region] : isDevelopment ? devAppKey : undefined;
 
 export function initAnalytics() {
   init(appKey ?? "", {

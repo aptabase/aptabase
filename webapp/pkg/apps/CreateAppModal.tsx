@@ -4,7 +4,6 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IconX } from "@tabler/icons-react";
-import { useNavigationContext } from "@app/navigation";
 
 type Props = {
   open: boolean;
@@ -13,7 +12,6 @@ type Props = {
 
 export function CreateAppModal(props: Props) {
   const { createApp } = useApps();
-  const { switchApp } = useNavigationContext();
   const navigate = useNavigate();
   const [name, setName] = useState("");
 
@@ -21,8 +19,8 @@ export function CreateAppModal(props: Props) {
     event.preventDefault();
 
     const app = await createApp(name);
-    switchApp(app);
-    navigate("/instructions");
+    navigate(`${app.id}/instructions`);
+    setName("");
     props.onClose();
     return;
   };

@@ -1,19 +1,23 @@
 using FluentMigrator.Runner;
 using Aptabase.Migrations;
-using Aptabase.Application;
+using Aptabase.Features;
 using System.Net.Http.Headers;
-using Aptabase.Application.Ingestion;
 using Aptabase.Data;
-using Aptabase.Application.Authentication;
+using Aptabase.Features.Ingestion;
+using Aptabase.Features.Authentication;
+using Aptabase.Features.Billing.LemonSqueezy;
 using System.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Aptabase.Application.Notification;
+using Aptabase.Features.Notification;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
-using Aptabase.Application.Query;
-using Aptabase.Application.Blob;
+using Aptabase.Features.Query;
+using Aptabase.Features.Blob;
 using Aptabase.CronJobs;
+using Aptabase.Features.GeoIP;
+using ClickHouse.Client.ADO;
+using ClickHouse.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
@@ -93,26 +97,34 @@ builder.Services.AddRateLimiter(c =>
     );
 });
 
+builder.Services.AddSingleton(appEnv);
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IUserHashService, DailyUserHashService>();
 builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
-builder.Services.AddSingleton(appEnv);
 builder.Services.AddSingleton<IIngestionValidator, IngestionValidator>();
 builder.Services.AddSingleton<IBlobService, DatabaseBlobService>();
 builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
+builder.Services.AddGeoIPClient(appEnv);
+builder.Services.AddEmailClient(appEnv);
+builder.Services.AddLemonSqueezy(appEnv);
 
-builder.Services.AddSingleton<IQueryClient, TinybirdQueryClient>();
-builder.Services.AddSingleton<IIngestionClient, TinybirdIngestionClient>();
-builder.Services.AddHttpClient("Tinybird", client =>
+if (!string.IsNullOrEmpty(appEnv.ClickHouseConnectionString))
 {
-    client.BaseAddress = new Uri(appEnv.TinybirdBaseUrl);
-    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", appEnv.TinybirdToken);
-});
-
-if (appEnv.IsManagedCloud)
-    builder.Services.AddSingleton<IEmailClient, SESEmailClient>();
+    builder.Services.AddSingleton<IClickHouseConnection>(x => new ClickHouseConnection(appEnv.ClickHouseConnectionString));
+    builder.Services.AddSingleton<IClickHouseMigrationRunner, ClickHouseMigrationRunner>();
+    builder.Services.AddSingleton<IQueryClient, ClickHouseQueryClient>();
+    builder.Services.AddSingleton<IIngestionClient, ClickHouseIngestionClient>();
+}
 else
-    builder.Services.AddSingleton<IEmailClient, SmtpEmailClient>();
+{
+    builder.Services.AddSingleton<IQueryClient, TinybirdQueryClient>();
+    builder.Services.AddSingleton<IIngestionClient, TinybirdIngestionClient>();
+    builder.Services.AddHttpClient("Tinybird", client =>
+    {
+        client.BaseAddress = new Uri(appEnv.TinybirdBaseUrl);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", appEnv.TinybirdToken);
+    });
+}
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 var dbFactory = new DbConnectionFactory(appEnv.ConnectionString);
@@ -167,11 +179,18 @@ if (appEnv.IsProduction)
     });
 }
 
-// Execute database migrations
 using (var scope = app.Services.CreateScope())
 {
+    // Execute Postgres migrations
     var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
     runner.MigrateUp();
+
+    if (!string.IsNullOrEmpty(appEnv.ClickHouseConnectionString))
+    {
+        // Execute ClickHouse migrations (if applicable)
+        var chRunner = scope.ServiceProvider.GetRequiredService<IClickHouseMigrationRunner>();
+        chRunner.MigrateUp();
+    }
 }
 
 app.Run();

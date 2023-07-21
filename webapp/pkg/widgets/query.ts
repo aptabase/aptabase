@@ -44,9 +44,16 @@ export function topAppBuildNumbers(params: QueryParams): Promise<TopNItem[]> {
 }
 
 type KeyMetrics = {
-  sessions: number;
-  events: number;
-  durationSeconds: number;
+  current: {
+    sessions: number;
+    events: number;
+    durationSeconds: number;
+  };
+  previous?: {
+    sessions: number;
+    events: number;
+    durationSeconds: number;
+  };
 };
 
 export function keyMetrics(params: QueryParams): Promise<KeyMetrics> {

@@ -1,3 +1,4 @@
+export * from "./AppSummaryWidget";
 export * from "./EventPropsWidget";
 export * from "./CurrentFilters";
 export * from "./MainChartWidget";
