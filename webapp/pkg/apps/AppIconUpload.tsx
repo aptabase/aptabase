@@ -107,7 +107,7 @@ export function AppIconUpload(props: Props) {
           className="hidden"
         />
         <div>
-          <Button variant="ghost" onClick={handleClick}>
+          <Button variant="ghost" onClick={handleClick} type="button">
             Change
           </Button>
         </div>
