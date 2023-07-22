@@ -48,7 +48,7 @@ export function AppSummaryWidget(props: Props) {
     <Link
       to={`/${props.app.id}/${params}`}
       key={props.app.id}
-      className="border rounded shadow hover:bg-muted"
+      className="border cursor-pointer rounded shadow hover:bg-muted"
     >
       <div className="p-2">
         <div className="flex items-center justify-between h-6">

@@ -1,7 +1,6 @@
 import { useCurrentApp } from "@app/apps";
 import {
   ErrorState,
-  Head,
   LoadingState,
   Markdown,
   PageHeading,
@@ -11,6 +10,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  Page,
 } from "@app/primitives";
 import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";
@@ -137,8 +137,7 @@ export function Component() {
   const [fw, content] = data || [];
 
   return (
-    <>
-      <Head title={`${app.name} - Instructions`} />
+    <Page title={`${app.name} - Instructions`}>
       <PageHeading
         title="Instructions"
         subtitle="Instrument your app with our SDK"
@@ -205,6 +204,6 @@ export function Component() {
           </div>
         )}
       </div>
-    </>
+    </Page>
   );
 }

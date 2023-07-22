@@ -1,10 +1,4 @@
-import {
-  ErrorState,
-  Head,
-  LoadingState,
-  PageHeading,
-  api,
-} from "@app/primitives";
+import { ErrorState, LoadingState, Page, PageHeading } from "@app/primitives";
 import { CurrentUsage } from "./CurrentUsage";
 import { CurrentPlan } from "./CurrentPlan";
 import { useBilling } from "./useBilling";
@@ -14,8 +8,7 @@ export function Component() {
   const { isLoading, isError, data } = useBilling();
 
   return (
-    <>
-      <Head title="Billing" />
+    <Page title="Billing">
       <PageHeading title="Billing" subtitle="Manage your subscription" />
 
       <div className="flex flex-col gap-8 max-w-3xl mt-8">
@@ -32,6 +25,6 @@ export function Component() {
           </div>
         )}
       </div>
-    </>
+    </Page>
   );
 }

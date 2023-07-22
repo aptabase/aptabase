@@ -1,5 +1,5 @@
 import { requestSignInLink } from "@app/auth";
-import { Button, Head, Logo, TextInput } from "@app/primitives";
+import { Button, Logo, Page, TextInput } from "@app/primitives";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { DataResidency } from "./components/DataResidency";
@@ -79,8 +79,7 @@ export function Component() {
   };
 
   return (
-    <>
-      <Head title="Login" />
+    <Page title="Login">
       <div className="mx-auto text-center mb-10">
         <RedirectErrorMessage />
       </div>
@@ -135,6 +134,6 @@ export function Component() {
         <LegalNotice operation="signin" />
         <RegionSwitch />
       </div>
-    </>
+    </Page>
   );
 }

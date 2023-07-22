@@ -1,4 +1,4 @@
-import { Card, DateRangePicker, Head, PageHeading } from "@app/primitives";
+import { Card, DateRangePicker, Page, PageHeading } from "@app/primitives";
 import {
   CurrentFilters,
   EventPropsWidget,
@@ -32,8 +32,7 @@ export function Component() {
   const resetFilters = () => navigate(`/${app.id}/`);
 
   return (
-    <>
-      <Head title={app.name} />
+    <Page title={app.name}>
       {buildMode === "debug" && <DebugModeBanner />}
       <div className="space-y-4">
         <div className="flex justify-between items-end">
@@ -86,6 +85,6 @@ export function Component() {
           )}
         </div>
       </div>
-    </>
+    </Page>
   );
 }

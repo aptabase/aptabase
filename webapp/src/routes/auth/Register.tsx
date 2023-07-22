@@ -1,5 +1,5 @@
 import { requestRegisterLink } from "@app/auth";
-import { Button, Head, Logo, TextInput } from "@app/primitives";
+import { Button, Logo, Page, TextInput } from "@app/primitives";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { DataResidency } from "./components/DataResidency";
@@ -51,8 +51,7 @@ export function Component() {
   };
 
   return (
-    <>
-      <Head title="Sign up" />
+    <Page title="Sign up">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Logo className="mx-auto h-20 w-auto text-primary" />
         <h2 className="text-center text-3xl font-bold">Get started for free</h2>
@@ -108,6 +107,6 @@ export function Component() {
         <LegalNotice operation="signup" />
         <RegionSwitch />
       </div>
-    </>
+    </Page>
   );
 }

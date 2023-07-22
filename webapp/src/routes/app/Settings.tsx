@@ -1,10 +1,10 @@
 import {
-  Head,
   PageHeading,
   Tabs,
   TabsList,
   TabsContent,
   TabsTrigger,
+  Page,
 } from "@app/primitives";
 import { DangerZone } from "./components/DangerZone";
 import { AppSharing } from "./components/AppSharing";
@@ -19,8 +19,7 @@ export function Component() {
   if (!app) return <Navigate to="/" />;
 
   return (
-    <>
-      <Head title={`${app.name} - Settings`} />
+    <Page title={`${app.name} - Settings`}>
       <PageHeading title="Settings" subtitle="Manage your app settings" />
 
       <Tabs defaultValue="general" className="mt-8">
@@ -39,6 +38,6 @@ export function Component() {
           <DangerZone app={app} />
         </TabsContent>
       </Tabs>
-    </>
+    </Page>
   );
 }
