@@ -153,6 +153,7 @@ else
     app.UseForwardedHeaders();
 }
 
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
 app.UseCors();
 app.UseAuthentication();
