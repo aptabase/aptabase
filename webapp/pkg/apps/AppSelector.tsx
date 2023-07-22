@@ -72,10 +72,12 @@ export function AppSelector() {
                       </span>
                     )}
                   </span>
-                  <IconSelector
-                    strokeWidth={2}
-                    className="min-h-4 max-h-4 min-w-4 max-w-4 text-muted-foreground"
-                  />
+                  <div className="w-4 h-4 ml-1">
+                    <IconSelector
+                      strokeWidth={2}
+                      className="h-4 w-4 text-muted-foreground"
+                    />
+                  </div>
                 </div>
               </Listbox.Button>
 
