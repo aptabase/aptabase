@@ -30,7 +30,7 @@ public class DailyUserHashService : IUserHashService
 
         // If we already have a cached user ID for this session, return it immediately
         // This avoid issues with the user ID changing in the middle of a session because of an IP change
-        if (_cache.TryGetValue(cacheKey, out string? userId) && userId != null)
+        if (_cache.TryGetValue(cacheKey, out string? userId) && !string.IsNullOrEmpty(userId))
             return userId;
 
         var clientIP = _httpContextAccessor.HttpContext?.ResolveClientIpAddress() ?? "";
