@@ -1,13 +1,11 @@
 using System.ComponentModel.DataAnnotations;
-using Aptabase.Features;
-using Aptabase.Features.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Aptabase.Controllers;
+namespace Aptabase.Features.Authentication;
 
 public class SignInBodyRequest
 {

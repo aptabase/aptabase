@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Aptabase.Features.Authentication;
 using System.ComponentModel.DataAnnotations;
 
-namespace Aptabase.Controllers;
+namespace Aptabase.Features.Apps;
 
 public class Application
 {

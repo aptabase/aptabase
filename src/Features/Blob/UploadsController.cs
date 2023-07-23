@@ -1,10 +1,8 @@
-using System.Data;
 using Aptabase.Features.Blob;
-using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Aptabase.Controllers;
+namespace Aptabase.Features.Blob;
 
 public class UploadedFile
 {

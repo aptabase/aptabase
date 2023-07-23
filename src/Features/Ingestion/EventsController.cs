@@ -1,10 +1,9 @@
 using Aptabase.Features.GeoIP;
-using Aptabase.Features.Ingestion;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
-namespace Aptabase.Controllers;
+namespace Aptabase.Features.Ingestion;
 
 [ApiController]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]

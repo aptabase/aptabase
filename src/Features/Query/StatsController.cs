@@ -1,11 +1,9 @@
 using System.Data;
-using Aptabase.Features;
 using Aptabase.Features.Authentication;
-using Aptabase.Features.Query;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Aptabase.Controllers;
+namespace Aptabase.Features.Query;
 
 public class PeriodicStats
 {

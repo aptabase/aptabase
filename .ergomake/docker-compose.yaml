@@ -12,6 +12,7 @@ services:
       ASPNETCORE_URLS: http://+:8080
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
+      SMTP_FROM_ADDRESS: demo@aptabase.com
     labels:
       dev.ergomake.env.replace-env.BASE_URL: "https://{{ services.app.url }}"
 

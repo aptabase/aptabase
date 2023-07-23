@@ -1,7 +1,6 @@
 using FluentMigrator.Runner.VersionTableInfo;
 
-namespace Aptabase.Migrations;
-
+namespace Aptabase.Data.Migrations;
 
 [VersionTableMetaData]
 public class VersionTable : IVersionTableMetaData

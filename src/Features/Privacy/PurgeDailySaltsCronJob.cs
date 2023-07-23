@@ -2,7 +2,7 @@ using Aptabase.Data;
 using Dapper;
 using Sgbj.Cron;
 
-namespace Aptabase.CronJobs;
+namespace Aptabase.Features.Privacy;
 
 public class PurgeDailySaltsCronJob : BackgroundService
 {

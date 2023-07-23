@@ -1,6 +1,6 @@
 using FluentMigrator;
 
-namespace Aptabase.Migrations;
+namespace Aptabase.Data.Migrations;
 
 [Migration(0001)]
 public class InitialSetup : Migration
