@@ -12,6 +12,8 @@ internal static class HttpContextExtensions
                 return string.Join(",", parts[0..^1]);
         }
 
+        Console.WriteLine("No CloudFront-Viewer-Address header found, falling back to RemoteIpAddress {0}", httpContext.Connection.RemoteIpAddress?.ToString() ?? "}");
+        Console.WriteLine("CloudFront-Viewer-Address={0}", cfViewerAddress.ToString());
         return httpContext.Connection.RemoteIpAddress?.ToString() ?? "";
     }
 
