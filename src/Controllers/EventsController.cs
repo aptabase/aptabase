@@ -76,7 +76,7 @@ public class EventsController : Controller
 
         var location = _geoIP.GetClientLocation(HttpContext);
         var header = new EventHeader(appId, location.CountryCode, location.RegionName);
-        var userId = await _userHashService.CalculateHash(body.Timestamp, appId, HttpContext.ResolveClientIpAddress(), userAgent ?? "");
+        var userId = await _userHashService.CalculateHash(body.Timestamp, appId, body.SessionId, userAgent ?? "");
         var row = NewEventRow(userId, header, body);
         await _ingestionClient.SendSingleAsync(row, cancellationToken);
 
