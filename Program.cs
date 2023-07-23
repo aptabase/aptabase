@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using ClickHouse.Client.ADO;
 using ClickHouse.Client;
 using Aptabase.Data;
+using Aptabase.Data.Migrations;
 using Aptabase.Features;
 using Aptabase.Features.Privacy;
 using Aptabase.Features.Query;
@@ -17,7 +18,6 @@ using Aptabase.Features.GeoIP;
 using Aptabase.Features.Ingestion;
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
-using Aptabase.Data.Migrations;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
