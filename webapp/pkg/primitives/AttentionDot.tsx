@@ -5,8 +5,6 @@ type Props = {
 };
 
 export function AttentionDot(props: Props) {
-  return null;
-
   return (
     <span
       className={cn(
