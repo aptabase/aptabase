@@ -85,7 +85,7 @@ export function Component() {
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Logo className="mx-auto h-20 w-auto text-primary" />
+        <Logo className="mx-auto h-12 w-auto text-primary" />
         <h2 className="text-center text-3xl text-foreground font-bold">
           Sign in to your account
         </h2>

@@ -1,6 +1,7 @@
 :root {
   color-scheme: light;
 
+  --primary: 221 100% 55%;
   --background: 0 0% 100%;
   --foreground: 240 10% 3.9%;
   --muted: 210 20% 98%;
@@ -30,6 +31,7 @@
   :root {
     color-scheme: dark;
 
+    --primary: 221 100% 55%;
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
     --muted: 0 0% 8%;
