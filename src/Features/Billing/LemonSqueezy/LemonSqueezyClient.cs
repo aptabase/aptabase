@@ -55,7 +55,7 @@ public class LemonSqueezyClient
                     variant = new {
                         data = new {
                             type = "variants",
-                            id = "85183"
+                            id = "103474"
                         }
                     }
                 }
