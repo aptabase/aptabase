@@ -34,10 +34,12 @@ We're working on making this easier.`
     <div className="flex flex-col space-y-1">
       <p className="flex items-center mb-1 justify-between">
         <span>{props.billing.plan.name} Plan</span>
-        <span>
-          ${props.billing.plan.monthlyPrice}{" "}
-          <span className="text-sm text-muted-foreground">/mo + Tax</span>
-        </span>
+        {props.billing.plan.monthlyPrice > 0 && (
+          <span>
+            ${props.billing.plan.monthlyPrice}{" "}
+            <span className="text-sm text-muted-foreground">/mo + Tax</span>
+          </span>
+        )}
       </p>
       <p className="flex items-center mb-1 justify-between ">
         <span className="text-sm">
