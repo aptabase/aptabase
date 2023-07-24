@@ -59,8 +59,8 @@ jobs:
 
       - name: Push to Amazon ECR (US)
         run: |
-          docker pull ghcr.io/$REPOSITORY:$IMAGE_TAG
-          docker tag ghcr.io/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker pull ghcr.io/aptabase/$REPOSITORY:$IMAGE_TAG
+          docker tag ghcr.io/aptabase/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         env:
           REGISTRY: 907052285437.dkr.ecr.us-east-1.amazonaws.com
@@ -84,8 +84,8 @@ jobs:
 
       - name: Push to Amazon ECR (EU)
         run: |
-          docker pull ghcr.io/$REPOSITORY:$IMAGE_TAG
-          docker tag ghcr.io/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker pull ghcr.io/aptabase/$REPOSITORY:$IMAGE_TAG
+          docker tag ghcr.io/aptabase/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         env:
           REGISTRY: 907052285437.dkr.ecr.eu-central-1.amazonaws.com
