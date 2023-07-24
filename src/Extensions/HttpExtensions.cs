@@ -18,12 +18,12 @@ internal static class HttpContextExtensions
         return httpContext.Connection.RemoteIpAddress?.ToString() ?? "";
     }
 
-    public static async void EnsureSuccessWithLog(this HttpResponseMessage response, ILogger logger)
+    public static async Task EnsureSuccessWithLog(this HttpResponseMessage response, ILogger logger)
     {
         if (!response.IsSuccessStatusCode)
         {
             var responseBody = await response.Content.ReadAsStringAsync();
-            logger.LogError("Tinybird returned {StatusCode} with body {ResponseBody}", response.StatusCode, responseBody);
+            logger.LogError("Request failed with {StatusCode} with body {ResponseBody}", response.StatusCode, responseBody);
             response.EnsureSuccessStatusCode();
         }
     }

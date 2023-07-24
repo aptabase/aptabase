@@ -25,7 +25,7 @@ public class TinybirdIngestionClient : IIngestionClient
     {
         var response = await _httpClient.PostAsJsonAsync(EventsPath, row, JsonSettings, cancellationToken);
         
-        response.EnsureSuccessWithLog(_logger);
+        await response.EnsureSuccessWithLog(_logger);
         return await response.Content.ReadFromJsonAsync<InsertResult>() ?? new InsertResult();
     }
 
@@ -35,7 +35,7 @@ public class TinybirdIngestionClient : IIngestionClient
         var content = new StringContent(string.Join('\n', rowsAsString));
         var response = await _httpClient.PostAsync(EventsPath, content, cancellationToken);
         
-        response.EnsureSuccessWithLog(_logger);
+        await response.EnsureSuccessWithLog(_logger);
         return await response.Content.ReadFromJsonAsync<InsertResult>() ?? new InsertResult();
     }
 }
