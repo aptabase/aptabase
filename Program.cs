@@ -97,6 +97,7 @@ builder.Services.AddRateLimiter(c =>
 });
 
 builder.Services.AddSingleton(appEnv);
+builder.Services.AddHealthChecks();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IUserHashService, DailyUserHashService>();
 builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
@@ -151,6 +152,7 @@ else
     app.UseForwardedHeaders();
 }
 
+app.MapHealthChecks("/healthz");
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
 app.UseCors();
