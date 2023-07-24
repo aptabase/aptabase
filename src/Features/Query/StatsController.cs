@@ -1,5 +1,6 @@
-using System.Data;
+using Aptabase.Data;
 using Aptabase.Features.Authentication;
+using ClickHouse.Client.Utility;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
@@ -183,9 +184,9 @@ public class QueryRequestBody
 public class StatsController : Controller
 {
     private readonly IQueryClient _queryClient;
-    private readonly IDbConnection _db;
+    private readonly IDbContext _db;
 
-    public StatsController(IDbConnection db, IQueryClient queryClient)
+    public StatsController(IDbContext db, IQueryClient queryClient)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));
@@ -395,7 +396,7 @@ public class StatsController : Controller
     private async Task<bool> HasAccessTo(string appId)
     {
         var user = this.GetCurrentUser();
-        var id = await _db.ExecuteScalarAsync<string>(
+        var id = await _db.Connection.ExecuteScalarAsync<string>(
             @"SELECT a.id
               FROM apps a
               LEFT JOIN app_shares s

@@ -1,4 +1,5 @@
 using Aptabase.Data;
+using ClickHouse.Client.Utility;
 using Dapper;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -23,15 +24,15 @@ public interface IIngestionValidator
 public class IngestionValidator : IIngestionValidator
 {
     private readonly IMemoryCache _cache;
-    private readonly IDbConnectionFactory _dbFactory;
+    private readonly IDbContext _db;
     private readonly EnvSettings _env;
 
     private readonly TimeSpan SuccessCacheDuration = TimeSpan.FromMinutes(30);
     private readonly TimeSpan FailureCacheDuration = TimeSpan.FromMinutes(5);
 
-    public IngestionValidator(IMemoryCache cache, IDbConnectionFactory dbFactory, EnvSettings env)
+    public IngestionValidator(IMemoryCache cache, IDbContext db, EnvSettings env)
     {
-        _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
+        _db = db ?? throw new ArgumentNullException(nameof(db));
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _env = env ?? throw new ArgumentNullException(nameof(env));
     }
@@ -66,8 +67,7 @@ public class IngestionValidator : IIngestionValidator
     private async Task<string?> FindActiveByAppKey(string appKey)
     {
         var key = appKey.Split("-").Last();
-        using var db = _dbFactory.Create();
-        return await db.ExecuteScalarAsync<string>($"SELECT id FROM apps WHERE app_key = @appKey AND deleted_at IS NULL", new { appKey });
+        return await _db.Connection.ExecuteScalarAsync<string>($"SELECT id FROM apps WHERE app_key = @appKey AND deleted_at IS NULL", new { appKey });
     }
 
     public (bool, string) IsValidBody(EventBody? body)

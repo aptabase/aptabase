@@ -1,11 +1,9 @@
-using Dapper;
-using System.Data;
 using Aptabase.Data;
-using Aptabase.Features;
 using Aptabase.Features.Blob;
 using Microsoft.AspNetCore.Mvc;
 using Aptabase.Features.Authentication;
 using System.ComponentModel.DataAnnotations;
+using Dapper;
 
 namespace Aptabase.Features.Apps;
 
@@ -44,11 +42,11 @@ public class UpdateAppRequestBody
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class AppsController : Controller
 {
-    private readonly IDbConnection _db;
+    private readonly IDbContext _db;
     private readonly EnvSettings _env;
     private readonly IBlobService _blobService;
 
-    public AppsController(IDbConnection db, EnvSettings env, IBlobService blobService)
+    public AppsController(IDbContext db, EnvSettings env, IBlobService blobService)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _env = env ?? throw new ArgumentNullException(nameof(env));
@@ -60,7 +58,7 @@ public class AppsController : Controller
     {
         var user = this.GetCurrentUser();
 
-        var apps = await _db.QueryAsync<Application>(
+        var apps = await _db.Connection.QueryAsync<Application>(
             @"SELECT a.id, a.name, a.icon_path, a.app_key, a.owner_id = @userId as has_ownership
               FROM apps a
               LEFT JOIN app_shares s
@@ -84,7 +82,7 @@ public class AppsController : Controller
             AppKey = $"A-{_env.Region}-{NanoId.Numbers(10)}"
         };
 
-        await _db.ExecuteScalarAsync<string>("INSERT INTO apps (id, owner_id, name, app_key) VALUES (@appId, @ownerId, @name, @appKey)", new
+        await _db.Connection.ExecuteScalarAsync<string>("INSERT INTO apps (id, owner_id, name, app_key) VALUES (@appId, @ownerId, @name, @appKey)", new
         {
             appId = app.Id,
             ownerId = user.Id,
@@ -109,7 +107,7 @@ public class AppsController : Controller
         }
 
         app.Name = body.Name;
-        await _db.ExecuteScalarAsync<string>("UPDATE apps SET name = @name, icon_path = @iconPath WHERE id = @appId", new
+        await _db.Connection.ExecuteScalarAsync<string>("UPDATE apps SET name = @name, icon_path = @iconPath WHERE id = @appId", new
         {
             appId = app.Id,
             name = app.Name,
@@ -126,7 +124,7 @@ public class AppsController : Controller
         if (app == null)
             return NotFound();
 
-        await _db.ExecuteScalarAsync<string>("UPDATE apps SET deleted_at = now() WHERE id = @appId", new
+        await _db.Connection.ExecuteScalarAsync<string>("UPDATE apps SET deleted_at = now() WHERE id = @appId", new
         {
             appId = app.Id,
         });
@@ -141,7 +139,7 @@ public class AppsController : Controller
         if (app == null)
             return NotFound();
             
-        var shares = await _db.QueryAsync<ApplicationShare>(
+        var shares = await _db.Connection.QueryAsync<ApplicationShare>(
                             @"SELECT email, created_at
                             FROM app_shares
                             WHERE app_id = @appId", new { appId });
@@ -155,7 +153,7 @@ public class AppsController : Controller
         if (app == null)
             return NotFound();
 
-        await _db.ExecuteScalarAsync<string>(@"
+        await _db.Connection.ExecuteScalarAsync<string>(@"
             INSERT INTO app_shares (app_id, email)
             VALUES (@appId, @email)
             ON CONFLICT DO NOTHING", new
@@ -174,7 +172,7 @@ public class AppsController : Controller
         if (app == null)
             return NotFound();
 
-        await _db.ExecuteScalarAsync<string>(@"DELETE FROM app_shares WHERE app_id = @appId AND email = @email", new
+        await _db.Connection.ExecuteScalarAsync<string>(@"DELETE FROM app_shares WHERE app_id = @appId AND email = @email", new
         {
             appId = appId,
             email = email,
@@ -186,7 +184,7 @@ public class AppsController : Controller
     private async Task<Application?> GetOwnedApp(string appId)
     {
         var user = this.GetCurrentUser();
-        return await _db.QueryFirstOrDefaultAsync<Application>(
+        return await _db.Connection.QueryFirstOrDefaultAsync<Application>(
                 @"SELECT id, name, icon_path, app_key, true as has_ownership
                 FROM apps
                 WHERE id = @appId

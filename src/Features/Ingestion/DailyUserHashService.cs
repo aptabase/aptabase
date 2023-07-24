@@ -1,8 +1,8 @@
-using Dapper;
 using Aptabase.Data;
 using System.Text;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Caching.Memory;
+using Dapper;
 
 namespace Aptabase.Features.Ingestion;
 
@@ -14,12 +14,12 @@ public interface IUserHashService
 public class DailyUserHashService : IUserHashService
 {
     private readonly IMemoryCache _cache;
-    private readonly IDbConnectionFactory _dbFactory;
+    private readonly IDbContext _db;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public DailyUserHashService(IMemoryCache cache, IDbConnectionFactory dbFactory, IHttpContextAccessor httpContextAccessor)
+    public DailyUserHashService(IMemoryCache cache, IDbContext db, IHttpContextAccessor httpContextAccessor)
     {
-        _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
+        _db = db ?? throw new ArgumentNullException(nameof(db));
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
     }
@@ -56,9 +56,8 @@ public class DailyUserHashService : IUserHashService
 
     private async Task<byte[]> ReadOrCreateSalt(string date, string appId)
     {
-        using var db = _dbFactory.Create();
         var newSalt = RandomNumberGenerator.GetBytes(16);
-        await db.ExecuteAsync($"INSERT INTO app_salts (app_id, date, salt) VALUES (@appId, @date, @newSalt) ON CONFLICT DO NOTHING", new { appId, date, newSalt });
-        return await db.ExecuteScalarAsync<byte[]>($"SELECT salt FROM app_salts WHERE app_id = @appId AND date = @date", new { appId, date });
+        await _db.Connection.ExecuteAsync($"INSERT INTO app_salts (app_id, date, salt) VALUES (@appId, @date, @newSalt) ON CONFLICT DO NOTHING", new { appId, date, newSalt });
+        return await _db.Connection.ExecuteScalarAsync<byte[]>($"SELECT salt FROM app_salts WHERE app_id = @appId AND date = @date", new { appId, date });
     }
 }
