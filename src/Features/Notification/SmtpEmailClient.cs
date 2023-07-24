@@ -21,7 +21,7 @@ public class SmtpEmailClient : IEmailClient
 
     public async Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string>? properties, CancellationToken cancellationToken)
     {
-        var body = await _engine.Render(templateName, properties);
+        var body = await _engine.Render(templateName, subject, properties);
         var msg = new MailMessage(_env.SmtpFromAddress, to, subject, body)
         {
             IsBodyHtml = true

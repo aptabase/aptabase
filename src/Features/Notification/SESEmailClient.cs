@@ -18,7 +18,7 @@ public class SESEmailClient : IEmailClient
 
     public async Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string>? properties, CancellationToken cancellationToken)
     {
-        var body = await _engine.Render(templateName, properties);
+        var body = await _engine.Render(templateName, subject, properties);
         var request = NewRequest(to, subject, body);
         await _ses.SendEmailAsync(request, cancellationToken);
     }
@@ -39,7 +39,7 @@ public class SESEmailClient : IEmailClient
     {
         return new SendEmailRequest
         {
-            Source = "Aptabase <notification@aptabase.com>",
+            Source = "Aptabase <goenning@aptabase.com>",
             Destination = new Destination
             {
                 ToAddresses =

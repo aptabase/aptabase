@@ -8,7 +8,7 @@ public class TemplateEngine
     private Assembly _assembly = Assembly.GetEntryAssembly() ?? throw new Exception("Failed to find the entry assembly");
     private Dictionary<string, string> _templates = new();
 
-    public async Task<string> Render(string name, Dictionary<string, string>? properties)
+    public async Task<string> Render(string name, string subject, Dictionary<string, string>? properties)
     {
         var baseTemplate = await GetTemplate("Base");
         var emailTemplate = await GetTemplate(name);
@@ -19,9 +19,7 @@ public class TemplateEngine
                 emailTemplate = emailTemplate.Replace($"##{key.ToUpper()}##", value);
         }
 
-        baseTemplate = baseTemplate.Replace("##CONTENT##", emailTemplate);
-
-        return baseTemplate;
+        return baseTemplate.Replace("##SUBJECT##", subject).Replace("##BODY##", emailTemplate);
     }
 
     public async Task<string> GetTemplate(string name)

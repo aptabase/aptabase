@@ -51,11 +51,10 @@ public class AuthService : IAuthService
         if (user != null)
         {
             var token = _tokenManager.CreateAuthToken(AuthTokenType.SignIn, user.Name, user.Email);
-            var properties = new Dictionary<string, string>
+            await _emailClient.SendEmailAsync(email, "Log in to Aptabase", "SignIn", new()
             {
                 { "url", GenerateAuthUrl(token) }
-            };
-            await _emailClient.SendEmailAsync(email, "Here's your magic link!", "SignIn", properties, cancellationToken);
+            }, cancellationToken);
 
             return true;
         }
@@ -74,13 +73,11 @@ public class AuthService : IAuthService
 
         var token = _tokenManager.CreateAuthToken(AuthTokenType.Register, name, email);
 
-        var properties = new Dictionary<string, string>
+        await _emailClient.SendEmailAsync(email, "Confirm your registration", "Register", new()
         {
             { "name", name },
             { "url", GenerateAuthUrl(token) }
-        };
-
-        await _emailClient.SendEmailAsync(email, "Here's your magic link!", "Register", properties, cancellationToken);
+        }, cancellationToken);
     }
 
     public async Task<UserAccount> CreateAccountAsync(string name, string email, CancellationToken cancellationToken)
@@ -89,8 +86,13 @@ public class AuthService : IAuthService
         var cmd = new CommandDefinition("INSERT INTO users (id, name, email) VALUES (@userId, @name, @email)", new { userId, name, email = email.ToLower() }, cancellationToken: cancellationToken);
         await _db.Connection.ExecuteAsync(cmd);
 
-        if (_env.IsManagedCloud)
-            await _emailClient.SendEmailAsync(email, "Hello from Aptabase 👋", "Welcome", null, cancellationToken);
+        if (!_env.IsManagedCloud)
+        {
+            await _emailClient.SendEmailAsync(email, "Welcome to Aptabase", "Welcome", new()
+            {
+                { "name", name },
+            }, cancellationToken);
+        }
 
         return new UserAccount(userId, name, email);
     }
