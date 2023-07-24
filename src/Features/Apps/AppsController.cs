@@ -1,7 +1,4 @@
-using Dapper;
-using System.Data;
 using Aptabase.Data;
-using Aptabase.Features;
 using Aptabase.Features.Blob;
 using Microsoft.AspNetCore.Mvc;
 using Aptabase.Features.Authentication;
@@ -44,11 +41,11 @@ public class UpdateAppRequestBody
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class AppsController : Controller
 {
-    private readonly IDbConnection _db;
+    private readonly IDbContext _db;
     private readonly EnvSettings _env;
     private readonly IBlobService _blobService;
 
-    public AppsController(IDbConnection db, EnvSettings env, IBlobService blobService)
+    public AppsController(IDbContext db, EnvSettings env, IBlobService blobService)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _env = env ?? throw new ArgumentNullException(nameof(env));

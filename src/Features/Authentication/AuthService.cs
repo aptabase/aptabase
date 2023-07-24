@@ -1,9 +1,7 @@
 using Aptabase.Features.Notification;
 using Aptabase.Data;
-using Dapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Data;
 using System.Security.Claims;
 
 namespace Aptabase.Features.Authentication;
@@ -24,7 +22,7 @@ public interface IAuthService
 public class AuthService : IAuthService
 {
     private readonly ILogger _logger;
-    private readonly IDbConnection _db;
+    private readonly IDbContext _db;
     private readonly IAuthTokenManager _tokenManager;
     private readonly EnvSettings _env;
     private readonly IEmailClient _emailClient;
@@ -32,7 +30,7 @@ public class AuthService : IAuthService
 
     public AuthService(
         ILogger<AuthService> logger,
-        IDbConnection db,
+        IDbContext db,
         EnvSettings env,
         IHttpContextAccessor httpContextAccessor,
         IEmailClient emailClient,
@@ -87,8 +85,7 @@ public class AuthService : IAuthService
     public async Task<UserAccount> CreateAccountAsync(string name, string email, CancellationToken cancellationToken)
     {
         var userId = NanoId.New();
-        var insertUser = new CommandDefinition("INSERT INTO users (id, name, email) VALUES (@userId, @name, @email)", new { userId, name, email }, cancellationToken: cancellationToken);
-        await _db.ExecuteAsync(insertUser);
+        await _db.ExecuteAsync("INSERT INTO users (id, name, email) VALUES (@userId, @name, @email)", new { userId, name, email }, cancellationToken);
 
         if (_env.IsManagedCloud)
             await _emailClient.SendEmailAsync(email, "Hello from Aptabase 👋", "Welcome", null, cancellationToken);
@@ -136,8 +133,7 @@ public class AuthService : IAuthService
 
     public async Task<UserAccount?> FindUserByEmail(string email, CancellationToken cancellationToken)
     {
-        var cmd = new CommandDefinition($"SELECT id, name, email FROM users WHERE email = @email", new { email }, cancellationToken: cancellationToken);
-        return await _db.QuerySingleOrDefaultAsync<UserAccount>(cmd);
+        return await _db.QuerySingleOrDefaultAsync<UserAccount>($"SELECT id, name, email FROM users WHERE email = @email", new { email }, cancellationToken: cancellationToken);
     }
 
     public async Task<UserAccount> FindOrCreateAccountWithOAuth(string name, string email, string providerName, string providerUid, CancellationToken cancellationToken)
@@ -160,22 +156,21 @@ public class AuthService : IAuthService
 
     public async Task<UserAccount?> FindUserByOAuthProvider(string providerName, string providerUid, CancellationToken cancellationToken)
     {
-        var cmd = new CommandDefinition($@"
+        return await _db.QuerySingleOrDefaultAsync<UserAccount>($@"
             SELECT u.id, u.name, u.email
             FROM user_providers up
             INNER JOIN users u
             ON u.id = up.user_id
             WHERE up.provider_name = @name
-            AND up.provider_uid = @uid", new { name = providerName, uid = providerUid }, cancellationToken: cancellationToken);
-        return await _db.QuerySingleOrDefaultAsync<UserAccount>(cmd);
+            AND up.provider_uid = @uid", new { name = providerName, uid = providerUid }, cancellationToken);
     }
 
     public Task AttachUserAuthProviderAsync(UserAccount user, string providerName, string providerUid, CancellationToken cancellationToken)
     {
-        var cmd = new CommandDefinition($@"
+        return _db.ExecuteAsync($@"
             INSERT INTO user_providers (provider_name, provider_uid, user_id)
-            VALUES (@providerName, @providerUid, @userId)", new { userId = user.Id, providerName, providerUid }, cancellationToken: cancellationToken);
-        return _db.ExecuteAsync(cmd);
+            VALUES (@providerName, @providerUid, @userId)",
+            new { userId = user.Id, providerName, providerUid }, cancellationToken);
     }
 
     private string GenerateAuthUrl(string token) => $"{_env.SelfBaseUrl}/api/_auth/continue?token={token}";

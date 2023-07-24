@@ -1,6 +1,5 @@
 using FluentMigrator.Runner;
 using System.Net.Http.Headers;
-using System.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Aptabase.Features.Notification;
 using System.Threading.RateLimiting;
@@ -18,6 +17,7 @@ using Aptabase.Features.GeoIP;
 using Aptabase.Features.Ingestion;
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
@@ -127,9 +127,8 @@ else
 }
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
-var dbFactory = new DbConnectionFactory(appEnv.ConnectionString);
-builder.Services.AddSingleton<IDbConnectionFactory>(dbFactory);
-builder.Services.AddScoped<IDbConnection>(_sp => dbFactory.Create());
+builder.Services.AddSingleton<IDbContext, DbContext>();
+builder.Services.AddNpgsqlDataSource(appEnv.ConnectionString);
 
 builder.Services.AddFluentMigratorCore().ConfigureRunner(
     r => r.AddPostgres()

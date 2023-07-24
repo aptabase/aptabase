@@ -1,9 +1,9 @@
-using Dapper;
 using System.Data;
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
 using Aptabase.Features.Query;
 using Microsoft.AspNetCore.Mvc;
+using Aptabase.Data;
 
 namespace Aptabase.Features.Billing;
 
@@ -18,10 +18,10 @@ public class BillingUsage
 public class BillingController : Controller
 {
     private readonly IQueryClient _queryClient;
-    private readonly IDbConnection _db;
+    private readonly IDbContext _db;
     private readonly LemonSqueezyClient _lsClient;
 
-    public BillingController(IDbConnection db, LemonSqueezyClient lsClient, IQueryClient queryClient)
+    public BillingController(IDbContext db, LemonSqueezyClient lsClient, IQueryClient queryClient)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _lsClient = lsClient ?? throw new ArgumentNullException(nameof(lsClient));

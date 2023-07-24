@@ -1,6 +1,5 @@
-using System.Data;
+using Aptabase.Data;
 using Aptabase.Features.Authentication;
-using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aptabase.Features.Query;
@@ -183,9 +182,9 @@ public class QueryRequestBody
 public class StatsController : Controller
 {
     private readonly IQueryClient _queryClient;
-    private readonly IDbConnection _db;
+    private readonly IDbContext _db;
 
-    public StatsController(IDbConnection db, IQueryClient queryClient)
+    public StatsController(IDbContext db, IQueryClient queryClient)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));

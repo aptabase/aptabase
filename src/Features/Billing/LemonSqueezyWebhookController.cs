@@ -1,10 +1,9 @@
-using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using Dapper;
 using Aptabase.Features.Billing.LemonSqueezy;
 using System.Security.Cryptography;
 using System.Text;
+using Aptabase.Data;
 
 namespace Aptabase.Features.Billing;
 
@@ -12,14 +11,14 @@ namespace Aptabase.Features.Billing;
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class LemonSqueezyWebhookController : Controller
 {
-    private readonly IDbConnection _db;
+    private readonly IDbContext _db;
     private readonly LemonSqueezyClient _lsClient;
     private readonly ILogger _logger;
 
     private readonly string _region;
     private readonly byte[] _signingSecret;
 
-    public LemonSqueezyWebhookController(EnvSettings env, IDbConnection db, LemonSqueezyClient lsClient, ILogger<LemonSqueezyWebhookController> logger)
+    public LemonSqueezyWebhookController(EnvSettings env, IDbContext db, LemonSqueezyClient lsClient, ILogger<LemonSqueezyWebhookController> logger)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _lsClient = lsClient ?? throw new ArgumentNullException(nameof(lsClient));

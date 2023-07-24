@@ -1,5 +1,4 @@
 using Aptabase.Data;
-using Dapper;
 using Sgbj.Cron;
 
 namespace Aptabase.Features.Privacy;
@@ -7,11 +6,11 @@ namespace Aptabase.Features.Privacy;
 public class PurgeDailySaltsCronJob : BackgroundService
 {
     private readonly ILogger _logger;
-    private readonly IDbConnectionFactory _dbFactory;
+    private readonly IDbContext _db;
 
-    public PurgeDailySaltsCronJob(IDbConnectionFactory dbFactory, ILogger<PurgeDailySaltsCronJob> logger)
+    public PurgeDailySaltsCronJob(IDbContext db, ILogger<PurgeDailySaltsCronJob> logger)
     {
-        _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
+        _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -26,8 +25,7 @@ public class PurgeDailySaltsCronJob : BackgroundService
         while (await timer.WaitForNextTickAsync(cancellationToken))
         {
             _logger.LogInformation("Purging daily salts");
-            using var db = _dbFactory.Create();
-            var rows = await db.ExecuteAsync(PURGE_QUERY);
+            var rows = await _db.ExecuteAsync(PURGE_QUERY);
             _logger.LogInformation("Deleted {rows} rows", rows);
         }
     }
