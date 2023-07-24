@@ -86,8 +86,7 @@ public class AuthService : IAuthService
     public async Task<UserAccount> CreateAccountAsync(string name, string email, CancellationToken cancellationToken)
     {
         var userId = NanoId.New();
-        var cmd = new CommandDefinition("INSERT INTO users (id, name, email) VALUES (@userId, @name, @email)",
-            new { userId, name, email }, cancellationToken: cancellationToken);
+        var cmd = new CommandDefinition("INSERT INTO users (id, name, email) VALUES (@userId, @name, @email)", new { userId, name, email }, cancellationToken: cancellationToken);
         await _db.Connection.ExecuteAsync(cmd);
 
         if (_env.IsManagedCloud)
@@ -136,8 +135,7 @@ public class AuthService : IAuthService
 
     public async Task<UserAccount?> FindUserByEmail(string email, CancellationToken cancellationToken)
     {
-        var cmd = new CommandDefinition("SELECT id, name, email FROM users WHERE email = @email",
-            new { email }, cancellationToken: cancellationToken);
+        var cmd = new CommandDefinition($"SELECT id, name, email FROM users WHERE email = @email", new { email }, cancellationToken: cancellationToken);
         return await _db.Connection.QuerySingleOrDefaultAsync<UserAccount>(cmd);
     }
 
