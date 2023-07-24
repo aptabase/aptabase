@@ -89,10 +89,10 @@ public class IngestionValidator : IIngestionValidator
                     return (false, "Property key must not be empty.");
 
                 if (prop.Name.Length > 40)
-                    return (false, "Property key must be less than or equal to 40 characters.");
+                    return (false, string.Format("Property key {0} must be less than or equal to 40 characters.", prop.Name));
 
                 if (prop.Value.ToString().Length > 200)
-                    return (false, "Property value must be less than or equal to 200 characters.");
+                    return (false, string.Format("Property value must be less than or equal to 200 characters. Value was: {0}", prop.Value.ToString()));
             }
         }
 
