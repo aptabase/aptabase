@@ -2,6 +2,7 @@ using Aptabase.Data;
 using System.Text;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Caching.Memory;
+using Dapper;
 
 namespace Aptabase.Features.Ingestion;
 
@@ -56,7 +57,7 @@ public class DailyUserHashService : IUserHashService
     private async Task<byte[]> ReadOrCreateSalt(string date, string appId)
     {
         var newSalt = RandomNumberGenerator.GetBytes(16);
-        await _db.ExecuteAsync($"INSERT INTO app_salts (app_id, date, salt) VALUES (@appId, @date, @newSalt) ON CONFLICT DO NOTHING", new { appId, date, newSalt });
-        return await _db.ExecuteScalarAsync<byte[]>($"SELECT salt FROM app_salts WHERE app_id = @appId AND date = @date", new { appId, date });
+        await _db.Connection.ExecuteAsync($"INSERT INTO app_salts (app_id, date, salt) VALUES (@appId, @date, @newSalt) ON CONFLICT DO NOTHING", new { appId, date, newSalt });
+        return await _db.Connection.ExecuteScalarAsync<byte[]>($"SELECT salt FROM app_salts WHERE app_id = @appId AND date = @date", new { appId, date });
     }
 }

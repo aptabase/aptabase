@@ -1,4 +1,6 @@
 using Aptabase.Data;
+using ClickHouse.Client.Utility;
+using Dapper;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Aptabase.Features.Ingestion;
@@ -65,7 +67,7 @@ public class IngestionValidator : IIngestionValidator
     private async Task<string?> FindActiveByAppKey(string appKey)
     {
         var key = appKey.Split("-").Last();
-        return await _db.ExecuteScalarAsync<string>($"SELECT id FROM apps WHERE app_key = @appKey AND deleted_at IS NULL", new { appKey });
+        return await _db.Connection.ExecuteScalarAsync<string>($"SELECT id FROM apps WHERE app_key = @appKey AND deleted_at IS NULL", new { appKey });
     }
 
     public (bool, string) IsValidBody(EventBody? body)

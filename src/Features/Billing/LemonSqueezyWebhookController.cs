@@ -4,6 +4,7 @@ using Aptabase.Features.Billing.LemonSqueezy;
 using System.Security.Cryptography;
 using System.Text;
 using Aptabase.Data;
+using Dapper;
 
 namespace Aptabase.Features.Billing;
 
@@ -77,16 +78,16 @@ public class LemonSqueezyWebhookController : Controller
             return BadRequest(new { message = "Missing 'user_id' on meta.custom_data" });
         }
 
-        await _db.ExecuteAsync(@"INSERT INTO subscriptions
-                                    (id, owner_id, customer_id, product_id, variant_id, status, ends_at)
-                                 VALUES
-                                    (@subId, @ownerId, @customerId, @productId, @variantId, @status, @endsAt)
-                                 ON CONFLICT (id) 
-                                 DO UPDATE SET product_id = @productId,
-                                               variant_id = @variantId,
-                                               status = @status,
-                                               ends_at = @endsAt,
-                                               modified_at = now()", new {
+        await _db.Connection.ExecuteAsync(@"INSERT INTO subscriptions
+                                                (id, owner_id, customer_id, product_id, variant_id, status, ends_at)
+                                            VALUES
+                                                (@subId, @ownerId, @customerId, @productId, @variantId, @status, @endsAt)
+                                            ON CONFLICT (id) 
+                                            DO UPDATE SET product_id = @productId,
+                                                        variant_id = @variantId,
+                                                        status = @status,
+                                                        ends_at = @endsAt,
+                                                        modified_at = now()", new {
             subId,
             ownerId,
             customerId = body.CustomerID,

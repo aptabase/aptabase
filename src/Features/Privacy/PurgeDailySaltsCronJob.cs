@@ -14,10 +14,6 @@ public class PurgeDailySaltsCronJob : BackgroundService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    private readonly string PURGE_QUERY = @"
-        DELETE FROM app_salts
-        WHERE TO_DATE(date, 'YYYY/MM/DD') <= CURRENT_DATE - INTERVAL '2' DAY";
-
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var timer = new CronTimer("0 0 * * *", TimeZoneInfo.Utc);
@@ -25,7 +21,7 @@ public class PurgeDailySaltsCronJob : BackgroundService
         while (await timer.WaitForNextTickAsync(cancellationToken))
         {
             _logger.LogInformation("Purging daily salts");
-            var rows = await _db.ExecuteAsync(PURGE_QUERY);
+            var rows = await _db.PurgeOldSalts(cancellationToken);
             _logger.LogInformation("Deleted {rows} rows", rows);
         }
     }

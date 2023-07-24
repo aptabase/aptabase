@@ -1,4 +1,6 @@
 using Aptabase.Data;
+using ClickHouse.Client.Utility;
+using Dapper;
 
 namespace Aptabase.Features.Blob;
 
@@ -15,20 +17,20 @@ public class DatabaseBlobService : IBlobService
     {
         var path = $"{prefix}/{Guid.NewGuid().ToString()}.png";
 
-        await _db.ExecuteScalarAsync("INSERT INTO blobs (path, content, content_type) VALUES (@path, @content, @contentType)", new {
+        var cmd = new CommandDefinition("INSERT INTO blobs (path, content, content_type) VALUES (@path, @content, @contentType)", new {
             path,
             content = content,
             contentType = "image/png"
-        }, cancellationToken);
+        }, cancellationToken: cancellationToken);
+
+        await _db.Connection.ExecuteScalarAsync(cmd);
 
         return path;
     }
 
     public async Task<Blob?> DownloadAsync(string path, CancellationToken cancellationToken)
     {
-        return await _db.QuerySingleOrDefaultAsync<Blob>(
-            "SELECT path, content, content_type FROM blobs WHERE path = @path", 
-            new { path }, cancellationToken
-        );
+        var cmd = new CommandDefinition("SELECT path, content, content_type FROM blobs WHERE path = @path", new { path }, cancellationToken: cancellationToken);
+        return await _db.Connection.QuerySingleOrDefaultAsync<Blob>(cmd);
     }
 }

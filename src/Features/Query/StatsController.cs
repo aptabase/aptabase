@@ -1,5 +1,7 @@
 using Aptabase.Data;
 using Aptabase.Features.Authentication;
+using ClickHouse.Client.Utility;
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aptabase.Features.Query;
@@ -394,7 +396,7 @@ public class StatsController : Controller
     private async Task<bool> HasAccessTo(string appId)
     {
         var user = this.GetCurrentUser();
-        var id = await _db.ExecuteScalarAsync<string>(
+        var id = await _db.Connection.ExecuteScalarAsync<string>(
             @"SELECT a.id
               FROM apps a
               LEFT JOIN app_shares s

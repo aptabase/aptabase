@@ -4,6 +4,7 @@ using Aptabase.Features.Billing.LemonSqueezy;
 using Aptabase.Features.Query;
 using Microsoft.AspNetCore.Mvc;
 using Aptabase.Data;
+using Dapper;
 
 namespace Aptabase.Features.Billing;
 
@@ -32,7 +33,7 @@ public class BillingController : Controller
     public async Task<IActionResult> BillingState(CancellationToken cancellationToken)
     {
         var user = this.GetCurrentUser();
-        var releaseAppIds = await _db.QueryAsync<string>(@"SELECT id FROM apps WHERE owner_id = @userId", new { userId = user.Id });
+        var releaseAppIds = await _db.Connection.QueryAsync<string>(@"SELECT id FROM apps WHERE owner_id = @userId", new { userId = user.Id });
         var debugAppIds = releaseAppIds.Select(id => $"{id}_DEBUG");
         var appIds = releaseAppIds.Concat(debugAppIds).ToArray();
 
@@ -72,7 +73,7 @@ public class BillingController : Controller
 
     private async Task<Subscription?> GetUserSubscription(UserAccount user)
     {
-        return await _db.QueryFirstOrDefaultAsync<Subscription>(
+        return await _db.Connection.QueryFirstOrDefaultAsync<Subscription>(
             @"SELECT * FROM subscriptions 
               WHERE owner_id = @userId
               ORDER BY created_at DESC LIMIT 1",
