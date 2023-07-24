@@ -1,7 +1,6 @@
 using FluentMigrator.Runner;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Aptabase.Features.Notification;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -15,9 +14,9 @@ using Aptabase.Features.Query;
 using Aptabase.Features.Blob;
 using Aptabase.Features.GeoIP;
 using Aptabase.Features.Ingestion;
+using Aptabase.Features.Notification;
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
