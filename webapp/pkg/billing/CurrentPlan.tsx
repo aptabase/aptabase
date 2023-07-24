@@ -46,9 +46,9 @@ We're working on making this easier.`
           {props.billing.plan.monthlyEvents.toLocaleString()}{" "}
           <span className="text-muted-foreground">events / mo</span>
         </span>
-        <Button variant="ghost" size="xs" onClick={action} loading={loading}>
+        {/* <Button variant="ghost" size="xs" onClick={action} loading={loading}>
           {hasSubscription ? "Manage" : "Upgrade"}
-        </Button>
+        </Button> */}
       </p>
       {status && !isExpired && (
         <p className="flex items-center mb-1 justify-between text-xs">
