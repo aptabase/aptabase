@@ -17,11 +17,15 @@ using Aptabase.Features.Ingestion;
 using Aptabase.Features.Notification;
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.AddServerHeader = false;
+
+    // Set to half of the default value to better support mobile devices on slow networks
+    options.Limits.MinRequestBodyDataRate = new MinDataRate(bytesPerSecond: 120, gracePeriod: TimeSpan.FromSeconds(5));
 });
 
 builder.Logging.ClearProviders();
