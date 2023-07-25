@@ -67,6 +67,12 @@ public static class OAuthExtensions
             o.ClaimActions.MapJsonKey("email", "email");
             o.Events = new OAuthEvents
             {
+                OnAccessDenied = context =>
+                {
+                    context.HandleResponse();
+                    context.HttpContext.Response.Redirect($"{env.SelfBaseUrl}/auth");
+                    return Task.CompletedTask;
+                },
                 OnCreatingTicket = async context =>
                 {
                     var ghUser = await MakeOAuthRequest<GitHubUser>(context, context.Options.UserInformationEndpoint);
@@ -115,6 +121,12 @@ public static class OAuthExtensions
             o.ClaimActions.MapJsonKey("email", "email");
             o.Events = new OAuthEvents
             {
+                OnAccessDenied = context =>
+                {
+                    context.HandleResponse();
+                    context.HttpContext.Response.Redirect($"{env.SelfBaseUrl}/auth");
+                    return Task.CompletedTask;
+                },
                 OnCreatingTicket = async context =>
                 {
                     var googleUser = await MakeOAuthRequest<GoogleUser>(context, context.Options.UserInformationEndpoint);
