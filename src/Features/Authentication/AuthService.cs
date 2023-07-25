@@ -53,6 +53,7 @@ public class AuthService : IAuthService
             var token = _tokenManager.CreateAuthToken(AuthTokenType.SignIn, user.Name, user.Email);
             await _emailClient.SendEmailAsync(email, "Log in to Aptabase", "SignIn", new()
             {
+                { "name", user.Name },
                 { "url", GenerateAuthUrl(token) }
             }, cancellationToken);
 
