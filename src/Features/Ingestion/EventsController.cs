@@ -1,3 +1,4 @@
+using System.Net;
 using Aptabase.Features.GeoIP;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -42,16 +43,19 @@ public class EventsController : Controller
 
         body.Normalize();
 
-        var (valid, errorMessage) = _validator.IsValidBody(body);
+        var (valid, validationMessage) = _validator.IsValidBody(body);
         if (!valid)
         {
-            _logger.LogWarning(errorMessage);
-            return BadRequest(errorMessage);
+            _logger.LogWarning(validationMessage);
+            return BadRequest(validationMessage);
         }
 
-        var (appId, result) = await ValidateAppKey(appKey);
-        if (result is not null)
-            return result;
+        var (appId, statusCode, message) = await ValidateAppKey(appKey);
+        if (statusCode != HttpStatusCode.OK)
+        {
+            _logger.LogWarning(message);
+            return StatusCode((int)statusCode, message);
+        }
 
         // We never expect the Web SDK to send the OS name, so it's safe to assume that if it's missing the event is coming from a browser
         var isWeb = string.IsNullOrEmpty(body.SystemProps.OSName);
@@ -82,20 +86,20 @@ public class EventsController : Controller
         return Ok(new { });
     }
 
-    private async Task<(string, IActionResult?)> ValidateAppKey(string appKey)
+    private async Task<(string, HttpStatusCode, string)> ValidateAppKey(string appKey)
     {
         var (appId, status) = await _validator.IsAppKeyValid(appKey);
 
-        IActionResult? result = status switch
+        (HttpStatusCode, string) result = status switch
         {
-            AppKeyStatus.Missing => BadRequest("Missing App-Key header. Find your app key on Aptabase console."),
-            AppKeyStatus.InvalidFormat => BadRequest($"Invalid format for app key '{appKey}'. Find your app key on Aptabase console."),
-            AppKeyStatus.InvalidRegion => BadRequest("Invalid App Key region. This key is meant for another region. Find your app key on Aptabase console."),
-            AppKeyStatus.NotFound => NotFound($"Appplication not found with given app key '{appKey}'. Find your app key on Aptabase console."),
-            _ => null
+            AppKeyStatus.Missing => (HttpStatusCode.BadRequest, "Missing App-Key header. Find your app key on Aptabase console."),
+            AppKeyStatus.InvalidFormat => (HttpStatusCode.BadRequest, $"Invalid format for app key '{appKey}'. Find your app key on Aptabase console."),
+            AppKeyStatus.InvalidRegion => (HttpStatusCode.BadRequest, $"Invalid region for App Key '{appKey}'. This key is meant for another region. Find your app key on Aptabase console."),
+            AppKeyStatus.NotFound => (HttpStatusCode.NotFound, $"Appplication not found with given app key '{appKey}'. Find your app key on Aptabase console."),
+            _ => (HttpStatusCode.OK, string.Empty)
         };
 
-        return (appId, result);
+        return (appId, result.Item1, result.Item2);
     }
 
     private EventRow NewEventRow(string userId, EventHeader header, EventBody body)
