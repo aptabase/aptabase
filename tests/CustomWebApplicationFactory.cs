@@ -1,3 +1,6 @@
+using Aptabase.Data;
+using Aptabase.Features;
+using FluentMigrator.Runner;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Aptabase.IntegrationTests;
@@ -16,5 +19,23 @@ public class CustomWebApplicationFactory<TProgram>
         Environment.SetEnvironmentVariable("SMTP_HOST", "localhost");
         Environment.SetEnvironmentVariable("SMTP_PORT", "1025");
         Environment.SetEnvironmentVariable("SMTP_FROM_ADDRESS", "abc@hi.com");
+
+        builder.ConfigureServices(services =>
+        {
+            using (var scope = services.BuildServiceProvider().CreateScope())
+            {
+                // Execute Postgres migrations
+                var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+                runner.MigrateUp();
+
+                var env = scope.ServiceProvider.GetRequiredService<EnvSettings>();
+                if (!string.IsNullOrEmpty(env.ClickHouseConnectionString))
+                {
+                    // Execute ClickHouse migrations (if applicable)
+                    var chRunner = scope.ServiceProvider.GetRequiredService<IClickHouseMigrationRunner>();
+                    chRunner.MigrateUp();
+                }
+            }
+        });
     }
 }
