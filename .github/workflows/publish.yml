@@ -1,8 +1,5 @@
 name: Publish Aptabase
-on:
-  push:
-    branches:
-      - main
+on: push
 
 permissions:
   id-token: write
@@ -58,6 +55,7 @@ jobs:
           IMAGE_TAG: main
 
   deploy-us:
+    if: ${{ github.ref == 'refs/heads/main' }}
     name: Deploy to Aptabase US
     runs-on: "ubuntu-latest"
     environment: "Aptabase US"
@@ -83,6 +81,7 @@ jobs:
           IMAGE_TAG: main
 
   deploy-eu:
+    if: ${{ github.ref == 'refs/heads/main' }}
     name: Deploy to Aptabase EU
     runs-on: "ubuntu-latest"
     environment: "Aptabase EU"
