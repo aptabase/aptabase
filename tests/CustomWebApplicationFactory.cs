@@ -1,6 +1,4 @@
-using Aptabase.Data;
 using Aptabase.Features;
-using FluentMigrator.Runner;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Aptabase.IntegrationTests;
@@ -22,8 +20,15 @@ public class CustomWebApplicationFactory<TProgram>
 
         builder.ConfigureServices(services =>
         {
-            var sp = services.BuildServiceProvider();
-            Program.RunMigrations(sp);
+            try
+            {
+                var sp = services.BuildServiceProvider();
+                Program.RunMigrations(sp);
+            }
+            catch
+            {
+                // ignore because it might be already migrated
+            }
         });
     }
 }
