@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace Aptabase.IntegrationTests;
@@ -12,7 +13,11 @@ public class IntegrationTestsFixture : IDisposable
 
     public HttpClient CreateClient()
     {
-        return _factory.CreateClient();
+        var opts = new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        };
+        return _factory.CreateClient(opts);
     }
 
     public void Dispose()

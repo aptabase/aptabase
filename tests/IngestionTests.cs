@@ -14,12 +14,17 @@ public class IngestionTests
     }
 
     [Fact]
-    public async Task Missing_AppKey()
+    public async Task User_Can_Create_App()
     {
-        var response = await _client.PostAsJsonAsync("/api/_auth/register", new {
-            name = "Jon Snow",
-            email = "jon.snow@got.com"
-        });
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var email = $"jon.snow.{Guid.NewGuid()}@got.com";
+        var registration = await _client.PostAsJsonAsync("/api/_auth/register", new { name = "Jon Snow", email });
+        registration.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var confirmUrl = await MailCatcher.GetLinkSentTo(email);
+        var confirmation = await _client.GetAsync(confirmUrl);
+        confirmation.StatusCode.Should().Be(HttpStatusCode.Redirect);
+
+        var apps = await _client.GetAsync("/api/_apps");
+        apps.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }
