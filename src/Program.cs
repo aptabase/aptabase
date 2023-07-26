@@ -28,8 +28,8 @@ public partial class Program
         {
             options.AddServerHeader = false;
 
-            // Set to half of the default value to better support mobile devices on slow networks
-            options.Limits.MinRequestBodyDataRate = new MinDataRate(bytesPerSecond: 120, gracePeriod: TimeSpan.FromSeconds(5));
+            // Set to 1/4 of the default value to better support mobile devices on slow networks
+            options.Limits.MinRequestBodyDataRate = new MinDataRate(bytesPerSecond: 60, gracePeriod: TimeSpan.FromSeconds(10));
         });
 
         builder.Logging.ClearProviders();
