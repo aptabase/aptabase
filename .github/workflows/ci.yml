@@ -28,7 +28,7 @@ jobs:
       mailcatcher:
         image: dockage/mailcatcher:0.8.2
         ports:
-          - 1025
+          - 1025:1025
           - 1080:1080
     steps:
       - name: Checkout repo
