@@ -16,11 +16,15 @@ jobs:
         env:
           POSTGRES_USER: aptabase
           POSTGRES_PASSWORD: aptabase_pw
+        ports:
+          - 5432:5432
       clickhouse:
         image: clickhouse/clickhouse-server:23.3.8.21
         env:
           CLICKHOUSE_USER: aptabase
           CLICKHOUSE_PASSWORD: aptabase_pw
+        ports:
+          - 8123:8123
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
