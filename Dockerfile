@@ -22,9 +22,6 @@ WORKDIR /app
 
 COPY --from=server /app/publish .
 COPY --from=webapp /src/wwwroot ./wwwroot
-
-COPY etc/geoip ./etc/geoip
-COPY etc/clickhouse ./etc/clickhouse
 COPY LICENSE .
 
 ENTRYPOINT ["dotnet", "Aptabase.dll"]
