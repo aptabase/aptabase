@@ -1,4 +1,3 @@
-using Aptabase.Features;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Aptabase.IntegrationTests;
@@ -17,18 +16,5 @@ public class CustomWebApplicationFactory<TProgram>
         Environment.SetEnvironmentVariable("SMTP_HOST", "localhost");
         Environment.SetEnvironmentVariable("SMTP_PORT", "1025");
         Environment.SetEnvironmentVariable("SMTP_FROM_ADDRESS", "abc@hi.com");
-
-        builder.ConfigureServices(services =>
-        {
-            try
-            {
-                var sp = services.BuildServiceProvider();
-                Program.RunMigrations(sp);
-            }
-            catch
-            {
-                // ignore because it might be already migrated
-            }
-        });
     }
 }
