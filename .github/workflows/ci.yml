@@ -112,7 +112,7 @@ jobs:
     name: Deploy to Aptabase US
     runs-on: "ubuntu-latest"
     environment: "Aptabase US"
-    needs: [build-and-publish]
+    needs: [publish]
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -149,7 +149,7 @@ jobs:
     name: Deploy to Aptabase EU
     runs-on: "ubuntu-latest"
     environment: "Aptabase EU"
-    needs: [build-and-publish]
+    needs: [publish]
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
