@@ -22,20 +22,8 @@ public class CustomWebApplicationFactory<TProgram>
 
         builder.ConfigureServices(services =>
         {
-            using (var scope = services.BuildServiceProvider().CreateScope())
-            {
-                // Execute Postgres migrations
-                var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-                runner.MigrateUp();
-
-                var env = scope.ServiceProvider.GetRequiredService<EnvSettings>();
-                if (!string.IsNullOrEmpty(env.ClickHouseConnectionString))
-                {
-                    // Execute ClickHouse migrations (if applicable)
-                    var chRunner = scope.ServiceProvider.GetRequiredService<IClickHouseMigrationRunner>();
-                    chRunner.MigrateUp();
-                }
-            }
+            var sp = services.BuildServiceProvider();
+            Program.RunMigrations(sp);
         });
     }
 }
