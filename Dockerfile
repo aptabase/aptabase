@@ -4,6 +4,7 @@ WORKDIR /src
 
 COPY ./src/Aptabase.csproj .
 RUN dotnet restore "./Aptabase.csproj"
+COPY ./etc .
 COPY ./src .
 RUN dotnet publish "Aptabase.csproj" -c Release -o /app/publish /p:UseAppHost=false
 

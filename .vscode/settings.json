@@ -12,7 +12,7 @@
     "**/CVS": true,
     "**/.DS_Store": true,
     "**/Thumbs.db": true,
-    "**/bin": true,
+    "**/bin": false,
     "**/obj": true
   }
 }
