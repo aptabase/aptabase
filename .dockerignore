@@ -3,7 +3,9 @@ bin
 .vs
 .DS_Store
 
-etc/tinybird/.tinyb
+etc/tinybird
 src/node_modules
 src/wwwroot/
 src/Properties/*
+tests
+tools

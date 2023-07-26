@@ -21,7 +21,8 @@ public class ClickHouseMigrationRunner : IClickHouseMigrationRunner
 
     public void MigrateUp()
     {
-        var files = Directory.GetFiles("./etc/clickhouse").OrderBy(x => x);
+        var pathToMigrations = Path.Combine(AppContext.BaseDirectory, "etc/clickhouse");
+        var files = Directory.GetFiles(pathToMigrations).OrderBy(x => x);
         foreach (string file in files)
         {
             var content = File.ReadAllText(file);

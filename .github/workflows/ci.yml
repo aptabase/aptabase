@@ -10,6 +10,21 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: aptabase
+          POSTGRES_PASSWORD: aptabase_pw
+        ports:
+          - 5432:5432
+      clickhouse:
+        image: clickhouse/clickhouse-server:23.3.8.21
+        env:
+          CLICKHOUSE_USER: aptabase
+          CLICKHOUSE_PASSWORD: aptabase_pw
+        ports:
+          - 8123:8123
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -23,19 +38,57 @@ jobs:
         run: dotnet test
         working-directory: src
 
+      - name: Run Unit Tests
+        run: dotnet test
+        working-directory: src
+
       - name: Run Integration Tests
         run: dotnet test
         working-directory: tests
 
-  build-and-publish:
-    name: Build and Publish
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Docker Build
-        run: docker build -t prod_build_img .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          tags: aptabase:latest
+          outputs: type=docker,dest=/tmp/aptabase.tar
+
+      - name: Upload Image
+        uses: actions/upload-artifact@v3
+        with:
+          name: aptabase
+          path: /tmp/aptabase.tar
+
+  publish:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    name: Publish
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Download Image
+        uses: actions/download-artifact@v3
+        with:
+          name: aptabase
+          path: /tmp
+
+      - name: Load Image
+        run: docker load --input /tmp/aptabase.tar
 
       # Push to Public Registry
       - name: Login to GitHub Container Registry
@@ -47,7 +100,7 @@ jobs:
 
       - name: Push to GitHub Container Registry
         run: |
-          docker tag prod_build_img $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker tag aptabase:latest $REGISTRY/$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         env:
           REGISTRY: ghcr.io/aptabase
@@ -59,8 +112,20 @@ jobs:
     name: Deploy to Aptabase US
     runs-on: "ubuntu-latest"
     environment: "Aptabase US"
-    needs: [test, build-and-publish]
+    needs: [publish]
     steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Download Image
+        uses: actions/download-artifact@v3
+        with:
+          name: aptabase
+          path: /tmp
+
+      - name: Load Image
+        run: docker load --input /tmp/aptabase.tar
+
       - name: Configure AWS credentials (US)
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -72,8 +137,7 @@ jobs:
 
       - name: Push to Amazon ECR (US)
         run: |
-          docker pull ghcr.io/aptabase/$REPOSITORY:$IMAGE_TAG
-          docker tag ghcr.io/aptabase/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker tag aptabase:latest $REGISTRY/$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         env:
           REGISTRY: 907052285437.dkr.ecr.us-east-1.amazonaws.com
@@ -85,8 +149,20 @@ jobs:
     name: Deploy to Aptabase EU
     runs-on: "ubuntu-latest"
     environment: "Aptabase EU"
-    needs: [test, build-and-publish]
+    needs: [publish]
     steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Download Image
+        uses: actions/download-artifact@v3
+        with:
+          name: aptabase
+          path: /tmp
+
+      - name: Load Image
+        run: docker load --input /tmp/aptabase.tar
+
       - name: Configure AWS credentials (EU)
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -98,8 +174,7 @@ jobs:
 
       - name: Push to Amazon ECR (EU)
         run: |
-          docker pull ghcr.io/aptabase/$REPOSITORY:$IMAGE_TAG
-          docker tag ghcr.io/aptabase/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker tag aptabase:latest $REGISTRY/$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         env:
           REGISTRY: 907052285437.dkr.ecr.eu-central-1.amazonaws.com
