@@ -1,17 +1,19 @@
 # Server Build
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS server
 WORKDIR /src
-COPY Aptabase.csproj .
+
+COPY ./src/Aptabase.csproj .
 RUN dotnet restore "./Aptabase.csproj"
-COPY . .
+COPY ./src .
 RUN dotnet publish "Aptabase.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # WebApp Build
 FROM node:18 as webapp
 WORKDIR /src
-COPY package.json package-lock.json ./
+
+COPY ./src/package.json ./src/package-lock.json ./
 RUN npm install
-COPY . .
+COPY ./src .
 RUN npm run build
 
 # Final
@@ -21,8 +23,8 @@ WORKDIR /app
 COPY --from=server /app/publish .
 COPY --from=webapp /src/wwwroot ./wwwroot
 
-COPY etc/geoip ../etc/geoip
-COPY etc/clickhouse ../etc/clickhouse
+COPY etc/geoip ./etc/geoip
+COPY etc/clickhouse ./etc/clickhouse
 COPY LICENSE .
 
 ENTRYPOINT ["dotnet", "Aptabase.dll"]
