@@ -10,6 +10,26 @@ permissions:
   contents: read
 
 jobs:
+  test:
+    name: Publish to GitHub Container Registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup .NET Core SDK 7.x
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.x
+
+      - name: Run Unit Tests
+        run: dotnet test
+        working-directory: ./src
+
+      - name: Run Integration Tests
+        run: dotnet test
+        working-directory: ./tests
+
   build-and-publish:
     name: Publish to GitHub Container Registry
     runs-on: ubuntu-latest
@@ -17,13 +37,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Run Tests
-        run: |
-          dotnet test
-
       - name: Docker Build
-        run: |
-          docker build -t prod_build_img .
+        run: docker build -t prod_build_img .
 
       # Push to Public Registry
       - name: Login to GitHub Container Registry
@@ -46,7 +61,7 @@ jobs:
     name: Deploy to Aptabase US
     runs-on: "ubuntu-latest"
     environment: "Aptabase US"
-    needs: build-and-publish
+    needs: [test, build-and-publish]
     steps:
       - name: Configure AWS credentials (US)
         uses: aws-actions/configure-aws-credentials@v2
@@ -71,7 +86,7 @@ jobs:
     name: Deploy to Aptabase EU
     runs-on: "ubuntu-latest"
     environment: "Aptabase EU"
-    needs: build-and-publish
+    needs: [test, build-and-publish]
     steps:
       - name: Configure AWS credentials (EU)
         uses: aws-actions/configure-aws-credentials@v2
