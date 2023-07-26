@@ -4,13 +4,13 @@ using Xunit;
 
 namespace Aptabase.IntegrationTests;
 
-public class HealthCheckTests : IClassFixture<CustomWebApplicationFactory<Program>>
+[Collection("Integration Tests")]
+public class HealthCheckTests
 {
     private readonly HttpClient _client;
-
-    public HealthCheckTests(CustomWebApplicationFactory<Program> factory)
+    public HealthCheckTests(IntegrationTestsFixture fixture)
     {
-        _client = factory.CreateClient();
+        _client = fixture.CreateClient();
     }
 
     [Fact]

@@ -28,14 +28,12 @@ services:
         soft: 262144
         hard: 262144
 
-  mailhog:
-    container_name: aptabase_mailhog
-    image: mailhog/mailhog
-    logging:
-      driver: "none"
+  mailcatcher:
+    container_name: aptabase_mailcatcher
+    image: dockage/mailcatcher:0.8.2
     ports:
       - 1025:1025
-      - 8025:8025
+      - 1080:1080
 
 volumes:
   pgdev-data:

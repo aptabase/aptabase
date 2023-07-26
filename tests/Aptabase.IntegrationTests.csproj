@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Aptabase.csproj" />
+    <ProjectReference Include="../src/Aptabase.csproj" />
   </ItemGroup>
 
   <ItemGroup>

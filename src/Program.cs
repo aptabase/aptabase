@@ -188,21 +188,26 @@ public partial class Program
             });
         }
 
-        using (var scope = app.Services.CreateScope())
+        RunMigrations(app.Services);
+
+        app.Run();
+    }
+
+    public static void RunMigrations(IServiceProvider sp)
+    {
+        using (var scope = sp.CreateScope())
         {
             // Execute Postgres migrations
             var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
             runner.MigrateUp();
 
-            if (!string.IsNullOrEmpty(appEnv.ClickHouseConnectionString))
+            var env = scope.ServiceProvider.GetRequiredService<EnvSettings>();
+            if (!string.IsNullOrEmpty(env.ClickHouseConnectionString))
             {
                 // Execute ClickHouse migrations (if applicable)
                 var chRunner = scope.ServiceProvider.GetRequiredService<IClickHouseMigrationRunner>();
                 chRunner.MigrateUp();
             }
         }
-
-        app.Run();
-
     }
 }

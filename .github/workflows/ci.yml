@@ -25,6 +25,11 @@ jobs:
           CLICKHOUSE_PASSWORD: aptabase_pw
         ports:
           - 8123:8123
+      mailcatcher:
+        image: dockage/mailcatcher:0.8.2
+        ports:
+          - 1025:1025
+          - 1080:1080
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -33,10 +38,6 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 7.x
-
-      - name: Run Unit Tests
-        run: dotnet test
-        working-directory: src
 
       - name: Run Unit Tests
         run: dotnet test

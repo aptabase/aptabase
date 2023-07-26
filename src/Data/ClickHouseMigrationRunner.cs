@@ -26,7 +26,7 @@ public class ClickHouseMigrationRunner : IClickHouseMigrationRunner
         foreach (string file in files)
         {
             var content = File.ReadAllText(file);
-            _logger.LogInformation($"Executing ClickHouse migration: {file}");
+            _logger.LogDebug($"Executing ClickHouse migration: {file}");
             _conn.Execute(content);
         }
     }

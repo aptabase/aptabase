@@ -5,7 +5,7 @@ namespace Aptabase.Features.Notification;
 
 public class TemplateEngine
 {
-    private Assembly _assembly = Assembly.GetEntryAssembly() ?? throw new Exception("Failed to find the entry assembly");
+    private Assembly _assembly = Assembly.GetExecutingAssembly() ?? throw new Exception("Failed to find the entry assembly");
     private Dictionary<string, string> _templates = new();
 
     public async Task<string> Render(string name, string subject, Dictionary<string, string>? properties)
