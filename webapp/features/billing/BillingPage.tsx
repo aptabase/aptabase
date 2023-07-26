@@ -3,7 +3,7 @@ import { CurrentUsage } from "./CurrentUsage";
 import { CurrentPlan } from "./CurrentPlan";
 import { useBilling } from "./useBilling";
 
-Component.displayName = "Billing";
+Component.displayName = "BillingPage";
 export function Component() {
   const { isLoading, isError, data } = useBilling();
 
