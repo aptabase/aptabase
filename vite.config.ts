@@ -47,42 +47,41 @@ export default defineConfig({
     conditions: ["development", "browser"],
     alias: [
       {
-        find: "@app/env",
-        replacement: path.resolve(__dirname, "./webapp/pkg/env"),
+        find: "@features/env",
+        replacement: path.resolve(__dirname, "./webapp/features/env"),
       },
       {
-        find: "@app/billing",
-        replacement: path.resolve(__dirname, "./webapp/pkg/billing"),
+        find: "@features/billing",
+        replacement: path.resolve(__dirname, "./webapp/features/billing"),
       },
       {
-        find: "@app/support",
-        replacement: path.resolve(__dirname, "./webapp/pkg/support"),
+        find: "@features/support",
+        replacement: path.resolve(__dirname, "./webapp/features/support"),
       },
       {
-        find: "@app/primitives",
-        replacement: path.resolve(__dirname, "./webapp/pkg/primitives"),
+        find: "@features/primitives",
+        replacement: path.resolve(__dirname, "./webapp/features/primitives"),
       },
       {
-        find: "@app/theme",
-        replacement: path.resolve(__dirname, "./webapp/pkg/theme"),
+        find: "@features/theme",
+        replacement: path.resolve(__dirname, "./webapp/features/theme"),
       },
       {
-        find: "@app/navigation",
-        replacement: path.resolve(__dirname, "./webapp/pkg/navigation"),
+        find: "@features/navigation",
+        replacement: path.resolve(__dirname, "./webapp/features/navigation"),
       },
       {
-        find: "@app/apps",
-        replacement: path.resolve(__dirname, "./webapp/pkg/apps"),
+        find: "@features/apps",
+        replacement: path.resolve(__dirname, "./webapp/features/apps"),
       },
       {
-        find: "@app/auth",
-        replacement: path.resolve(__dirname, "./webapp/pkg/auth"),
+        find: "@features/auth",
+        replacement: path.resolve(__dirname, "./webapp/features/auth"),
       },
       {
-        find: "@app/widgets",
-        replacement: path.resolve(__dirname, "./webapp/pkg/widgets"),
+        find: "@features/widgets",
+        replacement: path.resolve(__dirname, "./webapp/features/widgets"),
       },
-      { find: "@app", replacement: path.resolve(__dirname, "./webapp/src") },
     ],
   },
 });

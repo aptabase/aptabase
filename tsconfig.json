@@ -16,16 +16,15 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "@app/*": ["./webapp/src/*"],
-      "@app/billing": ["./webapp/pkg/billing"],
-      "@app/support": ["./webapp/pkg/support"],
-      "@app/env": ["./webapp/pkg/env"],
-      "@app/widgets": ["./webapp/pkg/widgets"],
-      "@app/primitives": ["./webapp/pkg/primitives"],
-      "@app/apps": ["./webapp/pkg/apps"],
-      "@app/navigation": ["./webapp/pkg/navigation"],
-      "@app/auth": ["./webapp/pkg/auth"],
-      "@app/theme": ["./webapp/pkg/theme"]
+      "@features/billing": ["./webapp/features/billing"],
+      "@features/support": ["./webapp/features/support"],
+      "@features/env": ["./webapp/features/env"],
+      "@features/widgets": ["./webapp/features/widgets"],
+      "@features/primitives": ["./webapp/features/primitives"],
+      "@features/apps": ["./webapp/features/apps"],
+      "@features/navigation": ["./webapp/features/navigation"],
+      "@features/auth": ["./webapp/features/auth"],
+      "@features/theme": ["./webapp/features/theme"]
     }
   },
   "references": [{ "path": "./tsconfig.node.json" }]
