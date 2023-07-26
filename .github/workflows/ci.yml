@@ -22,7 +22,7 @@ jobs:
         env:
           CLICKHOUSE_USER: aptabase
           CLICKHOUSE_PASSWORD: aptabase_pw
-        options: --health-cmd curl "http://localhost:8123"
+        options: --health-cmd "curl http://localhost:8123"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -43,6 +43,7 @@ jobs:
   build-and-publish:
     name: Build and Publish
     runs-on: ubuntu-latest
+    needs: [test]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -72,7 +73,7 @@ jobs:
     name: Deploy to Aptabase US
     runs-on: "ubuntu-latest"
     environment: "Aptabase US"
-    needs: [test, build-and-publish]
+    needs: [build-and-publish]
     steps:
       - name: Configure AWS credentials (US)
         uses: aws-actions/configure-aws-credentials@v2
@@ -98,7 +99,7 @@ jobs:
     name: Deploy to Aptabase EU
     runs-on: "ubuntu-latest"
     environment: "Aptabase EU"
-    needs: [test, build-and-publish]
+    needs: [build-and-publish]
     steps:
       - name: Configure AWS credentials (EU)
         uses: aws-actions/configure-aws-credentials@v2
