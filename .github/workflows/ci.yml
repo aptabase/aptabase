@@ -16,13 +16,11 @@ jobs:
         env:
           POSTGRES_USER: aptabase
           POSTGRES_PASSWORD: aptabase_pw
-        options: --health-cmd pg_isready
       clickhouse:
         image: clickhouse/clickhouse-server:23.3.8.21
         env:
           CLICKHOUSE_USER: aptabase
           CLICKHOUSE_PASSWORD: aptabase_pw
-        options: --health-cmd "curl http://localhost:8123"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
