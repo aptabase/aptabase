@@ -3,7 +3,7 @@ bin
 .vs
 .DS_Store
 
-node_modules
-wwwroot/
 etc/tinybird/.tinyb
-Properties/*
+src/node_modules
+src/wwwroot/
+src/Properties/*
