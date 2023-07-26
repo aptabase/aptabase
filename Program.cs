@@ -90,12 +90,12 @@ builder.Services.AddRateLimiter(c =>
     );
 
     c.AddPolicy("EventIngestion", httpContext => RateLimitPartition.GetFixedWindowLimiter(
-        httpContext.Request.Headers["App-Key"].ToString(),
+        httpContext.ResolveClientIpAddress(),
         partition => new FixedWindowRateLimiterOptions
         {
             AutoReplenishment = true,
-            PermitLimit = 10000, // avg 3 events per second
-            Window = TimeSpan.FromHours(1)
+            PermitLimit = 20,
+            Window = TimeSpan.FromSeconds(1)
         })
     );
 });
