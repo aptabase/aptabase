@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   test:
-    name: Publish to GitHub Container Registry
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -21,11 +21,6 @@ jobs:
 
       - name: Run Unit Tests
         run: dotnet test
-        working-directory: src
-
-      - name: Run Integration Tests
-        run: dotnet test
-        working-directory: tests
 
   build-and-publish:
     name: Publish to GitHub Container Registry
