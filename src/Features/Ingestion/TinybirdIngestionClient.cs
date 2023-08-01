@@ -1,6 +1,15 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Aptabase.Features.Ingestion;
+
+public class InsertResult
+{
+    [JsonPropertyName("successful_rows")]
+    public int SuccessfulRows { get; set; }
+    [JsonPropertyName("quarantined_rows")]
+    public int QuarantinedRows { get; set; }
+}
 
 public class TinybirdIngestionClient : IIngestionClient
 {
@@ -21,21 +30,23 @@ public class TinybirdIngestionClient : IIngestionClient
 
     private string EventsPath => $"/v0/events?name=events";
 
-    public async Task<InsertResult> SendSingleAsync(EventRow row, CancellationToken cancellationToken)
+    public async Task<long> SendSingleAsync(EventRow row, CancellationToken cancellationToken)
     {
         var response = await _httpClient.PostAsJsonAsync(EventsPath, row, JsonSettings, cancellationToken);
         
         await response.EnsureSuccessWithLog(_logger);
-        return await response.Content.ReadFromJsonAsync<InsertResult>() ?? new InsertResult();
+        var result = await response.Content.ReadFromJsonAsync<InsertResult>() ?? new InsertResult();
+        return result.SuccessfulRows;
     }
 
-    public async Task<InsertResult> SendMultipleAsync(EventRow[] rows, CancellationToken cancellationToken)
+    public async Task<long> SendMultipleAsync(EventRow[] rows, CancellationToken cancellationToken)
     {
         var rowsAsString = rows.Select(row => JsonSerializer.Serialize(row, JsonSettings));
         var content = new StringContent(string.Join('\n', rowsAsString));
         var response = await _httpClient.PostAsync(EventsPath, content, cancellationToken);
         
         await response.EnsureSuccessWithLog(_logger);
-        return await response.Content.ReadFromJsonAsync<InsertResult>() ?? new InsertResult();
+        var result = await response.Content.ReadFromJsonAsync<InsertResult>() ?? new InsertResult();
+        return result.SuccessfulRows;
     }
 }

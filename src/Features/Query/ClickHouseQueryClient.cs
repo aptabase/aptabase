@@ -1,14 +1,14 @@
 using Dapper;
-using ClickHouse.Client;
+using ClickHouse.Client.ADO;
 
 namespace Aptabase.Features.Query;
 
 public class ClickHouseQueryClient : IQueryClient
 {
-    private IClickHouseConnection _conn;
+    private ClickHouseConnection _conn;
     private ILogger _logger;
 
-    public ClickHouseQueryClient(IClickHouseConnection conn, ILogger<ClickHouseQueryClient> logger)
+    public ClickHouseQueryClient(ClickHouseConnection conn, ILogger<ClickHouseQueryClient> logger)
     {
         _conn = conn ?? throw new ArgumentNullException(nameof(conn));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));

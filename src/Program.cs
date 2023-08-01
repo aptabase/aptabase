@@ -118,7 +118,7 @@ public partial class Program
 
         if (!string.IsNullOrEmpty(appEnv.ClickHouseConnectionString))
         {
-            builder.Services.AddSingleton<IClickHouseConnection>(x => new ClickHouseConnection(appEnv.ClickHouseConnectionString));
+            builder.Services.AddSingleton<ClickHouseConnection>(x => new ClickHouseConnection(appEnv.ClickHouseConnectionString));
             builder.Services.AddSingleton<IClickHouseMigrationRunner, ClickHouseMigrationRunner>();
             builder.Services.AddSingleton<IQueryClient, ClickHouseQueryClient>();
             builder.Services.AddSingleton<IIngestionClient, ClickHouseIngestionClient>();
