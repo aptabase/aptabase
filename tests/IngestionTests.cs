@@ -1,101 +1,106 @@
 using Xunit;
 using System.Net;
 using FluentAssertions;
-using Aptabase.Features.Apps;
+using Aptabase.IntegrationTests.Clients;
 
 namespace Aptabase.IntegrationTests;
 
 [Collection("Integration Tests")]
-public class IngestionTests : IAsyncLifetime
+public class IngestionTests
 {
-    private readonly HttpClient _client;
+    private readonly IntegrationTestsFixture _fixture;
 
-    private string _appKey = "";
     public IngestionTests(IntegrationTestsFixture fixture)
     {
-        _client = fixture.CreateClient();
-    }
-
-    public async Task InitializeAsync()
-    {
-        var email = $"jon.snow.{Guid.NewGuid()}@got.com";
-        var registration = await _client.PostAsJsonAsync("/api/_auth/register", new { name = "Jon Snow", email });
-        registration.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var confirmUrl = await MailCatcher.GetLinkSentTo(email);
-        var confirmation = await _client.GetAsync(confirmUrl);
-        confirmation.StatusCode.Should().Be(HttpStatusCode.Redirect);
-
-        var createApp = await _client.PostAsJsonAsync("/api/_apps", new { name = "Demo App" });
-        createApp.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var apps = await _client.GetFromJsonAsync<Application[]>("/api/_apps");
-        apps?.Length.Should().Be(1);
-        var app = apps?.ElementAt(0) ?? throw new Exception("No apps found");
-
-        _appKey = app.AppKey;
-    }
-
-    public Task DisposeAsync()
-    {
-        return Task.CompletedTask;
+        _fixture = fixture;
     }
 
     [Fact]
-    public async Task Can_Ingest_For_Known_apps()
+    public async Task Can_Ingest_For_Known_App()
     {
-        var body = CreateNewEvent(_appKey);
-        var newEvent = await _client.PostAsync($"/api/v0/event", body);
-        newEvent.StatusCode.Should().Be(HttpStatusCode.OK);
+        var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
+
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey, "127.0.0.1");
+        var code = await client.TrackEvent(DateTime.UtcNow.AddHours(-10), "Button Clicked");
+        code.Should().Be(HttpStatusCode.OK);
+
+        var count = await _fixture.UserA.CountEvents(app.Id, "24h");
+        count.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Can_Ingest_Future_Events()
+    {
+        var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
+
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey, "127.0.0.1");
+        var code = await client.TrackEvent(DateTime.UtcNow.AddYears(10), "Button Clicked");
+        code.Should().Be(HttpStatusCode.OK);
+
+        var count = await _fixture.UserA.CountEvents(app.Id, "24h");
+        count.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Can_Ingest_Multiple_Events()
+    {
+        var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
+
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey, "127.0.0.1");
+        var code = await client.TrackEvents(new List<(DateTime, string)> {
+            (DateTime.UtcNow, "App Started"),
+            (DateTime.UtcNow, "Menu Opened"),
+            (DateTime.UtcNow, "Button Clicked"),
+        });
+        code.Should().Be(HttpStatusCode.OK);
+
+        var count = await _fixture.UserA.CountEvents(app.Id, "24h");
+        count.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task Cant_Ingest_More_Than_25_Events_In_Batch()
+    {
+        var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
+
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey, "127.0.0.1");
+        var code = await client.TrackEvents(Enumerable.Range(1, 26).Select(i => (DateTime.UtcNow, "Button Clicked")));
+        code.Should().Be(HttpStatusCode.BadRequest);
+
+        var count = await _fixture.UserA.CountEvents(app.Id, "24h");
+        count.Should().Be(0);
     }
 
     [Fact]
     public async Task Cant_Ingest_Unknown_AppKey()
     {
-        var body = CreateNewEvent("THIS-APP-KEY-DOESNT-EXIST");
-        var newEvent = await _client.PostAsync($"/api/v0/event", body);
-        newEvent.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var client = new IngestionClient(_fixture.CreateClient(), "THIS-DOES-NOT-EXIST", "127.0.0.1");
+        var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked");
+        code.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
     public async Task Check_Rate_Limiting()
     {
+        var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
+
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey, "10.0.0.0");
         for (var i = 1; i <= 22; i++)
         {
-            var body = CreateNewEvent(_appKey);
-            body.Headers.Add("CloudFront-Viewer-Address", "10.0.0.0");
-            var newEvent = await _client.PostAsync($"/api/v0/event", body);
+            var code1 = await client.TrackEvent(DateTime.UtcNow, "Button Clicked");
 
             if (i <= 20)
-                newEvent.StatusCode.Should().Be(HttpStatusCode.OK);
+                code1.Should().Be(HttpStatusCode.OK);
             else
-                newEvent.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+                code1.Should().Be(HttpStatusCode.TooManyRequests);
         }
 
-        // A different IP should succeed
-        var body2 = CreateNewEvent(_appKey);
-        body2.Headers.Add("CloudFront-Viewer-Address", "10.0.0.1");
-        var newEvent2 = await _client.PostAsync($"/api/v0/event", body2);
-        newEvent2.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
+        // A different IP should succeed because it uses a different IP
+        var client2 = new IngestionClient(_fixture.CreateClient(), app.AppKey, "12.0.0.0");
+        var code2 = await client2.TrackEvent(DateTime.UtcNow, "Button Clicked");
+        code2.Should().Be(HttpStatusCode.OK);
 
-    private JsonContent CreateNewEvent(string appKey)
-    {
-        var content = JsonContent.Create(new
-        {
-            eventName = "ButtonClicked",
-            timestamp = DateTime.UtcNow.ToString("o"),
-            sessionId = Guid.NewGuid().ToString(),
-            systemProps = new
-            {
-                isDebug = false,
-                osName = "macOs",
-                osVersion = "13.5",
-                appVersion = "1.0.0",
-                sdkVersion = "aptabase-swift@0.0.0"
-            }
-        });
-        content.Headers.Add("App-Key", appKey);
-        return content;
+        var count = await _fixture.UserA.CountEvents(app.Id, "24h");
+        count.Should().Be(21);
     }
 }

@@ -41,8 +41,6 @@ public class EventsController : Controller
     {
         appKey = appKey?.ToUpper() ?? "";
 
-        body.Normalize();
-
         var (valid, validationMessage) = _validator.IsValidBody(body);
         if (!valid)
         {
@@ -82,6 +80,50 @@ public class EventsController : Controller
         var userId = await _userHashService.CalculateHash(body.Timestamp, appId, body.SessionId, userAgent ?? "");
         var row = NewEventRow(userId, header, body);
         await _ingestionClient.SendSingleAsync(row, cancellationToken);
+
+        return Ok(new { });
+    }
+
+    [HttpPost("/api/v0/events")]
+    [EnableRateLimiting("EventIngestion")]
+    public async Task<IActionResult> Multiple(
+        [FromHeader(Name = "App-Key")] string? appKey,
+        [FromHeader(Name = "User-Agent")] string? userAgent,
+        [FromBody] EventBody[] events,
+        CancellationToken cancellationToken
+    )
+    {
+        appKey = appKey?.ToUpper() ?? "";
+
+        if (events.Length > 25)
+            return BadRequest($"Too many events in request. Maximum is 25.");
+
+        var validEvents = events.Where(e => { 
+            var (valid, validationMessage) = _validator.IsValidBody(e);
+            if (!valid)
+                _logger.LogWarning(validationMessage);
+            return valid;
+        }).ToArray();
+
+        if (!validEvents.Any())
+            return Ok(new { });
+
+        var (appId, statusCode, message) = await ValidateAppKey(appKey);
+        if (statusCode != HttpStatusCode.OK)
+        {
+            _logger.LogWarning(message);
+            return StatusCode((int)statusCode, message);
+        }
+
+        var location = _geoIP.GetClientLocation(HttpContext);
+        var header = new EventHeader(appId, location.CountryCode, location.RegionName);
+
+        var rows = await Task.WhenAll(validEvents.Select(async e => {
+            var userId = await _userHashService.CalculateHash(e.Timestamp, appId, e.SessionId, userAgent ?? "");
+            return NewEventRow(userId, header, e);
+        }));
+
+        await _ingestionClient.SendMultipleAsync(rows, cancellationToken);
 
         return Ok(new { });
     }
@@ -134,40 +176,4 @@ public class EventsController : Controller
             TTL = body.Timestamp.ToUniversalTime().Add(body.TTL).ToString("o"),
         };
     }
-
-    // Disabled, not yet used. Revisit this in future and think about Rate Limiting, Max Payload Size, etc.
-    // [HttpPost("/api/v0/events")]
-    // [EnableCors("AllowAny")]
-    // public async Task<IActionResult> Multiple(
-    //     [FromHeader(Name = "App-Key")] string? appKey,
-    //     [FromHeader(Name = "CloudFront-Viewer-Country")] string? countryCode,
-    //     [FromHeader(Name = "CloudFront-Viewer-Country-Region-Name")] string? regionName,
-    //     [FromHeader(Name = "CloudFront-Viewer-City")] string? city,
-    //     [FromHeader(Name = "User-Agent")] string? userAgent,
-    //     [FromBody] EventBody[] body,
-    //     CancellationToken cancellationToken
-    // )
-    // {
-    //     appKey = appKey?.ToUpper() ?? "";
-    //     countryCode = countryCode?.ToUpper() ?? "";
-
-    //     var (appId, result) = await ValidateAppKey(appKey);
-    //     if (result is not null)
-    //         return result;
-
-    //     var events = body
-    //         .Where(e => _validator.IsValidBody(e).Item1)
-    //         .Select(e =>
-    //         {
-    //             e.EnrichWith(userAgent);
-    //             return e;
-    //         })
-    //         .ToArray();
-
-    //     var header = new EventHeader(appId, countryCode, regionName, city);
-    //     await _tinybirdClient.SendMultipleAsync(header, events, cancellationToken);
-
-    //     // TODO: return how many rows were inserted, how many invalid
-    //     return Ok(new { });
-    // }
 }

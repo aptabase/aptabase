@@ -24,6 +24,10 @@ public class KeyMetrics
     public KeyMetricsRow Current { get; set; } = new KeyMetricsRow();
     public KeyMetricsRow? Previous { get; set; }
 
+    public KeyMetrics()
+    {
+    }
+
     public KeyMetrics(KeyMetricsRow current)
     {
         Current = current;
@@ -355,7 +359,8 @@ public class StatsController : Controller
 
         // Go back 1 second so that when relativeTo is 00:00:00 we start with the previous day
         // Happens when looking for previous period and "period" is "month" or "last-month"
-        relativeTo = relativeTo.AddSeconds(-1);
+        if (relativeTo.TimeOfDay == TimeSpan.Zero)
+            relativeTo = relativeTo.AddSeconds(-1);
 
         (DateTime? dateFrom, DateTime? dateTo, Granularity granularity) = body.Period switch
         {
