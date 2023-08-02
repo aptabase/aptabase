@@ -1,6 +1,7 @@
 using Xunit;
+using Aptabase.Data;
 
-namespace Aptabase.Data;
+namespace Aptabase.UnitTests.Data;
 
 public class NanoIdTests
 {

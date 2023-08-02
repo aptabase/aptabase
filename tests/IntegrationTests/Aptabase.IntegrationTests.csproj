@@ -15,14 +15,18 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="coverlet.msbuild" Version="6.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../src/Aptabase.csproj" />
+    <ProjectReference Include="../../src/Aptabase.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../etc/geoip/**" CopyToOutputDirectory="PreserveNewest" LinkBase="etc/geoip" />
-    <None Include="../etc/clickhouse/**" CopyToOutputDirectory="PreserveNewest" LinkBase="etc/clickhouse" />
+    <None Include="../../etc/geoip/**" CopyToOutputDirectory="PreserveNewest" LinkBase="etc/geoip" />
+    <None Include="../../etc/clickhouse/**" CopyToOutputDirectory="PreserveNewest" LinkBase="etc/clickhouse" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 namespace Microsoft.AspNetCore.Http;
 
-internal static class HttpContextExtensions
+public static class HttpContextExtensions
 {
     public static string ResolveClientIpAddress(this HttpContext httpContext)
     {

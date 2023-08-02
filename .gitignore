@@ -2,6 +2,7 @@ obj
 bin
 .vs
 .DS_Store
+coverage.cobertura.xml
 
 etc/tinybird/.tinyb
 src/node_modules
