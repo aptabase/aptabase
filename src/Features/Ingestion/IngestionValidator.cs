@@ -16,7 +16,7 @@ public enum AppKeyStatus
 
 public interface IIngestionValidator
 {
-    (bool, string) IsValidBody(EventBody body);
+    (bool, string) IsValidBody(EventBody? body);
 
     Task<(string, AppKeyStatus)> IsAppKeyValid(string appKey);
 }

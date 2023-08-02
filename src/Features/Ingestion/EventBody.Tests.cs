@@ -6,29 +6,20 @@ namespace Aptabase.Features.Ingestion;
 
 public class EventBodyTests
 {
-
     [Fact]
     public void Past_dates_should_bot_be_changed()
     {
         var ts = DateTime.UtcNow.AddMinutes(-10);
-        var body = new EventBody
-        {
-            Timestamp = ts,
-        };
+        var body = new EventBody { Timestamp = ts };
 
-        body.Normalize();
         body.Timestamp.Should().Be(ts);
     }
 
     [Fact]
     public void Future_dates_should_be_normalized_to_now()
     {
-        var body = new EventBody
-        {
-            Timestamp = DateTime.UtcNow.AddDays(5),
-        };
+        var body = new EventBody { Timestamp = DateTime.UtcNow.AddDays(5) };
 
-        body.Normalize();
         body.Timestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 

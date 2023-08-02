@@ -57,11 +57,15 @@ public static class EventsTTL
 
 public class EventBody
 {
-
     [Required, StringLength(60)]
     public string EventName { get; set; } = "";
 
-    public DateTime Timestamp { get; set; }
+    private DateTime _ts;
+    public DateTime Timestamp
+    {
+        get => _ts;
+        set => _ts = value > DateTime.UtcNow ? DateTime.UtcNow : value;
+    }
 
     [Required, StringLength(36)]
     public string SessionId { get; set; } = "";
@@ -71,13 +75,6 @@ public class EventBody
     public JsonDocument? Props { get; set; }
 
     public TimeSpan TTL => SystemProps.IsDebug ? EventsTTL.Debug : EventsTTL.Release;
-
-    public void Normalize()
-    {
-        // if the timestamp is in the future, normalize it to now
-        if (Timestamp > DateTime.UtcNow)
-            Timestamp = DateTime.UtcNow;
-    }
 
     public (JsonObject, JsonObject) SplitProps()
     {

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Aptabase.IntegrationTests;
+namespace Aptabase.IntegrationTests.Clients;
 
 public class MailCatcherMessage
 {

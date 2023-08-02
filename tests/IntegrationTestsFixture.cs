@@ -1,11 +1,14 @@
+using Aptabase.IntegrationTests.Clients;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace Aptabase.IntegrationTests;
 
-public class IntegrationTestsFixture : IDisposable
+public class IntegrationTestsFixture : IAsyncLifetime, IDisposable
 {
     private readonly CustomWebApplicationFactory<Program> _factory;
+    public AccountClient UserA { get; private set; } = null!;
+
     public IntegrationTestsFixture()
     {
         _factory = new CustomWebApplicationFactory<Program>();
@@ -23,6 +26,17 @@ public class IntegrationTestsFixture : IDisposable
     public void Dispose()
     {
         _factory.Dispose();
+    }
+
+    public async Task InitializeAsync()
+    {
+        UserA = new AccountClient(this.CreateClient());
+        await UserA.CreateAccount("Jon Snow", $"jon.snow.{Guid.NewGuid()}@got.com");
+    }
+
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }
 
