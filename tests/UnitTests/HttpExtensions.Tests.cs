@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Primitives;
 using Xunit;
+using Microsoft.Extensions.Primitives;
 
-namespace Aptabase.Features.Ingestion;
+namespace Aptabase.UnitTests.Features.Ingestion;
 
 public class HttpExtensionsTests
 {

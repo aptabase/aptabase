@@ -1,6 +1,7 @@
 using Xunit;
+using Aptabase.Features.Ingestion;
 
-namespace Aptabase.Features.Ingestion;
+namespace Aptabase.UnitTests.Features.Ingestion;
 
 public class UserAgentParserTests
 {

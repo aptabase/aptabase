@@ -30,20 +30,6 @@
     <EmbeddedResource Include="assets\Templates\*.html" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <Compile Remove="**\*.Tests.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Configuration)' != 'Release'">
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.3" />
-    <PackageReference Include="xunit" Version="2.5.0" />
-    <PackageReference Include="FluentAssertions" Version="6.11.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-
   <ItemGroup>
     <None Include="../etc/geoip/**" CopyToOutputDirectory="PreserveNewest" LinkBase="etc/geoip" />
     <None Include="../etc/clickhouse/**" CopyToOutputDirectory="PreserveNewest" LinkBase="etc/clickhouse" />

@@ -5,7 +5,9 @@ VisualStudioVersion = 25.0.1706.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aptabase", "src\Aptabase.csproj", "{9324014B-7845-4000-A251-3EF4E93C5138}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aptabase.IntegrationTests", "tests\Aptabase.IntegrationTests.csproj", "{F5DB13B5-53F6-423D-B270-AEC7BA180628}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aptabase.UnitTests", "tests\UnitTests\Aptabase.UnitTests.csproj", "{840E5844-C128-4178-A552-6C8438C437FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aptabase.IntegrationTests", "tests\IntegrationTests\Aptabase.IntegrationTests.csproj", "{F5DB13B5-53F6-423D-B270-AEC7BA180628}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{F5DB13B5-53F6-423D-B270-AEC7BA180628}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5DB13B5-53F6-423D-B270-AEC7BA180628}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5DB13B5-53F6-423D-B270-AEC7BA180628}.Release|Any CPU.Build.0 = Release|Any CPU
+		{840E5844-C128-4178-A552-6C8438C437FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{840E5844-C128-4178-A552-6C8438C437FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{840E5844-C128-4178-A552-6C8438C437FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{840E5844-C128-4178-A552-6C8438C437FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

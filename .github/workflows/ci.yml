@@ -41,11 +41,11 @@ jobs:
 
       - name: Run Unit Tests
         run: dotnet test
-        working-directory: src
+        working-directory: tests/UnitTests
 
       - name: Run Integration Tests
         run: dotnet test
-        working-directory: tests
+        working-directory: tests/IntegrationTests
 
   build:
     name: Build

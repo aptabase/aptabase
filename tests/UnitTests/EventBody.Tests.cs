@@ -1,8 +1,9 @@
-using System.Text.Json;
-using FluentAssertions;
 using Xunit;
+using System.Text.Json;
+using Aptabase.Features.Ingestion;
+using FluentAssertions;
 
-namespace Aptabase.Features.Ingestion;
+namespace Aptabase.UnitTests.Features.Ingestion;
 
 public class EventBodyTests
 {
