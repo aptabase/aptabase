@@ -23,16 +23,7 @@ export function TopCountriesWidget(props: Props) {
     isError,
     data: rows,
   } = useQuery(
-    [
-      "top-countries",
-      buildMode,
-      props.appId,
-      period,
-      countryCode,
-      appVersion,
-      eventName,
-      osName,
-    ],
+    ["top-countries", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     () =>
       topCountries({
         buildMode,
@@ -51,14 +42,11 @@ export function TopCountriesWidget(props: Props) {
       searchParamKey="countryCode"
       isLoading={isLoading}
       isError={isError}
-      labels={["Name", "Sessions"]}
+      labels={["Name", "Daily Users"]}
       items={rows || []}
       renderRow={(item) => (
         <span className="flex items-center space-x-2 px-2">
-          <img
-            src={getCountryFlagUrl(item.name)}
-            className="h-5 w-5 shadow rounded-full"
-          />
+          <img src={getCountryFlagUrl(item.name)} className="h-5 w-5 shadow rounded-full" />
           <p>{getCountryName(item.name) || "Unknown"}</p>
         </span>
       )}

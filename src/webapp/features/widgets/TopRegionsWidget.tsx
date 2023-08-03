@@ -24,16 +24,7 @@ export function TopRegionsWidget(props: Props) {
     isError,
     data: rows,
   } = useQuery(
-    [
-      "top-regions",
-      buildMode,
-      props.appId,
-      period,
-      countryCode,
-      appVersion,
-      eventName,
-      osName,
-    ],
+    ["top-regions", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     () =>
       topRegions({
         buildMode,
@@ -54,17 +45,14 @@ export function TopRegionsWidget(props: Props) {
       title={
         <CardTitle backProperty="countryCode">
           <div className="flex items-center space-x-2">
-            <img
-              src={getCountryFlagUrl(countryCode)}
-              className="h-5 w-5 shadow rounded-full"
-            />
+            <img src={getCountryFlagUrl(countryCode)} className="h-5 w-5 shadow rounded-full" />
             <span>{getCountryName(countryCode) || "Unknown"}</span>
           </div>
         </CardTitle>
       }
       isLoading={isLoading}
       isError={isError}
-      labels={["Name", "Sessions"]}
+      labels={["Name", "Daily Users"]}
       items={rows || []}
     />
   );

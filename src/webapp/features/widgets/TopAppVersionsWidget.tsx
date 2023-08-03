@@ -22,16 +22,7 @@ export function TopAppVersionsWidget(props: Props) {
     isError,
     data: rows,
   } = useQuery(
-    [
-      "top-appversions",
-      buildMode,
-      props.appId,
-      period,
-      countryCode,
-      appVersion,
-      eventName,
-      osName,
-    ],
+    ["top-appversions", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     () =>
       topAppVersions({
         buildMode,

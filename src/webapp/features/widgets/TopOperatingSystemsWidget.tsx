@@ -51,7 +51,7 @@ export function TopOperatingSystemsWidget(props: Props) {
       searchParamKey="osName"
       isLoading={isLoading}
       isError={isError}
-      labels={["Name", "Sessions"]}
+      labels={["Name", "Daily Users"]}
       items={rows || []}
       renderRow={(item) => (
         <span className="flex items-center space-x-2 px-2">
