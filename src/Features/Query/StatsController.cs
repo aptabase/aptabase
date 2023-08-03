@@ -1,7 +1,6 @@
+using Dapper;
 using Aptabase.Data;
 using Aptabase.Features.Authentication;
-using ClickHouse.Client.Utility;
-using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aptabase.Features.Query;
@@ -15,6 +14,7 @@ public class PeriodicStats
 public class PeriodicStatsRow
 {
     public string Period { get; set; } = "";
+    public int Users { get; set; } = 0;
     public int Sessions { get; set; } = 0;
     public int Events { get; set; } = 0;
 }
@@ -42,6 +42,7 @@ public class KeyMetrics
 
 public class KeyMetricsRow
 {
+    public double DailyUsers { get; set; } = 0;
     public int Sessions { get; set; } = 0;
     public int Events { get; set; } = 0;
     public double DurationSeconds { get; set; } = 0;
@@ -84,18 +85,11 @@ public enum Granularity
     Month
 }
 
-public enum BuildMode
-{
-    Debug,
-    Release
-}
-
 public class QueryParams
 {
     private const string DATE_FORMAT = "yyyy-MM-dd";
     private const string DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-    public BuildMode BuildMode { get; set; }
     public string AppId { get; set; } = "";
     public DateTime? DateFrom { get; set; }
     public DateTime? DateTo { get; set; }
@@ -134,8 +128,7 @@ public class QueryParams
 
         var where = conditions.Count > 0 ? $"WHERE {String.Join(" AND ", conditions)}" : string.Empty;
 
-        var appId = BuildMode == BuildMode.Debug ? $"{AppId}_DEBUG" : AppId;
-        return $"PREWHERE app_id = '{appId}' {where}";
+        return $"PREWHERE app_id = '{AppId}' {where}";
     }
 
     public string ToGranularPeriod(string columnOrValue)
@@ -269,7 +262,8 @@ public class StatsController : Controller
         var rows = await _queryClient.QueryAsync<PeriodicStatsRow>(
             $@"SELECT
                     {query.ToGranularPeriod("timestamp")} as Period,
-                    uniq(session_id) as Sessions,
+                    uniqExact(user_id) as Users,
+                    uniqExact(session_id) as Sessions,
                     count() as Events
                 FROM events
                 {query.ToFilter()}
@@ -316,14 +310,15 @@ public class StatsController : Controller
     private async Task<KeyMetricsRow> GetKeyMetrics(QueryParams query, CancellationToken cancellationToken)
     {
         return await _queryClient.QuerySingleAsync<KeyMetricsRow>(
-            $@"SELECT uniq(session_id) as Sessions,
-                    if(isNaN(median(max - min)), 0, median(max - min)) as DurationSeconds,
-                    sum(count) as Events
+            $@"SELECT uniqExact(user_id) / (date_diff('day', min(min), max(max)) + 1) as DailyUsers,
+                      uniqExact(session_id) as Sessions,
+                      if(isNaN(median(max - min)), 0, median(max - min)) as DurationSeconds,
+                      sum(count) as Events
             FROM (
-                    SELECT min(timestamp) as min, max(timestamp) as max, session_id, count(*) as count
+                    SELECT min(timestamp) as min, max(timestamp) as max, user_id, session_id, count(*) as count
                     FROM events
                     {query.ToFilter()}
-                    GROUP BY session_id
+                    GROUP BY user_id, session_id
             )", cancellationToken);
     }
 
@@ -378,16 +373,15 @@ public class StatsController : Controller
             _ => (relativeTo.AddHours(-24), relativeTo, Granularity.Hour), // default to 24 hours
         };
 
-        var buildMode = body.BuildMode.ToLower() switch
+        var appId = body.BuildMode.ToLower() switch
         {
-            "debug" => BuildMode.Debug,
-            _ => BuildMode.Release,
+            "debug" => $"{body.AppId}_DEBUG",
+            _ => body.AppId,
         };
 
         return new QueryParams
         {
-            AppId = body.AppId,
-            BuildMode = buildMode,
+            AppId = appId,
             DateFrom = dateFrom,
             DateTo = dateTo,
             Granularity = granularity,
