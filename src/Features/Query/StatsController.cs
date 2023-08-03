@@ -144,12 +144,12 @@ public class QueryParams
 
     public string ToFill()
     {
-        var toDate = (DateTime date) => ToGranularPeriod($"toDate('{date.ToString(DATE_FORMAT)}')");
-        var toDateTime = (DateTime date) => ToGranularPeriod($"toDateTime('{date.ToString(DATE_TIME_FORMAT)}')");
+        string toDate(DateTime date) => ToGranularPeriod($"toDate('{date.ToString(DATE_FORMAT)}')");
+        string toDateTime(DateTime date) => ToGranularPeriod($"toDateTime('{date.ToString(DATE_TIME_FORMAT)}')");
 
         var (step, fn, lastStep) = Granularity switch
         {
-            Granularity.Hour => ("toIntervalHour(1)", toDateTime, DateTime.UtcNow.AddHours(1)),
+            Granularity.Hour => ("toIntervalHour(1)", (Func<DateTime, string>)toDateTime, DateTime.UtcNow.AddHours(1)),
             Granularity.Day => ("toIntervalDay(1)", toDate, DateTime.UtcNow.AddDays(1)),
             Granularity.Month => ("toIntervalMonth(1)", toDate, DateTime.UtcNow.AddMonths(1)),
             _ => throw new ArgumentOutOfRangeException()
@@ -309,17 +309,15 @@ public class StatsController : Controller
 
     private async Task<KeyMetricsRow> GetKeyMetrics(QueryParams query, CancellationToken cancellationToken)
     {
-        return await _queryClient.QuerySingleAsync<KeyMetricsRow>(
-            $@"SELECT uniqExact(user_id) / (date_diff('day', min(min), max(max)) + 1) as DailyUsers,
-                      uniqExact(session_id) as Sessions,
-                      if(isNaN(median(max - min)), 0, median(max - min)) as DurationSeconds,
-                      sum(count) as Events
-            FROM (
-                    SELECT min(timestamp) as min, max(timestamp) as max, user_id, session_id, count(*) as count
-                    FROM events
-                    {query.ToFilter()}
-                    GROUP BY user_id, session_id
-            )", cancellationToken);
+        return await _queryClient.NamedQuerySingleAsync<KeyMetricsRow>("key_metrics__v1", new {
+            date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
+            date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
+            app_id = query.AppId,
+            event_name = query.EventName,
+            os_name = query.OsName,
+            app_version = query.AppVersion,
+            country_code = query.CountryCode,
+        }, cancellationToken);
     }
 
     private async Task<IActionResult> TopN(string fieldName, TopNValue value, QueryRequestBody body, CancellationToken cancellationToken)

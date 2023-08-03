@@ -5,23 +5,10 @@ namespace Aptabase.Features.GeoIP;
 public class DatabaseGeoClient : IGeoIPClient
 {
     private readonly DatabaseReader _db;
-    private readonly string[] paths = new string[] {
-        "./etc/geoip/GeoLite2-City.mmdb",
-        "../etc/geoip/GeoLite2-City.mmdb"
-    };
 
-    public DatabaseGeoClient()
+    public DatabaseGeoClient(EnvSettings env)
     {
-        foreach (var path in paths)
-        {
-            if (File.Exists(path))
-            {
-                _db = new DatabaseReader(path);
-                return;
-            }
-        }
-
-        throw new FileNotFoundException("Could not find GeoIP database");
+        _db = new DatabaseReader(Path.Combine(env.EtcDirectoryPath, "geoip/GeoLite2-City.mmdb"));
     }
 
     public GeoLocation GetClientLocation(HttpContext httpContext)
