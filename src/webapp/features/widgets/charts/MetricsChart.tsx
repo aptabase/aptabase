@@ -216,9 +216,12 @@ export function MetricsChart(props: Props) {
                 ...tooltip.dataPoints.map((x) => x.element.tooltipPosition(true).y)
               );
 
+              const isMobile = chart.height < 300;
+              const topOffset = isMobile ? 320 : 160;
+
               const { offsetLeft: positionX } = chart.canvas;
               tooltipRef.current.style.left = positionX + tooltip.caretX + "px";
-              tooltipRef.current.style.top = offsetY + 100 + "px";
+              tooltipRef.current.style.top = offsetY + topOffset + "px";
               tooltipRef.current.style.padding =
                 tooltip.options.padding + "px " + tooltip.options.padding + "px";
             },
