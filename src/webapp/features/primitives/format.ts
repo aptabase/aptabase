@@ -29,7 +29,7 @@ export function formatNumber(
   format?: "number" | "duration"
 ): string {
   if (format === "duration") {
-    if (value === 0) return "0s";
+    if (!value || value < 1) return "0s";
 
     const interval = intervalToDuration({
       start: 0,
