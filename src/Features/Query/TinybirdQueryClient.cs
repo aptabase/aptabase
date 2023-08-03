@@ -1,4 +1,3 @@
-using System.Text.Json;
 using System.Net;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -14,14 +13,8 @@ public class QueryResult<T>
 
 public class TinybirdQueryClient : IQueryClient
 {
-    private static readonly JsonSerializerOptions JsonSettings = new()
-    {
-        WriteIndented = false,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
-    private HttpClient _httpClient;
-    private ILogger _logger;
+    private readonly HttpClient _httpClient;
+    private readonly ILogger _logger;
 
     public TinybirdQueryClient(IHttpClientFactory factory, ILogger<TinybirdQueryClient> logger)
     {
@@ -76,14 +69,11 @@ public class TinybirdQueryClient : IQueryClient
 
     private string FormatArg(object value)
     {
-        switch (value)
+        return value switch
         {
-            case string[] s:
-                return string.Join(",", s);
-            case DateTime d:
-                return $"'{d:yyyy-MM-dd HH:mm:ss}'";
-            default:
-                return value?.ToString() ?? "";
-        }
+            string[] s => string.Join(",", s),
+            DateTime d => $"'{d:yyyy-MM-dd HH:mm:ss}'",
+            _ => value?.ToString() ?? "",
+        };
     }
 }

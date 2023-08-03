@@ -5,13 +5,13 @@ namespace Aptabase.Features.Query;
 
 public class ClickHouseQueryClient : IQueryClient
 {
-    private ClickHouseConnection _conn;
-    private ILogger _logger;
+    private readonly ClickHouseConnection _conn;
+    private readonly EnvSettings _env;
 
-    public ClickHouseQueryClient(ClickHouseConnection conn, ILogger<ClickHouseQueryClient> logger)
+    public ClickHouseQueryClient(ClickHouseConnection conn, EnvSettings env)
     {
+        _env = env ?? throw new ArgumentNullException(nameof(env));
         _conn = conn ?? throw new ArgumentNullException(nameof(conn));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<IEnumerable<T>> QueryAsync<T>(string query, CancellationToken cancellationToken)
@@ -26,8 +26,18 @@ public class ClickHouseQueryClient : IQueryClient
 
     public async Task<IEnumerable<T>> NamedQueryAsync<T>(string name, object args, CancellationToken cancellationToken)
     {
-        var argsString = string.Join(", ", args.GetType().GetProperties().Select(x => $"p_{x.Name}={FormatArg(x.GetValue(args, null))}"));
-        return await _conn.QueryAsync<T>($"SELECT * FROM {name}({argsString})", cancellationToken);
+        // TODO: replace this with parameterized views when this is fixed: https://github.com/ClickHouse/ClickHouse/issues/53004
+
+        var query = await ReadNamedQuery(name);
+        foreach (var prop in args.GetType().GetProperties())
+        {
+            var value = prop.GetValue(args, null);
+            if (value is null)
+                query = query.Replace($"{{{prop.Name}}}", "NULL");
+            else
+                query = query.Replace($"{{{prop.Name}}}", FormatArg(value));
+        }
+        return await _conn.QueryAsync<T>(query, cancellationToken);
     }
 
     public async Task<T> NamedQuerySingleAsync<T>(string name, object args, CancellationToken cancellationToken) where T : new()
@@ -36,16 +46,19 @@ public class ClickHouseQueryClient : IQueryClient
         return rows.FirstOrDefault() ?? new T();
     }
 
-    private string FormatArg(object? value)
+    private async Task<string> ReadNamedQuery(string name)
     {
-        switch (value)
+        var pathToQuery = Path.Combine(_env.EtcDirectoryPath, "clickhouse", "queries", $"{name}.sql");
+        return await File.ReadAllTextAsync(pathToQuery);
+    }
+
+    private string FormatArg(object value)
+    {
+        return value switch
         {
-            case string[] s:
-                return $"['${string.Join("','", s)}']";
-            case DateTime d:
-                return $"'{d:yyyy-MM-dd HH:mm:ss}'";
-            default:
-                return $"'{value}'";
-        }
+            string[] s => $"'${string.Join("','", s)}'",
+            DateTime d => $"'{d:yyyy-MM-dd HH:mm:ss}'",
+            _ => $"'{value}'",
+        };
     }
 }

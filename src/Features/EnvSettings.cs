@@ -73,7 +73,7 @@ public class EnvSettings
     // Variable Name: OAUTH_GOOGLE_CLIENT_SECRET
     public string OAuthGoogleClientSecret { get; private set; } = "";
 
-    //  The following properties are derived from the above settings
+    //  The following properties are derived from the other settings
     public bool IsManagedCloud => Region == "EU" || Region == "US";
     public bool IsBillingEnabled => IsManagedCloud || IsDevelopment;
     public bool IsProduction => !IsDevelopment;
@@ -81,6 +81,7 @@ public class EnvSettings
     public string Region { get; private set; } = "";
     public string LemonSqueezyApiKey { get; private set; } = "";
     public string LemonSqueezySigningSecret { get; private set; } = "";
+    public string EtcDirectoryPath { get; private set; } = "";
 
     public static EnvSettings Load()
     {
@@ -112,6 +113,10 @@ public class EnvSettings
             OAuthGitHubClientSecret = Get("OAUTH_GITHUB_CLIENT_SECRET"),
             OAuthGoogleClientId = Get("OAUTH_GOOGLE_CLIENT_ID"),
             OAuthGoogleClientSecret = Get("OAUTH_GOOGLE_CLIENT_SECRET"),
+
+            // On the container, the etc directory is mounted at ./etc
+            // But during development, it's at ../etc
+            EtcDirectoryPath = Directory.Exists("./etc") ? "./etc" : "../etc"
         };
     }
 
@@ -135,9 +140,6 @@ public class EnvSettings
 
     private static string MustGet(string name)
     {
-        var value = Environment.GetEnvironmentVariable(name);
-        if (value == null)
-            throw new Exception($"Missing {name} environment variable");
-        return value;
+        return Environment.GetEnvironmentVariable(name) ?? throw new Exception($"Missing {name} environment variable");
     }
 }

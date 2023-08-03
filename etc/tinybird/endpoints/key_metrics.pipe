@@ -1,0 +1,39 @@
+TOKEN aptabase-api READ
+
+VERSION 1
+NODE endpoint
+SQL >
+    %
+    SELECT uniqExact(user_id) / (date_diff('day', min(min), max(max)) + 1) as DailyUsers,
+           uniqExact(session_id) as Sessions,
+           if(isNaN(median(max - min)), 0, median(max - min)) as DurationSeconds,
+           sum(count) as Events
+    FROM (
+       SELECT min(timestamp) AS min,
+              max(timestamp) AS max,
+              user_id,
+              session_id,
+              count(*) AS count
+       FROM events
+       PREWHERE app_id = {{String(app_id)}}
+       WHERE 1 = 1
+       {% if defined(date_from) %}
+       AND timestamp >= {{String(date_from)}}
+       {% end %}
+       {% if defined(date_to) %}
+       AND timestamp < {{String(date_to)}}
+       {% end %}
+       {% if defined(country_code) %}
+       AND country_code = {{String(country_code)}}
+       {% end %}
+       {% if defined(event_name) %}
+       AND event_name = {{String(event_name)}}
+       {% end %}
+       {% if defined(os_name) %}
+       AND os_name = {{String(os_name)}}
+       {% end %}
+       {% if defined(app_version) %}
+       AND app_version = {{String(app_version)}}
+       {% end %}
+       GROUP BY user_id, session_id
+    )
