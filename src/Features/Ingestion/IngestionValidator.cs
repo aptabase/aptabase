@@ -60,13 +60,12 @@ public class IngestionValidator : IIngestionValidator
             return (string.Empty, AppKeyStatus.NotFound);
         }
 
-        _cache.Set(cacheKey, true, SuccessCacheDuration);
+        _cache.Set(cacheKey, appId, SuccessCacheDuration);
         return (appId, AppKeyStatus.Valid);
     }
 
     private async Task<string?> FindActiveByAppKey(string appKey)
     {
-        var key = appKey.Split("-").Last();
         return await _db.Connection.ExecuteScalarAsync<string>($"SELECT id FROM apps WHERE app_key = @appKey AND deleted_at IS NULL", new { appKey });
     }
 
