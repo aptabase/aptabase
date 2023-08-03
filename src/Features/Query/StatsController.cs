@@ -74,7 +74,6 @@ public class EventPropsItem
 
 public enum TopNValue
 {
-    DailyUsers,
     UniqueSessions,
     TotalEvents
 }
@@ -193,25 +192,25 @@ public class StatsController : Controller
     [HttpGet("/api/_stats/top-countries")]
     public async Task<IActionResult> TopCountries([FromQuery] QueryRequestBody body, CancellationToken cancellationToken)
     {
-        return await TopN("country_code", TopNValue.DailyUsers, body, cancellationToken);
+        return await TopN("country_code", TopNValue.UniqueSessions, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/top-osversions")]
     public async Task<IActionResult> TopOSVersions([FromQuery] QueryRequestBody body, CancellationToken cancellationToken)
     {
-        return await TopN("os_version", TopNValue.DailyUsers, body, cancellationToken);
+        return await TopN("os_version", TopNValue.UniqueSessions, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/top-operatingsystems")]
     public async Task<IActionResult> TopOperatingSystems([FromQuery] QueryRequestBody body, CancellationToken cancellationToken)
     {
-        return await TopN("os_name", TopNValue.DailyUsers, body, cancellationToken);
+        return await TopN("os_name", TopNValue.UniqueSessions, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/top-regions")]
     public async Task<IActionResult> TopRegions([FromQuery] QueryRequestBody body, CancellationToken cancellationToken)
     {
-        return await TopN("region_name", TopNValue.DailyUsers, body, cancellationToken);
+        return await TopN("region_name", TopNValue.UniqueSessions, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/top-events")]
@@ -333,7 +332,6 @@ public class StatsController : Controller
         {
             TopNValue.TotalEvents => "count()",
             TopNValue.UniqueSessions => "uniqExact(session_id)",
-            TopNValue.DailyUsers => "uniqExact(user_id) / (date_diff('day', min(timestamp), max(timestamp)) + 1)",
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
 

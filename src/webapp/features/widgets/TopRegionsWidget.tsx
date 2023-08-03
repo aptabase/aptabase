@@ -52,7 +52,7 @@ export function TopRegionsWidget(props: Props) {
       }
       isLoading={isLoading}
       isError={isError}
-      labels={["Name", "Daily Users"]}
+      labels={["Name", "Sessions"]}
       items={rows || []}
     />
   );

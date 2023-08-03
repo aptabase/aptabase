@@ -49,7 +49,7 @@ export function TopOSVersionsWidget(props: Props) {
       }
       isLoading={isLoading}
       isError={isError}
-      labels={["Version", "Daily Users"]}
+      labels={["Version", "Sessions"]}
       items={rows || []}
     />
   );
