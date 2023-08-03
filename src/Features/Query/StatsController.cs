@@ -318,17 +318,6 @@ public class StatsController : Controller
             app_version = query.AppVersion,
             country_code = query.CountryCode,
         }, cancellationToken);
-        // return await _queryClient.QuerySingleAsync<KeyMetricsRow>(
-        //     $@"SELECT uniqExact(user_id) / (date_diff('day', min(min), max(max)) + 1) as DailyUsers,
-        //               uniqExact(session_id) as Sessions,
-        //               if(isNaN(median(max - min)), 0, median(max - min)) as DurationSeconds,
-        //               sum(count) as Events
-        //     FROM (
-        //             SELECT min(timestamp) as min, max(timestamp) as max, user_id, session_id, count(*) as count
-        //             FROM events
-        //             {query.ToFilter()}
-        //             GROUP BY user_id, session_id
-        //     )", cancellationToken);
     }
 
     private async Task<IActionResult> TopN(string fieldName, TopNValue value, QueryRequestBody body, CancellationToken cancellationToken)

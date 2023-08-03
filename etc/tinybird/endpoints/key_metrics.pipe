@@ -18,10 +18,10 @@ SQL >
        PREWHERE app_id = {{String(app_id)}}
        WHERE 1 = 1
        {% if defined(date_from) %}
-       AND timestamp >= {{String(date_from)}}
+       AND timestamp > {{String(date_from)}}
        {% end %}
        {% if defined(date_to) %}
-       AND timestamp < {{String(date_to)}}
+       AND timestamp <= {{String(date_to)}}
        {% end %}
        {% if defined(country_code) %}
        AND country_code = {{String(country_code)}}

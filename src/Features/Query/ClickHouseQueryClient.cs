@@ -27,7 +27,6 @@ public class ClickHouseQueryClient : IQueryClient
     public async Task<IEnumerable<T>> NamedQueryAsync<T>(string name, object args, CancellationToken cancellationToken)
     {
         // TODO: replace this with parameterized views when this is fixed: https://github.com/ClickHouse/ClickHouse/issues/53004
-
         var query = await ReadNamedQuery(name);
         foreach (var prop in args.GetType().GetProperties())
         {
@@ -46,10 +45,16 @@ public class ClickHouseQueryClient : IQueryClient
         return rows.FirstOrDefault() ?? new T();
     }
 
+    private readonly Dictionary<string, string> _namedQueries = new();
     private async Task<string> ReadNamedQuery(string name)
     {
+        if (_namedQueries.ContainsKey(name))
+            return _namedQueries[name];
+
         var pathToQuery = Path.Combine(_env.EtcDirectoryPath, "clickhouse", "queries", $"{name}.sql");
-        return await File.ReadAllTextAsync(pathToQuery);
+        var query = await File.ReadAllTextAsync(pathToQuery);
+        _namedQueries[name] = query;
+        return query;
     }
 
     private string FormatArg(object value)
