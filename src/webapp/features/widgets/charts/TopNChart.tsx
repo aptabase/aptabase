@@ -20,9 +20,7 @@ type Props = {
   searchParamKey?: string;
 };
 
-const defaultRenderRow = (item: Item) => (
-  <span className="px-2">{item.name || <i>Empty</i>}</span>
-);
+const defaultRenderRow = (item: Item) => <span className="px-2">{item.name || <i>Empty</i>}</span>;
 
 export function TopNChart(props: Props) {
   const total = props.items.reduce((acc, item) => acc + item.value, 0);
@@ -49,7 +47,7 @@ export function TopNChart(props: Props) {
           <TopNRow
             key={item.name}
             item={item}
-            percentage={item.value / total}
+            percentage={Math.round(item.value) / total}
             searchParamKey={props.searchParamKey}
           >
             {renderRow(item)}
@@ -61,11 +59,7 @@ export function TopNChart(props: Props) {
 
   return (
     <>
-      {typeof props.title === "string" ? (
-        <CardTitle>{props.title}</CardTitle>
-      ) : (
-        props.title
-      )}
+      {typeof props.title === "string" ? <CardTitle>{props.title}</CardTitle> : props.title}
       {content}
     </>
   );
@@ -90,7 +84,7 @@ function TopNRow(props: TopNRowProps) {
       <div className="relative z-10 flex w-full max-w-[calc(100%-3rem)] items-center">
         <div
           className="absolute h-8 origin-left bg-primary-100 dark:bg-primary-900 rounded transition-all"
-          style={{ width: `${props.percentage * 100}%` }}
+          style={{ width: `${Math.min(props.percentage, 1) * 100}%` }}
         />
         <div className="flex z-10">{props.children}</div>
       </div>

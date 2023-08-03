@@ -1,9 +1,4 @@
-import {
-  TooltipProvider,
-  TooltipTrigger,
-  TooltipContent,
-  Tooltip,
-} from "../primitives";
+import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip } from "../primitives";
 import {
   IconArrowDownRight,
   IconArrowUpRight,
@@ -22,9 +17,7 @@ export function GrowthIndicator(props: Props) {
   if (props.previous === 0 && props.current === 0) return null;
   if (props.previous === undefined || props.previous === 0) return null;
 
-  const growth = Math.floor(
-    ((props.current - props.previous) / props.previous) * 100
-  );
+  const growth = Math.floor(((props.current - props.previous) / props.previous) * 100);
   if (growth === 0) return null;
 
   const isUp = growth > 0;
@@ -46,9 +39,7 @@ export function GrowthIndicator(props: Props) {
         </TooltipTrigger>
         <TooltipContent>
           <p className="text-muted-foreground">
-            Compared to{" "}
-            <span className="text-foreground">{props.previousFormatted}</span>{" "}
-            last period
+            vs <span className="text-foreground">{props.previousFormatted}</span> last period
           </p>
         </TooltipContent>
       </Tooltip>

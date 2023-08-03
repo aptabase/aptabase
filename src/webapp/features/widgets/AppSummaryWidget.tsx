@@ -14,32 +14,28 @@ export function AppSummaryWidget(props: Props) {
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";
 
-  const { data: metrics } = useQuery(
-    ["key-metrics", props.app.id, props.buildMode, period],
-    () =>
-      keyMetrics({
-        buildMode: props.buildMode,
-        appId: props.app.id,
-        period,
-        countryCode: "",
-        appVersion: "",
-        eventName: "",
-        osName: "",
-      })
+  const { data: metrics } = useQuery(["key-metrics", props.app.id, props.buildMode, period], () =>
+    keyMetrics({
+      buildMode: props.buildMode,
+      appId: props.app.id,
+      period,
+      countryCode: "",
+      appVersion: "",
+      eventName: "",
+      osName: "",
+    })
   );
 
-  const { data: values } = useQuery(
-    ["periodic-stats", props.app.id, props.buildMode, period],
-    () =>
-      periodicStats({
-        buildMode: props.buildMode,
-        appId: props.app.id,
-        period,
-        countryCode: "",
-        appVersion: "",
-        eventName: "",
-        osName: "",
-      }).then((s) => s.rows.map((x) => x.sessions))
+  const { data: values } = useQuery(["periodic-stats", props.app.id, props.buildMode, period], () =>
+    periodicStats({
+      buildMode: props.buildMode,
+      appId: props.app.id,
+      period,
+      countryCode: "",
+      appVersion: "",
+      eventName: "",
+      osName: "",
+    }).then((s) => s.rows.map((x) => x.users))
   );
 
   const params = period ? `?period=${period}` : "";
@@ -59,17 +55,17 @@ export function AppSummaryWidget(props: Props) {
           {metrics ? (
             <div className="flex items-center space-x-2">
               <GrowthIndicator
-                current={metrics.current.sessions}
-                previous={metrics.previous?.sessions}
-                previousFormatted={`${metrics.previous?.sessions} sessions`}
+                current={metrics.current.dailyUsers}
+                previous={metrics.previous?.dailyUsers}
+                previousFormatted={`${metrics.previous?.dailyUsers.toFixed(0)} avg. daily users`}
               />
-              <span className="text-2xl">{metrics?.current.sessions}</span>
+              <span className="text-2xl">{metrics?.current.dailyUsers.toFixed(0)}</span>
             </div>
           ) : null}
         </div>
         <div className="h-6">
           {metrics ? (
-            <p className="text-sm text-muted-foreground text-right">sessions</p>
+            <p className="text-sm text-muted-foreground text-right">avg. daily users</p>
           ) : null}
         </div>
       </div>

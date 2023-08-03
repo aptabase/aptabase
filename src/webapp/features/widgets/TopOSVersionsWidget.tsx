@@ -24,16 +24,7 @@ export function TopOSVersionsWidget(props: Props) {
     isError,
     data: rows,
   } = useQuery(
-    [
-      "top-osversions",
-      buildMode,
-      props.appId,
-      period,
-      countryCode,
-      appVersion,
-      eventName,
-      osName,
-    ],
+    ["top-osversions", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     () =>
       topOSVersions({
         buildMode,
@@ -58,7 +49,7 @@ export function TopOSVersionsWidget(props: Props) {
       }
       isLoading={isLoading}
       isError={isError}
-      labels={["Version", "Sessions"]}
+      labels={["Version", "Daily Users"]}
       items={rows || []}
     />
   );

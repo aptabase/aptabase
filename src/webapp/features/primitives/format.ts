@@ -10,8 +10,7 @@ const formatDistanceLocale: Record<string, string> = {
 const durationFormat = {
   format: ["hours", "minutes", "seconds"],
   locale: {
-    formatDistance: (token, count) =>
-      formatDistanceLocale[token].replace("{{count}}", count),
+    formatDistance: (token, count) => formatDistanceLocale[token].replace("{{count}}", count),
   } as Locale,
 };
 
@@ -21,13 +20,10 @@ function formatLargeNumber(num: number): string {
   } else if (num >= 1e3) {
     return (num / 1e3).toFixed(1) + "k";
   }
-  return num.toString();
+  return num.toFixed(0);
 }
 
-export function formatNumber(
-  value: number | undefined,
-  format?: "number" | "duration"
-): string {
+export function formatNumber(value: number | undefined, format?: "number" | "duration"): string {
   if (format === "duration") {
     if (!value || value < 1) return "0s";
 

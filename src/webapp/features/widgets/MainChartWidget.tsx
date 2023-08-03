@@ -14,28 +14,12 @@ type Props = {
   appId: string;
 };
 
-const months = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 function formatPeriod(granularity: Granularity, period: string) {
   try {
     if (granularity === "hour") {
-      return format(
-        parseJSON(period),
-        hourCycle === "h12" ? "haaaaa'm'" : "HH:mm"
-      );
+      return format(parseJSON(period), hourCycle === "h12" ? "haaaaa'm'" : "HH:mm");
     }
 
     const [year, month, day] = period.substring(0, 10).split("-");
@@ -68,9 +52,7 @@ function TooltipContent(props: {
       {props.points.map((point) => (
         <p key={point.name}>
           <span className="font-medium">{point.value}</span>{" "}
-          {point.value === 1
-            ? point.name.toLowerCase().slice(0, -1)
-            : point.name.toLowerCase()}
+          {point.value === 1 ? point.name.toLowerCase().slice(0, -1) : point.name.toLowerCase()}
         </p>
       ))}
     </div>
@@ -80,17 +62,10 @@ function TooltipContent(props: {
 export function MainChartWidget(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
-  const [activeMetrics, setActiveMetrics] = useState<string[]>(["sessions"]);
+  const [keyMetricToShow, setKeyMetricToShow] = useState<"users" | "sessions">("users");
+  const [showEvents, setShowEvents] = useState(false);
 
-  const toggleMetric = (metric: string) => {
-    if (activeMetrics.includes(metric)) {
-      if (activeMetrics.length > 1) {
-        setActiveMetrics(activeMetrics.filter((x) => x !== metric));
-      }
-    } else {
-      setActiveMetrics([...activeMetrics, metric]);
-    }
-  };
+  const toggleShowEvents = () => setShowEvents((x) => !x);
 
   const period = searchParams.get("period") || "";
   const countryCode = searchParams.get("countryCode") || "";
@@ -99,16 +74,7 @@ export function MainChartWidget(props: Props) {
   const osName = searchParams.get("osName") || "";
 
   const { isLoading, isError, data } = useQuery(
-    [
-      "periodic-stats",
-      buildMode,
-      props.appId,
-      period,
-      countryCode,
-      appVersion,
-      eventName,
-      osName,
-    ],
+    ["periodic-stats", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     () =>
       periodicStats({
         buildMode,
@@ -125,6 +91,8 @@ export function MainChartWidget(props: Props) {
     trackEvent("dashboard_viewed", { period });
   }, [period]);
 
+  // TODO: make this more efficient, we don't need to map over the data multiple times
+  const users = (data?.rows || []).map((x) => x.users);
   const sessions = (data?.rows || []).map((x) => x.sessions);
   const events = (data?.rows || []).map((x) => x.events);
   const labels = (data?.rows || []).map((x) => x.period);
@@ -134,31 +102,29 @@ export function MainChartWidget(props: Props) {
   return (
     <Card>
       <KeyMetrics
-        activeMetrics={activeMetrics}
-        onChangeMetric={toggleMetric}
+        activeMetric={keyMetricToShow}
+        onChangeActiveMetric={setKeyMetricToShow}
+        showEvents={showEvents}
+        onToggleShowEvents={toggleShowEvents}
         {...props}
       />
-      {activeMetrics.length > 0 && (
-        <MetricsChart
-          isEmpty={total === 0}
-          metrics={activeMetrics}
-          isError={isError}
-          isLoading={isLoading}
-          hasPartialData={period !== "last-month"}
-          sessions={sessions}
-          events={events}
-          showAllLabels={granularity === "month"}
-          labels={labels}
-          formatLabel={(label) => formatPeriod(granularity, label.toString())}
-          renderTooltip={({ label, points }) => (
-            <TooltipContent
-              granularity={granularity}
-              label={label}
-              points={points}
-            />
-          )}
-        />
-      )}
+      <MetricsChart
+        isEmpty={total === 0}
+        activeMetric={keyMetricToShow}
+        showEvents={showEvents}
+        isError={isError}
+        isLoading={isLoading}
+        hasPartialData={period !== "last-month"}
+        users={users}
+        sessions={sessions}
+        events={events}
+        showAllLabels={granularity === "month"}
+        labels={labels}
+        formatLabel={(label) => formatPeriod(granularity, label.toString())}
+        renderTooltip={({ label, points }) => (
+          <TooltipContent granularity={granularity} label={label} points={points} />
+        )}
+      />
     </Card>
   );
 }

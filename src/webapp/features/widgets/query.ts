@@ -45,11 +45,13 @@ export function topAppBuildNumbers(params: QueryParams): Promise<TopNItem[]> {
 
 type KeyMetrics = {
   current: {
+    dailyUsers: number;
     sessions: number;
     events: number;
     durationSeconds: number;
   };
   previous?: {
+    dailyUsers: number;
     sessions: number;
     events: number;
     durationSeconds: number;
@@ -66,6 +68,7 @@ type PeriodicStats = {
   granularity: Granularity;
   rows: {
     period: string;
+    users: number;
     sessions: number;
     events: number;
   }[];

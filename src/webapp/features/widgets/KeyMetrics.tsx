@@ -6,8 +6,10 @@ import { useApps } from "../apps";
 
 type Props = {
   appId: string;
-  activeMetrics: string[];
-  onChangeMetric: (metric: "sessions" | "events") => void;
+  activeMetric: "users" | "sessions";
+  onChangeActiveMetric: (metric: "users" | "sessions") => void;
+  showEvents: boolean;
+  onToggleShowEvents: () => void;
 };
 
 export function KeyMetrics(props: Props) {
@@ -24,16 +26,7 @@ export function KeyMetrics(props: Props) {
     isError,
     data: metrics,
   } = useQuery(
-    [
-      "key-metrics",
-      buildMode,
-      props.appId,
-      period,
-      countryCode,
-      appVersion,
-      eventName,
-      osName,
-    ],
+    ["key-metrics", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     () =>
       keyMetrics({
         buildMode,
@@ -47,16 +40,25 @@ export function KeyMetrics(props: Props) {
   );
 
   return (
-    <div className="h-24 flex justify-between sm:justify-start sm:space-x-4 mb-2">
+    <div className="mb-10 grid grid-cols-2 gap-4 sm:flex sm:h-22 sm:justify-start sm:gap-8">
       {!isLoading && !isError && (
         <>
+          <Metric
+            label="Daily Users"
+            current={metrics?.current.dailyUsers ?? 0}
+            previous={metrics?.previous?.dailyUsers}
+            activeClassName="bg-primary"
+            active={props.activeMetric === "users"}
+            onClick={() => props.onChangeActiveMetric("users")}
+            format="number"
+          />
           <Metric
             label="Sessions"
             current={metrics?.current.sessions ?? 0}
             previous={metrics?.previous?.sessions}
             activeClassName="bg-primary"
-            active={props.activeMetrics.includes("sessions")}
-            onClick={() => props.onChangeMetric("sessions")}
+            active={props.activeMetric === "sessions"}
+            onClick={() => props.onChangeActiveMetric("sessions")}
             format="number"
           />
           <Metric
@@ -64,8 +66,8 @@ export function KeyMetrics(props: Props) {
             activeClassName="bg-foreground"
             current={metrics?.current.events ?? 0}
             previous={metrics?.previous?.events}
-            active={props.activeMetrics.includes("events")}
-            onClick={() => props.onChangeMetric("events")}
+            active={props.showEvents}
+            onClick={props.onToggleShowEvents}
             format="number"
           />
           <Metric

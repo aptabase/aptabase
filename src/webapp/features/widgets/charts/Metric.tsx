@@ -18,7 +18,7 @@ export function Metric(props: Props) {
   return (
     <Container
       className={clsx(
-        "inline-flex flex-col text-center rounded p-2 min-w-[6rem]",
+        "inline-flex flex-col text-center rounded p-2 min-w-[7rem]",
         props.onClick ? "hover:bg-accent" : null
       )}
       onClick={props.onClick}
@@ -29,13 +29,9 @@ export function Metric(props: Props) {
       <div className="text-sm text-muted-foreground w-full">
         {props.label}{" "}
         <div
-          className={clsx(
-            "ml-1 p-1 inline-block rounded",
-            props.activeClassName,
-            {
-              hidden: !props.active,
-            }
-          )}
+          className={clsx("ml-1 p-1 inline-block rounded", props.activeClassName, {
+            hidden: !props.active,
+          })}
         />
       </div>
       <GrowthIndicator
