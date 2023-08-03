@@ -213,6 +213,11 @@ public static class DemoDataSource
         return locales[index];
     }
 
+    public static string GetRandomIpAddress()
+    {
+        return $"10.0.0.{_random.Next(0, 255)}";
+    }
+
     public static (string, Dictionary<string, object>) NewEvent()
     {
         var eventName = events[_random.Next(0, events.Length)];
