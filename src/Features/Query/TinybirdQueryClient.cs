@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Net;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Aptabase.Features.Query;
 
@@ -50,10 +51,15 @@ public class TinybirdQueryClient : IQueryClient
 
     public async Task<IEnumerable<T>> NamedQueryAsync<T>(string name, object args, CancellationToken cancellationToken)
     {
-        var nameValueCol = args.GetType().GetProperties().Select(x => new KeyValuePair<string, string>(x.Name, FormatArg(x.GetValue(args, null))));
-        var formData = new FormUrlEncodedContent(nameValueCol);
-        var response = await _httpClient.PostAsync($"/v0/pipes/{name}.json", formData, cancellationToken);
+        var query = new QueryBuilder();
+        foreach (var prop in args.GetType().GetProperties())
+        {
+            var value = prop.GetValue(args, null);
+            if (value is not null)
+                query.Add(prop.Name, FormatArg(value));
+        }
 
+        var response = await _httpClient.GetAsync($"/v0/pipes/{name}.json{query.ToQueryString()}", cancellationToken);
         await response.EnsureSuccessWithLog(_logger);
         var result = await response.Content.ReadFromJsonAsync<QueryResult<T>>() ?? new QueryResult<T>();
         return result.Data;
@@ -68,7 +74,7 @@ public class TinybirdQueryClient : IQueryClient
         return new T();
     }
 
-    private string FormatArg(object? value)
+    private string FormatArg(object value)
     {
         switch (value)
         {
