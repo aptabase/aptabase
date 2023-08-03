@@ -13,7 +13,7 @@ export function BuildModeSelector() {
 
   return (
     <div className="p-2 text-sm space-y-2">
-      <p>What data source do you want see?</p>
+      <p className="whitespace-nowrap">What data source do you want see?</p>
       <RadioGroup value={buildMode} onChange={switchBuildMode}>
         <div className="grid grid-cols-2">
           {options.map((option) => (
@@ -27,10 +27,7 @@ export function BuildModeSelector() {
                 )
               }
             >
-              <RadioGroup.Label
-                as="span"
-                className="flex items-center space-x-2"
-              >
+              <RadioGroup.Label as="span" className="flex items-center space-x-2">
                 <option.icon className="h-5 w-5" stroke="1.5" />
                 <span>{option.label}</span>
               </RadioGroup.Label>
@@ -39,7 +36,7 @@ export function BuildModeSelector() {
         </div>
       </RadioGroup>
       <p className="text-muted-foreground text-xs">
-        Events sent from Debug builds are separated from Release builds.
+        Events sent from debug builds are separated from release builds.
       </p>
     </div>
   );
