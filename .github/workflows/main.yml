@@ -10,7 +10,10 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v1
+      with:
+        driver: docker-container
+        buildkitd-flags: --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host
 
     - name: Build and push
       uses: docker/build-push-action@v4
