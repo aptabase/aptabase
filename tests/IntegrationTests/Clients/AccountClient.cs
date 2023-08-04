@@ -1,7 +1,7 @@
 using System.Net;
 using FluentAssertions;
 using Aptabase.Features.Apps;
-using Aptabase.Features.Query;
+using Aptabase.Features.Stats;
 
 namespace Aptabase.IntegrationTests.Clients;
 
@@ -32,6 +32,11 @@ public class AccountClient
         var apps = await _client.GetFromJsonAsync<Application[]>("/api/_apps");
         var app = apps?.FirstOrDefault(x => x.Name == name);
         return app ?? throw new Exception("No app found");
+    }
+
+    public async Task<HttpResponseMessage> GetKeyMetrics(string appId, string period)
+    {
+        return await _client.GetAsync($"/api/_stats/metrics?buildMode=release&period={period}&appId={appId}");
     }
 
     public async Task<long> CountEvents(string appId, string period)

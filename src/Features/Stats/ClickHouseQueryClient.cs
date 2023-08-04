@@ -2,7 +2,7 @@ using Dapper;
 using ClickHouse.Client.ADO;
 using Scriban;
 
-namespace Aptabase.Features.Query;
+namespace Aptabase.Features.Stats;
 
 public class ClickHouseQueryClient : IQueryClient
 {

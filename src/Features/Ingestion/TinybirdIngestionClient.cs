@@ -19,8 +19,8 @@ public class TinybirdIngestionClient : IIngestionClient
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    private HttpClient _httpClient;
-    private ILogger _logger;
+    private readonly HttpClient _httpClient;
+    private readonly ILogger _logger;
 
     public TinybirdIngestionClient(IHttpClientFactory factory, ILogger<TinybirdIngestionClient> logger)
     {
