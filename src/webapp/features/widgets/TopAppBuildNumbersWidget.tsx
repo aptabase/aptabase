@@ -50,7 +50,7 @@ export function TopAppBuildNumbersWidget(props: Props) {
       title={<CardTitle backProperty="appVersion">{appVersion}</CardTitle>}
       isLoading={isLoading}
       isError={isError}
-      labels={["Build Number", "Sessions"]}
+      labels={["Sessions"]}
       items={rows || []}
     />
   );
