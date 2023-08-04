@@ -13,7 +13,7 @@ public class PeriodicStats
 
 public class PeriodicStatsRow
 {
-    public DateTime Period { get; set; }
+    public string Period { get; set; } = "";
     public int Users { get; set; } = 0;
     public int Sessions { get; set; } = 0;
     public int Events { get; set; } = 0;
