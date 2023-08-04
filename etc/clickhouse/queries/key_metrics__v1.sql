@@ -10,7 +10,7 @@ FROM (
            count(*) AS count
     FROM events
     PREWHERE app_id = {app_id}
-    AND (timestamp > {date_from} OR {date_from} IS NULL)
+    WHERE (timestamp > {date_from} OR {date_from} IS NULL)
     AND (timestamp <= {date_to} OR {date_to} IS NULL)
     AND (country_code = {country_code} OR {country_code} IS NULL)
     AND (event_name = {event_name} OR {event_name} IS NULL)
