@@ -1,4 +1,4 @@
-NODE billing_usage_v1
+NODE billing_usage_v1_mv
 DESCRIPTION >
     Monthly count of events per app for billing purposes
 
@@ -18,7 +18,7 @@ SQL >
       day
 
 TYPE materialized
-DATASOURCE billing_usage_v1_mv
+DATASOURCE billing_usage_v1
 ENGINE "AggregatingMergeTree"
 ENGINE_SETTINGS "index_granularity = 1024"
 ENGINE_SORTING_KEY "app_id, year, month, day"

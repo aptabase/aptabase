@@ -1,4 +1,4 @@
-CREATE VIEW IF NOT EXISTS billing_usage_v1_mv
+CREATE VIEW IF NOT EXISTS billing_usage_v1
 AS
 SELECT
     app_id,
