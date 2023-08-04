@@ -5,7 +5,7 @@ using System;
 
 namespace Aptabase.Features.Authentication
 {
-    public class AccessControlFilter : ActionFilterAttribute
+    public class HasAccessToAppFilter : ActionFilterAttribute
     {
         private readonly IDbContext _db;
 
