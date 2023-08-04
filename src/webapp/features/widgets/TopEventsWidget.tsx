@@ -50,7 +50,7 @@ export function TopEventsWidget(props: Props) {
       searchParamKey="eventName"
       isLoading={isLoading}
       isError={isError}
-      labels={["Name", "Count"]}
+      labels={["Count"]}
       items={rows || []}
     />
   );
