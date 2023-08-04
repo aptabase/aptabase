@@ -24,6 +24,7 @@
     <PackageReference Include="Sgbj.Cron.CronTimer" Version="1.0.2" />
     <PackageReference Include="MaxMind.GeoIP2" Version="5.1.0" />
     <PackageReference Include="Yoh.Text.Json.NamingPolicies" Version="1.0.0" />
+    <PackageReference Include="Scriban" Version="5.7.0" />
   </ItemGroup>
 
   <ItemGroup>

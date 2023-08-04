@@ -1,0 +1,26 @@
+SELECT {{name_column}} as Name,
+       {% if value_column == 'UniqueSessions' %}
+        uniqExact(session_id) as Value
+       {% else %}
+        count() as Value
+       {% endif %}
+FROM events
+PREWHERE app_id = '{{app_id}}'
+WHERE 1 = 1
+{% if date_from and date_to %}
+AND timestamp BETWEEN '{{date_from}}' AND '{{date_to}}'
+{% endif %}
+{% if country_code %}
+AND country_code = '{{country_code}}'
+{% endif %}
+{% if event_name %}
+AND event_name = '{{event_name}}'
+{% endif %}
+{% if os_name %}
+AND os_name = '{{os_name}}'
+{% endif %}
+{% if app_version %}
+AND app_version = '{{app_version}}'
+{% endif %}
+GROUP BY Name
+ORDER BY Value DESC

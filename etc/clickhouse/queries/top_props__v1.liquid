@@ -1,0 +1,34 @@
+SELECT string_arr.1 AS StringKey,
+       string_arr.2 AS StringValue,
+       numeric_arr.1 AS NumericKey,
+       count() AS Events,
+       median(numeric_arr.2) AS Median,
+       min(numeric_arr.2) AS Min,
+       max(numeric_arr.2) AS Max,
+       sum(numeric_arr.2) AS Sum
+FROM (
+    SELECT * FROM (
+        SELECT JSONExtractKeysAndValues(string_props, 'String') AS string_arr,
+               JSONExtractKeysAndValues(numeric_props, 'Float') AS numeric_arr
+        FROM events
+        PREWHERE app_id = '{{app_id}}'
+        WHERE 1 = 1
+        {% if date_from and date_to %}
+        AND timestamp BETWEEN '{{date_from}}' AND '{{date_to}}'
+        {% endif %}
+        {% if country_code %}
+        AND country_code = '{{country_code}}'
+        {% endif %}
+        {% if event_name %}
+        AND event_name = '{{event_name}}'
+        {% endif %}
+        {% if os_name %}
+        AND os_name = '{{os_name}}'
+        {% endif %}
+        {% if app_version %}
+        AND app_version = '{{app_version}}'
+        {% endif %}
+    ) LEFT ARRAY JOIN string_arr
+) LEFT ARRAY JOIN numeric_arr
+GROUP BY StringKey, StringValue, NumericKey
+ORDER BY StringKey, Events DESC

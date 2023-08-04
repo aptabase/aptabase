@@ -1,5 +1,6 @@
 using Dapper;
 using ClickHouse.Client.ADO;
+using Scriban;
 
 namespace Aptabase.Features.Query;
 
@@ -26,16 +27,9 @@ public class ClickHouseQueryClient : IQueryClient
 
     public async Task<IEnumerable<T>> NamedQueryAsync<T>(string name, object args, CancellationToken cancellationToken)
     {
-        // TODO: replace this with parameterized views when this is fixed: https://github.com/ClickHouse/ClickHouse/issues/53004
-        var query = await ReadNamedQuery(name);
-        foreach (var prop in args.GetType().GetProperties())
-        {
-            var value = prop.GetValue(args, null);
-            if (value is null)
-                query = query.Replace($"{{{prop.Name}}}", "NULL");
-            else
-                query = query.Replace($"{{{prop.Name}}}", FormatArg(value));
-        }
+        var dict = args.GetType().GetProperties().ToDictionary(p => p.Name, p => FormatArg(p.GetValue(args, null)));
+        var template = await ReadNamedQuery(name);
+        var query = await template.RenderAsync(dict);
         return await _conn.QueryAsync<T>(query, cancellationToken);
     }
 
@@ -45,25 +39,28 @@ public class ClickHouseQueryClient : IQueryClient
         return rows.FirstOrDefault() ?? new T();
     }
 
-    private readonly Dictionary<string, string> _namedQueries = new();
-    private async Task<string> ReadNamedQuery(string name)
+    private readonly Dictionary<string, Template> _namedQueries = new();
+    private async Task<Template> ReadNamedQuery(string name)
     {
         if (_namedQueries.ContainsKey(name))
             return _namedQueries[name];
 
-        var pathToQuery = Path.Combine(_env.EtcDirectoryPath, "clickhouse", "queries", $"{name}.sql");
-        var query = await File.ReadAllTextAsync(pathToQuery);
-        _namedQueries[name] = query;
-        return query;
+        var pathToQuery = Path.Combine(_env.EtcDirectoryPath, "clickhouse", "queries", $"{name}.liquid");
+        var content = await File.ReadAllTextAsync(pathToQuery);
+        var template = Template.ParseLiquid(content);
+
+        _namedQueries[name] = template;
+        return template;
     }
 
-    private string FormatArg(object value)
+    private string? FormatArg(object? value)
     {
         return value switch
         {
-            string[] s => $"'${string.Join("','", s)}'",
-            DateTime d => $"'{d:yyyy-MM-dd HH:mm:ss}'",
-            _ => $"'{value}'",
+            string[] s => string.Join("','", s),
+            DateTime d => d.ToString("yyyy-MM-dd HH:mm:ss"),
+            null => null,
+            _ => $"{value}",
         };
     }
 }
