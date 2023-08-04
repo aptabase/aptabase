@@ -13,7 +13,7 @@ public class PeriodicStats
 
 public class PeriodicStatsRow
 {
-    public string Period { get; set; } = "";
+    public DateTime Period { get; set; }
     public int Users { get; set; } = 0;
     public int Sessions { get; set; } = 0;
     public int Events { get; set; } = 0;
@@ -87,9 +87,6 @@ public enum Granularity
 
 public class QueryParams
 {
-    private const string DATE_FORMAT = "yyyy-MM-dd";
-    private const string DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-
     public string AppId { get; set; } = "";
     public DateTime? DateFrom { get; set; }
     public DateTime? DateTo { get; set; }
@@ -98,71 +95,6 @@ public class QueryParams
     public string? OsName { get; set; }
     public string? EventName { get; set; }
     public string? AppVersion { get; set; }
-
-    public string ToFilter()
-    {
-        var dateFilter = (DateFrom, DateTo) switch
-        {
-            (null, null) => "",
-            (null, DateTime to) => $"timestamp < '{to.ToString(DATE_TIME_FORMAT)}'",
-            (DateTime from, null) => $"timestamp >= '{from.ToString(DATE_TIME_FORMAT)}'",
-            (DateTime from, DateTime to) => $" timestamp BETWEEN '{from.ToString(DATE_TIME_FORMAT)}' AND '{to.ToString(DATE_TIME_FORMAT)}'"
-        };
-
-        List<String> conditions = new();
-
-        if (!string.IsNullOrEmpty(dateFilter))
-            conditions.Add(dateFilter);
-
-        if (!string.IsNullOrEmpty(EventName))
-            conditions.Add($"event_name = '{EventName}'");
-
-        if (!string.IsNullOrEmpty(CountryCode))
-            conditions.Add($"country_code = '{CountryCode}'");
-
-        if (!string.IsNullOrEmpty(OsName))
-            conditions.Add($"os_name = '{OsName}'");
-
-        if (!string.IsNullOrEmpty(AppVersion))
-            conditions.Add($"app_version = '{AppVersion}'");
-
-        var where = conditions.Count > 0 ? $"WHERE {String.Join(" AND ", conditions)}" : string.Empty;
-
-        return $"PREWHERE app_id = '{AppId}' {where}";
-    }
-
-    public string ToGranularPeriod(string columnOrValue)
-    {
-        return Granularity switch
-        {
-            Granularity.Hour => $"toStartOfHour({columnOrValue})",
-            Granularity.Day => $"toStartOfDay({columnOrValue})",
-            Granularity.Month => $"toStartOfMonth({columnOrValue})",
-            _ => throw new ArgumentOutOfRangeException()
-        };
-    }
-
-    public string ToFill()
-    {
-        string toDate(DateTime date) => ToGranularPeriod($"toDate('{date.ToString(DATE_FORMAT)}')");
-        string toDateTime(DateTime date) => ToGranularPeriod($"toDateTime('{date.ToString(DATE_TIME_FORMAT)}')");
-
-        var (step, fn, lastStep) = Granularity switch
-        {
-            Granularity.Hour => ("toIntervalHour(1)", (Func<DateTime, string>)toDateTime, DateTime.UtcNow.AddHours(1)),
-            Granularity.Day => ("toIntervalDay(1)", toDate, DateTime.UtcNow.AddDays(1)),
-            Granularity.Month => ("toIntervalMonth(1)", toDate, DateTime.UtcNow.AddMonths(1)),
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
-        return (DateFrom, DateTo) switch
-        {
-            (null, null) => $"WITH FILL STEP {step}",
-            (null, DateTime to) => $"WITH FILL TO {fn(to)} STEP {step}",
-            (DateTime from, null) => $"WITH FILL FROM {fn(from)} TO {fn(lastStep)} STEP {step}",
-            (DateTime from, DateTime to) => $"WITH FILL FROM {fn(from)} TO {fn(to)} STEP {step}"
-        };
-    }
 }
 
 public class QueryRequestBody
@@ -259,17 +191,16 @@ public class StatsController : Controller
         if (query == null)
             return BadRequest();
 
-        var rows = await _queryClient.QueryAsync<PeriodicStatsRow>(
-            $@"SELECT
-                    {query.ToGranularPeriod("timestamp")} as Period,
-                    uniqExact(user_id) as Users,
-                    uniqExact(session_id) as Sessions,
-                    count() as Events
-                FROM events
-                {query.ToFilter()}
-                GROUP by {query.ToGranularPeriod("timestamp")}
-                ORDER BY {query.ToGranularPeriod("timestamp")} ASC
-                {query.ToFill()}", cancellationToken);
+        var rows = await _queryClient.NamedQueryAsync<PeriodicStatsRow>("key_metrics_periodic__v1", new {
+            date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
+            date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
+            granularity = query.Granularity.ToString(),
+            app_id = query.AppId,
+            event_name = query.EventName,
+            os_name = query.OsName,
+            app_version = query.AppVersion,
+            country_code = query.CountryCode,
+        }, cancellationToken);
 
         return Ok(new PeriodicStats
         {
@@ -285,24 +216,15 @@ public class StatsController : Controller
         if (query == null)
             return BadRequest();
 
-        var rows = await _queryClient.QueryAsync<EventPropsItem>(
-            $@"SELECT string_arr.1 as StringKey,
-                      string_arr.2 as StringValue,
-                      numeric_arr.1 as NumericKey,
-                      count() as Events,
-                      median(numeric_arr.2) as Median,
-                      min(numeric_arr.2) as Min,
-                      max(numeric_arr.2) as Max,
-                      sum(numeric_arr.2) as Sum
-                FROM (
-                    SELECT * FROM (
-                        SELECT JSONExtractKeysAndValues(string_props, 'String') as string_arr, JSONExtractKeysAndValues(numeric_props, 'Float') as numeric_arr
-                        FROM events
-                        {query.ToFilter()}
-                    ) LEFT ARRAY JOIN string_arr
-                ) LEFT ARRAY JOIN numeric_arr
-                GROUP BY StringKey, StringValue, NumericKey
-                ORDER BY StringKey, Events DESC", cancellationToken);
+        var rows = await _queryClient.NamedQueryAsync<EventPropsItem>("top_props__v1", new {
+            date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
+            date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
+            app_id = query.AppId,
+            event_name = query.EventName,
+            os_name = query.OsName,
+            app_version = query.AppVersion,
+            country_code = query.CountryCode,
+        }, cancellationToken);
 
         return Ok(rows);
     }
@@ -313,33 +235,30 @@ public class StatsController : Controller
             date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
             date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
             app_id = query.AppId,
-            event_name = query.EventName,
+                event_name = query.EventName,
             os_name = query.OsName,
             app_version = query.AppVersion,
             country_code = query.CountryCode,
         }, cancellationToken);
     }
 
-    private async Task<IActionResult> TopN(string fieldName, TopNValue value, QueryRequestBody body, CancellationToken cancellationToken)
+    private async Task<IActionResult> TopN(string nameColumn, TopNValue valueColumn, QueryRequestBody body, CancellationToken cancellationToken)
     {
         var query = await ToParams(body, DateTime.UtcNow);
         if (query == null)
             return BadRequest();
 
-        var valueField = value switch
-        {
-            TopNValue.TotalEvents => "count()",
-            TopNValue.UniqueSessions => "uniqExact(session_id)",
-            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
-        };
-
-        var rows = await _queryClient.QueryAsync<TopNItem>(
-            $@"SELECT {fieldName} as Name,
-                      {valueField} as Value
-              FROM events
-              {query.ToFilter()}
-              GROUP BY Name
-              ORDER BY Value DESC", cancellationToken);
+        var rows = await _queryClient.NamedQueryAsync<TopNItem>("top_n__v1", new {
+            name_column = nameColumn,
+            value_column = valueColumn.ToString(),
+            date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
+            date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
+            app_id = query.AppId,
+            event_name = query.EventName,
+            os_name = query.OsName,
+            app_version = query.AppVersion,
+            country_code = query.CountryCode,
+        }, cancellationToken);
 
         return Ok(rows);
     }
@@ -370,6 +289,9 @@ public class StatsController : Controller
             "all" => (default(DateTime?), default(DateTime?), Granularity.Month),
             _ => (relativeTo.AddHours(-24), relativeTo, Granularity.Hour), // default to 24 hours
         };
+
+        if ((dateFrom is null && dateTo is not null) || (dateFrom is not null && dateTo is null))
+            throw new ArgumentException("Both dateFrom and dateTo must be defined, or both must be null");
 
         var appId = body.BuildMode.ToLower() switch
         {

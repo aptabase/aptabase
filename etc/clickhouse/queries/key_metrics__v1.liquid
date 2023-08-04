@@ -1,0 +1,30 @@
+SELECT uniqExact(user_id) / (date_diff('day', min(min), max(max)) + 1) as DailyUsers,
+       uniqExact(session_id) as Sessions,
+       if(isNaN(median(max - min)), 0, median(max - min)) as DurationSeconds,
+       sum(count) as Events
+FROM (
+    SELECT min(timestamp) AS min,
+           max(timestamp) AS max,
+           user_id,
+           session_id,
+           count(*) AS count
+    FROM events
+    PREWHERE app_id = '{{app_id}}'
+    WHERE 1 = 1
+    {% if date_from and date_to %}
+    AND timestamp BETWEEN '{{date_from}}' AND '{{date_to}}'
+    {% endif %}
+    {% if country_code %}
+    AND country_code = '{{country_code}}'
+    {% endif %}
+    {% if event_name %}
+    AND event_name = '{{event_name}}'
+    {% endif %}
+    {% if os_name %}
+    AND os_name = '{{os_name}}'
+    {% endif %}
+    {% if app_version %}
+    AND app_version = '{{app_version}}'
+    {% endif %}
+    GROUP BY user_id, session_id
+)
