@@ -121,7 +121,7 @@ public class StatsController : Controller
         _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));
     }
 
-    [HttpGet("/api/_stats/top-countries")]
+    [HttpGet("/api/_stats/top-countries"), AccessControl]
     public async Task<IActionResult> TopCountries([FromQuery] QueryRequestBody body, CancellationToken cancellationToken)
     {
         return await TopN("country_code", TopNValue.UniqueSessions, body, cancellationToken);
@@ -263,11 +263,10 @@ public class StatsController : Controller
         return Ok(rows);
     }
 
-    private async Task<QueryParams?> ToParams(QueryRequestBody body, DateTime relativeTo)
+    private async Task<QueryParams> ToParams(QueryRequestBody body, DateTime relativeTo)
     {
-        var allowed = await HasAccessTo(body.AppId);
-        if (!allowed)
-            return null;
+        // Rest of the method...
+    }
 
         // Go back 1 second so that when relativeTo is 00:00:00 we start with the previous day
         // Happens when looking for previous period and "period" is "month" or "last-month"
