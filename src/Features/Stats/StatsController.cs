@@ -151,7 +151,7 @@ public class QueryParams
     }
 }
 
-[ApiController, IsAuthenticated]
+[ApiController, IsAuthenticated, HasReadAccessToApp]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class StatsController : Controller
 {
@@ -162,49 +162,49 @@ public class StatsController : Controller
         _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));
     }
 
-    [HttpGet("/api/_stats/top-countries"), HasReadAccessToApp]
+    [HttpGet("/api/_stats/top-countries")]
     public async Task<IActionResult> TopCountries([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         return await TopN("country_code", TopNValue.UniqueSessions, body, cancellationToken);
     }
 
-    [HttpGet("/api/_stats/top-osversions"), HasReadAccessToApp]
+    [HttpGet("/api/_stats/top-osversions")]
     public async Task<IActionResult> TopOSVersions([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         return await TopN("os_version", TopNValue.UniqueSessions, body, cancellationToken);
     }
 
-    [HttpGet("/api/_stats/top-operatingsystems"), HasReadAccessToApp]
+    [HttpGet("/api/_stats/top-operatingsystems")]
     public async Task<IActionResult> TopOperatingSystems([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         return await TopN("os_name", TopNValue.UniqueSessions, body, cancellationToken);
     }
 
-    [HttpGet("/api/_stats/top-regions"), HasReadAccessToApp]
+    [HttpGet("/api/_stats/top-regions")]
     public async Task<IActionResult> TopRegions([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         return await TopN("region_name", TopNValue.UniqueSessions, body, cancellationToken);
     }
 
-    [HttpGet("/api/_stats/top-events"), HasReadAccessToApp]
+    [HttpGet("/api/_stats/top-events")]
     public async Task<IActionResult> TopEvents([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         return await TopN("event_name", TopNValue.TotalEvents, body, cancellationToken);
     }
 
-    [HttpGet("/api/_stats/top-appversions"), HasReadAccessToApp]
+    [HttpGet("/api/_stats/top-appversions")]
     public async Task<IActionResult> TopAppVersions([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         return await TopN("app_version", TopNValue.UniqueSessions, body, cancellationToken);
     }
 
-    [HttpGet("/api/_stats/top-appbuildnumbers"), HasReadAccessToApp]
+    [HttpGet("/api/_stats/top-appbuildnumbers")]
     public async Task<IActionResult> TopAppBuildNumbers([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         return await TopN("app_build_number", TopNValue.UniqueSessions, body, cancellationToken);
     }
 
-    [HttpGet("/api/_stats/metrics"), HasReadAccessToApp]
+    [HttpGet("/api/_stats/metrics")]
     public async Task<IActionResult> KeyMetrics([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         var currentQuery = body.Parse(DateTime.UtcNow);
@@ -219,7 +219,7 @@ public class StatsController : Controller
         return Ok(new KeyMetrics(await current, previous));
     }
 
-    [HttpGet("/api/_stats/periodic"), HasReadAccessToApp]
+    [HttpGet("/api/_stats/periodic")]
     public async Task<IActionResult> PeriodicStats([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         var query = body.Parse(DateTime.UtcNow);
@@ -241,7 +241,7 @@ public class StatsController : Controller
         });
     }
 
-    [HttpGet("/api/_stats/top-props"), HasReadAccessToApp]
+    [HttpGet("/api/_stats/top-props")]
     public async Task<IActionResult> EventProps([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         var query = body.Parse(DateTime.UtcNow);
