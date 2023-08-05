@@ -35,7 +35,7 @@ export function Component() {
     <Page title={app.name}>
       {buildMode === "debug" && <DebugModeBanner />}
       <div className="space-y-4">
-        <div className="flex justify-between items-end">
+        <div className="flex justify-between items-center">
           <PageHeading title="Dashboard" onClick={resetFilters} />
           <div className="flex items-center">
             <AppConfigMenu />

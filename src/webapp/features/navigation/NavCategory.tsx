@@ -7,7 +7,7 @@ export function NavCategory(props: Props) {
   return (
     <div>
       {props.title && (
-        <span className="text-xs tracking-tight font-semibold ml-2 leading-6 text-muted-foreground">
+        <span className="text-xs tracking-tighter font-semibold ml-2 leading-6 text-muted-foreground uppercase">
           {props.title}
         </span>
       )}
