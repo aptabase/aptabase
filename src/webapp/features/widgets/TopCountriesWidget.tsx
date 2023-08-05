@@ -42,7 +42,7 @@ export function TopCountriesWidget(props: Props) {
       searchParamKey="countryCode"
       isLoading={isLoading}
       isError={isError}
-      labels={["Name", "Sessions"]}
+      valueLabel="Sessions"
       items={rows || []}
       renderRow={(item) => (
         <span className="flex items-center space-x-2 px-2">

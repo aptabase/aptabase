@@ -41,7 +41,7 @@ export function TopAppVersionsWidget(props: Props) {
       searchParamKey="appVersion"
       isLoading={isLoading}
       isError={isError}
-      labels={["Version", "Sessions"]}
+      valueLabel="Sessions"
       items={rows || []}
     />
   );

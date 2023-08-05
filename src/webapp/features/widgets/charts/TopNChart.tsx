@@ -10,10 +10,9 @@ type Item = {
 
 type Props = {
   title: string | JSX.Element;
-  labels: [string, string];
   items: Item[];
-  renderKeyLabel?: React.ReactNode;
-  renderValueLabel?: React.ReactNode;
+  keyLabel?: React.ReactNode;
+  valueLabel?: React.ReactNode;
   renderRow?: (item: Item) => React.ReactNode;
   isLoading?: boolean;
   isError?: boolean;
@@ -34,13 +33,14 @@ export function TopNChart(props: Props) {
     <EmptyState />
   ) : (
     <>
-      <div className="flex w-full flex-row justify-between items-center">
-        <div className="text-muted-foreground text-sm font-normal">
-          {props.renderKeyLabel ? props.renderKeyLabel : props.labels[0]}
+      <div className="flex w-full flex-row justify-between items-end">
+        <div>
+          {typeof props.title === "string" ? <CardTitle>{props.title}</CardTitle> : props.title}
+          {props.keyLabel && (
+            <div className="text-muted-foreground text-sm font-normal">{props.keyLabel}</div>
+          )}
         </div>
-        <div className="text-muted-foreground text-sm font-normal pr-1">
-          {props.renderValueLabel ? props.renderValueLabel : props.labels[1]}
-        </div>
+        <div className="text-muted-foreground text-sm font-normal pr-1">{props.valueLabel}</div>
       </div>
       <div className="grid text-sm mt-2 max-h-[22rem] overflow-y-auto">
         {props.items.map((item) => (
@@ -57,12 +57,7 @@ export function TopNChart(props: Props) {
     </>
   );
 
-  return (
-    <>
-      {typeof props.title === "string" ? <CardTitle>{props.title}</CardTitle> : props.title}
-      {content}
-    </>
-  );
+  return content;
 }
 
 type TopNRowProps = {

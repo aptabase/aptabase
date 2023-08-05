@@ -22,16 +22,7 @@ export function TopEventsWidget(props: Props) {
     isError,
     data: rows,
   } = useQuery(
-    [
-      "top-events",
-      buildMode,
-      props.appId,
-      period,
-      countryCode,
-      appVersion,
-      eventName,
-      osName,
-    ],
+    ["top-events", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     () =>
       topEvents({
         buildMode,
@@ -50,7 +41,7 @@ export function TopEventsWidget(props: Props) {
       searchParamKey="eventName"
       isLoading={isLoading}
       isError={isError}
-      labels={["Name", "Count"]}
+      valueLabel="Count"
       items={rows || []}
     />
   );

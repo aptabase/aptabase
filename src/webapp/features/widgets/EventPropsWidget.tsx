@@ -31,16 +31,7 @@ export function EventPropsWidget(props: Props) {
     isError,
     data: rows,
   } = useQuery(
-    [
-      "top-event-props",
-      buildMode,
-      props.appId,
-      period,
-      countryCode,
-      appVersion,
-      eventName,
-      osName,
-    ],
+    ["top-event-props", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     () =>
       topEventProps({
         buildMode,
@@ -53,30 +44,21 @@ export function EventPropsWidget(props: Props) {
       })
   );
 
-  const stringKeys = [
-    ...new Set((rows || []).map((row) => row.stringKey).filter((x) => !!x)),
-  ];
+  const stringKeys = [...new Set((rows || []).map((row) => row.stringKey).filter((x) => !!x))];
 
-  const numericKeys = [
-    ...new Set((rows || []).map((row) => row.numericKey).filter((x) => !!x)),
-  ];
+  const numericKeys = [...new Set((rows || []).map((row) => row.numericKey).filter((x) => !!x))];
 
   if (!isLoading && stringKeys.length === 0) {
     const value =
       (rows || []).find(
-        (x) =>
-          selectedNumericKey[0] === "events" ||
-          x.numericKey === selectedNumericKey[1]
+        (x) => selectedNumericKey[0] === "events" || x.numericKey === selectedNumericKey[1]
       )?.[selectedNumericKey[0]] ?? 0;
 
     return (
       <>
         <div className="flex justify-between">
           <CardTitle backProperty="eventName">{eventName}</CardTitle>
-          <NumericKeySelector
-            numericKeys={numericKeys}
-            onChange={setSelectedNumericKey}
-          />
+          <NumericKeySelector numericKeys={numericKeys} onChange={setSelectedNumericKey} />
         </div>
         <div className="flex justify-center items-center mt-20">
           <span className="text-8xl text-center">{value}</span>
@@ -89,8 +71,7 @@ export function EventPropsWidget(props: Props) {
     .filter(
       (x) =>
         x.stringKey === stringKeys[stringKeyIndex] &&
-        (selectedNumericKey[0] === "events" ||
-          x.numericKey === selectedNumericKey[1])
+        (selectedNumericKey[0] === "events" || x.numericKey === selectedNumericKey[1])
     )
     .map((row) => ({
       name: row.stringValue,
@@ -101,19 +82,8 @@ export function EventPropsWidget(props: Props) {
   return (
     <TopNChart
       title={<CardTitle backProperty="eventName">{eventName}</CardTitle>}
-      labels={[stringKeys[stringKeyIndex], "Events"]}
-      renderKeyLabel={
-        <StringKeySelector
-          stringKeys={stringKeys}
-          onChangeIndex={setStringKeyIndex}
-        />
-      }
-      renderValueLabel={
-        <NumericKeySelector
-          numericKeys={numericKeys}
-          onChange={setSelectedNumericKey}
-        />
-      }
+      keyLabel={<StringKeySelector stringKeys={stringKeys} onChangeIndex={setStringKeyIndex} />}
+      valueLabel={<NumericKeySelector numericKeys={numericKeys} onChange={setSelectedNumericKey} />}
       isLoading={isLoading}
       isError={isError}
       items={items}
@@ -121,10 +91,7 @@ export function EventPropsWidget(props: Props) {
   );
 }
 
-function StringKeySelector(props: {
-  stringKeys: string[];
-  onChangeIndex: (idx: number) => void;
-}) {
+function StringKeySelector(props: { stringKeys: string[]; onChangeIndex: (idx: number) => void }) {
   if (props.stringKeys.length === 0) {
     return null;
   }
@@ -162,10 +129,7 @@ function NumericKeySelector(props: {
   };
 
   return (
-    <select
-      className="form-select compact min-w-[6rem]"
-      onChange={onChangeValue}
-    >
+    <select className="form-select compact min-w-[6rem]" onChange={onChangeValue}>
       <option value={[]}>Events</option>
       {props.numericKeys.map((key) => (
         <Fragment key={key}>
