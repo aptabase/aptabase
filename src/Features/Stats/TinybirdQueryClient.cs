@@ -2,7 +2,7 @@ using System.Net;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Extensions;
 
-namespace Aptabase.Features.Query;
+namespace Aptabase.Features.Stats;
 
 public class QueryResult<T>
 {

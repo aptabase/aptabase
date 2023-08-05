@@ -5,12 +5,10 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using ClickHouse.Client.ADO;
-using ClickHouse.Client;
 using Aptabase.Data;
 using Aptabase.Data.Migrations;
 using Aptabase.Features;
 using Aptabase.Features.Privacy;
-using Aptabase.Features.Query;
 using Aptabase.Features.Blob;
 using Aptabase.Features.GeoIP;
 using Aptabase.Features.Ingestion;
@@ -18,6 +16,7 @@ using Aptabase.Features.Notification;
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Aptabase.Features.Stats;
 
 public partial class Program
 {

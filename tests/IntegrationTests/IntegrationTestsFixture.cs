@@ -8,6 +8,7 @@ public class IntegrationTestsFixture : IAsyncLifetime, IDisposable
 {
     private readonly CustomWebApplicationFactory<Program> _factory;
     public AccountClient UserA { get; private set; } = null!;
+    public AccountClient UserB { get; private set; } = null!;
 
     public IntegrationTestsFixture()
     {
@@ -30,8 +31,11 @@ public class IntegrationTestsFixture : IAsyncLifetime, IDisposable
 
     public async Task InitializeAsync()
     {
-        UserA = new AccountClient(this.CreateClient());
+        UserA = new AccountClient(CreateClient());
         await UserA.CreateAccount("Jon Snow", $"jon.snow.{Guid.NewGuid()}@got.com");
+
+        UserB = new AccountClient(CreateClient());
+        await UserB.CreateAccount("Arya Stark", $"arya.stark.{Guid.NewGuid()}@got.com");
     }
 
     public Task DisposeAsync()

@@ -1,10 +1,10 @@
 using System.Data;
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
-using Aptabase.Features.Query;
 using Microsoft.AspNetCore.Mvc;
 using Aptabase.Data;
 using Dapper;
+using Aptabase.Features.Stats;
 
 namespace Aptabase.Features.Billing;
 

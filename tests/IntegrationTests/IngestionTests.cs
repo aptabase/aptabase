@@ -80,6 +80,21 @@ public class IngestionTests
     }
 
     [Fact]
+    public async Task Cant_Read_Stats_From_Other_Users()
+    {
+        var appA = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
+
+        var client = new IngestionClient(_fixture.CreateClient(), appA.AppKey, "127.0.0.1");
+        await client.TrackEvent(DateTime.UtcNow, "Button Clicked");
+        
+        var responseA = await _fixture.UserA.GetKeyMetrics(appA.Id, "24h");
+        responseA.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var responseB = await _fixture.UserB.GetKeyMetrics(appA.Id, "24h");
+        responseB.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
     public async Task Check_Rate_Limiting()
     {
         var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());

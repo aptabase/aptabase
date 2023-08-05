@@ -1,4 +1,4 @@
-namespace Aptabase.Features.Query;
+namespace Aptabase.Features.Stats;
 
 public interface IQueryClient
 {

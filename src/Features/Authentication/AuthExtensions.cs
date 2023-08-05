@@ -11,10 +11,14 @@ public static class AuthExtensions
 
     public static UserAccount GetCurrentUser(this Controller controller)
     {
-        if (!controller.HttpContext.IsAuthenticated())
+        return controller.HttpContext.GetCurrentUser();
+    }
+
+    public static UserAccount GetCurrentUser(this HttpContext context)
+    {
+        if (!context.IsAuthenticated())
             throw new InvalidOperationException("User is not authenticated.");
 
-        var context = controller.HttpContext;
         var id = context.User.FindFirst(x => x.Type == "id")?.Value ?? "";
         var email = context.User.FindFirst(x => x.Type == "email")?.Value ?? "";
         var name = context.User.FindFirst(x => x.Type == "name")?.Value ?? "";
