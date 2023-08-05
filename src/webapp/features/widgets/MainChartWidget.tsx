@@ -1,5 +1,5 @@
 import { MetricsChart } from "./charts";
-import { Card } from "../primitives";
+import { Card, formatNumber } from "../primitives";
 import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseJSON } from "date-fns";
@@ -51,7 +51,7 @@ function TooltipContent(props: {
       </p>
       {props.points.map((point) => (
         <p key={point.name}>
-          <span className="font-medium">{point.value}</span>{" "}
+          <span className="font-medium">{formatNumber(point.value)}</span>{" "}
           {point.value === 1 ? point.name.toLowerCase().slice(0, -1) : point.name.toLowerCase()}
         </p>
       ))}
@@ -118,7 +118,7 @@ export function MainChartWidget(props: Props) {
         users={users}
         sessions={sessions}
         events={events}
-        showAllLabels={granularity === "month"}
+        granularity={granularity}
         labels={labels}
         formatLabel={(label) => formatPeriod(granularity, label.toString())}
         renderTooltip={({ label, points }) => (

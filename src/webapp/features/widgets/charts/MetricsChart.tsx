@@ -37,7 +37,7 @@ type Props = {
   sessions: number[];
   events: number[];
   showEvents: boolean;
-  showAllLabels: boolean;
+  granularity: "hour" | "day" | "month";
   isEmpty?: boolean;
   isLoading?: boolean;
   isError?: boolean;
@@ -59,6 +59,14 @@ export function MetricsChart(props: Props) {
   const [tooltipDataPoint, setTooltipDataPoint] = useState<TooltipDataPoint | null>(null);
   let chartInstance: Chart;
 
+  const showAllLabels = props.granularity === "month";
+  const activeMetricLabel =
+    props.activeMetric === "sessions"
+      ? "Sessions"
+      : props.granularity === "month"
+      ? "Avg. Daily Users"
+      : "Users";
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -69,7 +77,7 @@ export function MetricsChart(props: Props) {
           {
             order: 2,
             type: "bar",
-            label: props.activeMetric == "users" ? "Users" : "Sessions",
+            label: activeMetricLabel,
             yAxisID: props.activeMetric,
             data: props[props.activeMetric],
             backgroundColor: props.hasPartialData
@@ -120,9 +128,9 @@ export function MetricsChart(props: Props) {
             },
             ticks: {
               autoSkip: true,
-              maxRotation: props.showAllLabels ? 45 : 0,
-              autoSkipPadding: props.showAllLabels ? 0 : 20,
-              maxTicksLimit: props.showAllLabels ? 0 : 8,
+              maxRotation: showAllLabels ? 45 : 0,
+              autoSkipPadding: showAllLabels ? 0 : 20,
+              maxTicksLimit: showAllLabels ? 0 : 8,
               callback: function (value) {
                 const label = typeof value === "number" ? this.getLabelForValue(value) : value;
                 return props.formatLabel(label);

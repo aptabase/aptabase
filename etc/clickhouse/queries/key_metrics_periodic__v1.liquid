@@ -6,7 +6,11 @@ SELECT
     {% else %}
      toStartOfMonth(timestamp)
     {% endif %} AS Period,
-    uniqExact(user_id) AS Users,
+    {% if granularity == 'Month' %}
+     uniqExact(user_id) / (date_diff('day', Period, toLastDayOfMonth(Period)) + 1)
+    {% else %}
+     uniqExact(user_id)
+    {% endif %} AS Users,
     uniqExact(session_id) AS Sessions,
     count() AS Events
 FROM events
