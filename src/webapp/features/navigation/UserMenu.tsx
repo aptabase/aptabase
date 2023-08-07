@@ -1,11 +1,11 @@
 import React, { Fragment } from "react";
-import { signOutUrl, UserAccount, UserAvatar } from "../auth";
 import { AttentionDot, cn, RegionFlag } from "../primitives";
 import { Menu, Transition } from "@headlessui/react";
 import { IconCreditCard, IconDoorExit } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 import { useBillingState } from "../billing";
 import { isBillingEnabled } from "../env";
+import { signOut, UserAccount, UserAvatar } from "../auth";
 
 type Props = {
   user: UserAccount;
@@ -15,6 +15,7 @@ const Divider = () => <div className="border-t my-1" />;
 
 const MenuItem = (props: {
   href: string;
+  onClick?: () => Promise<void> | void;
   reloadDocument?: boolean;
   children: React.ReactNode;
 }) => (
@@ -22,6 +23,7 @@ const MenuItem = (props: {
     {({ active }) => (
       <Link
         to={props.href}
+        onClick={props.onClick}
         reloadDocument={props.reloadDocument}
         className={cn(
           "flex mx-1 rounded p-2 text-sm items-center space-x-2",
@@ -61,9 +63,7 @@ export function UserMenu(props: Props) {
           <div className="px-3 py-1 text-xs flex items-center justify-between">
             <div>
               <span className="text-muted-foreground">Signed in as</span>
-              <span className="block truncate text-sm font-medium">
-                {props.user.email}
-              </span>
+              <span className="block truncate text-sm font-medium">{props.user.email}</span>
             </div>
             <RegionFlag />
           </div>
@@ -78,7 +78,7 @@ export function UserMenu(props: Props) {
             </>
           )}
           <Divider />
-          <MenuItem href={signOutUrl()} reloadDocument>
+          <MenuItem href="#" onClick={signOut} reloadDocument>
             <IconDoorExit className="w-4 h-4" />
             <span>Sign out</span>
           </MenuItem>

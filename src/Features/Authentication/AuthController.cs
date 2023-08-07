@@ -63,13 +63,13 @@ public class AuthController : Controller
     }
 
     [HttpGet("/api/_auth/github")]
-    public IActionResult GitHub(CancellationToken cancellationToken)
+    public IActionResult GitHub()
     {
         return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "github");
     }
 
     [HttpGet("/api/_auth/google")]
-    public IActionResult Google(CancellationToken cancellationToken)
+    public IActionResult Google()
     {
         return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "google");
     }
@@ -83,7 +83,7 @@ public class AuthController : Controller
         return Ok(user);
     }
 
-    [HttpGet("/api/_auth/signout")]
+    [HttpPost("/api/_auth/signout")]
     public async Task<IActionResult> ForceSignOut()
     {
         await _authService.SignOutAsync();

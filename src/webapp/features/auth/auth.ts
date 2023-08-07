@@ -20,10 +20,7 @@ export async function requestSignInLink(email: string): Promise<boolean> {
   return false;
 }
 
-export async function requestRegisterLink(
-  name: string,
-  email: string
-): Promise<void> {
+export async function requestRegisterLink(name: string, email: string): Promise<void> {
   await api.post("/_auth/register", { name, email });
   trackEvent("register");
 }
@@ -36,6 +33,10 @@ export async function me(): Promise<UserAccount | null> {
   return account.json() as Promise<UserAccount | null>;
 }
 
-export function signOutUrl(): string {
-  return `/api/_auth/signout`;
+export async function signOut(): Promise<void> {
+  const [, response] = await api.fetch("POST", "/_auth/signout");
+  const redirectTo = response.headers.get("location");
+  if (redirectTo) {
+    location.href = redirectTo;
+  }
 }
