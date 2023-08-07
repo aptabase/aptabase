@@ -1,12 +1,13 @@
 using System.Reflection;
 using System.Text;
+using System.Web;
 
 namespace Aptabase.Features.Notification;
 
 public class TemplateEngine
 {
-    private Assembly _assembly = Assembly.GetExecutingAssembly() ?? throw new Exception("Failed to find the entry assembly");
-    private Dictionary<string, string> _templates = new();
+    private readonly Assembly _assembly = Assembly.GetExecutingAssembly() ?? throw new Exception("Failed to find the entry assembly");
+    private readonly Dictionary<string, string> _templates = new();
 
     public async Task<string> Render(string name, string subject, Dictionary<string, string>? properties)
     {
@@ -16,7 +17,7 @@ public class TemplateEngine
         if (properties is not null)
         {
             foreach (var (key, value) in properties)
-                emailTemplate = emailTemplate.Replace($"##{key.ToUpper()}##", value);
+                emailTemplate = emailTemplate.Replace($"##{key.ToUpper()}##", HttpUtility.HtmlEncode(value));
         }
 
         return baseTemplate.Replace("##SUBJECT##", subject).Replace("##BODY##", emailTemplate);
