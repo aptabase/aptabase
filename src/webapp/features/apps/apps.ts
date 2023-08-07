@@ -15,16 +15,12 @@ export async function listApps(): Promise<Application[]> {
 
 export async function createApp(name: string): Promise<Application> {
   const app = await api.post<Application>("/_apps", { name });
-  trackEvent("app_created");
+  trackEvent("app_created", { name });
 
   return app;
 }
 
-export async function updateApp(
-  appId: string,
-  name: string,
-  icon: string
-): Promise<Application> {
+export async function updateApp(appId: string, name: string, icon: string): Promise<Application> {
   return await api.put<Application>(`/_apps/${appId}`, { name, icon });
 }
 
