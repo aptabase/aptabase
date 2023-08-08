@@ -1,10 +1,10 @@
-import { TopNChart } from "./charts";
+import { TopNChart } from "./TopNChart";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { CardTitle } from "./CardTitle";
 import { getCountryFlagUrl, getCountryName } from "./countries";
-import { topRegions } from "./query";
-import { useApps } from "../apps";
+import { topRegions } from "../query";
+import { useApps } from "@features/apps";
 
 type Props = {
   appId: string;

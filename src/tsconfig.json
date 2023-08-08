@@ -19,7 +19,7 @@
       "@features/billing": ["./webapp/features/billing"],
       "@features/support": ["./webapp/features/support"],
       "@features/env": ["./webapp/features/env"],
-      "@features/widgets": ["./webapp/features/widgets"],
+      "@features/analytics": ["./webapp/features/analytics"],
       "@features/primitives": ["./webapp/features/primitives"],
       "@features/apps": ["./webapp/features/apps"],
       "@features/navigation": ["./webapp/features/navigation"],

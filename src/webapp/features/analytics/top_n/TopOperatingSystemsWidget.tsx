@@ -1,15 +1,15 @@
-import { TopNChart } from "./charts";
+import { TopNChart } from "./TopNChart";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { getCountryFlagUrl, getCountryName } from "./countries";
-import { topCountries } from "./query";
-import { useApps } from "../apps";
+import { topOperatingSystem } from "../query";
+import { useApps } from "@features/apps";
+import { OSIcon } from "./icons/os";
 
 type Props = {
   appId: string;
 };
 
-export function TopCountriesWidget(props: Props) {
+export function TopOperatingSystemsWidget(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";
@@ -23,9 +23,18 @@ export function TopCountriesWidget(props: Props) {
     isError,
     data: rows,
   } = useQuery(
-    ["top-countries", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
+    [
+      "top-operatingsystems",
+      buildMode,
+      props.appId,
+      period,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
     () =>
-      topCountries({
+      topOperatingSystem({
         buildMode,
         appId: props.appId,
         period,
@@ -38,16 +47,16 @@ export function TopCountriesWidget(props: Props) {
 
   return (
     <TopNChart
-      title="Countries"
-      searchParamKey="countryCode"
+      title="Operating Systems"
+      searchParamKey="osName"
       isLoading={isLoading}
       isError={isError}
       valueLabel="Sessions"
       items={rows || []}
       renderRow={(item) => (
         <span className="flex items-center space-x-2 px-2">
-          <img src={getCountryFlagUrl(item.name)} className="h-5 w-5 shadow rounded-full" />
-          <p>{getCountryName(item.name) || "Unknown"}</p>
+          <OSIcon name={item.name} className="h-5 w-5" />
+          <p>{item.name || "Unknown"}</p>
         </span>
       )}
     />

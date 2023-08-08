@@ -1,14 +1,14 @@
-import { MetricsChart } from "./charts";
-import { Card, formatNumber } from "../primitives";
+import { formatNumber } from "@features/primitives";
 import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseJSON } from "date-fns";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Granularity, periodicStats } from "./query";
+import { Granularity, periodicStats } from "../query";
 import { KeyMetrics } from "./KeyMetrics";
-import { useApps } from "../apps";
-import { hourCycle } from "../env";
+import { useApps } from "@features/apps";
+import { hourCycle } from "@features/env";
+import { MetricsChart } from "./MetricsChart";
 
 type Props = {
   appId: string;
@@ -100,7 +100,7 @@ export function MainChartWidget(props: Props) {
 
   const granularity = data?.granularity || "day";
   return (
-    <Card>
+    <>
       <KeyMetrics
         activeMetric={keyMetricToShow}
         onChangeActiveMetric={setKeyMetricToShow}
@@ -125,6 +125,6 @@ export function MainChartWidget(props: Props) {
           <TooltipContent granularity={granularity} label={label} points={points} />
         )}
       />
-    </Card>
+    </>
   );
 }

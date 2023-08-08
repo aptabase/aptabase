@@ -1,9 +1,9 @@
-import { Application, AppIcon } from "../apps";
+import { Application, AppIcon } from "@features/apps";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
-import { keyMetrics, periodicStats } from "./query";
+import { keyMetrics, periodicStats } from "../query";
 import { NumbersChart } from "./NumbersChart";
-import { GrowthIndicator } from "./GrowthIndicator";
+import { GrowthIndicator } from "@features/primitives";
 
 type Props = {
   app: Application;

@@ -1,0 +1,51 @@
+sessions_daily_v1
+
+- grouped by day, with unique users/sessions, but not including any other filtering data
+- ttl of max(raw ttl)
+  -> used to get key metrics and periodic data for 7d or more
+
+sessions_hourly_v1
+
+- grouped by hour, with unique users/sessions, but not including any other filtering data
+- ttl of 10 days
+  -> used to get key metrics and periodic data for 24h and 48h
+
+sessions_v1 - grouped by session, including all other filtering data, except event_name
+
+- ttl of max(raw ttl)
+  -> used by all top_n queries
+  -> used if filters are being applied
+
+events - for raw data
+-> only used if event_name is being filtered
+
+
+COMPARE
+
+SELECT app_id,
+     	 uniqExact(user_id) / (date_diff('day', min(min), max(max)) + 1) as DailyUsers,
+     	 uniqExact(session_id) as Sessions,
+     	 if(isNaN(median(max - min)), 0, median(max - min)) as DurationSeconds,
+     	 sum(count) as Events
+FROM (
+   SELECT app_id,
+  	      min(timestamp) AS min,
+          max(timestamp) AS max,
+          user_id,
+          session_id,
+          count(*) AS count
+   FROM events
+   WHERE os_name = 'macOS'
+   GROUP BY app_id, user_id, session_id
+) GROUP BY app_id
+
+vs
+
+SELECT app_id,
+     	 uniqExact(user_id) / (date_diff('day', min(timestamp), max(timestamp)) + 1) as DailyUsers,
+     	 uniqExact(session_id) as Sessions,
+     	 median(duration) as DurationSeconds,
+     	 countMerge(events) as Events
+FROM sessions_v1
+WHERE os_name = 'macOS'
+GROUP BY app_id

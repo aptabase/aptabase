@@ -35,11 +35,11 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        lazy: () => import("./features/apps/HomePage"),
+        lazy: () => import("./features/analytics/HomePage"),
       },
       {
         path: "/:id",
-        lazy: () => import("./features/apps/DashboardPage"),
+        lazy: () => import("./features/analytics/DashboardPage"),
       },
       {
         path: "/:id/instructions",

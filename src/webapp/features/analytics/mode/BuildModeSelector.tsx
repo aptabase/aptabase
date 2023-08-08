@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { RadioGroup } from "@headlessui/react";
 import { IconBug, IconRocket } from "@tabler/icons-react";
-import { useApps } from "./AppsProvider";
+import { useApps } from "@features/apps";
 
 const options = [
   { icon: IconRocket, label: "Release", value: "release" },

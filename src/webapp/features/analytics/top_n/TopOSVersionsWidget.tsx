@@ -1,15 +1,16 @@
-import { TopNChart } from "./charts";
+import { TopNChart } from "./TopNChart";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { CardTitle } from "./CardTitle";
-import { topAppBuildNumbers } from "./query";
-import { useApps } from "../apps";
+import { topOSVersions } from "../query";
+import { useApps } from "@features/apps";
+import { OSIcon } from "./icons/os";
 
 type Props = {
   appId: string;
 };
 
-export function TopAppBuildNumbersWidget(props: Props) {
+export function TopOSVersionsWidget(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";
@@ -23,18 +24,9 @@ export function TopAppBuildNumbersWidget(props: Props) {
     isError,
     data: rows,
   } = useQuery(
-    [
-      "top-appbuildnumbers",
-      buildMode,
-      props.appId,
-      period,
-      countryCode,
-      appVersion,
-      eventName,
-      osName,
-    ],
+    ["top-osversions", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     () =>
-      topAppBuildNumbers({
+      topOSVersions({
         buildMode,
         appId: props.appId,
         period,
@@ -47,7 +39,14 @@ export function TopAppBuildNumbersWidget(props: Props) {
 
   return (
     <TopNChart
-      title={<CardTitle backProperty="appVersion">{appVersion}</CardTitle>}
+      title={
+        <CardTitle backProperty="osName">
+          <span className="flex items-center space-x-2 px-2">
+            <OSIcon name={osName} className="h-5 w-5" />
+            <p>{osName || "Unknown"}</p>
+          </span>
+        </CardTitle>
+      }
       isLoading={isLoading}
       isError={isError}
       valueLabel="Sessions"

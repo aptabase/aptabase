@@ -1,4 +1,4 @@
-import { useDelay } from "../../primitives";
+import { useDelay } from "@features/primitives";
 
 export function TopNSkeleton() {
   const show = useDelay(400);

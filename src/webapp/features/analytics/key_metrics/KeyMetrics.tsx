@@ -1,8 +1,8 @@
-import { Metric } from "./charts";
+import { Metric } from "./Metric";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { keyMetrics } from "./query";
-import { useApps } from "../apps";
+import { keyMetrics } from "../query";
+import { useApps } from "@features/apps";
 
 type Props = {
   appId: string;

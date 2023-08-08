@@ -1,10 +1,5 @@
-import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip } from "../primitives";
-import {
-  IconArrowDownRight,
-  IconArrowUpRight,
-  IconTrendingDown,
-  IconTrendingUp,
-} from "@tabler/icons-react";
+import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip } from "@features/primitives";
+import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 
 type Props = {
   current: number;

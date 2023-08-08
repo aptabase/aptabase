@@ -1,8 +1,8 @@
-import { TopNChart } from "./charts";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { topAppVersions } from "./query";
-import { useApps } from "../apps";
+import { topAppVersions } from "../query";
+import { useApps } from "@features/apps";
+import { TopNChart } from "./TopNChart";
 
 type Props = {
   appId: string;

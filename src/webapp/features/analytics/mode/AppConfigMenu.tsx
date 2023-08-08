@@ -2,7 +2,7 @@ import { Menu, Transition } from "@headlessui/react";
 import { IconBug, IconRocket } from "@tabler/icons-react";
 import { Fragment } from "react";
 import { BuildModeSelector } from "./BuildModeSelector";
-import { useApps } from "./AppsProvider";
+import { useApps } from "@features/apps";
 
 export function AppConfigMenu() {
   const { buildMode } = useApps();

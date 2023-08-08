@@ -1,21 +1,21 @@
-import { TopNChart } from "./charts";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { topOperatingSystem } from "./query";
-import { useApps } from "../apps";
-import { OSIcon } from "./icons/os";
+import { CardTitle } from "./CardTitle";
+import { topAppBuildNumbers } from "../query";
+import { useApps } from "@features/apps";
+import { TopNChart } from "./TopNChart";
 
 type Props = {
   appId: string;
 };
 
-export function TopOperatingSystemsWidget(props: Props) {
+export function TopAppBuildNumbersWidget(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";
-  const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
+  const countryCode = searchParams.get("countryCode") || "";
   const osName = searchParams.get("osName") || "";
 
   const {
@@ -24,7 +24,7 @@ export function TopOperatingSystemsWidget(props: Props) {
     data: rows,
   } = useQuery(
     [
-      "top-operatingsystems",
+      "top-appbuildnumbers",
       buildMode,
       props.appId,
       period,
@@ -34,7 +34,7 @@ export function TopOperatingSystemsWidget(props: Props) {
       osName,
     ],
     () =>
-      topOperatingSystem({
+      topAppBuildNumbers({
         buildMode,
         appId: props.appId,
         period,
@@ -47,18 +47,11 @@ export function TopOperatingSystemsWidget(props: Props) {
 
   return (
     <TopNChart
-      title="Operating Systems"
-      searchParamKey="osName"
+      title={<CardTitle backProperty="appVersion">{appVersion}</CardTitle>}
       isLoading={isLoading}
       isError={isError}
       valueLabel="Sessions"
       items={rows || []}
-      renderRow={(item) => (
-        <span className="flex items-center space-x-2 px-2">
-          <OSIcon name={item.name} className="h-5 w-5" />
-          <p>{item.name || "Unknown"}</p>
-        </span>
-      )}
     />
   );
 }

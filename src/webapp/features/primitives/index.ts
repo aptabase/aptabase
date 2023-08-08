@@ -3,6 +3,7 @@ export * from "./AttentionDot";
 export * from "./Button";
 export * from "./Card";
 export * from "./DateRangePicker";
+export * from "./GrowthIndicator";
 export * from "./EmptyState";
 export * from "./ErrorState";
 export * from "./LazyLoad";

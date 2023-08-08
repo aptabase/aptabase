@@ -1,6 +1,5 @@
 import clsx from "clsx";
-import { GrowthIndicator } from "../GrowthIndicator";
-import { formatNumber } from "../../primitives";
+import { GrowthIndicator, formatNumber } from "@features/primitives";
 
 type Props = {
   label: string;

@@ -1,10 +1,10 @@
-import { TopNChart } from "./charts";
+import { TopNChart } from "./TopNChart";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CardTitle } from "./CardTitle";
-import { topEventProps } from "./query";
-import { useApps } from "../apps";
+import { topEventProps } from "../query";
+import { useApps } from "@features/apps";
 
 type Props = {
   appId: string;
@@ -12,7 +12,7 @@ type Props = {
 
 type AggregateValueName = "events" | "sum" | "median" | "min" | "max";
 
-export function EventPropsWidget(props: Props) {
+export function TopEventPropsWidget(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";

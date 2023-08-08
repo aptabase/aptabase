@@ -1,7 +1,7 @@
-import { EmptyState, ErrorState, formatNumber } from "../../primitives";
 import { Link } from "react-router-dom";
 import { TopNSkeleton } from "./TopNSkeleton";
-import { CardTitle } from "../CardTitle";
+import { CardTitle } from "./CardTitle";
+import { EmptyState, ErrorState, formatNumber } from "@features/primitives";
 
 type Item = {
   name: string;

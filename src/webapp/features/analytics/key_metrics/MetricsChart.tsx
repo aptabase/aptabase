@@ -1,4 +1,3 @@
-import { EmptyState, ErrorState, LoadingState } from "../../primitives";
 import {
   BarController,
   LineController,
@@ -14,6 +13,7 @@ import {
 import Annotation, { LineAnnotationOptions } from "chartjs-plugin-annotation";
 import { useEffect, useRef, useState } from "react";
 import colors from "./colors";
+import { EmptyState, ErrorState, LoadingState } from "@features/primitives";
 
 Chart.defaults.font.family = "'Inter var', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
 

@@ -1,14 +1,9 @@
-import {
-  IconCode,
-  IconGraph,
-  IconHome,
-  IconSettings,
-} from "@tabler/icons-react";
+import { IconCode, IconGraph, IconHome, IconSettings } from "@tabler/icons-react";
 import { NavCategory } from "./NavCategory";
 import { NavItem } from "./NavItem";
 import { isSupportEnabled } from "../env";
 import { SupportNavCategory } from "../support";
-import { useCurrentApp } from "../apps/AppsProvider";
+import { useCurrentApp } from "@features/apps";
 
 export function NavMenu(props: { onNavigation?: VoidFunction }) {
   const currentApp = useCurrentApp();
@@ -17,12 +12,7 @@ export function NavMenu(props: { onNavigation?: VoidFunction }) {
     <div className="flex flex-col h-full justify-between">
       <div className="space-y-6">
         <NavCategory>
-          <NavItem
-            label="Home"
-            href="/"
-            icon={IconHome}
-            onNavigation={props.onNavigation}
-          />
+          <NavItem label="Home" href="/" icon={IconHome} onNavigation={props.onNavigation} />
         </NavCategory>
         <NavCategory title="Application">
           <NavItem
