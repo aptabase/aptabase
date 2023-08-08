@@ -1,4 +1,4 @@
-import { Icon3dCubeSphere, IconCube } from "@tabler/icons-react";
+import { Icon3dCubeSphere } from "@tabler/icons-react";
 import { IconApple } from "./apple";
 
 type Props = {

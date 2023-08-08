@@ -1,11 +1,11 @@
 import { api } from "../primitives";
 
-type TopNItem = {
+export type TopNItem = {
   name: string;
   value: number;
 };
 
-type QueryParams = {
+export type QueryParams = {
   buildMode: "release" | "debug";
   appId: string;
   period?: string;

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { TopNSkeleton } from "./TopNSkeleton";
-import { CardTitle } from "./CardTitle";
-import { EmptyState, ErrorState, formatNumber } from "@features/primitives";
+import { TopNTitle } from "./TopNTitle";
+import { EmptyState, ErrorState, formatNumber } from "./";
 
 type Item = {
   name: string;
@@ -19,7 +19,7 @@ type Props = {
   searchParamKey?: string;
 };
 
-const defaultRenderRow = (item: Item) => <span className="px-2">{item.name || <i>Empty</i>}</span>;
+const defaultRenderRow = (item: Item) => <>{item.name || <i>Empty</i>}</>;
 
 export function TopNChart(props: Props) {
   const total = props.items.reduce((acc, item) => acc + item.value, 0);
@@ -35,7 +35,7 @@ export function TopNChart(props: Props) {
     <>
       <div className="flex w-full flex-row justify-between items-end">
         <div>
-          {typeof props.title === "string" ? <CardTitle>{props.title}</CardTitle> : props.title}
+          {typeof props.title === "string" ? <TopNTitle>{props.title}</TopNTitle> : props.title}
           {props.keyLabel && (
             <div className="text-muted-foreground text-sm font-normal">{props.keyLabel}</div>
           )}
@@ -50,7 +50,7 @@ export function TopNChart(props: Props) {
             percentage={Math.round(item.value) / total}
             searchParamKey={props.searchParamKey}
           >
-            {renderRow(item)}
+            <div className="px-2">{renderRow(item)}</div>
           </TopNRow>
         ))}
       </div>

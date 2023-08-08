@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { IconX } from "@tabler/icons-react";
-import { getCountryFlagUrl, getCountryName } from "./top_n/countries";
-import { OSIcon } from "./top_n/icons/os";
+import { Country } from "./dashboard/Country";
+import { OS } from "./dashboard/OS";
 
 type ChipProps = {
   children: React.ReactNode;
@@ -42,28 +42,24 @@ export function CurrentFilters() {
     <div className="flex items-center gap-2 flex-wrap">
       {eventName && (
         <FilterChip removeProperty="eventName">
-          <span>Event Name is</span>
+          <span>Event =</span>
           <span className="font-bold">{eventName}</span>
         </FilterChip>
       )}
       {appVersion && (
         <FilterChip removeProperty="appVersion">
-          <span>App Version is</span>
+          <span>Version =</span>
           <span className="font-bold">{appVersion}</span>
         </FilterChip>
       )}
       {osName && (
         <FilterChip removeProperty="osName">
-          <OSIcon name={osName} className="h-5 w-5" />
-          <p>{osName}</p>
+          <OS name={osName} />
         </FilterChip>
       )}
       {countryCode && (
         <FilterChip removeProperty="countryCode">
-          <div className="flex items-center space-x-2">
-            <img src={getCountryFlagUrl(countryCode)} className="h-5 w-5 shadow rounded-full" />
-            <p>{getCountryName(countryCode) || "Unknown"}</p>
-          </div>
+          <Country countryCode={countryCode} />
         </FilterChip>
       )}
     </div>

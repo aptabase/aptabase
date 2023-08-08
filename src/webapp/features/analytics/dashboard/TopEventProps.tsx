@@ -1,10 +1,9 @@
-import { TopNChart } from "./TopNChart";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CardTitle } from "./CardTitle";
 import { topEventProps } from "../query";
 import { useApps } from "@features/apps";
+import { TopNChart, TopNTitle } from "@features/primitives";
 
 type Props = {
   appId: string;
@@ -12,7 +11,7 @@ type Props = {
 
 type AggregateValueName = "events" | "sum" | "median" | "min" | "max";
 
-export function TopEventPropsWidget(props: Props) {
+export function TopEventProps(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";
@@ -57,7 +56,7 @@ export function TopEventPropsWidget(props: Props) {
     return (
       <>
         <div className="flex justify-between">
-          <CardTitle backProperty="eventName">{eventName}</CardTitle>
+          <TopNTitle backProperty="eventName">{eventName}</TopNTitle>
           <NumericKeySelector numericKeys={numericKeys} onChange={setSelectedNumericKey} />
         </div>
         <div className="flex justify-center items-center mt-20">
@@ -81,7 +80,7 @@ export function TopEventPropsWidget(props: Props) {
 
   return (
     <TopNChart
-      title={<CardTitle backProperty="eventName">{eventName}</CardTitle>}
+      title={<TopNTitle backProperty="eventName">{eventName}</TopNTitle>}
       keyLabel={<StringKeySelector stringKeys={stringKeys} onChangeIndex={setStringKeyIndex} />}
       valueLabel={<NumericKeySelector numericKeys={numericKeys} onChange={setSelectedNumericKey} />}
       isLoading={isLoading}

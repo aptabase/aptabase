@@ -1,14 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { topAppVersions } from "../query";
+import { QueryParams, TopNItem } from "../query";
 import { useApps } from "@features/apps";
-import { TopNChart } from "./TopNChart";
+
+type ChildrenProps = {
+  isLoading: boolean;
+  isError: boolean;
+  items: TopNItem[];
+};
 
 type Props = {
   appId: string;
+  queryName: string;
+  query: (params: QueryParams) => Promise<TopNItem[]>;
+  children: (props: ChildrenProps) => JSX.Element;
 };
 
-export function TopAppVersionsWidget(props: Props) {
+export function TopNDataContainer(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";
@@ -17,14 +25,10 @@ export function TopAppVersionsWidget(props: Props) {
   const eventName = searchParams.get("eventName") || "";
   const osName = searchParams.get("osName") || "";
 
-  const {
-    isLoading,
-    isError,
-    data: rows,
-  } = useQuery(
-    ["top-appversions", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
+  const { isLoading, isError, data } = useQuery(
+    [props.queryName, buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     () =>
-      topAppVersions({
+      props.query({
         buildMode,
         appId: props.appId,
         period,
@@ -35,14 +39,5 @@ export function TopAppVersionsWidget(props: Props) {
       })
   );
 
-  return (
-    <TopNChart
-      title="App Versions"
-      searchParamKey="appVersion"
-      isLoading={isLoading}
-      isError={isError}
-      valueLabel="Sessions"
-      items={rows || []}
-    />
-  );
+  return props.children({ isLoading, isError, items: data || [] });
 }
