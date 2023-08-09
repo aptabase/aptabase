@@ -66,7 +66,7 @@ export function TopEventProps(props: Props) {
     );
   }
 
-  const items = (rows || [])
+  let items = (rows || [])
     .filter(
       (x) =>
         x.stringKey === stringKeys[stringKeyIndex] &&
@@ -77,6 +77,17 @@ export function TopEventProps(props: Props) {
       value: row[selectedNumericKey[0]],
     }))
     .sort((a, b) => b.value - a.value);
+
+  /// When we have multiple numeric events, we need to dedupe the string props
+  /// when the "Events" value is selected, becauuse the query returns it multiple times
+  if (numericKeys.length >= 2 && selectedNumericKey[0] === "events") {
+    const deduped = items.reduce((acc, item) => {
+      acc[item.name] = item.value;
+      return acc;
+    }, {} as Record<string, number>);
+
+    items = Object.keys(deduped).map((name) => ({ name, value: deduped[name] }));
+  }
 
   return (
     <TopNChart
