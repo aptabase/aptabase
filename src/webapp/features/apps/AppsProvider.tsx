@@ -1,6 +1,6 @@
 import { ErrorState, LoadingState, useLocalStorage } from "../primitives";
 import { useQuery } from "@tanstack/react-query";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext } from "react";
 import { Navigate, useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Application, createApp, deleteApp, listApps, updateApp } from "./apps";
@@ -16,11 +16,7 @@ type AppsContextType = {
   buildMode: BuildMode;
   createApp: (name: string) => Promise<Application>;
   deleteApp: (appId: string) => Promise<void>;
-  updateApp: (
-    appId: string,
-    name: string,
-    icon: string
-  ) => Promise<Application>;
+  updateApp: (appId: string, name: string, icon: string) => Promise<Application>;
   switchBuildMode: (mode: BuildMode) => void;
 };
 
@@ -28,10 +24,7 @@ const AppsContext = createContext<AppsContextType | undefined>(undefined);
 
 export function AppsProvider(props: Props) {
   const location = useLocation();
-  const [buildMode, setBuildMode] = useLocalStorage<BuildMode>(
-    "buildmode",
-    "debug"
-  );
+  const [buildMode, setBuildMode] = useLocalStorage<BuildMode>("buildmode", "debug");
 
   const { isLoading, isError, data, refetch } = useQuery(["apps"], listApps);
 

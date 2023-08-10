@@ -84,7 +84,8 @@ export function MainChartWidget(props: Props) {
         appVersion,
         eventName,
         osName,
-      })
+      }),
+    { staleTime: 10000 }
   );
 
   useEffect(() => {

@@ -40,7 +40,8 @@ export function TopEventProps(props: Props) {
         appVersion,
         eventName,
         osName,
-      })
+      }),
+    { staleTime: 10000 }
   );
 
   const stringKeys = [...new Set((rows || []).map((row) => row.stringKey).filter((x) => !!x))];

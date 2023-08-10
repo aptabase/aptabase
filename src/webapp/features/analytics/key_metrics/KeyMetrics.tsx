@@ -36,7 +36,8 @@ export function KeyMetrics(props: Props) {
         appVersion,
         eventName,
         osName,
-      })
+      }),
+    { staleTime: 10000 }
   );
 
   return (

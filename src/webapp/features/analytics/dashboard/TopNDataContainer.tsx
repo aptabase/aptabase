@@ -36,7 +36,8 @@ export function TopNDataContainer(props: Props) {
         appVersion,
         eventName,
         osName,
-      })
+      }),
+    { staleTime: 10000 }
   );
 
   return props.children({ isLoading, isError, items: data || [] });

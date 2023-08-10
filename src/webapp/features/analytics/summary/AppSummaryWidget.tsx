@@ -14,28 +14,34 @@ export function AppSummaryWidget(props: Props) {
   const [searchParams] = useSearchParams();
   const period = searchParams.get("period") || "";
 
-  const { data: metrics } = useQuery(["key-metrics", props.app.id, props.buildMode, period], () =>
-    keyMetrics({
-      buildMode: props.buildMode,
-      appId: props.app.id,
-      period,
-      countryCode: "",
-      appVersion: "",
-      eventName: "",
-      osName: "",
-    })
+  const { data: metrics } = useQuery(
+    ["key-metrics", props.app.id, props.buildMode, period],
+    () =>
+      keyMetrics({
+        buildMode: props.buildMode,
+        appId: props.app.id,
+        period,
+        countryCode: "",
+        appVersion: "",
+        eventName: "",
+        osName: "",
+      }),
+    { staleTime: 60000 }
   );
 
-  const { data: values } = useQuery(["periodic-stats", props.app.id, props.buildMode, period], () =>
-    periodicStats({
-      buildMode: props.buildMode,
-      appId: props.app.id,
-      period,
-      countryCode: "",
-      appVersion: "",
-      eventName: "",
-      osName: "",
-    }).then((s) => s.rows.map((x) => x.users))
+  const { data: values } = useQuery(
+    ["periodic-stats", props.app.id, props.buildMode, period],
+    () =>
+      periodicStats({
+        buildMode: props.buildMode,
+        appId: props.app.id,
+        period,
+        countryCode: "",
+        appVersion: "",
+        eventName: "",
+        osName: "",
+      }).then((s) => s.rows.map((x) => x.users)),
+    { staleTime: 60000 }
   );
 
   const params = period ? `?period=${period}` : "";
