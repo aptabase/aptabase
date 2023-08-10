@@ -30,8 +30,8 @@ public class EventBodyTests
         var body = new EventBody
         {
             Timestamp = DateTime.UtcNow.AddDays(5),
-            Props = JsonDocument.Parse(@"{ 
-                ""name"": ""Bob"", 
+            Props = JsonDocument.Parse(@"{
+                ""name"": ""Bob"",
                 ""age"": 10,
                 ""isAdult"": true,
                 ""array"": [1,2,3],
