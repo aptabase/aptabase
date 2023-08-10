@@ -7,15 +7,6 @@ using Dapper;
 
 namespace Aptabase.Features.Apps;
 
-public class Application
-{
-    public string Id { get; set; } = "";
-    public string Name { get; set; } = "";
-    public string AppKey { get; set; } = "";
-    public string IconPath { get; set; } = "";
-    public bool HasOwnership { get; set; } = false;
-}
-
 public class ApplicationShare
 {
     public string Email { get; set; } = "";
@@ -72,7 +63,7 @@ public class AppsController : Controller
     }
 
     [HttpPost("/api/_apps")]
-    public async Task<IActionResult> Create([FromBody] CreateAppRequestBody body, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreateAppRequestBody body)
     {
         var user = this.GetCurrentUser();
         var app = new Application
@@ -158,8 +149,8 @@ public class AppsController : Controller
             VALUES (@appId, @email)
             ON CONFLICT DO NOTHING", new
         {
-            appId = appId,
-            email = email,
+            appId,
+            email,
         });
 
         return Ok(new { });
@@ -174,8 +165,8 @@ public class AppsController : Controller
 
         await _db.Connection.ExecuteScalarAsync<string>(@"DELETE FROM app_shares WHERE app_id = @appId AND email = @email", new
         {
-            appId = appId,
-            email = email,
+            appId,
+            email,
         });
 
         return Ok(new { });
