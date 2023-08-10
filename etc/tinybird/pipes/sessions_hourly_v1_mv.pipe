@@ -1,4 +1,4 @@
-NODE sessions_daily_v1_mv
+NODE sessions_hourly_v1_mv
 DESCRIPTION >
     Aggregated hourly sessions
 
