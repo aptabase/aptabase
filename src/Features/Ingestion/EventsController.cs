@@ -11,18 +11,18 @@ namespace Aptabase.Features.Ingestion;
 public class EventsController : Controller
 {
     private readonly ILogger _logger;
-    private readonly IIngestionValidator _validator;
+    private readonly IIngestionCache _cache;
     private readonly IIngestionClient _ingestionClient;
     private readonly IUserHashService _userHashService;
     private readonly IGeoIPClient _geoIP;
 
-    public EventsController(IIngestionValidator validator,
+    public EventsController(IIngestionCache cache,
                             IIngestionClient ingestionClient,
                             IUserHashService userHashService,
                             IGeoIPClient geoIP,
                             ILogger<EventsController> logger)
     {
-        _validator = validator ?? throw new ArgumentNullException(nameof(validator));
+        _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _ingestionClient = ingestionClient ?? throw new ArgumentNullException(nameof(ingestionClient));
         _userHashService = userHashService ?? throw new ArgumentNullException(nameof(userHashService));
         _geoIP = geoIP ?? throw new ArgumentNullException(nameof(geoIP));
@@ -41,19 +41,16 @@ public class EventsController : Controller
     {
         appKey = appKey?.ToUpper() ?? "";
 
-        var (valid, validationMessage) = _validator.IsValidBody(body);
+        var (valid, validationMessage) = IsValidBody(body);
         if (!valid)
         {
             _logger.LogWarning(validationMessage);
             return BadRequest(validationMessage);
         }
 
-        var (appId, statusCode, message) = await ValidateAppKey(appKey);
-        if (statusCode != HttpStatusCode.OK)
-        {
-            _logger.LogWarning(message);
-            return StatusCode((int)statusCode, message);
-        }
+        var appId = await _cache.FindByAppKey(appKey, cancellationToken);
+        if (string.IsNullOrEmpty(appId))
+            return AppNotFound(appKey);
 
         // We never expect the Web SDK to send the OS name, so it's safe to assume that if it's missing the event is coming from a browser
         var isWeb = string.IsNullOrEmpty(body.SystemProps.OSName);
@@ -96,10 +93,10 @@ public class EventsController : Controller
         appKey = appKey?.ToUpper() ?? "";
 
         if (events.Length > 25)
-            return BadRequest($"Too many events in request. Maximum is 25.");
+            return BadRequest($"Too many events ({events.Length}) in a single request. Maximum is 25.");
 
         var validEvents = events.Where(e => { 
-            var (valid, validationMessage) = _validator.IsValidBody(e);
+            var (valid, validationMessage) = IsValidBody(e);
             if (!valid)
                 _logger.LogWarning(validationMessage);
             return valid;
@@ -108,12 +105,9 @@ public class EventsController : Controller
         if (!validEvents.Any())
             return Ok(new { });
 
-        var (appId, statusCode, message) = await ValidateAppKey(appKey);
-        if (statusCode != HttpStatusCode.OK)
-        {
-            _logger.LogWarning(message);
-            return StatusCode((int)statusCode, message);
-        }
+        var appId = await _cache.FindByAppKey(appKey, cancellationToken);
+        if (string.IsNullOrEmpty(appId))
+            return AppNotFound(appKey);
 
         var location = _geoIP.GetClientLocation(HttpContext);
         var header = new EventHeader(appId, location.CountryCode, location.RegionName);
@@ -128,20 +122,40 @@ public class EventsController : Controller
         return Ok(new { });
     }
 
-    private async Task<(string, HttpStatusCode, string)> ValidateAppKey(string appKey)
+    private IActionResult AppNotFound(string appKey)
     {
-        var (appId, status) = await _validator.IsAppKeyValid(appKey);
+        var msg = $"Appplication not found with given app key: {appKey}";
+        _logger.LogWarning(msg);
+        return NotFound(msg);
+    }
 
-        (HttpStatusCode, string) result = status switch
+    private (bool, string) IsValidBody(EventBody? body)
+    {
+        if (body is null)
+            return (false, "Missing event body.");
+
+        if (body.Timestamp > DateTime.UtcNow.AddMinutes(1))
+            return (false, "Future events are not allowed.");
+
+        if (body.Timestamp < DateTime.UtcNow.AddDays(-1))
+            return (false, "Event is too old.");
+
+        if (body.Props is not null)
         {
-            AppKeyStatus.Missing => (HttpStatusCode.BadRequest, "Missing App-Key header. Find your app key on Aptabase console."),
-            AppKeyStatus.InvalidFormat => (HttpStatusCode.BadRequest, $"Invalid format for app key '{appKey}'. Find your app key on Aptabase console."),
-            AppKeyStatus.InvalidRegion => (HttpStatusCode.BadRequest, $"Invalid region for App Key '{appKey}'. This key is meant for another region. Find your app key on Aptabase console."),
-            AppKeyStatus.NotFound => (HttpStatusCode.NotFound, $"Appplication not found with given app key '{appKey}'. Find your app key on Aptabase console."),
-            _ => (HttpStatusCode.OK, string.Empty)
-        };
+            foreach (var prop in body.Props.RootElement.EnumerateObject())
+            {
+                if (string.IsNullOrWhiteSpace(prop.Name))
+                    return (false, "Property key must not be empty.");
 
-        return (appId, result.Item1, result.Item2);
+                if (prop.Name.Length > 40)
+                    return (false, string.Format("Property key {0} must be less than or equal to 40 characters.", prop.Name));
+
+                if (prop.Value.ToString().Length > 200)
+                    return (false, string.Format("Property value must be less than or equal to 200 characters. Value was: {0}", prop.Value.ToString()));
+            }
+        }
+
+        return (true, string.Empty);
     }
 
     private EventRow NewEventRow(string userId, EventHeader header, EventBody body)

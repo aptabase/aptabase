@@ -17,6 +17,7 @@ using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Aptabase.Features.Stats;
+using Aptabase.Features.Apps;
 
 public partial class Program
 {
@@ -106,9 +107,11 @@ public partial class Program
         builder.Services.AddSingleton(appEnv);
         builder.Services.AddHealthChecks();
         builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddSingleton<IAppQueries, AppQueries>();
+        builder.Services.AddSingleton<IPrivacyQueries, PrivacyQueries>();
         builder.Services.AddSingleton<IUserHashService, DailyUserHashService>();
         builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
-        builder.Services.AddSingleton<IIngestionValidator, IngestionValidator>();
+        builder.Services.AddSingleton<IIngestionCache, IngestionCache>();
         builder.Services.AddSingleton<IBlobService, DatabaseBlobService>();
         builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
         builder.Services.AddGeoIPClient(appEnv);
@@ -194,19 +197,18 @@ public partial class Program
 
     public static void RunMigrations(IServiceProvider sp)
     {
-        using (var scope = sp.CreateScope())
-        {
-            // Execute Postgres migrations
-            var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-            runner.MigrateUp();
+        using var scope = sp.CreateScope();
+        
+        // Execute Postgres migrations
+        var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        runner.MigrateUp();
 
-            var env = scope.ServiceProvider.GetRequiredService<EnvSettings>();
-            if (!string.IsNullOrEmpty(env.ClickHouseConnectionString))
-            {
-                // Execute ClickHouse migrations (if applicable)
-                var chRunner = scope.ServiceProvider.GetRequiredService<IClickHouseMigrationRunner>();
-                chRunner.MigrateUp();
-            }
+        var env = scope.ServiceProvider.GetRequiredService<EnvSettings>();
+        if (!string.IsNullOrEmpty(env.ClickHouseConnectionString))
+        {
+            // Execute ClickHouse migrations (if applicable)
+            var chRunner = scope.ServiceProvider.GetRequiredService<IClickHouseMigrationRunner>();
+            chRunner.MigrateUp();
         }
     }
 }

@@ -1,9 +1,9 @@
+using Dapper;
 using Aptabase.Data;
 using Aptabase.Features.Blob;
 using Microsoft.AspNetCore.Mvc;
 using Aptabase.Features.Authentication;
 using System.ComponentModel.DataAnnotations;
-using Dapper;
 
 namespace Aptabase.Features.Apps;
 
