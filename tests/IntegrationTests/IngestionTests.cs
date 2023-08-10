@@ -76,7 +76,7 @@ public class IngestionTests
     {
         var client = new IngestionClient(_fixture.CreateClient(), "THIS-DOES-NOT-EXIST", "127.0.0.1");
         var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked");
-        code.Should().Be(HttpStatusCode.BadRequest);
+        code.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
