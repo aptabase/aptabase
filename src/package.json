@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc && vite build",
-    "dev": "vite",
+    "dev": "vite --clearScreen false",
     "preview": "vite preview"
   },
   "dependencies": {
