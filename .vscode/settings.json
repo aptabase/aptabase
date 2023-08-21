@@ -1,7 +1,7 @@
 {
   "editor.formatOnSave": true,
   "csharp.format.enable": true,
-  "csharp.referencesCodeLens.enabled": false,
+  "dotnet.codeLens.enableReferencesCodeLens": false,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "typescript.tsserver.experimental.enableProjectDiagnostics": true,
   "tinybird.dataProjectSubdir": "etc/tinybird",

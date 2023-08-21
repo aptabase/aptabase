@@ -1,5 +1,7 @@
 // Custom Exception Middleware to catch common exceptions caused by client disconnects
-// Can be removed on .NET 8 because of https://github.com/dotnet/aspnetcore/pull/46330
+// Some conditions can be removed on .NET 8 because of https://github.com/dotnet/aspnetcore/pull/46330
+using System.Net;
+
 public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;
@@ -16,6 +18,10 @@ public class ExceptionMiddleware
         try
         {
             await _next(context);
+        }
+        catch (BadHttpRequestException ex) when (ex.StatusCode == (int)HttpStatusCode.RequestTimeout)
+        {
+            _logger.LogWarning("Request to {Path} timed out. {Exception}", context.Request.Path.Value, ex.Message);
         }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {
