@@ -52,31 +52,21 @@ export function AppSelector() {
 
   return (
     <>
-      <CreateAppModal
-        open={showCreateAppModal}
-        onClose={() => setShowCreateAppModal(false)}
-      />
+      <CreateAppModal open={showCreateAppModal} onClose={() => setShowCreateAppModal(false)} />
       <Listbox defaultValue={currentApp} onChange={onChange}>
         {({ open }) => (
           <>
             <div className="relative w-full h-9">
-              <Listbox.Button className="relative flex items-center space-x-1 rounded-md py-1.5 text-left hover:bg-accent px-2 w-full">
-                {currentApp && (
-                  <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />
-                )}
+              <Listbox.Button className="relative flex items-center space-x-2 rounded-md py-1.5 text-left hover:bg-accent px-2 w-full">
+                {currentApp && <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />}
                 <div className="flex items-center justify-between truncate w-full">
                   <span className="block truncate">
                     {currentApp?.name ?? (
-                      <span className="text-muted-foreground text-sm">
-                        Select an App
-                      </span>
+                      <span className="text-muted-foreground text-sm">Select an App</span>
                     )}
                   </span>
                   <div className="w-4 h-4 ml-1">
-                    <IconSelector
-                      strokeWidth={2}
-                      className="h-4 w-4 text-muted-foreground"
-                    />
+                    <IconSelector strokeWidth={2} className="h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
               </Listbox.Button>
@@ -91,10 +81,7 @@ export function AppSelector() {
                 <Listbox.Options className="absolute z-10 mt-1 max-h-80 w-60 overflow-auto border rounded-md bg-background py-1 shadow-lg text-sm focus-ring">
                   {apps.map((app) => (
                     <StyledOption key={app.id} value={app}>
-                      <AppIcon
-                        className="w-5 h-5 mr-1"
-                        iconPath={app.iconPath}
-                      />
+                      <AppIcon className="w-5 h-5 mr-1" iconPath={app.iconPath} />
                       <span className="block truncate">{app.name}</span>
                     </StyledOption>
                   ))}
