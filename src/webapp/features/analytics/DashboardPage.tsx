@@ -9,6 +9,7 @@ import { OSWidget } from "./dashboard/OSWidget";
 import { CountryWidget } from "./dashboard/CountryWidget";
 import { VersionWidget } from "./dashboard/VersionWidget";
 import { EventWidget } from "./dashboard/EventWidget";
+import { OnboardingDashboard } from "@features/onboarding";
 
 Component.displayName = "DashboardPage";
 
@@ -18,6 +19,7 @@ export function Component() {
   const navigate = useNavigate();
 
   if (!app) return <Navigate to="/" />;
+  if (!app.hasEvents) return <OnboardingDashboard app={app} />;
 
   const resetFilters = () => navigate(`/${app.id}/`);
   const containerClassName = "min-h-[12rem] bg-background py-4 sm:px-4";

@@ -7,6 +7,7 @@ namespace Aptabase.Features.Ingestion;
 public record CachedApplication
 {
     public string Id { get; set; } = "";
+    public bool HasEvents { get; set; } = false;
 
     public static CachedApplication Empty => new();
 
@@ -18,6 +19,7 @@ public record CachedApplication
     public CachedApplication(Application app)
     {
         Id = app.Id;
+        HasEvents = app.HasEvents;
     }
 }
 
@@ -47,7 +49,17 @@ public class IngestionCache : IIngestionCache
 
         var cacheKey = $"APP-KEY-STATUS-{appKey}";
         if (_cache.TryGetValue(cacheKey, out CachedApplication? cachedApp) && cachedApp is not null)
-            return string.IsNullOrEmpty(cachedApp.Id) ? string.Empty : cachedApp.Id;
+        {
+            if (string.IsNullOrEmpty(cachedApp.Id))
+                return string.Empty;
+
+            // if the app never had events before, we need to set the flag in the database and update the cache
+            var changed = await CheckOnbordingStatus(cachedApp, cancellationToken);
+            if (changed)
+                _cache.Set(cacheKey, cachedApp, SuccessCacheDuration);
+
+            return cachedApp.Id;
+        }
 
         var app = await _appQueries.GetActiveAppByAppKey(appKey, cancellationToken);
         if (app is null)
@@ -56,7 +68,19 @@ public class IngestionCache : IIngestionCache
             return string.Empty;
         }
 
-        _cache.Set(cacheKey, new CachedApplication(app), SuccessCacheDuration);
+        cachedApp = new CachedApplication(app);
+        await CheckOnbordingStatus(cachedApp, cancellationToken);
+        _cache.Set(cacheKey, cachedApp, SuccessCacheDuration);
         return app.Id;
+    }
+
+    private async Task<bool> CheckOnbordingStatus(CachedApplication app, CancellationToken cancellationToken)
+    {
+        if (app.HasEvents)
+            return false;
+
+        await _appQueries.MaskAsOnboarded(app.Id, cancellationToken);
+        app.HasEvents = true;
+        return true;
     }
 }

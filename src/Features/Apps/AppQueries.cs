@@ -9,12 +9,14 @@ public class Application
     public string Name { get; set; } = "";
     public string AppKey { get; set; } = "";
     public string IconPath { get; set; } = "";
+    public bool HasEvents { get; set; } = false;
     public bool HasOwnership { get; set; } = false;
 }
 
 public interface IAppQueries
 {
     Task<Application?> GetActiveAppByAppKey(string appKey, CancellationToken cancellationToken);
+    Task MaskAsOnboarded(string appId, CancellationToken cancellationToken);
 }
 
 public class AppQueries : IAppQueries
@@ -28,11 +30,24 @@ public class AppQueries : IAppQueries
 
     public Task<Application?> GetActiveAppByAppKey(string appKey, CancellationToken cancellationToken)
     {
-        var cmd = new CommandDefinition("SELECT id, name, icon_path, app_key FROM apps WHERE app_key = @appKey AND deleted_at IS NULL",
+        var cmd = new CommandDefinition(@"
+            SELECT id, name, icon_path, app_key, has_events
+            FROM apps
+            WHERE app_key = @appKey AND deleted_at IS NULL",
             new { appKey },
             cancellationToken: cancellationToken
         );
 
         return _db.Connection.QueryFirstOrDefaultAsync<Application?>(cmd);
+    }
+
+    public async Task MaskAsOnboarded(string appId, CancellationToken cancellationToken)
+    {
+        var cmd = new CommandDefinition($"UPDATE apps SET has_events = true WHERE id = @appId",
+            new { appId },
+            cancellationToken: cancellationToken
+        );
+
+        await _db.Connection.ExecuteAsync(cmd);
     }
 }

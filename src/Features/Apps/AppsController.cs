@@ -50,7 +50,7 @@ public class AppsController : Controller
         var user = this.GetCurrentUser();
 
         var apps = await _db.Connection.QueryAsync<Application>(
-            @"SELECT a.id, a.name, a.icon_path, a.app_key, a.owner_id = @userId as has_ownership
+            @"SELECT a.id, a.name, a.icon_path, a.app_key, a.owner_id = @userId as has_ownership, a.has_events
               FROM apps a
               LEFT JOIN app_shares s
               ON s.app_id = a.id
@@ -73,13 +73,37 @@ public class AppsController : Controller
             AppKey = $"A-{_env.Region}-{NanoId.Numbers(10)}"
         };
 
-        await _db.Connection.ExecuteScalarAsync<string>("INSERT INTO apps (id, owner_id, name, app_key) VALUES (@appId, @ownerId, @name, @appKey)", new
+        await _db.Connection.ExecuteScalarAsync<string>(@"
+            INSERT INTO apps (id, owner_id, name, app_key, has_events)
+            VALUES (@appId, @ownerId, @name, @appKey, false)",
+        new
         {
             appId = app.Id,
             ownerId = user.Id,
             name = app.Name,
             appKey = app.AppKey
         });
+
+        return Ok(app);
+    }
+
+    [HttpGet("/api/_apps/{appId}")]
+    public async Task<IActionResult> GetAppById(string appId)
+    {
+        var user = this.GetCurrentUser();
+
+        var app = await _db.Connection.QueryFirstOrDefaultAsync<Application>(
+            @"SELECT a.id, a.name, a.icon_path, a.app_key, a.owner_id = @userId as has_ownership, a.has_events
+              FROM apps a
+              LEFT JOIN app_shares s
+              ON s.app_id = a.id
+              WHERE a.id = @appId
+              AND (a.owner_id = @userId OR s.email = @userEmail)
+              AND a.deleted_at IS NULL
+              GROUP BY a.id, a.name, a.icon_path, a.app_key
+              ORDER by a.name",
+            new { appId, userId = user.Id, userEmail = user.Email }
+        );
 
         return Ok(app);
     }
@@ -176,10 +200,12 @@ public class AppsController : Controller
     {
         var user = this.GetCurrentUser();
         return await _db.Connection.QueryFirstOrDefaultAsync<Application>(
-                @"SELECT id, name, icon_path, app_key, true as has_ownership
-                FROM apps
-                WHERE id = @appId
-                AND owner_id = @userId
-                AND deleted_at IS NULL", new { appId, userId = user.Id });
+            @"SELECT id, name, icon_path, app_key, true as has_ownership, has_events
+              FROM apps
+              WHERE id = @appId
+              AND owner_id = @userId
+              AND deleted_at IS NULL",
+            new { appId, userId = user.Id }
+        );
     }
 }
