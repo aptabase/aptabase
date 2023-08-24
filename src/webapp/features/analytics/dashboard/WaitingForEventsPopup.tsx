@@ -9,8 +9,8 @@ type Props = {
 
 export function WaitingForEventsPopup(props: Props) {
   return (
-    <div className="absolute top-0 left-0 h-full w-full backdrop-blur-sm z-20 flex justify-center items-start lg:items-center">
-      <div className="flex flex-col bg-background py-4 w-80 rounded-md border space-y-6 mt-4 items-center">
+    <div className="absolute top-0 left-0 h-full w-full backdrop-blur-md -mt-4 z-20 flex justify-center items-start lg:items-center">
+      <div className="flex flex-col bg-background py-4 w-80 rounded-md border space-y-6 mt-20 lg:mt-0 items-center">
         <p className="text-center font-semibold">Waiting for the first event...</p>
         <p className="text-center text-muted-foreground mx-14">
           Install an{" "}

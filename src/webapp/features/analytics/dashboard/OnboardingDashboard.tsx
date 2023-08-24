@@ -1,8 +1,12 @@
 import { Page, PageHeading, TopNChart } from "@features/primitives";
 import { Application, getAppById } from "@features/apps";
-import { OS, Country, MainChartWidget } from "@features/analytics";
 import { useQuery } from "@tanstack/react-query";
 import { WaitingForEventsPopup } from "./WaitingForEventsPopup";
+import { MetricsChart } from "../key_metrics/MetricsChart";
+import { Country } from "./Country";
+import { OS } from "./OS";
+import { Metric } from "../key_metrics/Metric";
+import { KeyMetricsContainer } from "../key_metrics/MetricsContainer";
 
 type Props = {
   app: Application;
@@ -25,6 +29,10 @@ export function OnboardingDashboard(props: Props) {
 
   const containerClassName = "min-h-[12rem] bg-background py-4 sm:px-4";
 
+  const usersPerHour = [
+    10, 30, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 40, 30, 20, 10, 5, 10, 15, 20, 25, 30, 35, 40,
+  ];
+
   return (
     <Page title={props.app.name}>
       <div className="space-y-4">
@@ -33,7 +41,49 @@ export function OnboardingDashboard(props: Props) {
         </div>
         <div className="relative">
           <WaitingForEventsPopup appId={props.app.id} />
-          <MainChartWidget appId={props.app.id} />
+
+          <KeyMetricsContainer>
+            <Metric
+              label="Daily Users"
+              current={42}
+              previous={24}
+              activeClassName="bg-primary"
+              active={true}
+              format="number"
+            />
+            <Metric
+              label="Sessions"
+              current={94}
+              previous={65}
+              activeClassName="bg-primary"
+              format="number"
+            />
+            <Metric
+              label="Events"
+              activeClassName="bg-foreground"
+              current={3504}
+              previous={2406}
+              format="number"
+            />
+            <Metric label="Avg. Duration" current={340} format="duration" />
+          </KeyMetricsContainer>
+
+          <MetricsChart
+            isEmpty={false}
+            activeMetric="users"
+            showEvents={false}
+            isError={false}
+            isLoading={false}
+            hasPartialData={true}
+            users={[
+              10, 30, 15, 25, 26, 28, 24, 32, 40, 50, 42, 30, 40, 24, 50, 40, 42, 39, 24, 20, 25,
+              30, 35, 23,
+            ]}
+            labels={usersPerHour.map((_, i) => i.toString())}
+            sessions={[]}
+            events={[]}
+            granularity="hour"
+          />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] pt-[1px] bg-accent">
             <div className={containerClassName}>
               <TopNChart

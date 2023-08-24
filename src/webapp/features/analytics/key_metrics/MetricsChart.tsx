@@ -41,8 +41,8 @@ type Props = {
   isEmpty?: boolean;
   isLoading?: boolean;
   isError?: boolean;
-  formatLabel: (label: string | number) => string;
-  renderTooltip: (dataPoint: TooltipDataPoint) => JSX.Element;
+  formatLabel?: (label: string | number) => string;
+  renderTooltip?: (dataPoint: TooltipDataPoint) => JSX.Element;
 };
 
 type TooltipDataPoint = {
@@ -133,7 +133,7 @@ export function MetricsChart(props: Props) {
               maxTicksLimit: showAllLabels ? 0 : 8,
               callback: function (value) {
                 const label = typeof value === "number" ? this.getLabelForValue(value) : value;
-                return props.formatLabel(label);
+                return props.formatLabel?.(label) ?? value;
               },
             },
             border: {
@@ -257,7 +257,7 @@ export function MetricsChart(props: Props) {
             style={{ opacity: 0 }}
             className="absolute pointer-events-none shadow border bg-background p-2 rounded transform -translate-x-1/2"
           >
-            {tooltipDataPoint ? props.renderTooltip(tooltipDataPoint) : null}
+            {tooltipDataPoint && props.renderTooltip ? props.renderTooltip(tooltipDataPoint) : null}
           </div>
         </>
       )}

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { keyMetrics } from "../query";
 import { useApps } from "@features/apps";
+import { KeyMetricsContainer } from "./MetricsContainer";
 
 type Props = {
   appId: string;
@@ -41,7 +42,7 @@ export function KeyMetrics(props: Props) {
   );
 
   return (
-    <div className="mb-10 grid grid-cols-2 gap-4 sm:flex sm:h-22 sm:justify-start sm:gap-8">
+    <KeyMetricsContainer>
       {!isLoading && !isError && (
         <>
           <Metric
@@ -79,6 +80,6 @@ export function KeyMetrics(props: Props) {
           />
         </>
       )}
-    </div>
+    </KeyMetricsContainer>
   );
 }
