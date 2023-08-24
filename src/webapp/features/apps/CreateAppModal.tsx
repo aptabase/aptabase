@@ -14,20 +14,27 @@ export function CreateAppModal(props: Props) {
   const { createApp } = useApps();
   const navigate = useNavigate();
   const [name, setName] = useState("");
+  const [processing, setIsProcessing] = useState(false);
+
+  const close = () => {
+    setName("");
+    setIsProcessing(false);
+    props.onClose();
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsProcessing(true);
 
     const app = await createApp(name);
-    navigate(`${app.id}/instructions`);
-    setName("");
-    props.onClose();
-    return;
+    navigate(app.id);
+
+    return close();
   };
 
   return (
     <Transition.Root show={props.open} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={props.onClose}>
+      <Dialog as="div" className="relative z-50" onClose={close}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -62,21 +69,23 @@ export function CreateAppModal(props: Props) {
                   </button>
                 </div>
                 <Dialog.Title as="h3" className="text-lg font-medium">
-                  Create an app
+                  Register your App
                 </Dialog.Title>
                 <div className="text-sm text-muted-foreground">
                   Each app has its own dashboard and metrics
                 </div>
                 <form onSubmit={handleSubmit} className="mt-8 space-y-2">
                   <TextInput
-                    label="App Name"
                     name="name"
-                    placeholder="My App Name"
+                    placeholder="My Awesome App"
                     required={true}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
-                  <Button disabled={name.length < 2 || name.length > 40}>
+                  <Button
+                    disabled={name.length < 2 || name.length > 40 || processing}
+                    loading={processing}
+                  >
                     Create
                   </Button>
                 </form>
