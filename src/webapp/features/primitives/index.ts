@@ -1,5 +1,4 @@
 export * from "./Alert";
-export * from "./AttentionDot";
 export * from "./Button";
 export * from "./DateRangePicker";
 export * from "./GrowthIndicator";
@@ -23,4 +22,4 @@ export * from "./Tooltip";
 export * from "./utils";
 export * from "./TopNChart";
 export * from "./TopNTitle";
-export * from "./WaitingSignal";
+export * from "./PingSignal";
