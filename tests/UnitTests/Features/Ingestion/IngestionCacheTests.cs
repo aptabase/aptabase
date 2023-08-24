@@ -9,43 +9,48 @@ namespace Aptabase.UnitTests.Features.Ingestion;
 
 public class IngestionCacheTests
 {
+    private readonly Mock<IAppQueries> _queries;
+    private readonly MemoryCache _cache;
+    private readonly IngestionCache _sut;
+
+    public IngestionCacheTests()
+    {
+        _queries = new Mock<IAppQueries>();
+        _cache = new MemoryCache(new MemoryCacheOptions());
+        _sut = new IngestionCache(_cache, _queries.Object);
+    }
+
     [Fact]
     public async Task Returns_Empty_For_Unkown_AppKeys()
     {
-        var queries = new Mock<IAppQueries>();
-        queries.Setup(q => q.GetActiveAppByAppKey(It.IsAny<string>(), default)).ReturnsAsync((Application?)null);
+        _queries.Setup(q => q.GetActiveAppByAppKey(It.IsAny<string>(), default)).ReturnsAsync((Application?)null);
 
-        var cache = new MemoryCache(new MemoryCacheOptions());
-        var sut = new IngestionCache(cache, queries.Object);
-
-        var appId = await sut.FindByAppKey("A-DEV-000", default);
+        var appId = await _sut.FindByAppKey("A-DEV-000", default);
         appId.Should().BeEmpty();
-        cache.Count.Should().Be(1);
+        _cache.Count.Should().Be(1);
 
-        var appId2 = await sut.FindByAppKey("A-DEV-000", default);
+        var appId2 = await _sut.FindByAppKey("A-DEV-000", default);
         appId2.Should().BeEmpty();
-        cache.Count.Should().Be(1);
+        _cache.Count.Should().Be(1);
 
-        queries.Verify(q => q.GetActiveAppByAppKey(It.IsAny<string>(), default), Times.Once());
+        _queries.Verify(q => q.GetActiveAppByAppKey(It.IsAny<string>(), default), Times.Once());
+        _queries.Verify(q => q.MaskAsOnboarded(It.IsAny<string>(), default), Times.Never());
     }
 
     [Fact]
     public async Task Should_Cache_Result()
     {
-        var queries = new Mock<IAppQueries>();
-        queries.Setup(q => q.GetActiveAppByAppKey("A-DEV-000", default)).ReturnsAsync(new Application { Id = "1234" });
+        _queries.Setup(q => q.GetActiveAppByAppKey("A-DEV-000", default)).ReturnsAsync(new Application { Id = "1234" });
 
-        var cache = new MemoryCache(new MemoryCacheOptions());
-        var sut = new IngestionCache(cache, queries.Object);
-
-        var appId = await sut.FindByAppKey("A-DEV-000", default);
+        var appId = await _sut.FindByAppKey("A-DEV-000", default);
         appId.Should().Be("1234");
-        cache.Count.Should().Be(1);
+        _cache.Count.Should().Be(1);
 
-        var appId2 = await sut.FindByAppKey("A-DEV-000", default);
+        var appId2 = await _sut.FindByAppKey("A-DEV-000", default);
         appId2.Should().Be("1234");
-        cache.Count.Should().Be(1);
+        _cache.Count.Should().Be(1);
 
-        queries.Verify(q => q.GetActiveAppByAppKey(It.IsAny<string>(), default), Times.Once());
+        _queries.Verify(q => q.GetActiveAppByAppKey(It.IsAny<string>(), default), Times.Once());
+        _queries.Verify(q => q.MaskAsOnboarded(It.IsAny<string>(), default), Times.Once());
     }
 }
