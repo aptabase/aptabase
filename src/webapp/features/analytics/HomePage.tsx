@@ -7,6 +7,7 @@ import { useSearchParams } from "react-router-dom";
 import { AppConfigMenu } from "./mode/AppConfigMenu";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
 import { AppSummaryWidget } from "./summary/AppSummaryWidget";
+import { OnboardingSummaryWidget } from "@features/onboarding";
 
 Component.displayName = "HomePage";
 export function Component() {
@@ -41,7 +42,11 @@ export function Component() {
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
         {apps.map((app) => (
           <LazyLoad className="h-48" key={app.id}>
-            <AppSummaryWidget app={app} buildMode={buildMode} />
+            {app.hasEvents ? (
+              <AppSummaryWidget app={app} buildMode={buildMode} />
+            ) : (
+              <OnboardingSummaryWidget app={app} />
+            )}
           </LazyLoad>
         ))}
       </div>

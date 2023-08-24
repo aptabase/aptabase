@@ -6,11 +6,16 @@ export type Application = {
   name: string;
   appKey: string;
   iconPath: string;
-  hasOwnership: string;
+  hasEvents: boolean;
+  hasOwnership: boolean;
 };
 
 export async function listApps(): Promise<Application[]> {
   return await api.get<Application[]>("/_apps");
+}
+
+export async function getAppById(appId: string): Promise<Application> {
+  return await api.get(`/_apps/${appId}`);
 }
 
 export async function createApp(name: string): Promise<Application> {

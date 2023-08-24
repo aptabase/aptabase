@@ -49,11 +49,10 @@ export function AppSummaryWidget(props: Props) {
   return (
     <Link
       to={`/${props.app.id}/${params}`}
-      key={props.app.id}
-      className="border cursor-pointer rounded shadow hover:bg-muted"
+      className="border cursor-pointer rounded shadow hover:bg-muted h-full"
     >
-      <div className="p-2">
-        <div className="flex items-center justify-between h-6">
+      <div className="p-2 h-16">
+        <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2 truncate">
             <AppIcon className="w-6 h-6" iconPath={props.app.iconPath} />
             <span className="truncate">{props.app.name}</span>
@@ -69,7 +68,7 @@ export function AppSummaryWidget(props: Props) {
             </div>
           ) : null}
         </div>
-        <div className="h-6">
+        <div>
           {metrics ? (
             <p className="text-sm text-muted-foreground text-right">avg. daily users</p>
           ) : null}
