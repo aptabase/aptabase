@@ -39,7 +39,7 @@ export function OnboardingDashboard(props: Props) {
         <div className="flex justify-between items-center">
           <PageHeading title="Dashboard" />
         </div>
-        <div className="relative">
+        <div className="relative bg-background pt-2">
           <WaitingForEventsPopup appId={props.app.id} />
 
           <KeyMetricsContainer>
