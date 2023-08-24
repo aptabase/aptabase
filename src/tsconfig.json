@@ -16,15 +16,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "@features/billing": ["./webapp/features/billing"],
-      "@features/support": ["./webapp/features/support"],
-      "@features/env": ["./webapp/features/env"],
-      "@features/analytics": ["./webapp/features/analytics"],
-      "@features/primitives": ["./webapp/features/primitives"],
-      "@features/apps": ["./webapp/features/apps"],
-      "@features/navigation": ["./webapp/features/navigation"],
-      "@features/auth": ["./webapp/features/auth"],
-      "@features/theme": ["./webapp/features/theme"]
+      "@features/*": ["./webapp/features/*"]
     }
   },
   "references": [{ "path": "./tsconfig.node.json" }]

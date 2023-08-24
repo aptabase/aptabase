@@ -47,40 +47,8 @@ export default defineConfig({
     conditions: ["development", "browser"],
     alias: [
       {
-        find: "@features/env",
-        replacement: path.resolve(__dirname, "./webapp/features/env"),
-      },
-      {
-        find: "@features/billing",
-        replacement: path.resolve(__dirname, "./webapp/features/billing"),
-      },
-      {
-        find: "@features/support",
-        replacement: path.resolve(__dirname, "./webapp/features/support"),
-      },
-      {
-        find: "@features/primitives",
-        replacement: path.resolve(__dirname, "./webapp/features/primitives"),
-      },
-      {
-        find: "@features/theme",
-        replacement: path.resolve(__dirname, "./webapp/features/theme"),
-      },
-      {
-        find: "@features/navigation",
-        replacement: path.resolve(__dirname, "./webapp/features/navigation"),
-      },
-      {
-        find: "@features/apps",
-        replacement: path.resolve(__dirname, "./webapp/features/apps"),
-      },
-      {
-        find: "@features/auth",
-        replacement: path.resolve(__dirname, "./webapp/features/auth"),
-      },
-      {
-        find: "@features/widgets",
-        replacement: path.resolve(__dirname, "./webapp/features/widgets"),
+        find: "@features",
+        replacement: path.resolve(__dirname, "./webapp/features"),
       },
     ],
   },
