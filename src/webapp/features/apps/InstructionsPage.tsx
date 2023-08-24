@@ -39,15 +39,13 @@ const frameworks: { [id: string]: FrameworkInstructions } = {
   },
   electron: {
     name: "Electron",
-    baseURL:
-      "https://raw.githubusercontent.com/aptabase/aptabase-electron/main/",
+    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-electron/main/",
     repository: "https://github.com/aptabase/aptabase-electron",
     icon: "https://aptabase.com/tools/electron.svg",
   },
   flutter: {
     name: "Flutter",
-    baseURL:
-      "https://raw.githubusercontent.com/aptabase/aptabase_flutter/main/",
+    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase_flutter/main/",
     repository: "https://github.com/aptabase/aptabase_flutter",
     icon: "https://aptabase.com/tools/flutter.svg",
   },
@@ -67,15 +65,13 @@ const frameworks: { [id: string]: FrameworkInstructions } = {
   },
   "react-native": {
     name: "React Native",
-    baseURL:
-      "https://raw.githubusercontent.com/aptabase/aptabase-react-native/main/",
+    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-react-native/main/",
     repository: "https://github.com/aptabase/aptabase-react-native",
     icon: "https://aptabase.com/tools/react-native.svg",
   },
   tauri: {
     name: "Tauri",
-    baseURL:
-      "https://raw.githubusercontent.com/aptabase/tauri-plugin-aptabase/main/",
+    baseURL: "https://raw.githubusercontent.com/aptabase/tauri-plugin-aptabase/main/",
     repository: "https://github.com/aptabase/tauri-plugin-aptabase",
     icon: "https://aptabase.com/tools/tauri.svg",
   },
@@ -93,9 +89,7 @@ const frameworks: { [id: string]: FrameworkInstructions } = {
   },
 };
 
-const fetchInstructions = async (
-  id: string
-): Promise<[FrameworkInstructions, string]> => {
+const fetchInstructions = async (id: string): Promise<[FrameworkInstructions, string]> => {
   const fw = frameworks[id];
   if (!fw) {
     return [fw, ""];
@@ -138,14 +132,11 @@ export function Component() {
 
   return (
     <Page title={`${app.name} - Instructions`}>
-      <PageHeading
-        title="Instructions"
-        subtitle="Instrument your app with our SDK"
-      />
+      <PageHeading title="Instructions" subtitle="Instrument your app with our SDK" />
       <div className="flex flex-col space-y-8 mt-8">
         <div className="px-4 py-2 bg-muted max-w-fit rounded">
           <p className="text-muted-foreground text-sm mb-1">
-            👇 App key for <span className="text-foreground">{app.name}</span>
+            App key for <span className="text-foreground">{app.name}</span>
           </p>
           <span className="font-medium text-xl mb-2">{app.appKey} </span>
           <p className="text-muted-foreground text-sm mt-2">

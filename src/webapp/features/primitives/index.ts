@@ -19,7 +19,6 @@ export * from "./api";
 export * from "./useDelay";
 export * from "./useLocalStorage";
 export * from "./Tooltip";
-export * from "./utils";
 export * from "./TopNChart";
 export * from "./TopNTitle";
 export * from "./PingSignal";

@@ -1,11 +1,12 @@
 import React, { Fragment } from "react";
-import { AttentionDot, cn, RegionFlag } from "../primitives";
+import { PingSignal, RegionFlag } from "../primitives";
 import { Menu, Transition } from "@headlessui/react";
 import { IconCreditCard, IconDoorExit } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 import { useBillingState } from "../billing";
 import { isBillingEnabled } from "../env";
 import { signOut, UserAccount, UserAvatar } from "../auth";
+import { twMerge } from "tailwind-merge";
 
 type Props = {
   user: UserAccount;
@@ -25,7 +26,7 @@ const MenuItem = (props: {
         to={props.href}
         onClick={props.onClick}
         reloadDocument={props.reloadDocument}
-        className={cn(
+        className={twMerge(
           "flex mx-1 rounded p-2 text-sm items-center space-x-2",
           active ? "bg-accent text-foreground" : ""
         )}
@@ -46,7 +47,7 @@ export function UserMenu(props: Props) {
           <>
             <UserAvatar user={props.user} />
             <div className="hidden lg:block">{props.user.name}</div>
-            {!open && billing === "OVERUSE" && <AttentionDot />}
+            {!open && billing === "OVERUSE" && <PingSignal color="warning" size="sm" />}
           </>
         )}
       </Menu.Button>
@@ -73,7 +74,7 @@ export function UserMenu(props: Props) {
               <MenuItem href="/billing">
                 <IconCreditCard className="w-4 h-4" />
                 <span>Billing</span>
-                {billing === "OVERUSE" && <AttentionDot />}
+                {billing === "OVERUSE" && <PingSignal color="warning" size="sm" />}
               </MenuItem>
             </>
           )}

@@ -1,5 +1,6 @@
-import { AttentionDot, cn } from "../primitives";
+import { PingSignal } from "@features/primitives";
 import { BillingInfo } from "./useBilling";
+import { twMerge } from "tailwind-merge";
 
 const months = [
   "January",
@@ -21,11 +22,7 @@ type Props = {
 };
 
 const getUsageBarColor = (perc: number) => {
-  return perc >= 100
-    ? "bg-destructive"
-    : perc >= 90
-    ? "bg-warning"
-    : "bg-primary";
+  return perc >= 100 ? "bg-destructive" : perc >= 90 ? "bg-warning" : "bg-primary";
 };
 
 export function CurrentUsage(props: Props) {
@@ -43,15 +40,14 @@ export function CurrentUsage(props: Props) {
         <div className="text-sm flex items-center space-x-1">
           <span>{props.billing.usage.toLocaleString()}</span>
           <span className="text-muted-foreground">
-            / {props.billing.plan.monthlyEvents.toLocaleString()} events (
-            {perc.toFixed(1)}
+            / {props.billing.plan.monthlyEvents.toLocaleString()} events ({perc.toFixed(1)}
             %)
           </span>
-          {props.billing.state === "OVERUSE" && <AttentionDot />}
+          {props.billing.state === "OVERUSE" && <PingSignal color="warning" />}
         </div>
         <div className="overflow-hidden rounded bg-accent">
           <div
-            className={cn("h-2 rounded", getUsageBarColor(perc))}
+            className={twMerge("h-2 rounded", getUsageBarColor(perc))}
             style={{ width: `${perc}%` }}
           />
         </div>

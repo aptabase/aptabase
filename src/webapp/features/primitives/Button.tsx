@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "./utils";
 import { forwardRef } from "react";
 import { Slot } from "@radix-ui/react-slot";
+import { twMerge } from "tailwind-merge";
 
 const Loading = () => {
   return (
@@ -68,7 +68,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, loading, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
+      <Comp className={twMerge(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
         {loading ? <Loading /> : props.children}
       </Comp>
     );
