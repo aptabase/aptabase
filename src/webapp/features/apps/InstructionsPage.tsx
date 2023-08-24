@@ -136,7 +136,7 @@ export function Component() {
       <div className="flex flex-col space-y-8 mt-8">
         <div className="px-4 py-2 bg-muted max-w-fit rounded">
           <p className="text-muted-foreground text-sm mb-1">
-            App key for <span className="text-foreground">{app.name}</span>
+            App Key for <span className="text-foreground">{app.name}</span>
           </p>
           <span className="font-medium text-xl mb-2">{app.appKey} </span>
           <p className="text-muted-foreground text-sm mt-2">
