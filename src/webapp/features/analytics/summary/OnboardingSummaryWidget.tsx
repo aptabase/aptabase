@@ -1,4 +1,5 @@
 import { AppIcon, Application } from "@features/apps";
+import { WaitingSignal } from "@features/primitives";
 import { Link } from "react-router-dom";
 
 type Props = {
@@ -18,11 +19,11 @@ export function OnboardingSummaryWidget(props: Props) {
           </div>
         </div>
         <div className="flex-1 items-center text-sm space-y-4">
-          <p className="text-center">Waiting for the first event...</p>
-          <span className="relative flex h-4 w-4 mx-auto items-center justify-center">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-          </span>
+          <WaitingSignal size="small" />
+          <div>
+            <p className="text-center">Waiting for the first event...</p>
+            <p className="text-center text-muted-foreground">Click to learn how</p>
+          </div>
         </div>
       </div>
     </Link>

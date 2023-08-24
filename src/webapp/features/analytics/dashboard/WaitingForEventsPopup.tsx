@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { isSupportEnabled } from "../env/env";
-import { ContactUsLink } from "../support/ContactUsLink";
+import { isSupportEnabled } from "@features/env";
+import { ContactUsLink } from "@features/support";
+import { WaitingSignal } from "@features/primitives";
 
 type Props = {
   appId: string;
@@ -18,10 +19,7 @@ export function WaitingForEventsPopup(props: Props) {
           </Link>{" "}
           on your app to get started.
         </p>
-        <span className="relative flex h-6 w-6 mx-auto items-center justify-center">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success"></span>
-        </span>
+        <WaitingSignal size="normal" />
         {isSupportEnabled && (
           <div className="w-full space-y-4">
             <hr className="mx-4" />

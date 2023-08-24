@@ -23,3 +23,4 @@ export * from "./Tooltip";
 export * from "./utils";
 export * from "./TopNChart";
 export * from "./TopNTitle";
+export * from "./WaitingSignal";

@@ -7,7 +7,7 @@ import { useSearchParams } from "react-router-dom";
 import { AppConfigMenu } from "./mode/AppConfigMenu";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
 import { AppSummaryWidget } from "./summary/AppSummaryWidget";
-import { OnboardingSummaryWidget } from "@features/onboarding";
+import { OnboardingSummaryWidget } from "./summary/OnboardingSummaryWidget";
 
 Component.displayName = "HomePage";
 export function Component() {

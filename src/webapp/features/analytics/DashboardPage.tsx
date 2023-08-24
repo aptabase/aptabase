@@ -9,7 +9,7 @@ import { OSWidget } from "./dashboard/OSWidget";
 import { CountryWidget } from "./dashboard/CountryWidget";
 import { VersionWidget } from "./dashboard/VersionWidget";
 import { EventWidget } from "./dashboard/EventWidget";
-import { OnboardingDashboard } from "@features/onboarding";
+import { OnboardingDashboard } from "./dashboard/OnboardingDashboard";
 
 Component.displayName = "DashboardPage";
 
