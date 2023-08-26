@@ -1,6 +1,7 @@
 using Dapper;
-using ClickHouse.Client.ADO;
 using Scriban;
+using ClickHouse.Client.ADO;
+using System.Collections.Concurrent;
 
 namespace Aptabase.Features.Stats;
 
@@ -39,7 +40,7 @@ public class ClickHouseQueryClient : IQueryClient
         return rows.FirstOrDefault() ?? new T();
     }
 
-    private readonly Dictionary<string, Template> _namedQueries = new();
+    private readonly ConcurrentDictionary<string, Template> _namedQueries = new();
     private async Task<Template> ReadNamedQuery(string name)
     {
         if (_namedQueries.ContainsKey(name))
