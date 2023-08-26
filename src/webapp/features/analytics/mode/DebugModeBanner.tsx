@@ -1,9 +1,4 @@
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@features/primitives";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@features/primitives";
 
 export function DebugModeBanner() {
   return (
@@ -16,10 +11,17 @@ export function DebugModeBanner() {
                 <span>Debug Data</span>
               </TooltipTrigger>
               <TooltipContent>
+                <p>The dashboard is showing data from debug mode.</p>
                 <p>
-                  The dashboard is showing data from apps built for development.
+                  <a
+                    target="_blank"
+                    className="underline"
+                    href="https://aptabase.com/docs/build-modes"
+                  >
+                    Switch to release mode
+                  </a>{" "}
+                  to see production data.
                 </p>
-                <p>Switch to release to see production data.</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

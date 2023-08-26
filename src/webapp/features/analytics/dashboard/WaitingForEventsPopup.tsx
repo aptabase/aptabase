@@ -24,7 +24,7 @@ export function WaitingForEventsPopup(props: Props) {
           <div className="w-full space-y-4">
             <hr className="mx-4" />
             <p className="text-xs text-center text-muted-foreground">
-              Need help? <ContactUsLink className="text-white">Contact us</ContactUsLink>
+              Need help? <ContactUsLink className="text-white underline">Contact us</ContactUsLink>
             </p>
           </div>
         )}

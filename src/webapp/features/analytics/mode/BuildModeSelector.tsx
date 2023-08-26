@@ -35,8 +35,16 @@ export function BuildModeSelector() {
           ))}
         </div>
       </RadioGroup>
-      <p className="text-muted-foreground text-xs">
-        Events sent from debug builds are separated from release builds.
+      <p className="text-muted-foreground text-xs text-center">
+        Your data is separated by{" "}
+        <a
+          target="_blank"
+          className="underline hover:text-white"
+          href="https://aptabase.com/docs/build-modes"
+        >
+          build mode
+        </a>
+        .
       </p>
     </div>
   );
