@@ -15,9 +15,9 @@ public class IngestionClient
         _appKey = appKey;
     }
 
-    public async Task<HttpStatusCode> TrackEvent(DateTime timestamp, string eventName)
+    public async Task<HttpStatusCode> TrackEvent(DateTime timestamp, string eventName, object? props)
     {
-        var row = NewEvent(timestamp, eventName);
+        var row = NewEvent(timestamp, eventName, props);
         var body = JsonContent.Create(row);
         body.Headers.Add("App-Key", _appKey);
         body.Headers.Add("CloudFront-Viewer-Address", _ipAddress);
@@ -25,9 +25,9 @@ public class IngestionClient
         return response.StatusCode;
     }
 
-    public async Task<HttpStatusCode> TrackEvents(IEnumerable<(DateTime, string)> events)
+    public async Task<HttpStatusCode> TrackEvents(IEnumerable<(DateTime, string, object?)> events)
     {
-        var rows = events.Select(tuple => NewEvent(tuple.Item1, tuple.Item2));
+        var rows = events.Select(tuple => NewEvent(tuple.Item1, tuple.Item2, tuple.Item3));
         var body = JsonContent.Create(rows);
         body.Headers.Add("App-Key", _appKey);
         body.Headers.Add("CloudFront-Viewer-Address", _ipAddress);
@@ -35,7 +35,7 @@ public class IngestionClient
         return response.StatusCode;
     }
 
-    private object NewEvent(DateTime timestamp, string eventName)
+    private object NewEvent(DateTime timestamp, string eventName, object? props)
     {
         return new
         {
@@ -49,7 +49,8 @@ public class IngestionClient
                 osVersion = "13.5",
                 appVersion = "1.0.0",
                 sdkVersion = "aptabase-swift@0.0.0"
-            }
+            },
+            props
         };
     }
 }

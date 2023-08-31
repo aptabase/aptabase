@@ -1,4 +1,4 @@
-using System.Net;
+using System.Text.Json;
 using Aptabase.Features.GeoIP;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -44,7 +44,7 @@ public class EventsController : Controller
         var (valid, validationMessage) = IsValidBody(body);
         if (!valid)
         {
-            _logger.LogWarning(validationMessage);
+            _logger.LogWarning($"Dropping event from {appKey} because: {validationMessage}.");
             return BadRequest(validationMessage);
         }
 
@@ -98,7 +98,7 @@ public class EventsController : Controller
         var validEvents = events.Where(e => { 
             var (valid, validationMessage) = IsValidBody(e);
             if (!valid)
-                _logger.LogWarning(validationMessage);
+                _logger.LogWarning($"Dropping event from {appKey}. {validationMessage}");
             return valid;
         }).ToArray();
 
@@ -142,16 +142,22 @@ public class EventsController : Controller
 
         if (body.Props is not null)
         {
+            if (body.Props.RootElement.ValueKind != JsonValueKind.Object)
+                return (false, $"Properties must be an object. Props was: {body.Props.RootElement.GetRawText()}");
+
             foreach (var prop in body.Props.RootElement.EnumerateObject())
             {
                 if (string.IsNullOrWhiteSpace(prop.Name))
                     return (false, "Property key must not be empty.");
 
                 if (prop.Name.Length > 40)
-                    return (false, string.Format("Property key {0} must be less than or equal to 40 characters.", prop.Name));
+                    return (false, $"Property key {prop.Name} must be less than or equal to 40 characters. Props was: {body.Props.RootElement.GetRawText()}");
+
+                if (prop.Value.ValueKind == JsonValueKind.Object || prop.Value.ValueKind == JsonValueKind.Array)
+                    return (false, $"Value of key {prop.Name} must be a primitive type. Props was: {body.Props.RootElement.GetRawText()}");
 
                 if (prop.Value.ToString().Length > 200)
-                    return (false, string.Format("Property value must be less than or equal to 200 characters. Value was: {0}", prop.Value.ToString()));
+                    return (false, $"Value of key {prop.Name} must be less than or equal to 200 characters. Props was: {body.Props.RootElement.GetRawText()}");
             }
         }
 
