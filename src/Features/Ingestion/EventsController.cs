@@ -142,8 +142,17 @@ public class EventsController : Controller
 
         if (body.Props is not null)
         {
+            if (body.Props.RootElement.ValueKind == JsonValueKind.String)
+            {
+                var valueAsString = body.Props.RootElement.GetString() ?? "";
+                if (TryParseDocument(valueAsString, out var doc) && doc is not null)
+                    body.Props = doc;
+                else 
+                    return (false, $"Props must be an object or a valid stringified JSON, was: {body.Props.RootElement.GetRawText()}");
+            }
+
             if (body.Props.RootElement.ValueKind != JsonValueKind.Object)
-                return (false, $"Properties must be an object. Props was: {body.Props.RootElement.GetRawText()}");
+                return (false, $"Props must be an object or a valid stringified JSON, was: {body.Props.RootElement.GetRawText()}");
 
             foreach (var prop in body.Props.RootElement.EnumerateObject())
             {
@@ -151,13 +160,13 @@ public class EventsController : Controller
                     return (false, "Property key must not be empty.");
 
                 if (prop.Name.Length > 40)
-                    return (false, $"Property key {prop.Name} must be less than or equal to 40 characters. Props was: {body.Props.RootElement.GetRawText()}");
+                    return (false, $"Property key '{prop.Name}' must be less than or equal to 40 characters. Props was: {body.Props.RootElement.GetRawText()}");
 
                 if (prop.Value.ValueKind == JsonValueKind.Object || prop.Value.ValueKind == JsonValueKind.Array)
-                    return (false, $"Value of key {prop.Name} must be a primitive type. Props was: {body.Props.RootElement.GetRawText()}");
+                    return (false, $"Value of key '{prop.Name}' must be a primitive type. Props was: {body.Props.RootElement.GetRawText()}");
 
                 if (prop.Value.ToString().Length > 200)
-                    return (false, $"Value of key {prop.Name} must be less than or equal to 200 characters. Props was: {body.Props.RootElement.GetRawText()}");
+                    return (false, $"Value of key '{prop.Name}' must be less than or equal to 200 characters. Props was: {body.Props.RootElement.GetRawText()}");
             }
         }
 
@@ -195,5 +204,19 @@ public class EventsController : Controller
             NumericProps = numericProps.ToJsonString(),
             TTL = body.Timestamp.ToUniversalTime().Add(body.TTL).ToString("o"),
         };
+    }
+
+    private bool TryParseDocument(string json, out JsonDocument? doc)
+    {
+        try
+        {
+            doc = JsonDocument.Parse(json);
+            return true;
+        }
+        catch
+        {
+            doc = null;
+            return false;
+        }
     }
 }

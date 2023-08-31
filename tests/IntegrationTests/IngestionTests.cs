@@ -20,7 +20,7 @@ public class IngestionTests
     {
         var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
 
-        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey, "127.0.0.1");
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
         var code = await client.TrackEvent(DateTime.UtcNow.AddHours(-10), "Button Clicked", null);
         code.Should().Be(HttpStatusCode.OK);
 
@@ -33,7 +33,7 @@ public class IngestionTests
     {
         var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
 
-        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey, "127.0.0.1");
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
         var code = await client.TrackEvent(DateTime.UtcNow.AddYears(10), "Button Clicked", null);
         code.Should().Be(HttpStatusCode.OK);
 
@@ -46,7 +46,7 @@ public class IngestionTests
     {
         var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
 
-        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey, "127.0.0.1");
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
         var code = await client.TrackEvents(new List<(DateTime, string, object?)> {
             (DateTime.UtcNow, "App Started", null),
             (DateTime.UtcNow, "Menu Opened", null),
@@ -63,7 +63,7 @@ public class IngestionTests
     {
         var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
 
-        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey, "127.0.0.1");
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
         var code = await client.TrackEvents(new List<(DateTime, string, object?)> {
             (DateTime.UtcNow, "App Started", null),
             (DateTime.UtcNow, "Menu Opened", null),
@@ -80,7 +80,7 @@ public class IngestionTests
     {
         var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
 
-        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey, "127.0.0.1");
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
         var code = await client.TrackEvents(Enumerable.Range(1, 26).Select(i => (DateTime.UtcNow, "Button Clicked", (object?)null)));
         code.Should().Be(HttpStatusCode.BadRequest);
 
@@ -91,7 +91,7 @@ public class IngestionTests
     [Fact]
     public async Task Cant_Ingest_Unknown_AppKey()
     {
-        var client = new IngestionClient(_fixture.CreateClient(), "THIS-DOES-NOT-EXIST", "127.0.0.1");
+        var client = new IngestionClient(_fixture.CreateClient(), "THIS-DOES-NOT-EXIST");
         var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked", null);
         code.Should().Be(HttpStatusCode.NotFound);
     }
@@ -100,7 +100,7 @@ public class IngestionTests
     public async Task Cant_Ingest_With_Valid_Props(object props)
     {
         var appA = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
-        var client = new IngestionClient(_fixture.CreateClient(), appA.AppKey, "127.0.0.1");
+        var client = new IngestionClient(_fixture.CreateClient(), appA.AppKey);
         var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked", props);
         code.Should().Be(HttpStatusCode.OK);
     }
@@ -108,6 +108,10 @@ public class IngestionTests
     public static IEnumerable<object[]> ValidProps => 
         new List<object[]>
         {
+            new object[] { "{}" },
+            new object[] { "{\"name\":\"Bob\"}" },
+            new object[] { "{\"name\":\"Bob\", \"age\":20}" },
+            new object[] { new { } },
             new object[] { new { age = 20 } },
             new object[] { new { name = "Bob", age = 20 } },
             new object[] { new { name = "Bob", valid = true } },
@@ -118,7 +122,7 @@ public class IngestionTests
     public async Task Cant_Ingest_With_Invalid_Props(object props)
     {
         var appA = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
-        var client = new IngestionClient(_fixture.CreateClient(), appA.AppKey, "127.0.0.1");
+        var client = new IngestionClient(_fixture.CreateClient(), appA.AppKey);
         var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked", props);
         code.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -128,9 +132,12 @@ public class IngestionTests
         {
             new object[] { 1 },
             new object[] { "Something" },
+            new object[] { "[1,2,3]" },
             new object[] { "" },
             new object[] { new string[]{"A", "B", "C"} },
-            new object[] { new { name = "Bob", age = 20, list = new string[]{"A", "B", "C"} } }
+            new object[] { new { name = "Bob", age = 20, list = new int[]{1,2,3} } },
+            new object[] { "{\"name\":\"Bob\", \"age\":20, \"list\": [1,2,3]}" },
+            new object[] { "{\"\":\"Bob\"}" },
         };
 
     [Fact]
@@ -138,7 +145,7 @@ public class IngestionTests
     {
         var appA = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
 
-        var client = new IngestionClient(_fixture.CreateClient(), appA.AppKey, "127.0.0.1");
+        var client = new IngestionClient(_fixture.CreateClient(), appA.AppKey);
         await client.TrackEvent(DateTime.UtcNow, "Button Clicked", null);
         
         var responseA = await _fixture.UserA.GetKeyMetrics(appA.Id, "24h");

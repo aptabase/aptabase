@@ -4,9 +4,16 @@ namespace Aptabase.IntegrationTests.Clients;
 
 public class IngestionClient
 {
+    private static readonly Random _random = new Random();
     private readonly HttpClient _client;
     private readonly string _ipAddress;
     private readonly string _appKey;
+
+    // Use this constructor to avoid rate limiting
+    public IngestionClient(HttpClient client, string appKey)
+        : this(client, appKey, RandomIpAddress())
+    {
+    }
 
     public IngestionClient(HttpClient client, string appKey, string ipAddress)
     {
@@ -52,5 +59,10 @@ public class IngestionClient
             },
             props
         };
+    }
+
+    private static string RandomIpAddress()
+    {
+        return $"{_random.Next(0, 255)}.{_random.Next(0, 255)}.{_random.Next(0, 255)}.{_random.Next(0, 255)}";
     }
 }
