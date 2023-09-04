@@ -37,7 +37,19 @@ public partial class Program
 
         var appEnv = EnvSettings.Load();
 
-        builder.Services.AddResponseCompression();
+        builder.Services.AddResponseCompression(options =>
+        {
+            options.EnableForHttps = true;
+            options.Providers.Add<BrotliCompressionProvider>();
+            options.Providers.Add<GzipCompressionProvider>();
+            options.MimeTypes = new[]
+            {
+                "text/css",
+                "application/javascript",
+                "text/javascript",
+                "text/html",
+            };
+        });
         builder.Services.AddCors(options =>
         {
             options.AddPolicy(name: "AllowAptabaseCom", policy =>
