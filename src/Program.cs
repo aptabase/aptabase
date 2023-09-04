@@ -40,8 +40,6 @@ public partial class Program
         builder.Services.AddResponseCompression(options =>
         {
             options.EnableForHttps = true;
-            options.Providers.Add<BrotliCompressionProvider>();
-            options.Providers.Add<GzipCompressionProvider>();
             options.MimeTypes = new[]
             {
                 "text/css",
