@@ -16,78 +16,8 @@ import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-
-type FrameworkInstructions = {
-  name: string;
-  baseURL: string;
-  repository: string;
-  icon: string;
-};
-
-const frameworks: { [id: string]: FrameworkInstructions } = {
-  android: {
-    name: "Android (Kotlin)",
-    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-kotlin/main/",
-    repository: "https://github.com/aptabase/aptabase-kotlin",
-    icon: "https://aptabase.com/tools/android.svg",
-  },
-  swift: {
-    name: "Apple (Swift)",
-    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-swift/main/",
-    repository: "https://github.com/aptabase/aptabase-swift",
-    icon: "https://aptabase.com/tools/apple.svg",
-  },
-  electron: {
-    name: "Electron",
-    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-electron/main/",
-    repository: "https://github.com/aptabase/aptabase-electron",
-    icon: "https://aptabase.com/tools/electron.svg",
-  },
-  flutter: {
-    name: "Flutter",
-    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase_flutter/main/",
-    repository: "https://github.com/aptabase/aptabase_flutter",
-    icon: "https://aptabase.com/tools/flutter.svg",
-  },
-  nativescript: {
-    name: "NativeScript",
-    baseURL:
-      "https://raw.githubusercontent.com/goenning/nativescript-plugins/main//packages/nativescript-aptabase",
-    repository:
-      "https://github.com/nstudio/nativescript-plugins/blob/main//packages/nativescript-aptabase",
-    icon: "https://aptabase.com/tools/nativescript.svg",
-  },
-  maui: {
-    name: ".NET MAUI",
-    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-maui/main/",
-    repository: "https://github.com/aptabase/aptabase-maui",
-    icon: "https://aptabase.com/tools/dotnet.svg",
-  },
-  "react-native": {
-    name: "React Native",
-    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-react-native/main/",
-    repository: "https://github.com/aptabase/aptabase-react-native",
-    icon: "https://aptabase.com/tools/react-native.svg",
-  },
-  tauri: {
-    name: "Tauri",
-    baseURL: "https://raw.githubusercontent.com/aptabase/tauri-plugin-aptabase/main/",
-    repository: "https://github.com/aptabase/tauri-plugin-aptabase",
-    icon: "https://aptabase.com/tools/tauri.svg",
-  },
-  unreal: {
-    name: "Unreal Engine",
-    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-unreal/main/",
-    repository: "https://github.com/aptabase/aptabase-unreal",
-    icon: "https://aptabase.com/tools/unreal.svg",
-  },
-  webapp: {
-    name: "Web App",
-    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-js/main/",
-    repository: "https://github.com/aptabase/aptabase-js",
-    icon: "https://aptabase.com/tools/javascript.svg",
-  },
-};
+import { twMerge } from "tailwind-merge";
+import frameworks, { type FrameworkInstructions } from "./frameworks";
 
 const fetchInstructions = async (id: string): Promise<[FrameworkInstructions, string]> => {
   const fw = frameworks[id];
@@ -97,23 +27,9 @@ const fetchInstructions = async (id: string): Promise<[FrameworkInstructions, st
 
   trackEvent("instructions_viewed", { framework: id });
 
-  if (fw.baseURL) {
-    const response = await fetch(`${fw.baseURL}/README.md`);
-    const content = await response.text();
-    return [fw, content];
-  }
-
-  return [
-    fw,
-    `
-  # ${fw.name} for Aptabase
-  
-  We don't have an SDK for ${fw.name} at this time.
-  
-  If you're insterested in using Aptabase with ${fw.name}, please upvote [this issue](${fw.repository}) on GitHub.
-
-  `,
-  ];
+  const response = await fetch(`${fw.baseURL}/README.md`);
+  const content = await response.text();
+  return [fw, content];
 };
 
 Component.displayName = "InstructionsPage";
@@ -155,7 +71,10 @@ export function Component() {
                   {Object.entries(frameworks).map(([id, fw]) => (
                     <SelectItem key={fw.name} value={id}>
                       <div className="flex gap-2 items-center">
-                        <img src={fw.icon} className="h-4 w-4" />
+                        <img
+                          src={fw.icon}
+                          className={twMerge("h-4 w-4", fw.invert ? "dark:invert" : "")}
+                        />
                         <span>{fw.name}</span>
                       </div>
                     </SelectItem>

@@ -3,6 +3,7 @@ import gradle from "highlight.js/lib/languages/gradle";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 import "./Markdown.css";
 
@@ -17,6 +18,7 @@ export function Markdown(props: Props) {
       className="prose dark:prose-invert max-w-none prose-table:max-w-fit prose-img:my-0"
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[
+        rehypeRaw,
         [
           rehypeHighlight,
           {
@@ -26,9 +28,7 @@ export function Markdown(props: Props) {
         ],
       ]}
       components={{
-        blockquote: ({ node, ...props }) => (
-          <div className="border-l-4 pl-2">{props.children}</div>
-        ),
+        blockquote: ({ node, ...props }) => <div className="border-l-4 pl-2">{props.children}</div>,
         img: ({ node, ...imgProps }) => {
           if (imgProps.src?.endsWith("og.png")) return null;
           const src = imgProps.src?.startsWith("http")
@@ -37,9 +37,7 @@ export function Markdown(props: Props) {
 
           return <img {...imgProps} src={src} />;
         },
-        a: ({ node, ...props }) => (
-          <a target="_blank" className="inline-block" {...props} />
-        ),
+        a: ({ node, ...props }) => <a target="_blank" className="inline-block" {...props} />,
       }}
     >
       {props.content}
