@@ -37,6 +37,7 @@ public partial class Program
 
         var appEnv = EnvSettings.Load();
 
+        builder.Services.AddResponseCompression();
         builder.Services.AddCors(options =>
         {
             options.AddPolicy(name: "AllowAptabaseCom", policy =>
@@ -148,6 +149,8 @@ public partial class Program
             );
 
         var app = builder.Build();
+        
+        app.UseResponseCompression();
 
         if (appEnv.IsManagedCloud)
         {
