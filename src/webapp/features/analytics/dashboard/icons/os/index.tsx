@@ -26,5 +26,5 @@ export function OSIcon(props: Props) {
     return <Icon3dCubeSphere className={props.className} />;
   }
 
-  return <img src={imageUrl} className={props.className} />;
+  return <img src={imageUrl} className={props.className} loading="lazy" />;
 }

@@ -35,7 +35,7 @@ export function Markdown(props: Props) {
             ? imgProps.src
             : `${props.baseURL}/${imgProps.src}`;
 
-          return <img {...imgProps} src={src} />;
+          return <img {...imgProps} src={src} loading="lazy" />;
         },
         a: ({ node, ...props }) => <a target="_blank" className="inline-block" {...props} />,
       }}

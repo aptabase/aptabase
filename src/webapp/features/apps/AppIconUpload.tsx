@@ -93,19 +93,14 @@ export function AppIconUpload(props: Props) {
       </label>
       <div className="flex gap-2 items-center">
         {imgSrc ? (
-          <img src={imgSrc} className="w-9 h-9 rounded" />
+          <img src={imgSrc} className="w-9 h-9 rounded" loading="lazy" />
         ) : props.iconPath ? (
           <AppIcon iconPath={props.iconPath} className="w-9 h-9" />
         ) : (
           <IconCube className="w-9 h-9 border p-1.5 rounded" />
         )}
 
-        <input
-          ref={inputRef}
-          onChange={handleFileChanged}
-          type="file"
-          className="hidden"
-        />
+        <input ref={inputRef} onChange={handleFileChanged} type="file" className="hidden" />
         <div>
           <Button variant="ghost" onClick={handleClick} type="button">
             Change

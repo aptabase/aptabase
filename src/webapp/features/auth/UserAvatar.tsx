@@ -19,6 +19,7 @@ export function UserAvatar(props: Props) {
     <img
       onError={handleError}
       className="h-8 w-8 lg:h-6 lg:w-6 rounded-full"
+      loading="lazy"
       src={props.user.avatarUrl}
       alt={props.user.name}
     />

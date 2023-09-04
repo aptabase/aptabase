@@ -74,6 +74,7 @@ export function Component() {
                         <img
                           src={fw.icon}
                           className={twMerge("h-4 w-4", fw.invert ? "dark:invert" : "")}
+                          loading="lazy"
                         />
                         <span>{fw.name}</span>
                       </div>
