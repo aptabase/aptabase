@@ -1,5 +1,5 @@
 import { useCurrentApp } from "@features/apps";
-import { PageHeading, Page } from "@features/primitives";
+import { PageHeading, Page } from "@components/Page";
 import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";

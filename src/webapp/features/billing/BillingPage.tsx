@@ -1,4 +1,4 @@
-import { Page, PageHeading } from "../primitives";
+import { Page, PageHeading } from "@components/Page";
 import { CurrentUsage } from "./CurrentUsage";
 import { CurrentPlan } from "./CurrentPlan";
 import { useBilling } from "./useBilling";

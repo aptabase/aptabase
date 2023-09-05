@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { LazyMotion, domAnimation, m } from "framer-motion";
+import { twJoin } from "tailwind-merge";
 
 type Props = {
   title: string;
@@ -26,5 +27,25 @@ export function Page(props: Props) {
         {props.children}
       </m.div>
     </LazyMotion>
+  );
+}
+
+type PageHeadingProps = {
+  title: string;
+  subtitle?: string;
+  onClick?: VoidFunction;
+};
+
+export function PageHeading(props: PageHeadingProps) {
+  return (
+    <div>
+      <h1
+        className={twJoin("text-2xl font-medium", !!props.onClick && "cursor-pointer")}
+        onClick={props.onClick}
+      >
+        {props.title}
+      </h1>
+      {props.subtitle && <p className="text-muted-foreground">{props.subtitle}</p>}
+    </div>
   );
 }

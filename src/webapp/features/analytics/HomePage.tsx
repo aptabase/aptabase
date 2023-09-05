@@ -1,4 +1,4 @@
-import { LazyLoad, Page, PageHeading } from "@features/primitives";
+import { Page, PageHeading } from "@components/Page";
 import { useApps } from "@features/apps";
 import { LonelyState } from "./LonelyState";
 import { trackEvent } from "@aptabase/web";
@@ -9,6 +9,7 @@ import { DebugModeBanner } from "./mode/DebugModeBanner";
 import { AppSummaryWidget } from "./summary/AppSummaryWidget";
 import { OnboardingSummaryWidget } from "./summary/OnboardingSummaryWidget";
 import { DateRangePicker } from "./DateRangePicker";
+import { LazyLoad } from "@components/LazyLoad";
 
 Component.displayName = "HomePage";
 export function Component() {

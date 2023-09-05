@@ -1,4 +1,4 @@
-import { PageHeading, Page } from "@features/primitives";
+import { PageHeading, Page } from "@components/Page";
 import { Tabs, TabsList, TabsContent, TabsTrigger } from "@components/Tabs";
 import { DangerZone } from "./DangerZone";
 import { AppSharing } from "./AppSharing";

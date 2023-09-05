@@ -1,4 +1,4 @@
-import { LazyLoad, Page, PageHeading } from "@features/primitives";
+import { Page, PageHeading } from "@components/Page";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useApps, useCurrentApp } from "@features/apps";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
@@ -11,6 +11,7 @@ import { VersionWidget } from "./dashboard/VersionWidget";
 import { EventWidget } from "./dashboard/EventWidget";
 import { OnboardingDashboard } from "./dashboard/OnboardingDashboard";
 import { DateRangePicker } from "./DateRangePicker";
+import { LazyLoad } from "@components/LazyLoad";
 
 Component.displayName = "DashboardPage";
 

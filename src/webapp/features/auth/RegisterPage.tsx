@@ -1,5 +1,5 @@
 import { requestRegisterLink } from "@features/auth";
-import { Page } from "@features/primitives";
+import { Page } from "@components/Page";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { DataResidency } from "./DataResidency";
