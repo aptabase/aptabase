@@ -1,10 +1,10 @@
 import { useApps } from ".";
-import { TextInput } from "../primitives";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@components/Button";
 import { IconX } from "@tabler/icons-react";
+import { TextInput } from "@components/TextInput";
 
 type Props = {
   open: boolean;

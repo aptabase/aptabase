@@ -1,4 +1,4 @@
-import { DateRangePicker, LazyLoad, Page, PageHeading } from "@features/primitives";
+import { LazyLoad, Page, PageHeading } from "@features/primitives";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useApps, useCurrentApp } from "@features/apps";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
@@ -10,6 +10,7 @@ import { CountryWidget } from "./dashboard/CountryWidget";
 import { VersionWidget } from "./dashboard/VersionWidget";
 import { EventWidget } from "./dashboard/EventWidget";
 import { OnboardingDashboard } from "./dashboard/OnboardingDashboard";
+import { DateRangePicker } from "./DateRangePicker";
 
 Component.displayName = "DashboardPage";
 

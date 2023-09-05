@@ -1,5 +1,5 @@
 import { requestSignInLink } from "@features/auth";
-import { Page, TextInput } from "@features/primitives";
+import { Page } from "@features/primitives";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { DataResidency } from "./DataResidency";
@@ -10,6 +10,7 @@ import { SignInWithGoogle } from "./SignInWithGoogle";
 import { isOAuthEnabled } from "@features/env";
 import { Logo } from "./Logo";
 import { Button } from "@components/Button";
+import { TextInput } from "@components/TextInput";
 
 type FormStatus = "idle" | "loading" | "success" | "notfound";
 

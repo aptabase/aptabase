@@ -1,16 +1,5 @@
 import { useCurrentApp } from "@features/apps";
-import {
-  ErrorState,
-  LoadingState,
-  PageHeading,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  Page,
-} from "@features/primitives";
+import { ErrorState, LoadingState, PageHeading, Page } from "@features/primitives";
 import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -18,6 +7,14 @@ import { Navigate } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 import frameworks, { type FrameworkInstructions } from "./frameworks";
 import { Markdown } from "@components/Markdown";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+} from "@components/Select";
 
 const fetchInstructions = async (id: string): Promise<[FrameworkInstructions, string]> => {
   const fw = frameworks[id];

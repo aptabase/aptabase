@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { AppIconUpload, Application, useApps } from "@features/apps";
-import { TextInput } from "@features/primitives";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@components/Button";
+import { TextInput } from "@components/TextInput";
 
 type Props = {
   app: Application;

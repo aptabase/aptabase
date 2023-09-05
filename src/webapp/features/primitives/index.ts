@@ -1,5 +1,3 @@
-export * from "./Alert";
-export * from "./DateRangePicker";
 export * from "./GrowthIndicator";
 export * from "./EmptyState";
 export * from "./ErrorState";
@@ -8,8 +6,6 @@ export * from "./LoadingState";
 export * from "./Page";
 export * from "./format";
 export * from "./PageHeading";
-export * from "./Select";
-export * from "./TextInput";
 export * from "./api";
 export * from "./useDelay";
 export * from "./useLocalStorage";

@@ -1,4 +1,4 @@
-import { DateRangePicker, LazyLoad, Page, PageHeading } from "@features/primitives";
+import { LazyLoad, Page, PageHeading } from "@features/primitives";
 import { useApps } from "@features/apps";
 import { LonelyState } from "./LonelyState";
 import { trackEvent } from "@aptabase/web";
@@ -8,6 +8,7 @@ import { AppConfigMenu } from "./mode/AppConfigMenu";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
 import { AppSummaryWidget } from "./summary/AppSummaryWidget";
 import { OnboardingSummaryWidget } from "./summary/OnboardingSummaryWidget";
+import { DateRangePicker } from "./DateRangePicker";
 
 Component.displayName = "HomePage";
 export function Component() {
