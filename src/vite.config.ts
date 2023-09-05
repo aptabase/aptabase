@@ -53,6 +53,10 @@ export default defineConfig({
     conditions: ["development", "browser"],
     alias: [
       {
+        find: "@components",
+        replacement: path.resolve(__dirname, "./webapp/components"),
+      },
+      {
         find: "@features",
         replacement: path.resolve(__dirname, "./webapp/features"),
       },

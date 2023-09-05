@@ -1,5 +1,5 @@
 import { requestRegisterLink } from "@features/auth";
-import { Button, Logo, Page, TextInput } from "@features/primitives";
+import { Button, Page, TextInput } from "@features/primitives";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { DataResidency } from "./DataResidency";
@@ -8,6 +8,7 @@ import { RegionSwitch } from "./RegionSwitch";
 import { SignInWithGitHub } from "./SignInWithGitHub";
 import { SignInWithGoogle } from "./SignInWithGoogle";
 import { isOAuthEnabled } from "@features/env";
+import { Logo } from "./Logo";
 
 type FormStatus = "idle" | "loading" | "success";
 
@@ -17,11 +18,7 @@ type StatusMessageProps = {
 
 const StatusMessage = (props: StatusMessageProps) => {
   if (props.status === "success") {
-    return (
-      <span className="text-success">
-        Woo-hoo! Email sent, go check your inbox!
-      </span>
-    );
+    return <span className="text-success">Woo-hoo! Email sent, go check your inbox!</span>;
   }
 
   return (
@@ -66,10 +63,7 @@ export function Component() {
                 <SignInWithGoogle />
               </div>
               <div className="relative my-4">
-                <div
-                  className="absolute inset-0 flex items-center"
-                  aria-hidden="true"
-                >
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
                   <div className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-sm">

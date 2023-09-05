@@ -1,13 +1,6 @@
 import { Application } from "@features/apps";
-import {
-  Button,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-  api,
-  formatDate,
-} from "@features/primitives";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/Tooltip";
+import { Button, api, formatDate } from "@features/primitives";
 import { IconShareOff } from "@tabler/icons-react";
 
 type Props = {
@@ -29,9 +22,7 @@ export function AppShareListItem(props: Props) {
     <li className="flex items-center space-x-4 border px-4 py-2 rounded-md justify-between">
       <div className="truncate">
         <p className="truncate">{props.email}</p>
-        <p className="text-xs text-muted-foreground mt-1">
-          {formatDate(props.createdAt)}
-        </p>
+        <p className="text-xs text-muted-foreground mt-1">{formatDate(props.createdAt)}</p>
       </div>
       <TooltipProvider>
         <Tooltip delayDuration={0}>

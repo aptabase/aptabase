@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@features/primitives";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/Tooltip";
 
 export function DebugModeBanner() {
   return (

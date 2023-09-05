@@ -1,4 +1,4 @@
-import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip } from "@features/primitives";
+import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip } from "@components/Tooltip";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 
 type Props = {

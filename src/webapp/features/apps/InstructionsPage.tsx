@@ -2,7 +2,6 @@ import { useCurrentApp } from "@features/apps";
 import {
   ErrorState,
   LoadingState,
-  Markdown,
   PageHeading,
   Select,
   SelectTrigger,
@@ -18,6 +17,7 @@ import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 import frameworks, { type FrameworkInstructions } from "./frameworks";
+import { Markdown } from "@components/Markdown";
 
 const fetchInstructions = async (id: string): Promise<[FrameworkInstructions, string]> => {
   const fw = frameworks[id];

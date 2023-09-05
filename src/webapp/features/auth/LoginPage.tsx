@@ -1,5 +1,5 @@
 import { requestSignInLink } from "@features/auth";
-import { Button, Logo, Page, TextInput } from "@features/primitives";
+import { Button, Page, TextInput } from "@features/primitives";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { DataResidency } from "./DataResidency";
@@ -8,6 +8,7 @@ import { RegionSwitch } from "./RegionSwitch";
 import { SignInWithGitHub } from "./SignInWithGitHub";
 import { SignInWithGoogle } from "./SignInWithGoogle";
 import { isOAuthEnabled } from "@features/env";
+import { Logo } from "./Logo";
 
 type FormStatus = "idle" | "loading" | "success" | "notfound";
 
@@ -27,19 +28,13 @@ const SignUpMessage = () => (
 
 const StatusMessage = (props: StatusMessageProps) => {
   if (props.status === "success") {
-    return (
-      <span className="text-success">
-        Woo-hoo! Email sent, go check your inbox!
-      </span>
-    );
+    return <span className="text-success">Woo-hoo! Email sent, go check your inbox!</span>;
   }
 
   if (props.status === "notfound") {
     return (
       <>
-        <span className="text-destructive">
-          Could not find an account with that email.
-        </span>
+        <span className="text-destructive">Could not find an account with that email.</span>
         <SignUpMessage />
       </>
     );
@@ -55,8 +50,7 @@ const RedirectErrorMessage = () => {
   if (!error) {
     return null;
   }
-  const message =
-    error === "expired" ? "This link has expired." : "This link is invalid.";
+  const message = error === "expired" ? "This link has expired." : "This link is invalid.";
 
   return (
     <p className="mx-auto text-center mb-10 text-destructive text-sm">
@@ -86,9 +80,7 @@ export function Component() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Logo className="mx-auto h-12 w-auto text-primary" />
-        <h2 className="text-center text-3xl text-foreground font-bold">
-          Sign in to your account
-        </h2>
+        <h2 className="text-center text-3xl text-foreground font-bold">Sign in to your account</h2>
         <DataResidency />
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -101,10 +93,7 @@ export function Component() {
               </div>
 
               <div className="relative my-4">
-                <div
-                  className="absolute inset-0 flex items-center"
-                  aria-hidden="true"
-                >
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
                   <div className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-sm">
