@@ -1,8 +1,9 @@
-import { ErrorState, LoadingState } from "../primitives";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
 import { Navigate } from "react-router-dom";
 import { UserAccount, me } from "./auth";
+import { ErrorState } from "@components/ErrorState";
+import { LoadingState } from "@components/LoadingState";
 
 type Props = {
   children: React.ReactNode;
@@ -21,11 +22,7 @@ export function AuthProvider(props: Props) {
   if (isError) return <ErrorState />;
   if (!user) return <Navigate to="/auth" />;
 
-  return (
-    <AuthContext.Provider value={{ user }}>
-      {props.children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user }}>{props.children}</AuthContext.Provider>;
 }
 
 export function useAuthState(): AuthContextType {

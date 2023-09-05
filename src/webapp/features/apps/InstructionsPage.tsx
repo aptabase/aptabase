@@ -1,5 +1,5 @@
 import { useCurrentApp } from "@features/apps";
-import { ErrorState, LoadingState, PageHeading, Page } from "@features/primitives";
+import { PageHeading, Page } from "@features/primitives";
 import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -15,6 +15,8 @@ import {
   SelectGroup,
   SelectItem,
 } from "@components/Select";
+import { ErrorState } from "@components/ErrorState";
+import { LoadingState } from "@components/LoadingState";
 
 const fetchInstructions = async (id: string): Promise<[FrameworkInstructions, string]> => {
   const fw = frameworks[id];

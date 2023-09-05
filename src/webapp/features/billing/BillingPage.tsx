@@ -1,7 +1,9 @@
-import { ErrorState, LoadingState, Page, PageHeading } from "../primitives";
+import { Page, PageHeading } from "../primitives";
 import { CurrentUsage } from "./CurrentUsage";
 import { CurrentPlan } from "./CurrentPlan";
 import { useBilling } from "./useBilling";
+import { ErrorState } from "@components/ErrorState";
+import { LoadingState } from "@components/LoadingState";
 
 Component.displayName = "BillingPage";
 export function Component() {

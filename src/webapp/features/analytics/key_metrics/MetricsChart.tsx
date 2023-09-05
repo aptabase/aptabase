@@ -13,7 +13,9 @@ import {
 import Annotation, { LineAnnotationOptions } from "chartjs-plugin-annotation";
 import { useEffect, useRef, useState } from "react";
 import colors from "./colors";
-import { EmptyState, ErrorState, LoadingState } from "@features/primitives";
+import { EmptyState } from "@components/EmptyState";
+import { ErrorState } from "@components/ErrorState";
+import { LoadingState } from "@components/LoadingState";
 
 Chart.defaults.font.family = "'Inter var', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
 

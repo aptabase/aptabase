@@ -1,5 +1,5 @@
 import { Application } from "@features/apps";
-import { ErrorState, LoadingState, api } from "@features/primitives";
+import { api } from "@features/primitives";
 import { IconHelp } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -7,6 +7,8 @@ import { AppShareListItem } from "./AppShareListItem";
 import { Button } from "@components/Button";
 import { TextInput } from "@components/TextInput";
 import { Alert, AlertDescription, AlertTitle } from "@components/Alert";
+import { ErrorState } from "@components/ErrorState";
+import { LoadingState } from "@components/LoadingState";
 
 type AppShare = {
   email: string;

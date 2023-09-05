@@ -1,4 +1,4 @@
-import { useDelay } from "./useDelay";
+import { useDelay } from "@hooks/use-delay";
 import { twMerge } from "tailwind-merge";
 
 type Props = {
