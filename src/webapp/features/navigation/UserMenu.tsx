@@ -80,7 +80,7 @@ export function UserMenu(props: Props) {
             </>
           )}
           <Divider />
-          <MenuItem href="#" onClick={signOut} reloadDocument>
+          <MenuItem href="#" onClick={signOut}>
             <IconDoorExit className="w-4 h-4" />
             <span>Sign out</span>
           </MenuItem>

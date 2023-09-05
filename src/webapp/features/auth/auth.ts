@@ -34,9 +34,6 @@ export async function me(): Promise<UserAccount | null> {
 }
 
 export async function signOut(): Promise<void> {
-  const [, response] = await api.fetch("POST", "/_auth/signout");
-  const redirectTo = response.headers.get("location");
-  if (redirectTo) {
-    location.href = redirectTo;
-  }
+  await api.fetch("POST", "/_auth/signout");
+  location.href = "/auth";
 }

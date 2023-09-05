@@ -17,6 +17,7 @@ async function handleError(status: number, response: Response): Promise<void> {
 
 const commonHeaders: RequestInit = {
   credentials: "include",
+  redirect: "manual",
 };
 
 const mutatingHeaders: RequestInit = {
@@ -32,11 +33,7 @@ type ValidationError = {
   errors: Record<string, string[]>;
 };
 
-async function _fetch(
-  method: string,
-  path: string,
-  body?: any
-): Promise<[number, Response]> {
+async function _fetch(method: string, path: string, body?: any): Promise<[number, Response]> {
   const response = await window.fetch(`/api${path}`, {
     ...(method === "GET" ? commonHeaders : mutatingHeaders),
     method,
