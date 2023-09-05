@@ -1,6 +1,6 @@
 import { TablerIconsProps } from "@tabler/icons-react";
-import clsx from "clsx";
 import { NavLink, useLocation } from "react-router-dom";
+import { twMerge } from "tailwind-merge";
 
 type Props = {
   label: string;
@@ -22,7 +22,7 @@ export function NavItem(props: Props) {
     </>
   );
 
-  const className = clsx(
+  const className = twMerge(
     props.href === location.pathname ? "bg-accent" : "w-full hover:bg-accent",
     baseClassName
   );
@@ -33,13 +33,11 @@ export function NavItem(props: Props) {
   };
 
   return props.disabled ? (
-    <span className={clsx(baseClassName, "text-muted-foreground")}>
-      {content}
-    </span>
+    <span className={twMerge(baseClassName, "text-muted-foreground")}>{content}</span>
   ) : props.href ? (
     <NavLink
       to={props.href}
-      className={({ isActive }) => clsx(className, isActive && "bg-accent")}
+      className={({ isActive }) => twMerge(className, isActive && "bg-accent")}
       onClick={props.onNavigation}
     >
       {content}

@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { twJoin } from "tailwind-merge";
 
 type Props = {
   title: string;
@@ -10,16 +10,12 @@ export function PageHeading(props: Props) {
   return (
     <div>
       <h1
-        className={clsx("text-2xl font-medium", {
-          "cursor-pointer": !!props.onClick,
-        })}
+        className={twJoin("text-2xl font-medium", !!props.onClick && "cursor-pointer")}
         onClick={props.onClick}
       >
         {props.title}
       </h1>
-      {props.subtitle && (
-        <p className="text-muted-foreground">{props.subtitle}</p>
-      )}
+      {props.subtitle && <p className="text-muted-foreground">{props.subtitle}</p>}
     </div>
   );
 }

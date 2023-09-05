@@ -28,7 +28,6 @@
     "chart.js": "4.3.0",
     "chartjs-plugin-annotation": "3.0.1",
     "class-variance-authority": "0.6.1",
-    "clsx": "2.0.0",
     "date-fns": "2.30.0",
     "framer-motion": "^10.13.0",
     "postcss": "8.4.27",

@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import { Application, useApps, useCurrentApp } from ".";
 import { Listbox, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
@@ -6,6 +5,7 @@ import { CreateAppModal } from "./CreateAppModal";
 import { IconPlus, IconSelector } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { AppIcon } from "./AppIcon";
+import { twJoin } from "tailwind-merge";
 
 type OptionProps = {
   value?: Application;
@@ -16,9 +16,9 @@ function StyledOption(props: OptionProps) {
   return (
     <Listbox.Option
       className={({ active }) =>
-        clsx(
-          active ? "text-foreground bg-accent" : "",
-          "relative rounded cursor-pointer select-none p-2 mx-1 text-sm flex items-center space-x-1"
+        twJoin(
+          "relative rounded cursor-pointer select-none p-2 mx-1 text-sm flex items-center space-x-1",
+          active && "text-foreground bg-accent"
         )
       }
       value={props.value}

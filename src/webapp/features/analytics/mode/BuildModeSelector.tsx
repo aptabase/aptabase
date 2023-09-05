@@ -1,7 +1,7 @@
-import clsx from "clsx";
 import { RadioGroup } from "@headlessui/react";
 import { IconBug, IconRocket } from "@tabler/icons-react";
 import { useApps } from "@features/apps";
+import { twJoin } from "tailwind-merge";
 
 const options = [
   { icon: IconRocket, label: "Release", value: "release" },
@@ -21,9 +21,9 @@ export function BuildModeSelector() {
               key={option.value}
               value={option.value}
               className={({ checked }) =>
-                clsx(
-                  checked ? "bg-accent" : "text-muted-foreground",
-                  "flex cursor-pointer items-center justify-center rounded p-2 focus-ring"
+                twJoin(
+                  "flex cursor-pointer items-center justify-center rounded p-2 focus-ring",
+                  checked ? "bg-accent" : "text-muted-foreground"
                 )
               }
             >

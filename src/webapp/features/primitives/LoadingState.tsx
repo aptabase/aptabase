@@ -1,5 +1,5 @@
-import clsx from "clsx";
 import { useDelay } from "./useDelay";
+import { twMerge } from "tailwind-merge";
 
 type Props = {
   size?: "sm" | "md" | "lg";
@@ -29,7 +29,7 @@ export function LoadingState(props: Props) {
     <div className="w-full h-full flex flex-col items-center justify-center">
       <svg
         aria-hidden="true"
-        className={clsx(sizes[size], colors[color], "inline animate-spin")}
+        className={twMerge(sizes[size], colors[color], "inline animate-spin")}
         viewBox="0 0 100 101"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

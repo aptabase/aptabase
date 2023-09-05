@@ -1,5 +1,5 @@
 import { useRef, MutableRefObject, useState, useEffect } from "react";
-import clsx from "clsx";
+import { twMerge } from "tailwind-merge";
 
 function useLazyLoad<T extends Element>(
   ref: MutableRefObject<T>,
@@ -44,7 +44,7 @@ export function LazyLoad(props: Props) {
   const show: boolean = useLazyLoad<HTMLDivElement>(ref);
 
   return (
-    <div ref={ref} className={clsx("flex flex-col", props.className)}>
+    <div ref={ref} className={twMerge("flex flex-col", props.className)}>
       {show && props.children}
     </div>
   );

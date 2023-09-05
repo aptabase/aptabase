@@ -1,8 +1,8 @@
 import { Listbox, Transition } from "@headlessui/react";
 import { IconChevronDown } from "@tabler/icons-react";
-import clsx from "clsx";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { useSearchParams } from "react-router-dom";
+import { twJoin } from "tailwind-merge";
 
 type Option = {
   value: string;
@@ -42,9 +42,9 @@ function StyledOption(props: StyledOptionProps) {
     <Listbox.Option
       key={props.option.value}
       className={({ active }) =>
-        clsx(
-          active && "bg-accent text-foreground",
-          "relative rounded cursor-pointer select-none py-1.5 pl-3 pr-9 mx-1"
+        twJoin(
+          "relative rounded cursor-pointer select-none py-1.5 pl-3 pr-9 mx-1",
+          active && "bg-accent text-foreground"
         )
       }
       value={props.option}
@@ -65,8 +65,7 @@ export function DateRangePicker() {
     });
   };
 
-  const selected =
-    options.find((option) => option.value === period) || options[0];
+  const selected = options.find((option) => option.value === period) || options[0];
 
   return (
     <Listbox value={selected} onChange={onChange}>
