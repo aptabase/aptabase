@@ -40,14 +40,8 @@ public partial class Program
         builder.Services.AddResponseCompression(options =>
         {
             options.EnableForHttps = true;
-            options.MimeTypes = new[]
-            {
-                "text/css",
-                "application/javascript",
-                "text/javascript",
-                "text/html",
-            };
         });
+
         builder.Services.AddCors(options =>
         {
             options.AddPolicy(name: "AllowAptabaseCom", policy =>
