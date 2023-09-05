@@ -49,8 +49,8 @@ const sizes = {
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
   loading?: boolean;
-  size: keyof typeof sizes;
-  variant: keyof typeof variants;
+  size?: keyof typeof sizes;
+  variant?: keyof typeof variants;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
