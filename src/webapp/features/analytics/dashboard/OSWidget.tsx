@@ -2,7 +2,8 @@ import { useSearchParams } from "react-router-dom";
 import { TopNDataContainer } from "./TopNDataContainer";
 import { topOSVersions, topOperatingSystem } from "../query";
 import { OS } from "./OS";
-import { TopNChart, TopNTitle } from "@features/primitives";
+import { TopNChart } from "./TopNChart";
+import { TopNTitle } from "./TopNTitle";
 
 type Props = {
   appId: string;

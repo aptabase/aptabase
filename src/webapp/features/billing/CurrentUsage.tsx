@@ -1,4 +1,4 @@
-import { PingSignal } from "@features/primitives";
+import { PingSignal } from "@components/PingSignal";
 import { BillingInfo } from "./useBilling";
 import { twMerge } from "tailwind-merge";
 

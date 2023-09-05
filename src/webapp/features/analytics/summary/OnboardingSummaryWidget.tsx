@@ -1,5 +1,5 @@
+import { PingSignal } from "@components/PingSignal";
 import { AppIcon, Application } from "@features/apps";
-import { PingSignal } from "@features/primitives";
 import { Link } from "react-router-dom";
 
 type Props = {

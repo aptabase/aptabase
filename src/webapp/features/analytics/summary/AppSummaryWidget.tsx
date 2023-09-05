@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { keyMetrics, periodicStats } from "../query";
 import { NumbersChart } from "./NumbersChart";
-import { GrowthIndicator } from "@features/primitives";
+import { GrowthIndicator } from "@components/GrowthIndicator";
 
 type Props = {
   app: Application;

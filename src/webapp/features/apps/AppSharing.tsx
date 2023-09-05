@@ -1,5 +1,5 @@
 import { Application } from "@features/apps";
-import { api } from "@features/primitives";
+import { api } from "@fns/api";
 import { IconHelp } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";

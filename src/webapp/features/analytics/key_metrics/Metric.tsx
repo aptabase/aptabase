@@ -1,4 +1,5 @@
-import { GrowthIndicator, formatNumber } from "@features/primitives";
+import { GrowthIndicator } from "@components/GrowthIndicator";
+import { formatNumber } from "@fns/format-number";
 import { twJoin, twMerge } from "tailwind-merge";
 
 type Props = {

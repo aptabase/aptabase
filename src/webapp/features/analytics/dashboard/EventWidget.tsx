@@ -2,7 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import { TopNDataContainer } from "./TopNDataContainer";
 import { topEvents } from "../query";
 import { TopEventProps } from "./TopEventProps";
-import { TopNChart } from "@features/primitives";
+import { TopNChart } from "./TopNChart";
 
 type Props = {
   appId: string;

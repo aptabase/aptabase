@@ -1,4 +1,4 @@
-import { api } from "../primitives";
+import { api } from "@fns/api";
 
 export type TopNItem = {
   name: string;

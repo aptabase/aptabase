@@ -2,7 +2,8 @@ import { useSearchParams } from "react-router-dom";
 import { TopNDataContainer } from "./TopNDataContainer";
 import { topCountries, topRegions } from "../query";
 import { Country } from "./Country";
-import { TopNChart, TopNTitle } from "@features/primitives";
+import { TopNChart } from "./TopNChart";
+import { TopNTitle } from "./TopNTitle";
 
 type Props = {
   appId: string;

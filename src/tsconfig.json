@@ -16,6 +16,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
+      "@fns/*": ["./webapp/fns/*"],
       "@hooks/*": ["./webapp/hooks/*"],
       "@components/*": ["./webapp/components/*"],
       "@features/*": ["./webapp/features/*"]

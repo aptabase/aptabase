@@ -3,7 +3,8 @@ import { Fragment, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { topEventProps } from "../query";
 import { useApps } from "@features/apps";
-import { TopNChart, TopNTitle } from "@features/primitives";
+import { TopNChart } from "./TopNChart";
+import { TopNTitle } from "./TopNTitle";
 
 type Props = {
   appId: string;

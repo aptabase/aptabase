@@ -1,4 +1,3 @@
-import { TopNChart } from "@features/primitives";
 import { Application, getAppById } from "@features/apps";
 import { useQuery } from "@tanstack/react-query";
 import { WaitingForEventsPopup } from "./WaitingForEventsPopup";
@@ -8,6 +7,7 @@ import { OS } from "./OS";
 import { Metric } from "../key_metrics/Metric";
 import { KeyMetricsContainer } from "../key_metrics/MetricsContainer";
 import { Page, PageHeading } from "@components/Page";
+import { TopNChart } from "./TopNChart";
 
 type Props = {
   app: Application;

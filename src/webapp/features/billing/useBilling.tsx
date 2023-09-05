@@ -1,6 +1,6 @@
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
-import { api } from "../primitives";
-import { isBillingEnabled } from "../env";
+import { api } from "@fns/api";
+import { isBillingEnabled } from "@features/env";
 
 export type BillingInfo = {
   usage: number;

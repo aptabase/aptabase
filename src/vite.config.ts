@@ -49,6 +49,10 @@ export default defineConfig({
         replacement: path.resolve(__dirname, "./webapp/components"),
       },
       {
+        find: "@fns",
+        replacement: path.resolve(__dirname, "./webapp/fns"),
+      },
+      {
         find: "@hooks",
         replacement: path.resolve(__dirname, "./webapp/hooks"),
       },

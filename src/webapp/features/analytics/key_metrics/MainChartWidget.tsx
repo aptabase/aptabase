@@ -1,4 +1,3 @@
-import { formatNumber } from "@features/primitives";
 import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseJSON } from "date-fns";
@@ -9,6 +8,7 @@ import { KeyMetrics } from "./KeyMetrics";
 import { useApps } from "@features/apps";
 import { hourCycle } from "@features/env";
 import { MetricsChart } from "./MetricsChart";
+import { formatNumber } from "@fns/format-number";
 
 type Props = {
   appId: string;

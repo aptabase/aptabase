@@ -1,4 +1,4 @@
-import { api } from "../primitives";
+import { api } from "@fns/api";
 import { trackEvent } from "@aptabase/web";
 
 export type UserAccount = {

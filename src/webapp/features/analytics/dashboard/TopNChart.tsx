@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { TopNSkeleton } from "./TopNSkeleton";
 import { TopNTitle } from "./TopNTitle";
-import { formatNumber } from "./";
 import { EmptyState } from "@components/EmptyState";
 import { ErrorState } from "@components/ErrorState";
+import { formatNumber } from "@fns/format-number";
 
 type Item = {
   name: string;

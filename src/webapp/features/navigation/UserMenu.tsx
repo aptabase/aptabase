@@ -1,5 +1,4 @@
 import React, { Fragment } from "react";
-import { PingSignal } from "@features/primitives";
 import { Menu, Transition } from "@headlessui/react";
 import { IconCreditCard, IconDoorExit } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
@@ -8,6 +7,7 @@ import { isBillingEnabled } from "../env";
 import { signOut, UserAccount, UserAvatar } from "../auth";
 import { twMerge } from "tailwind-merge";
 import { RegionFlag } from "@components/RegionFlag";
+import { PingSignal } from "@components/PingSignal";
 
 type Props = {
   user: UserAccount;

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { isSupportEnabled } from "@features/env";
 import { ContactUsLink } from "@features/support";
-import { PingSignal } from "@features/primitives";
+import { PingSignal } from "@components/PingSignal";
 
 type Props = {
   appId: string;

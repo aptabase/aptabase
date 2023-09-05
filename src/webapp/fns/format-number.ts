@@ -1,5 +1,4 @@
-import { format, formatDuration, intervalToDuration } from "date-fns";
-import { enUS } from "date-fns/locale";
+import { formatDuration, intervalToDuration } from "date-fns";
 
 const formatDistanceLocale: Record<string, string> = {
   xSeconds: "{{count}}s",
@@ -36,10 +35,4 @@ export function formatNumber(value: number | undefined, format?: "number" | "dur
   }
 
   return formatLargeNumber(value ?? 0);
-}
-
-export function formatDate(value: Date | string | undefined): string {
-  if (!value) return "";
-
-  return format(new Date(value), "PP", { locale: enUS });
 }

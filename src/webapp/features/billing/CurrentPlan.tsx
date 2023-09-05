@@ -1,8 +1,9 @@
-import { api, formatDate } from "../primitives";
+import { api } from "@fns/api";
 import { useState } from "react";
 import { SubscriptionStatusBadge } from "./SubscriptionStatusBadge";
 import { BillingInfo } from "./useBilling";
 import { Button } from "@components/Button";
+import { formatDate } from "@fns/format-date";
 
 type Props = {
   billing: BillingInfo;
