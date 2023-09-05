@@ -1,7 +1,8 @@
 import { Application } from "@features/apps";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/Tooltip";
-import { Button, api, formatDate } from "@features/primitives";
+import { api, formatDate } from "@features/primitives";
 import { IconShareOff } from "@tabler/icons-react";
+import { Button } from "@components/Button";
 
 type Props = {
   app: Application;

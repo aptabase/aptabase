@@ -1,5 +1,5 @@
 import { region } from "@features/env";
-import { RegionFlag } from "@features/primitives";
+import { RegionFlag } from "@components/RegionFlag";
 
 export function DataResidency() {
   if (!region) return null;

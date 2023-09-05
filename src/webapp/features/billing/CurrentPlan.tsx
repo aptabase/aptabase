@@ -1,7 +1,8 @@
-import { Button, api, formatDate } from "../primitives";
+import { api, formatDate } from "../primitives";
 import { useState } from "react";
 import { SubscriptionStatusBadge } from "./SubscriptionStatusBadge";
 import { BillingInfo } from "./useBilling";
+import { Button } from "@components/Button";
 
 type Props = {
   billing: BillingInfo;
@@ -11,8 +12,7 @@ export function CurrentPlan(props: Props) {
   const [loading, setLoading] = useState(false);
 
   const status = props.billing.subscription?.status;
-  const expiresOn =
-    status === "cancelled" ? props.billing.subscription?.endsAt : undefined;
+  const expiresOn = status === "cancelled" ? props.billing.subscription?.endsAt : undefined;
   const isExpired = status === "expired";
   const hasSubscription = !!props.billing.subscription;
 
@@ -54,9 +54,7 @@ We're working on making this easier.`
         <p className="flex items-center mb-1 justify-between text-xs">
           <SubscriptionStatusBadge status={status} />
           {expiresOn && (
-            <span className="text-muted-foreground">
-              Expires on {formatDate(expiresOn)}
-            </span>
+            <span className="text-muted-foreground">Expires on {formatDate(expiresOn)}</span>
           )}
         </p>
       )}

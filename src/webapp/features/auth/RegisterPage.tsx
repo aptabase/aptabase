@@ -1,5 +1,5 @@
 import { requestRegisterLink } from "@features/auth";
-import { Button, Page, TextInput } from "@features/primitives";
+import { Page, TextInput } from "@features/primitives";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { DataResidency } from "./DataResidency";
@@ -9,6 +9,7 @@ import { SignInWithGitHub } from "./SignInWithGitHub";
 import { SignInWithGoogle } from "./SignInWithGoogle";
 import { isOAuthEnabled } from "@features/env";
 import { Logo } from "./Logo";
+import { Button } from "@components/Button";
 
 type FormStatus = "idle" | "loading" | "success";
 

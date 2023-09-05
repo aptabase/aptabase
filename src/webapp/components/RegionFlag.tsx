@@ -1,4 +1,4 @@
-import { region } from "../env";
+import { region } from "@features/env";
 
 const flags: { [host: string]: string } = {
   us: new URL(`./icons/us.svg`, import.meta.url).href,

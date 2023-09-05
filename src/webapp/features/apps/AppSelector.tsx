@@ -6,7 +6,6 @@ import { CreateAppModal } from "./CreateAppModal";
 import { IconPlus, IconSelector } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { AppIcon } from "./AppIcon";
-import { Button } from "../primitives";
 
 type OptionProps = {
   value?: Application;

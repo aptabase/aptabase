@@ -3,16 +3,16 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
-  Button,
   ErrorState,
   LoadingState,
   TextInput,
   api,
 } from "@features/primitives";
-import { IconHelp, IconTerminal } from "@tabler/icons-react";
+import { IconHelp } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { AppShareListItem } from "./AppShareListItem";
+import { Button } from "@components/Button";
 
 type AppShare = {
   email: string;
@@ -77,8 +77,8 @@ export function AppSharing(props: Props) {
         <IconHelp className="h-4 w-4" />
         <AlertTitle>What is App Sharing?</AlertTitle>
         <AlertDescription className="text-muted-foreground">
-          Sharing an app with other users allow them to have read-only access to
-          your app's dashboard.
+          Sharing an app with other users allow them to have read-only access to your app's
+          dashboard.
           <br />
           You remain the owner of the app and can revoke access at any time.
         </AlertDescription>

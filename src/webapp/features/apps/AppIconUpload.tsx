@@ -1,4 +1,4 @@
-import { Button } from "../primitives";
+import { Button } from "@components/Button";
 import { IconCube } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { AppIcon } from "./AppIcon";

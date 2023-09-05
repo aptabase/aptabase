@@ -1,5 +1,4 @@
 export * from "./Alert";
-export * from "./Button";
 export * from "./DateRangePicker";
 export * from "./GrowthIndicator";
 export * from "./EmptyState";
@@ -9,7 +8,6 @@ export * from "./LoadingState";
 export * from "./Page";
 export * from "./format";
 export * from "./PageHeading";
-export * from "./Region";
 export * from "./Select";
 export * from "./TextInput";
 export * from "./api";

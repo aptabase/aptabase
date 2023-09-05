@@ -1,8 +1,9 @@
 import { useApps } from "@features/apps";
 import { useAuth } from "@features/auth";
-import { Button, TextInput } from "@features/primitives";
+import { TextInput } from "@features/primitives";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@components/Button";
 
 export function LonelyState() {
   const user = useAuth();

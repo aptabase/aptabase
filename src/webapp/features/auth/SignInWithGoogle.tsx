@@ -1,4 +1,4 @@
-import { Button } from "@features/primitives";
+import { Button } from "@components/Button";
 
 export function SignInWithGoogle() {
   const url = `/api/_auth/google`;
