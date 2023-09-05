@@ -17,14 +17,6 @@ export default defineConfig({
         manualChunks: {
           react: ["react", "react-router-dom", "react-dom"],
           chartjs: ["chart.js", "chartjs-plugin-annotation"],
-          motion: ["framer-motion"],
-          markdown: [
-            "react-markdown",
-            "rehype-raw",
-            "rehype-highlight",
-            "remark-gfm",
-            "highlight.js",
-          ],
         },
       },
     },
