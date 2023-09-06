@@ -26,11 +26,11 @@ public class IngestionCacheTests
         _queries.Setup(q => q.GetActiveAppByAppKey(It.IsAny<string>(), default)).ReturnsAsync((Application?)null);
 
         var appId = await _sut.FindByAppKey("A-DEV-000", default);
-        appId.Should().BeEmpty();
+        appId.Should().Be(CachedApplication.Empty);
         _cache.Count.Should().Be(1);
 
         var appId2 = await _sut.FindByAppKey("A-DEV-000", default);
-        appId2.Should().BeEmpty();
+        appId2.Should().Be(CachedApplication.Empty);
         _cache.Count.Should().Be(1);
 
         _queries.Verify(q => q.GetActiveAppByAppKey(It.IsAny<string>(), default), Times.Once());
