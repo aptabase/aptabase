@@ -11,6 +11,7 @@ public class Application
     public string IconPath { get; set; } = "";
     public bool HasEvents { get; set; } = false;
     public bool HasOwnership { get; set; } = false;
+    public bool IsLocked { get; set; } = false;
 }
 
 public interface IAppQueries
@@ -31,9 +32,13 @@ public class AppQueries : IAppQueries
     public Task<Application?> GetActiveAppByAppKey(string appKey, CancellationToken cancellationToken)
     {
         var cmd = new CommandDefinition(@"
-            SELECT id, name, icon_path, app_key, has_events
-            FROM apps
-            WHERE app_key = @appKey AND deleted_at IS NULL",
+            SELECT a.id, a.name, a.icon_path, 
+                   a.app_key, a.has_events, 
+                   u.lock_reason IS NOT NULL AS is_locked
+            FROM apps a
+            INNER JOIN users u
+            ON u.id = a.owner_id
+            WHERE a.app_key = @appKey AND a.deleted_at IS NULL",
             new { appKey },
             cancellationToken: cancellationToken
         );

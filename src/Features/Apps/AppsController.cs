@@ -47,16 +47,20 @@ public class AppsController : Controller
     [HttpGet("/api/_apps")]
     public async Task<IActionResult> ListApps()
     {
-        var user = this.GetCurrentUser();
+        var user = this.GetCurrentUserIdentity();
 
         var apps = await _db.Connection.QueryAsync<Application>(
-            @"SELECT a.id, a.name, a.icon_path, a.app_key, a.owner_id = @userId as has_ownership, a.has_events
+            @"SELECT a.id, a.name, a.icon_path, a.app_key, 
+                     a.owner_id = @userId AS has_ownership, a.has_events, 
+                     u.lock_reason IS NOT NULL AS is_locked
               FROM apps a
               LEFT JOIN app_shares s
               ON s.app_id = a.id
+              INNER JOIN users u
+              ON u.id = a.owner_id
               WHERE (a.owner_id = @userId OR s.email = @userEmail)
               AND a.deleted_at IS NULL
-              GROUP BY a.id, a.name, a.icon_path, a.app_key
+              GROUP BY a.id, a.name, a.icon_path, a.app_key, u.lock_reason
               ORDER by a.name", new { userId = user.Id, userEmail = user.Email });
               
         return Ok(apps);
@@ -65,7 +69,7 @@ public class AppsController : Controller
     [HttpPost("/api/_apps")]
     public async Task<IActionResult> Create([FromBody] CreateAppRequestBody body)
     {
-        var user = this.GetCurrentUser();
+        var user = this.GetCurrentUserIdentity();
         var app = new Application
         {
             Id = NanoId.New(),
@@ -90,17 +94,21 @@ public class AppsController : Controller
     [HttpGet("/api/_apps/{appId}")]
     public async Task<IActionResult> GetAppById(string appId)
     {
-        var user = this.GetCurrentUser();
+        var user = this.GetCurrentUserIdentity();
 
         var app = await _db.Connection.QueryFirstOrDefaultAsync<Application>(
-            @"SELECT a.id, a.name, a.icon_path, a.app_key, a.owner_id = @userId as has_ownership, a.has_events
+            @"SELECT a.id, a.name, a.icon_path, a.app_key, 
+                     a.owner_id = @userId as has_ownership, a.has_events,
+                     u.lock_reason IS NOT NULL AS is_locked
               FROM apps a
               LEFT JOIN app_shares s
               ON s.app_id = a.id
+              INNER JOIN users u
+              ON u.id = a.owner_id
               WHERE a.id = @appId
               AND (a.owner_id = @userId OR s.email = @userEmail)
               AND a.deleted_at IS NULL
-              GROUP BY a.id, a.name, a.icon_path, a.app_key
+              GROUP BY a.id, a.name, a.icon_path, a.app_key, u.lock_reason
               ORDER by a.name",
             new { appId, userId = user.Id, userEmail = user.Email }
         );
@@ -198,13 +206,16 @@ public class AppsController : Controller
 
     private async Task<Application?> GetOwnedApp(string appId)
     {
-        var user = this.GetCurrentUser();
+        var user = this.GetCurrentUserIdentity();
         return await _db.Connection.QueryFirstOrDefaultAsync<Application>(
-            @"SELECT id, name, icon_path, app_key, true as has_ownership, has_events
-              FROM apps
+            @"SELECT a.id, a.name, a.icon_path, a.app_key, true as has_ownership, 
+                     a.has_events, u.lock_reason IS NOT NULL AS is_locked
+              FROM apps a
               WHERE id = @appId
-              AND owner_id = @userId
-              AND deleted_at IS NULL",
+              INNER JOIN users u
+              ON u.id = a.owner_id
+              AND a.owner_id = @userId
+              AND a.deleted_at IS NULL",
             new { appId, userId = user.Id }
         );
     }

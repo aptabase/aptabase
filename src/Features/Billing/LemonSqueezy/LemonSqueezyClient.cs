@@ -23,7 +23,7 @@ public class LemonSqueezyClient
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<string?> CreateCheckout(UserAccount user, CancellationToken cancellationToken)
+    public async Task<string?> CreateCheckout(UserIdentity user, CancellationToken cancellationToken)
     {
         var body = new {
             data = new {

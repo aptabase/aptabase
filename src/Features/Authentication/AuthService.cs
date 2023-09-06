@@ -13,6 +13,7 @@ public interface IAuthService
     Task SendRegisterEmailAsync(string name, string email, CancellationToken cancellationToken);
     Task SignInAsync(UserAccount user);
     Task SignOutAsync();
+    Task<UserAccount?> FindUserById(string id, CancellationToken cancellationToken);
     Task<UserAccount?> FindUserByEmail(string email, CancellationToken cancellationToken);
     Task<UserAccount?> FindUserByOAuthProvider(string providerName, string providerUid, CancellationToken cancellationToken);
     Task<UserAccount> FindOrCreateAccountWithOAuth(string name, string email, string providerName, string providerUid, CancellationToken cancellationToken);
@@ -95,7 +96,7 @@ public class AuthService : IAuthService
             }, cancellationToken);
         }
 
-        return new UserAccount(userId, name, email);
+        return new UserAccount(new UserIdentity(userId, name, email));
     }
 
     public async Task SignOutAsync()
@@ -117,7 +118,6 @@ public class AuthService : IAuthService
         var claims = new List<Claim>
         {
             new Claim("id", user.Id),
-            new Claim("name", user.Name),
             new Claim("email", user.Email),
         };
 
@@ -136,9 +136,15 @@ public class AuthService : IAuthService
             authProperties);
     }
 
+    public async Task<UserAccount?> FindUserById(string id, CancellationToken cancellationToken)
+    {
+        var cmd = new CommandDefinition($"SELECT id, name, email, lock_reason FROM users WHERE id = @id", new { id }, cancellationToken: cancellationToken);
+        return await _db.Connection.QuerySingleOrDefaultAsync<UserAccount>(cmd);
+    }
+
     public async Task<UserAccount?> FindUserByEmail(string email, CancellationToken cancellationToken)
     {
-        var cmd = new CommandDefinition($"SELECT id, name, email FROM users WHERE email = @email", new { email = email.ToLower() }, cancellationToken: cancellationToken);
+        var cmd = new CommandDefinition($"SELECT id, name, email, lock_reason FROM users WHERE email = @email", new { email = email.ToLower() }, cancellationToken: cancellationToken);
         return await _db.Connection.QuerySingleOrDefaultAsync<UserAccount>(cmd);
     }
 
@@ -148,22 +154,22 @@ public class AuthService : IAuthService
         if (user is not null)
             return user;
 
-        user = await this.FindUserByEmail(email, cancellationToken);
+        user = await FindUserByEmail(email, cancellationToken);
         if (user is not null)
         {
-            await this.AttachUserAuthProviderAsync(user, providerName, providerUid, cancellationToken);
+            await AttachUserAuthProviderAsync(user, providerName, providerUid, cancellationToken);
             return user;
         }
 
-        user = await this.CreateAccountAsync(name, email, cancellationToken);
-        await this.AttachUserAuthProviderAsync(user, providerName, providerUid, cancellationToken);
+        user = await CreateAccountAsync(name, email, cancellationToken);
+        await AttachUserAuthProviderAsync(user, providerName, providerUid, cancellationToken);
         return user;
     }
 
     public async Task<UserAccount?> FindUserByOAuthProvider(string providerName, string providerUid, CancellationToken cancellationToken)
     {
         var cmd = new CommandDefinition($@"
-            SELECT u.id, u.name, u.email
+            SELECT u.id, u.name, u.email, u.lock_reason
             FROM user_providers up
             INNER JOIN users u
             ON u.id = up.user_id

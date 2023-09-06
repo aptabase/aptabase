@@ -32,7 +32,7 @@ public class BillingController : Controller
     [HttpGet("/api/_billing")]
     public async Task<IActionResult> BillingState(CancellationToken cancellationToken)
     {
-        var user = this.GetCurrentUser();
+        var user = this.GetCurrentUserIdentity();
         var releaseAppIds = await _db.Connection.QueryAsync<string>(@"SELECT id FROM apps WHERE owner_id = @userId", new { userId = user.Id });
         var debugAppIds = releaseAppIds.Select(id => $"{id}_DEBUG");
         var appIds = releaseAppIds.Concat(debugAppIds).ToArray();
@@ -65,13 +65,13 @@ public class BillingController : Controller
     [HttpPost("/api/_billing/checkout")]
     public async Task<IActionResult> GenerateCheckoutUrl(CancellationToken cancellationToken)
     {
-        var user = this.GetCurrentUser();
+        var user = this.GetCurrentUserIdentity();
         var url = await _lsClient.CreateCheckout(user, cancellationToken);
 
         return Ok(new { url });
     }
 
-    private async Task<Subscription?> GetUserSubscription(UserAccount user)
+    private async Task<Subscription?> GetUserSubscription(UserIdentity user)
     {
         return await _db.Connection.QueryFirstOrDefaultAsync<Subscription>(
             @"SELECT * FROM subscriptions 
