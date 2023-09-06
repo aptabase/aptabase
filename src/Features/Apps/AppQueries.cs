@@ -11,7 +11,7 @@ public class Application
     public string IconPath { get; set; } = "";
     public bool HasEvents { get; set; } = false;
     public bool HasOwnership { get; set; } = false;
-    public bool IsLocked { get; set; } = false;
+    public char? LockReason { get; set; }
 }
 
 public interface IAppQueries
@@ -34,7 +34,7 @@ public class AppQueries : IAppQueries
         var cmd = new CommandDefinition(@"
             SELECT a.id, a.name, a.icon_path, 
                    a.app_key, a.has_events, 
-                   u.lock_reason IS NOT NULL AS is_locked
+                   u.lock_reason
             FROM apps a
             INNER JOIN users u
             ON u.id = a.owner_id

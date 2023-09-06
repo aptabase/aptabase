@@ -7,9 +7,11 @@ import { useSearchParams } from "react-router-dom";
 import { AppConfigMenu } from "./mode/AppConfigMenu";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
 import { AppSummaryWidget } from "./summary/AppSummaryWidget";
-import { OnboardingSummaryWidget } from "./summary/OnboardingSummaryWidget";
 import { DateRangePicker } from "./DateRangePicker";
 import { LazyLoad } from "@components/LazyLoad";
+import { EmptyStateWidget } from "./summary/EmptyStateWidget";
+import { WaitingForEventsInfo } from "./summary/WaitingForEventsInfo";
+import { AppLockedContent } from "./locked/AppLockedContent";
 
 Component.displayName = "HomePage";
 export function Component() {
@@ -44,10 +46,16 @@ export function Component() {
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
         {apps.map((app) => (
           <LazyLoad className="h-48" key={app.id}>
-            {app.hasEvents ? (
+            {app.lockReason ? (
+              <EmptyStateWidget app={app}>
+                <AppLockedContent reason={app.lockReason} />
+              </EmptyStateWidget>
+            ) : app.hasEvents ? (
               <AppSummaryWidget app={app} buildMode={buildMode} />
             ) : (
-              <OnboardingSummaryWidget app={app} />
+              <EmptyStateWidget app={app}>
+                <WaitingForEventsInfo />
+              </EmptyStateWidget>
             )}
           </LazyLoad>
         ))}

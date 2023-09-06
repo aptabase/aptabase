@@ -52,7 +52,7 @@ public class AppsController : Controller
         var apps = await _db.Connection.QueryAsync<Application>(
             @"SELECT a.id, a.name, a.icon_path, a.app_key, 
                      a.owner_id = @userId AS has_ownership, a.has_events, 
-                     u.lock_reason IS NOT NULL AS is_locked
+                     u.lock_reason
               FROM apps a
               LEFT JOIN app_shares s
               ON s.app_id = a.id
@@ -99,7 +99,7 @@ public class AppsController : Controller
         var app = await _db.Connection.QueryFirstOrDefaultAsync<Application>(
             @"SELECT a.id, a.name, a.icon_path, a.app_key, 
                      a.owner_id = @userId as has_ownership, a.has_events,
-                     u.lock_reason IS NOT NULL AS is_locked
+                     u.lock_reason
               FROM apps a
               LEFT JOIN app_shares s
               ON s.app_id = a.id
@@ -209,7 +209,7 @@ public class AppsController : Controller
         var user = this.GetCurrentUserIdentity();
         return await _db.Connection.QueryFirstOrDefaultAsync<Application>(
             @"SELECT a.id, a.name, a.icon_path, a.app_key, true as has_ownership, 
-                     a.has_events, u.lock_reason IS NOT NULL AS is_locked
+                     a.has_events, u.lock_reason
               FROM apps a
               WHERE id = @appId
               INNER JOIN users u

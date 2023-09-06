@@ -16,7 +16,7 @@ public class CachedApplication
     public CachedApplication(Application app)
     {
         Id = app.Id;
-        IsLocked = app.IsLocked;
+        IsLocked = app.LockReason.HasValue;
     }
 
     public static CachedApplication Empty => new CachedApplication();

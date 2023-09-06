@@ -12,6 +12,8 @@ import { EventWidget } from "./dashboard/EventWidget";
 import { OnboardingDashboard } from "./dashboard/OnboardingDashboard";
 import { DateRangePicker } from "./DateRangePicker";
 import { LazyLoad } from "@components/LazyLoad";
+import { TeaserDashboardContainer } from "./dashboard/TeaserDashboardContainer";
+import { AppLockedContent } from "./locked/AppLockedContent";
 
 Component.displayName = "DashboardPage";
 
@@ -21,6 +23,14 @@ export function Component() {
   const navigate = useNavigate();
 
   if (!app) return <Navigate to="/" />;
+  if (app.lockReason) {
+    return (
+      <TeaserDashboardContainer app={app}>
+        <AppLockedContent reason={app.lockReason} />
+      </TeaserDashboardContainer>
+    );
+  }
+
   if (!app.hasEvents) return <OnboardingDashboard app={app} />;
 
   const resetFilters = () => navigate(`/${app.id}/`);
