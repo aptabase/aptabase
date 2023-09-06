@@ -1,12 +1,30 @@
 using Aptabase.Features.Apps;
-using ClickHouse.Client.Utility;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Aptabase.Features.Ingestion;
 
+public class CachedApplication
+{
+    public string Id { get; private set; }
+    public bool IsLocked { get; private set; }
+
+    public CachedApplication()
+    {
+        Id = string.Empty;
+    }
+
+    public CachedApplication(Application app)
+    {
+        Id = app.Id;
+        IsLocked = app.IsLocked;
+    }
+
+    public static CachedApplication Empty => new CachedApplication();
+}
+
 public interface IIngestionCache
 {
-    Task<string> FindByAppKey(string appKey, CancellationToken cancellationToken);
+    Task<CachedApplication> FindByAppKey(string appKey, CancellationToken cancellationToken);
 }
 
 public class IngestionCache : IIngestionCache
@@ -23,26 +41,27 @@ public class IngestionCache : IIngestionCache
         _appQueries = appQueries ?? throw new ArgumentNullException(nameof(appQueries));
     }
 
-    public async Task<string> FindByAppKey(string appKey, CancellationToken cancellationToken)
+    public async Task<CachedApplication> FindByAppKey(string appKey, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(appKey))
-            return string.Empty;
+            return CachedApplication.Empty;
 
         var cacheKey = $"APP-KEY-STATUS-{appKey}";
-        if (_cache.TryGetValue(cacheKey, out string? cachedAppId))
-            return string.IsNullOrEmpty(cachedAppId) ? string.Empty : cachedAppId;
+        if (_cache.TryGetValue(cacheKey, out CachedApplication? cachedApp) && cachedApp is not null)
+            return cachedApp;
 
         var app = await _appQueries.GetActiveAppByAppKey(appKey, cancellationToken);
         if (app is null)
         {
-            _cache.Set(cacheKey, string.Empty, FailureCacheDuration);
-            return string.Empty;
+            _cache.Set(cacheKey, CachedApplication.Empty, FailureCacheDuration);
+            return CachedApplication.Empty;
         }
 
         if (!app.HasEvents) 
             await _appQueries.MaskAsOnboarded(app.Id, cancellationToken);
         
-        _cache.Set(cacheKey, app.Id, SuccessCacheDuration);
-        return app.Id;
+        cachedApp = new CachedApplication(app);
+        _cache.Set(cacheKey, cachedApp, SuccessCacheDuration);
+        return cachedApp;
     }
 }
