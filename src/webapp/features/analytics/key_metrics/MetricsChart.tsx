@@ -1,35 +1,14 @@
-import {
-  BarController,
-  LineController,
-  BarElement,
-  LineElement,
-  PointElement,
-  CategoryScale,
-  Chart,
-  LinearScale,
-  Tooltip,
-  ScriptableContext,
-} from "chart.js";
-import Annotation, { LineAnnotationOptions } from "chartjs-plugin-annotation";
-import { useEffect, useRef, useState } from "react";
 import colors from "./colors";
+import { useRef, useState } from "react";
 import { EmptyState } from "@components/EmptyState";
 import { ErrorState } from "@components/ErrorState";
 import { LoadingState } from "@components/LoadingState";
-
-Chart.defaults.font.family = "'Inter var', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
-
-Chart.register(
-  BarController,
-  BarElement,
-  LineController,
-  LineElement,
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Annotation
-);
+import {
+  Chart,
+  type LineAnnotationOptions,
+  type ScriptableContext,
+  type ChartConfigurationCustomTypesPerDataset,
+} from "@components/Chart";
 
 type Props = {
   hasPartialData: boolean;
@@ -56,192 +35,176 @@ type TooltipDataPoint = {
 };
 
 export function MetricsChart(props: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [tooltipDataPoint, setTooltipDataPoint] = useState<TooltipDataPoint | null>(null);
-  let chartInstance: Chart;
 
   const showAllLabels = props.granularity === "month";
   const activeMetricLabel =
-    props.activeMetric === "sessions"
-      ? "Sessions"
-      : props.granularity === "month"
-      ? "Avg. Daily Users"
-      : "Users";
+    props.activeMetric === "sessions" ? "Sessions" : props.granularity === "month" ? "Avg. Daily Users" : "Users";
 
-  useEffect(() => {
-    if (!canvasRef.current) return;
-
-    chartInstance = new Chart(canvasRef.current, {
-      data: {
-        labels: props.labels,
-        datasets: [
-          {
-            order: 2,
-            type: "bar",
-            label: activeMetricLabel,
-            yAxisID: props.activeMetric,
-            data: props[props.activeMetric],
-            backgroundColor: props.hasPartialData
-              ? (ctx: ScriptableContext<"bar">) => {
-                  const total = ctx.chart.data.datasets[0].data.length;
-                  return total - 1 === ctx.dataIndex ? colors.primaryStripped : colors.primary;
+  const config: ChartConfigurationCustomTypesPerDataset = {
+    data: {
+      labels: props.labels,
+      datasets: [
+        {
+          order: 2,
+          type: "bar",
+          label: activeMetricLabel,
+          yAxisID: props.activeMetric,
+          data: props[props.activeMetric],
+          backgroundColor: props.hasPartialData
+            ? (ctx: ScriptableContext<"bar">) => {
+                const total = ctx.chart.data.datasets[0].data.length;
+                return total - 1 === ctx.dataIndex ? colors.primaryStripped : colors.primary;
+              }
+            : colors.primary,
+          borderRadius: 2,
+        },
+        {
+          order: 1,
+          type: "line",
+          label: "Events",
+          data: props.events,
+          yAxisID: "events",
+          hidden: !props.showEvents,
+          borderColor: colors.secondary,
+          tension: 0.2,
+          borderWidth: 3,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          segment: {
+            borderDash: props.hasPartialData
+              ? (ctx) => {
+                  const total = props.events.length || 0;
+                  return total - 1 === ctx.p1DataIndex ? [8, 8] : [];
                 }
-              : colors.primary,
-            borderRadius: 2,
+              : [],
           },
-          {
-            order: 1,
-            type: "line",
-            label: "Events",
-            data: props.events,
-            yAxisID: "events",
-            hidden: !props.showEvents,
-            borderColor: colors.secondary,
-            tension: 0.2,
-            borderWidth: 3,
-            pointRadius: 0,
-            pointHoverRadius: 0,
-            segment: {
-              borderDash: props.hasPartialData
-                ? (ctx) => {
-                    const total = chartInstance?.data.datasets[0].data.length || 0;
-                    return total - 1 === ctx.p1DataIndex ? [8, 8] : [];
-                  }
-                : [],
-            },
-          },
-        ],
+        },
+      ],
+    },
+    options: {
+      animation: false,
+      interaction: {
+        mode: "index",
+        intersect: false,
       },
-      options: {
-        animation: false,
-        interaction: {
-          mode: "index",
-          intersect: false,
-        },
-        maintainAspectRatio: false,
-        layout: {
-          padding: 0,
-        },
-        scales: {
-          x: {
-            grid: {
-              display: false,
-            },
-            ticks: {
-              autoSkip: true,
-              maxRotation: showAllLabels ? 45 : 0,
-              autoSkipPadding: showAllLabels ? 0 : 20,
-              maxTicksLimit: showAllLabels ? 0 : 8,
-              callback: function (value) {
-                const label = typeof value === "number" ? this.getLabelForValue(value) : value;
-                return props.formatLabel?.(label) ?? value;
-              },
-            },
-            border: {
-              display: false,
+      maintainAspectRatio: false,
+      layout: {
+        padding: 0,
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false,
+          },
+          ticks: {
+            autoSkip: true,
+            maxRotation: showAllLabels ? 45 : 0,
+            autoSkipPadding: showAllLabels ? 0 : 20,
+            maxTicksLimit: showAllLabels ? 0 : 8,
+            callback: function (value) {
+              const label = typeof value === "number" ? this.getLabelForValue(value) : value;
+              return props.formatLabel?.(label) ?? value;
             },
           },
-          [props.activeMetric]: {
-            grid: {
-              tickWidth: 0,
-            },
-            beginAtZero: true,
-            ticks: {
-              maxTicksLimit: 4,
-            },
-            border: {
-              display: false,
-              dash: [4, 4],
-            },
-          },
-          events: {
-            display: props.showEvents,
-            position: "right",
-            grid: {
-              tickWidth: 0,
-            },
-            beginAtZero: true,
-            ticks: {
-              maxTicksLimit: 4,
-            },
-            border: {
-              display: false,
-              dash: [4, 4],
-            },
+          border: {
+            display: false,
           },
         },
-        plugins: {
-          annotation: {
-            annotations: [
-              {
-                type: "line",
-                display: false,
-                borderColor: colors.highlight,
-                borderWidth: (ctx) => {
-                  const columns = ctx.chart.data.datasets[0].data.length;
-                  const chartWidth = ctx.chart.width + 100;
-                  return chartWidth / columns;
-                },
-              },
-            ],
+        [props.activeMetric]: {
+          grid: {
+            tickWidth: 0,
           },
-          tooltip: {
-            enabled: false,
-            position: "nearest",
-
-            external: function ({ tooltip, chart }) {
-              if (!tooltipRef.current) return;
-
-              const annotations = chartInstance.options.plugins?.annotation
-                ?.annotations as LineAnnotationOptions[];
-              const highlight = annotations[0];
-
-              if (tooltip.opacity === 0) {
-                tooltipRef.current.style.opacity = "0";
-                highlight.display = false;
-                chart.update("none");
-                return;
-              }
-
-              const dataPoint = tooltip.dataPoints[0];
-              const label = dataPoint.label;
-              const points = tooltip.dataPoints.map((dataPoint) => ({
-                name: dataPoint.dataset.label ?? "",
-                value: dataPoint.parsed.y ?? 0,
-              }));
-
-              setTooltipDataPoint({ label, points });
-
-              if (highlight && highlight.xMin !== dataPoint.dataIndex) {
-                highlight.display = true;
-                highlight.xMin = dataPoint.dataIndex;
-                highlight.xMax = dataPoint.dataIndex;
-                chart.update("none");
-              }
-
-              tooltipRef.current.style.opacity = "1";
-
-              var offsetY = Math.min(
-                ...tooltip.dataPoints.map((x) => x.element.tooltipPosition(true).y)
-              );
-
-              const isMobile = chart.height < 300;
-              const topOffset = isMobile ? 320 : 160;
-
-              const { offsetLeft: positionX } = chart.canvas;
-              tooltipRef.current.style.left = positionX + tooltip.caretX + "px";
-              tooltipRef.current.style.top = offsetY + topOffset + "px";
-              tooltipRef.current.style.padding =
-                tooltip.options.padding + "px " + tooltip.options.padding + "px";
-            },
+          beginAtZero: true,
+          ticks: {
+            maxTicksLimit: 4,
+          },
+          border: {
+            display: false,
+            dash: [4, 4],
+          },
+        },
+        events: {
+          display: props.showEvents,
+          position: "right",
+          grid: {
+            tickWidth: 0,
+          },
+          beginAtZero: true,
+          ticks: {
+            maxTicksLimit: 4,
+          },
+          border: {
+            display: false,
+            dash: [4, 4],
           },
         },
       },
-    });
+      plugins: {
+        annotation: {
+          annotations: [
+            {
+              type: "line",
+              display: false,
+              borderColor: colors.highlight,
+              borderWidth: (ctx) => {
+                const columns = ctx.chart.data.datasets[0].data.length;
+                const chartWidth = ctx.chart.width + 100;
+                return chartWidth / columns;
+              },
+            },
+          ],
+        },
+        tooltip: {
+          enabled: false,
+          position: "nearest",
 
-    return () => chartInstance.destroy();
-  }, [canvasRef, props]);
+          external: function ({ tooltip, chart }) {
+            if (!tooltipRef.current) return;
+
+            const annotations = chart.options.plugins?.annotation?.annotations as LineAnnotationOptions[];
+            const highlight = annotations[0];
+
+            if (tooltip.opacity === 0) {
+              tooltipRef.current.style.opacity = "0";
+              highlight.display = false;
+              chart.update("none");
+              return;
+            }
+
+            const dataPoint = tooltip.dataPoints[0];
+            const label = dataPoint.label;
+            const points = tooltip.dataPoints.map((dataPoint) => ({
+              name: dataPoint.dataset.label ?? "",
+              value: dataPoint.parsed.y ?? 0,
+            }));
+
+            setTooltipDataPoint({ label, points });
+
+            if (highlight && highlight.xMin !== dataPoint.dataIndex) {
+              highlight.display = true;
+              highlight.xMin = dataPoint.dataIndex;
+              highlight.xMax = dataPoint.dataIndex;
+              chart.update("none");
+            }
+
+            tooltipRef.current.style.opacity = "1";
+
+            var offsetY = Math.min(...tooltip.dataPoints.map((x) => x.element.tooltipPosition(true).y));
+
+            const isMobile = chart.height < 300;
+            const topOffset = isMobile ? 320 : 160;
+
+            const { offsetLeft: positionX } = chart.canvas;
+            tooltipRef.current.style.left = positionX + tooltip.caretX + "px";
+            tooltipRef.current.style.top = offsetY + topOffset + "px";
+            tooltipRef.current.style.padding = tooltip.options.padding + "px " + tooltip.options.padding + "px";
+          },
+        },
+      },
+    },
+  };
 
   return (
     <div className="h-60 md:h-80 w-full">
@@ -253,7 +216,7 @@ export function MetricsChart(props: Props) {
         <EmptyState />
       ) : (
         <>
-          <canvas ref={canvasRef}></canvas>
+          <Chart config={config} />
           <div
             ref={tooltipRef}
             style={{ opacity: 0 }}
