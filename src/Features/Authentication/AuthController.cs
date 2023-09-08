@@ -77,9 +77,13 @@ public class AuthController : Controller
     [HttpGet("/api/_auth/me")]
     [IsAuthenticated]
     [EnableCors("AllowAptabaseCom")]
-    public IActionResult Me()
+    public async Task<IActionResult> Me(CancellationToken cancellationToken)
     {
-        var user = this.GetCurrentUser();
+        var identity = this.GetCurrentUserIdentity();
+        var user = await _authService.FindUserById(identity.Id, cancellationToken);
+        if (user is null)
+            return NotFound();
+
         return Ok(user);
     }
 
