@@ -17,9 +17,9 @@
 
 # About the Project
 
-[Aptabase](https://aptabase.com) is an open-source alternative to Firebase/Google Analytics, specifically built for Mobile, Destkop and Web apps.
+[Aptabase](https://aptabase.com) is an open-source alternative to Firebase/Google Analytics, specifically built for Mobile, Desktop and Web apps.
 
-📱 **Extensive list of SDK**: No matter what framework or language you use, we have an SDK for you. Swift, Flutter, Electron, Kotlin and many others.
+📱 **Extensive list of SDK**: No matter what framework or language you use, we have an SDK for you. Swift, React Native, Flutter, Electron, Kotlin, and many others.
 
 😇 **Privacy-First**: We prioritize user privacy and collect minimal usage data without using unique identifiers. Instead, we focus on monitoring sessions, complying fully with GDPR, CCPA, and PECR regulations.
 
@@ -33,7 +33,7 @@
 
 ## ☁️ Managed Cloud
 
-The easiest and quickest way to get started. A fully managed services by the creators of Aptabase to help you get started in minutes. Forget about managing software updates and patches, we do it all for you!
+The easiest and quickest way to get started. A fully managed service by the creators of Aptabase to help you get started in minutes. Forget about managing software updates and patches; we do it all for you!
 
 [Try free now →](https://aptabase.com)
 
@@ -45,7 +45,7 @@ You can also host Aptabase on your servers. It's free, but you are responsible f
 
 # SDKs
 
-We provide SDKs for the most popular frameworks and languages to make it easier to integrate it into your app.
+We provide SDKs for the most popular frameworks and languages to make it easier to integrate them into your app.
 
 - [Swift (Apple)](https://github.com/aptabase/aptabase-swift)
 - [Android (Kotlin)](https://github.com/aptabase/aptabase-kotlin)
@@ -57,11 +57,12 @@ We provide SDKs for the most popular frameworks and languages to make it easier 
 - [Electron](https://github.com/aptabase/aptabase-electron)
 - [Web Apps](https://github.com/aptabase/aptabase-js)
 - [Unreal Engine](https://github.com/aptabase/aptabase-unreal)
+- [Unity Engine](https://github.com/aptabase/aptabase-unity)
 
 # Need help?
 
 - Find us on [Discord](https://discord.gg/d9d97unCUk) or [Twitter](https://twitter.com/aptabase)
-- Open a Github issue or a discussion on this repo
+- Open a GitHub issue or a discussion on this repo
 - Shoot us an email [hi@aptabase.com](mailto:hi@aptabase.com)
 
 # Credits

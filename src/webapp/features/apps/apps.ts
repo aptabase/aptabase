@@ -8,6 +8,7 @@ export type Application = {
   iconPath: string;
   hasEvents: boolean;
   hasOwnership: boolean;
+  lockReason?: string;
 };
 
 export async function listApps(): Promise<Application[]> {

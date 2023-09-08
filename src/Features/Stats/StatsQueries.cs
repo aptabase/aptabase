@@ -6,7 +6,7 @@ namespace Aptabase.Features.Stats;
 
 public static class StatsQueries
 {
-    public static async Task<bool> HasReadAccessToApp(this IDbContext db, string appId, UserAccount user, CancellationToken cancellationToken)
+    public static async Task<bool> HasReadAccessToApp(this IDbContext db, string appId, UserIdentity user, CancellationToken cancellationToken)
     {
         var cmd = new CommandDefinition(
             @"SELECT a.id

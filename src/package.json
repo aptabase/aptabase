@@ -47,6 +47,6 @@
     "vite": "4.4.6"
   },
   "prettier": {
-    "printWidth": 100
+    "printWidth": 120
   }
 }

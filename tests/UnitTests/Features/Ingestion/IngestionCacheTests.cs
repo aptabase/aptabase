@@ -25,12 +25,12 @@ public class IngestionCacheTests
     {
         _queries.Setup(q => q.GetActiveAppByAppKey(It.IsAny<string>(), default)).ReturnsAsync((Application?)null);
 
-        var appId = await _sut.FindByAppKey("A-DEV-000", default);
-        appId.Should().BeEmpty();
+        var app = await _sut.FindByAppKey("A-DEV-000", default);
+        app.Id.Should().Be(string.Empty);
         _cache.Count.Should().Be(1);
 
-        var appId2 = await _sut.FindByAppKey("A-DEV-000", default);
-        appId2.Should().BeEmpty();
+        var app2 = await _sut.FindByAppKey("A-DEV-000", default);
+        app2.Id.Should().Be(string.Empty);
         _cache.Count.Should().Be(1);
 
         _queries.Verify(q => q.GetActiveAppByAppKey(It.IsAny<string>(), default), Times.Once());
@@ -42,12 +42,12 @@ public class IngestionCacheTests
     {
         _queries.Setup(q => q.GetActiveAppByAppKey("A-DEV-000", default)).ReturnsAsync(new Application { Id = "1234" });
 
-        var appId = await _sut.FindByAppKey("A-DEV-000", default);
-        appId.Should().Be("1234");
+        var app = await _sut.FindByAppKey("A-DEV-000", default);
+        app.Id.Should().Be("1234");
         _cache.Count.Should().Be(1);
 
-        var appId2 = await _sut.FindByAppKey("A-DEV-000", default);
-        appId2.Should().Be("1234");
+        var app2 = await _sut.FindByAppKey("A-DEV-000", default);
+        app2.Id.Should().Be("1234");
         _cache.Count.Should().Be(1);
 
         _queries.Verify(q => q.GetActiveAppByAppKey(It.IsAny<string>(), default), Times.Once());

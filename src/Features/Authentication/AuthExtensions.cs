@@ -9,12 +9,12 @@ public static class AuthExtensions
         return context.User.Identity?.IsAuthenticated ?? false;
     }
 
-    public static UserAccount GetCurrentUser(this Controller controller)
+    public static UserIdentity GetCurrentUserIdentity(this Controller controller)
     {
-        return controller.HttpContext.GetCurrentUser();
+        return controller.HttpContext.GetCurrentUserIdentity();
     }
 
-    public static UserAccount GetCurrentUser(this HttpContext context)
+    public static UserIdentity GetCurrentUserIdentity(this HttpContext context)
     {
         if (!context.IsAuthenticated())
             throw new InvalidOperationException("User is not authenticated.");
@@ -22,6 +22,6 @@ public static class AuthExtensions
         var id = context.User.FindFirst(x => x.Type == "id")?.Value ?? "";
         var email = context.User.FindFirst(x => x.Type == "email")?.Value ?? "";
         var name = context.User.FindFirst(x => x.Type == "name")?.Value ?? "";
-        return new UserAccount(id, name, email);
+        return new UserIdentity(id, name, email);
     }
 }

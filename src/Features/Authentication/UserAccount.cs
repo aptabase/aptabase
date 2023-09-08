@@ -1,37 +1,36 @@
-using System.Security.Cryptography;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace Aptabase.Features.Authentication;
 
 public class UserAccount
 {
-    private static MD5 md5 = MD5.Create();
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string AvatarUrl => GetAvatarUrl();
+    public char? LockReason { get; set; }
 
-    public string Id { get; private set; } = "";
-    public string Name { get; private set; } = "";
-    public string Email { get; private set; } = "";
-    public string AvatarUrl { get; private set; } = "";
-
-    public UserAccount(string id, string name, string email)
+    public UserAccount()
     {
-        Id = id;
-        Name = name;
-        Email = email;
-        AvatarUrl = GetAvatarUrl(email);
+
     }
 
-    private string GetAvatarUrl(string email)
+    public UserAccount(UserIdentity identity)
     {
-        var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(email.Trim().ToLower()));
+        Id = identity.Id;
+        Name = identity.Name;
+        Email = identity.Email;
+    }
+
+    private static MD5 md5 = MD5.Create();
+    private string GetAvatarUrl()
+    {
+        var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(Email.Trim().ToLower()));
         var sb = new StringBuilder();
         foreach (var b in hash)
             sb.Append(b.ToString("x2"));
 
-        return $"https://aptabase.com/avatar/{sb.ToString()}?s=80&d=404";
+        return $"https://aptabase.com/avatar/{sb}?s=80&d=404";
     }
-}
-
-public enum UserRole
-{
-    Admin = 1,
 }

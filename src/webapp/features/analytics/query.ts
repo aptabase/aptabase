@@ -43,7 +43,7 @@ export function topAppBuildNumbers(params: QueryParams): Promise<TopNItem[]> {
   return api.get<TopNItem[]>(`/_stats/top-appbuildnumbers`, params);
 }
 
-type KeyMetrics = {
+export type KeyMetrics = {
   current: {
     dailyUsers: number;
     sessions: number;
@@ -64,7 +64,7 @@ export function keyMetrics(params: QueryParams): Promise<KeyMetrics> {
 
 export type Granularity = "hour" | "day" | "month";
 
-type PeriodicStats = {
+export type PeriodicStats = {
   granularity: Granularity;
   rows: {
     period: string;

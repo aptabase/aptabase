@@ -48,9 +48,12 @@ public class EventsController : Controller
             return BadRequest(validationMessage);
         }
 
-        var appId = await _cache.FindByAppKey(appKey, cancellationToken);
-        if (string.IsNullOrEmpty(appId))
+        var app = await _cache.FindByAppKey(appKey, cancellationToken);
+        if (string.IsNullOrEmpty(app.Id))
             return AppNotFound(appKey);
+
+        if (app.IsLocked) 
+            return BadRequest($"Owner account is locked.");
 
         // We never expect the Web SDK to send the OS name, so it's safe to assume that if it's missing the event is coming from a browser
         var isWeb = string.IsNullOrEmpty(body.SystemProps.OSName);
@@ -73,8 +76,8 @@ public class EventsController : Controller
             userAgent = $"{body.SystemProps.OSName}/{body.SystemProps.OSVersion} {body.SystemProps.EngineName}/{body.SystemProps.EngineVersion} {body.SystemProps.Locale}";
 
         var location = _geoIP.GetClientLocation(HttpContext);
-        var header = new EventHeader(appId, location.CountryCode, location.RegionName);
-        var userId = await _userHashService.CalculateHash(body.Timestamp, appId, body.SessionId, userAgent ?? "");
+        var header = new EventHeader(app.Id, location.CountryCode, location.RegionName);
+        var userId = await _userHashService.CalculateHash(body.Timestamp, app.Id, body.SessionId, userAgent ?? "");
         var row = NewEventRow(userId, header, body);
         await _ingestionClient.SendSingleAsync(row, cancellationToken);
 
@@ -105,15 +108,18 @@ public class EventsController : Controller
         if (!validEvents.Any())
             return Ok(new { });
 
-        var appId = await _cache.FindByAppKey(appKey, cancellationToken);
-        if (string.IsNullOrEmpty(appId))
+        var app = await _cache.FindByAppKey(appKey, cancellationToken);
+        if (string.IsNullOrEmpty(app.Id))
             return AppNotFound(appKey);
 
+        if (app.IsLocked) 
+            return BadRequest($"Owner account is locked.");
+
         var location = _geoIP.GetClientLocation(HttpContext);
-        var header = new EventHeader(appId, location.CountryCode, location.RegionName);
+        var header = new EventHeader(app.Id, location.CountryCode, location.RegionName);
 
         var rows = await Task.WhenAll(validEvents.Select(async e => {
-            var userId = await _userHashService.CalculateHash(e.Timestamp, appId, e.SessionId, userAgent ?? "");
+            var userId = await _userHashService.CalculateHash(e.Timestamp, app.Id, e.SessionId, userAgent ?? "");
             return NewEventRow(userId, header, e);
         }));
 
