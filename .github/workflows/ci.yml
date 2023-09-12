@@ -135,6 +135,8 @@ jobs:
 
       - name: Login to Amazon ECR (US)
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: "true"
 
       - name: Push to Amazon ECR (US)
         run: |
@@ -172,6 +174,8 @@ jobs:
 
       - name: Login to Amazon ECR (EU)
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: "true"
 
       - name: Push to Amazon ECR (EU)
         run: |
