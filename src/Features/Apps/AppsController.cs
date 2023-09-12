@@ -211,9 +211,9 @@ public class AppsController : Controller
             @"SELECT a.id, a.name, a.icon_path, a.app_key, true as has_ownership, 
                      a.has_events, u.lock_reason
               FROM apps a
-              WHERE id = @appId
               INNER JOIN users u
               ON u.id = a.owner_id
+              WHERE a.id = @appId
               AND a.owner_id = @userId
               AND a.deleted_at IS NULL",
             new { appId, userId = user.Id }
