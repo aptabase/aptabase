@@ -18,16 +18,10 @@ export function CurrentPlan(props: Props) {
   const hasSubscription = !!props.billing.subscription;
 
   const action = async () => {
-    if (hasSubscription) {
-      alert(
-        `To upgrade or cancel your subscription, please contact support.
-We're working on making this easier.`
-      );
-      return;
-    }
-
     setLoading(true);
-    const response = await api.post<{ url: string }>(`/_billing/checkout`);
+
+    const path = hasSubscription ? `/_billing/portal` : `/_billing/checkout`;
+    const response = await api.post<{ url: string }>(path);
     location.href = response.url;
   };
 
@@ -37,15 +31,13 @@ We're working on making this easier.`
         <span>{props.billing.plan.name} Plan</span>
         {props.billing.plan.monthlyPrice > 0 && (
           <span>
-            ${props.billing.plan.monthlyPrice}{" "}
-            <span className="text-sm text-muted-foreground">/mo + Tax</span>
+            ${props.billing.plan.monthlyPrice} <span className="text-sm text-muted-foreground">/mo + Tax</span>
           </span>
         )}
       </p>
       <p className="flex items-center mb-1 justify-between ">
         <span className="text-sm">
-          {props.billing.plan.monthlyEvents.toLocaleString()}{" "}
-          <span className="text-muted-foreground">events / mo</span>
+          {props.billing.plan.monthlyEvents.toLocaleString()} <span className="text-muted-foreground">events / mo</span>
         </span>
         <Button variant="ghost" size="xs" onClick={action} loading={loading}>
           {hasSubscription ? "Manage" : "Upgrade"}
@@ -54,9 +46,7 @@ We're working on making this easier.`
       {status && !isExpired && (
         <p className="flex items-center mb-1 justify-between text-xs">
           <SubscriptionStatusBadge status={status} />
-          {expiresOn && (
-            <span className="text-muted-foreground">Expires on {formatDate(expiresOn)}</span>
-          )}
+          {expiresOn && <span className="text-muted-foreground">Expires on {formatDate(expiresOn)}</span>}
         </p>
       )}
     </div>

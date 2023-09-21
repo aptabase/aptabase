@@ -66,7 +66,7 @@ public class LemonSqueezyWebhookController : Controller
 
     private async Task<IActionResult> HandleSubscriptionCreatedOrUpdated([FromBody] WebhookEvent ev, CancellationToken cancellationToken)
     {
-        var body = JsonSerializer.Deserialize<SubscriptionDataEvent>(ev.Data.Attributes, LemonSqueezyClient.JsonSettings);
+        var body = JsonSerializer.Deserialize<SubscriptionAttributes>(ev.Data.Attributes, LemonSqueezyClient.JsonSettings);
         if (body == null)
             return BadRequest(new { message = "Event body is null" });
 

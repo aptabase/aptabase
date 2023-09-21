@@ -65,7 +65,16 @@ public class LemonSqueezyClient
         var response = await _httpClient.PostAsJsonAsync("/v1/checkouts", body, JsonSettings, cancellationToken);
 
         await response.EnsureSuccessWithLog(_logger);
-        var result = await response.Content.ReadFromJsonAsync<Checkout>();
-        return result?.Data.Attributes.Url;
+        var result = await response.Content.ReadFromJsonAsync<GetResponse<Resource<CheckoutAttributes>>>(JsonSettings);
+        return result?.Data.Attributes.Url ?? "";
+    }
+
+    public async Task<string> GetBillingPortalUrl(long subscriptionId, CancellationToken cancellationToken)
+    {
+        var response = await _httpClient.GetAsync($"/v1/subscriptions/{subscriptionId}", cancellationToken);
+
+        await response.EnsureSuccessWithLog(_logger);
+        var result = await response.Content.ReadFromJsonAsync<GetResponse<Resource<SubscriptionAttributes>>>(JsonSettings);
+        return result?.Data.Attributes.Urls.CustomerPortal ?? "";
     }
 }

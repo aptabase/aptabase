@@ -20,12 +20,3 @@ public class WebhookEventMeta
     public string EventName { get; set; } = "";
     public Dictionary<string, string> CustomData { get; set; } = new Dictionary<string, string>();
 }
-
-public class SubscriptionDataEvent
-{
-    public int ProductID { get; set; }
-    public int VariantID { get; set; }
-    public int CustomerID { get; set; }
-    public string Status { get; set; } = "";
-    public DateTime? EndsAt { get; set; }
-}

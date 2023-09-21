@@ -71,6 +71,18 @@ public class BillingController : Controller
         return Ok(new { url });
     }
 
+    [HttpPost("/api/_billing/portal")]
+    public async Task<IActionResult> GeneratePortalUrl(CancellationToken cancellationToken)
+    {
+        var user = this.GetCurrentUserIdentity();
+        var sub = await GetUserSubscription(user);
+        if (sub is null)
+            return NotFound();
+
+        var url = await _lsClient.GetBillingPortalUrl(sub.Id, cancellationToken);
+        return Ok(new { url });
+    }
+
     private async Task<Subscription?> GetUserSubscription(UserIdentity user)
     {
         return await _db.Connection.QueryFirstOrDefaultAsync<Subscription>(
