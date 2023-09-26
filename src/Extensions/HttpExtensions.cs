@@ -4,6 +4,9 @@ public static class HttpContextExtensions
 {
     public static string ResolveClientIpAddress(this HttpContext httpContext)
     {
+        if (httpContext.Request.Headers.TryGetValue("X-Real-Ip", out var ip) && !string.IsNullOrEmpty(ip))
+            return ip.ToString();
+
         var cfViewerAddress = httpContext.Request.Headers["CloudFront-Viewer-Address"];
         if (cfViewerAddress.Count > 0)
         {

@@ -19,9 +19,11 @@ public class HeadersController : Controller
     {
         var location = _geoIP.GetClientLocation(HttpContext);
         var ipAddress = HttpContext.ResolveClientIpAddress();
+        var remoteIpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
         var headers = HttpContext.Request.Headers.ToDictionary(x => x.Key, x => x.Value.ToString());
 
         return Ok(new {
+            remoteIpAddress,
             ipAddress,
             location,
             headers
