@@ -156,18 +156,10 @@ public partial class Program
         
         app.UseResponseCompression();
 
-        if (appEnv.IsManagedCloud)
+        app.UseForwardedHeaders(new ForwardedHeadersOptions
         {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedProtoHeaderName = "Cloudfront-Forwarded-Proto",
-                ForwardedHeaders = ForwardedHeaders.XForwardedProto
-            });
-        }
-        else
-        {
-            app.UseForwardedHeaders();
-        }
+            ForwardedHeaders = ForwardedHeaders.XForwardedProto
+        });
 
         app.MapHealthChecks("/healthz");
         app.UseMiddleware<ExceptionMiddleware>();
