@@ -158,6 +158,8 @@ public partial class Program
 
         app.UseForwardedHeaders(new ForwardedHeadersOptions
         {
+            // App may be running on HTTP behind a HTTPS proxy/load balancer
+            // So we need to use the X-Forwarded-Proto forwarded header
             ForwardedHeaders = ForwardedHeaders.XForwardedProto
         });
 
