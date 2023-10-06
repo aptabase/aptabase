@@ -5,6 +5,8 @@ type Point = {
   lat: number;
   lng: number;
   size: number;
+  countryCode: string;
+  region: string;
 };
 
 type Props = {
@@ -14,19 +16,32 @@ type Props = {
 
 export function WorldMap(props: Props) {
   return (
-    <svg
-      baseProfile="tiny"
-      className={`text-border ${props.className}`}
-      fill="currentColor"
-      version="1.2"
-      viewBox="0 0 2000 857"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <WorldMapParts />
+    <>
+      <svg
+        id="worldmap"
+        baseProfile="tiny"
+        className={`text-foreground stroke-background ${props.className}`}
+        fill="currentColor"
+        version="1.2"
+        strokeWidth="1"
+        viewBox="0 0 2000 857"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+          #worldmap path { opacity: 0.1 }
+          #worldmap path:hover { opacity: 0.2 }`,
+          }}
+        />
 
-      {props.points.map((point) => (
-        <MapDataPoint key={`${point.lat}-${point.lng}`} lat={point.lat} lng={point.lng} size={point.size} />
-      ))}
-    </svg>
+        <WorldMapParts />
+
+        {props.points.map((point) => (
+          <MapDataPoint key={`${point.lat}-${point.lng}`} {...point} />
+        ))}
+      </svg>
+      <div id="world-map-tooltip-container" />
+    </>
   );
 }
