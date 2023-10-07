@@ -9,6 +9,8 @@ type Props = {
   lat: number;
   lng: number;
   size: number;
+  onMouseEnter: (countryCode: string) => void;
+  onMouseLeave: () => void;
 };
 
 type TooltipPosition = {
@@ -19,13 +21,17 @@ type TooltipPosition = {
 export function MapDataPoint(props: Props) {
   const [tooltip, setTooltip] = useState<TooltipPosition | undefined>(undefined);
 
-  const mouseOver = (evt: MouseEvent) => {
+  const mouseEnter = (evt: MouseEvent) => {
     if (tooltip) return;
 
     setTooltip({ x: evt.clientX, y: evt.clientY });
+    props.onMouseEnter(props.countryCode);
   };
 
-  const mouseOut = () => setTooltip(undefined);
+  const mouseLeave = () => {
+    setTooltip(undefined);
+    props.onMouseLeave();
+  };
 
   const { x, y } = projectAbsolute(props.lat, props.lng, 2000, 1, -30, 0);
   return (
@@ -34,8 +40,8 @@ export function MapDataPoint(props: Props) {
         cx={x}
         cy={y}
         r={props.size}
-        onMouseEnter={mouseOver}
-        onMouseLeave={mouseOut}
+        onMouseEnter={mouseEnter}
+        onMouseLeave={mouseLeave}
         className="text-success opacity-50"
       />
 

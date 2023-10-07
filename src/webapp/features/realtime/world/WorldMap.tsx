@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MapDataPoint } from "./MapDataPoint";
 import { WorldMapParts } from "./WorldMapParts";
 
@@ -15,6 +16,8 @@ type Props = {
 };
 
 export function WorldMap(props: Props) {
+  const [activeCountry, setActiveCountry] = useState<string | undefined>(undefined);
+
   return (
     <>
       <svg
@@ -30,15 +33,20 @@ export function WorldMap(props: Props) {
         <style
           dangerouslySetInnerHTML={{
             __html: `
-          #worldmap path { opacity: 0.1 }
-          #worldmap path:hover { opacity: 0.2 }`,
+            #worldmap path { opacity: 0.1 }
+            #worldmap path:hover, #worldmap path[data-active="true"] { opacity: 0.2 }`,
           }}
         />
 
-        <WorldMapParts />
+        <WorldMapParts activeCountry={activeCountry} />
 
         {props.points.map((point) => (
-          <MapDataPoint key={`${point.lat}-${point.lng}`} {...point} />
+          <MapDataPoint
+            key={`${point.lat}-${point.lng}`}
+            {...point}
+            onMouseEnter={setActiveCountry}
+            onMouseLeave={() => setActiveCountry(undefined)}
+          />
         ))}
       </svg>
       <div id="world-map-tooltip-container" />
