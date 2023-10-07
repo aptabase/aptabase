@@ -33,7 +33,7 @@ export function MapDataPoint(props: Props) {
     props.onMouseLeave();
   };
 
-  const { x, y } = projectAbsolute(props.lat, props.lng, 2000, 1, -30, 0);
+  const { x, y } = projectAbsolute(props.lat, props.lng, 2000, 0.95, -10, 0);
   return (
     <>
       <circle
@@ -48,15 +48,12 @@ export function MapDataPoint(props: Props) {
       {tooltip && (
         <WorldMapPopup {...tooltip}>
           <div className="p-2 text-sm">
-            <div className="flex items-center justify-between">
-              <span>
-                <span className="font-bold">5</span> recent users
-              </span>
+            <span className="font-bold">5</span> recent users
+            <div className="flex gap-1 items-center justify-between">
+              <div>
+                {props.region && <span>{props.region} ·</span>} <CountryName countryCode={props.countryCode} />
+              </div>
               <CountryFlag countryCode={props.countryCode} size="sm" />
-            </div>
-
-            <div>
-              {props.region}, <CountryName countryCode={props.countryCode} />
             </div>
           </div>
         </WorldMapPopup>
