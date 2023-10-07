@@ -42,18 +42,15 @@ export function MapDataPoint(props: Props) {
       {tooltip && (
         <WorldMapPopup {...tooltip}>
           <div className="p-2 text-sm">
-            <div className="flex justify-between">
+            <div className="flex items-center justify-between">
               <span>
                 <span className="font-bold">5</span> recent users
               </span>
-              <CountryFlag countryCode={props.countryCode} />
+              <CountryFlag countryCode={props.countryCode} size="sm" />
             </div>
 
-            <div className="flex gap-1">
-              {props.region},
-              <span>
-                <CountryName countryCode={props.countryCode} />
-              </span>
+            <div>
+              {props.region}, <CountryName countryCode={props.countryCode} />
             </div>
           </div>
         </WorldMapPopup>
