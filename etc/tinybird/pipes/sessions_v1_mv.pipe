@@ -8,8 +8,8 @@ SQL >
         app_id,
         user_id,
         session_id,
-        minState(e.timestamp) AS timestamp,
-        maxState(e.timestamp) AS timestamp_end,
+        minSimpleState(e.timestamp) AS timestamp,
+        maxSimpleState(e.timestamp) AS timestamp_end,
         anySimpleState(os_name) AS os_name,
         anySimpleState(os_version) AS os_version,
         anySimpleState(locale) AS locale,
@@ -20,7 +20,7 @@ SQL >
         anySimpleState(sdk_version) AS sdk_version,
         anySimpleState(country_code) AS country_code,
         anySimpleState(region_name) AS region_name,
-        countState() AS events,
+        countSimpleState() AS events,
         maxSimpleState(ttl) AS ttl
     FROM events AS e
     GROUP BY
