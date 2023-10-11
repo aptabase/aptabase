@@ -1,7 +1,7 @@
 Future improvements for sessions and events tables:
 
 - Review https://clickhouse.com/blog/common-getting-started-issues-with-clickhouse
-- Should sorting key be toDate(timestamp) instead of timestamp?
+- Should sorting key be toDate(timestamp) instead of timestamp? See https://kb.altinity.com/engines/mergetree-table-engine-family/pick-keys/, maybe add both toStartOfDay(timestamp) and timestamp
 - Add user_id and session_id to sorting key?
 - Use Codecs to compress data
 - Use `UInt64` for app_id, user_id and session_id
