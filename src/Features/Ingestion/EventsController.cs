@@ -79,7 +79,7 @@ public class EventsController : Controller
         var header = new EventHeader(app.Id, location.CountryCode, location.RegionName);
         var userId = await _userHashService.CalculateHash(body.Timestamp, app.Id, body.SessionId, userAgent ?? "");
         var row = NewEventRow(userId, header, body);
-        await _ingestionClient.SendSingleAsync(row, cancellationToken);
+        await _ingestionClient.SendEventAsync(row, cancellationToken);
 
         return Ok(new { });
     }
@@ -123,7 +123,7 @@ public class EventsController : Controller
             return NewEventRow(userId, header, e);
         }));
 
-        await _ingestionClient.SendMultipleAsync(rows, cancellationToken);
+        await _ingestionClient.BulkSendEventAsync(rows, cancellationToken);
 
         return Ok(new { });
     }
