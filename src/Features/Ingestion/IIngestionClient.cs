@@ -2,7 +2,7 @@ namespace Aptabase.Features.Ingestion;
 
 public interface IIngestionClient
 {
-    Task<long> SendSingleAsync(EventRow row, CancellationToken cancellationToken);
-    Task<long> SendMultipleAsync(EventRow[] rows, CancellationToken cancellationToken);
+    Task<long> SendEventAsync(EventRow row, CancellationToken cancellationToken);
+    Task<long> BulkSendEventAsync(IEnumerable<EventRow> rows, CancellationToken cancellationToken);
 }
 

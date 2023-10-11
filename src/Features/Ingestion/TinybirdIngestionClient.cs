@@ -30,20 +30,21 @@ public class TinybirdIngestionClient : IIngestionClient
 
     private string EventsPath => $"/v0/events?name=events";
 
-    public async Task<long> SendSingleAsync(EventRow row, CancellationToken cancellationToken)
+    public Task<long> SendEventAsync(EventRow row, CancellationToken cancellationToken)
     {
-        var response = await _httpClient.PostAsJsonAsync(EventsPath, row, JsonSettings, cancellationToken);
-        
-        await response.EnsureSuccessWithLog(_logger);
-        var result = await response.Content.ReadFromJsonAsync<InsertResult>() ?? new InsertResult();
-        return result.SuccessfulRows;
+        return PostAsync(EventsPath, new[] { row }, cancellationToken);
     }
 
-    public async Task<long> SendMultipleAsync(EventRow[] rows, CancellationToken cancellationToken)
+    public Task<long> BulkSendEventAsync(IEnumerable<EventRow> rows, CancellationToken cancellationToken)
+    {
+        return PostAsync(EventsPath, rows, cancellationToken);
+    }
+
+    private async Task<long> PostAsync<T>(string path, IEnumerable<T> rows, CancellationToken cancellationToken)
     {
         var rowsAsString = rows.Select(row => JsonSerializer.Serialize(row, JsonSettings));
         var content = new StringContent(string.Join('\n', rowsAsString));
-        var response = await _httpClient.PostAsync(EventsPath, content, cancellationToken);
+        var response = await _httpClient.PostAsync(path, content, cancellationToken);
         
         await response.EnsureSuccessWithLog(_logger);
         var result = await response.Content.ReadFromJsonAsync<InsertResult>() ?? new InsertResult();

@@ -7,7 +7,6 @@ namespace Aptabase.Features.Ingestion;
 public class ClickHouseIngestionClient : IIngestionClient
 {
     private ClickHouseConnection _conn;
-    private ILogger _logger;
 
     private readonly string[] COLUMNS = new string[] {
         "app_id",
@@ -34,12 +33,11 @@ public class ClickHouseIngestionClient : IIngestionClient
     public ClickHouseIngestionClient(ClickHouseConnection conn, ILogger<ClickHouseIngestionClient> logger)
     {
         _conn = conn ?? throw new ArgumentNullException(nameof(conn));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<long> SendSingleAsync(EventRow row, CancellationToken cancellationToken)
+    public async Task<long> SendEventAsync(EventRow row, CancellationToken cancellationToken)
     {
-        return await _conn.ExecuteAsync($@"INSERT INTO events ({string.Join(",", COLUMNS)}) VALUES (@{string.Join(", @", COLUMNS)})", new {
+        var cmd = new CommandDefinition($@"INSERT INTO events ({string.Join(",", COLUMNS)}) VALUES (@{string.Join(", @", COLUMNS)})", new {
             app_id = row.AppId,
             timestamp = DateTime.Parse(row.Timestamp).ToUniversalTime(),
             event_name = row.EventName,
@@ -59,10 +57,12 @@ public class ClickHouseIngestionClient : IIngestionClient
             string_props = row.StringProps,
             numeric_props = row.NumericProps,
             ttl = DateTime.Parse(row.TTL).ToUniversalTime(),
-        });
+        }, cancellationToken: cancellationToken);
+        
+        return await _conn.ExecuteAsync(cmd);
     }
 
-    public async Task<long> SendMultipleAsync(EventRow[] rows, CancellationToken cancellationToken)
+    public async Task<long> BulkSendEventAsync(IEnumerable<EventRow> rows, CancellationToken cancellationToken)
     {
         using var bulkCopy = new ClickHouseBulkCopy(_conn)
         {
