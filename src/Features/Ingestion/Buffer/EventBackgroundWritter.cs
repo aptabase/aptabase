@@ -53,7 +53,6 @@ public class EventBackgroundWritter : BackgroundService
 
         try
         {
-            _logger.LogInformation("Flushing {Count} events.", events.Length);
             _watch.Restart();
 
             var rows = await Task.WhenAll(events.Select(ToEventRow));
