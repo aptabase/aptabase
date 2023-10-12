@@ -2,16 +2,17 @@ using MaxMind.GeoIP2;
 
 namespace Aptabase.Features.GeoIP;
 
-public class DatabaseGeoClient : IGeoIPClient
+public class DatabaseGeoClient : GeoIPClient
 {
     private readonly DatabaseReader _db;
 
     public DatabaseGeoClient(EnvSettings env)
+        : base(env)
     {
         _db = new DatabaseReader(Path.Combine(env.EtcDirectoryPath, "geoip/GeoLite2-City.mmdb"));
     }
 
-    public GeoLocation GetClientLocation(HttpContext httpContext)
+    public override GeoLocation GetClientLocation(HttpContext httpContext)
     {
         var ip = httpContext.ResolveClientIpAddress();
         

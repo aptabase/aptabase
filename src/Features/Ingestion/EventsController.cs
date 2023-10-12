@@ -14,11 +14,11 @@ public class EventsController : Controller
     private readonly ILogger _logger;
     private readonly IIngestionCache _cache;
     private readonly IEventBuffer _buffer;
-    private readonly IGeoIPClient _geoIP;
+    private readonly GeoIPClient _geoIP;
 
     public EventsController(IIngestionCache cache,
                             IEventBuffer buffer,
-                            IGeoIPClient geoIP,
+                            GeoIPClient geoIP,
                             ILogger<EventsController> logger)
     {
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
