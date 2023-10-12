@@ -75,8 +75,7 @@ public class EventsController : Controller
 
         var clientIp = HttpContext.ResolveClientIpAddress();
         var location = _geoIP.GetClientLocation(HttpContext);
-        var header = new EventHeader(app.Id, location.CountryCode, location.RegionName);
-        var trackingEvent = NewTrackingEvent(clientIp, userAgent ?? "", header, body);
+        var trackingEvent = NewTrackingEvent(app.Id, location.CountryCode, location.RegionName, clientIp, userAgent ?? "", body);
         _buffer.Add(ref trackingEvent);
 
         return Ok(new { });
@@ -115,8 +114,7 @@ public class EventsController : Controller
 
         var clientIp = HttpContext.ResolveClientIpAddress();
         var location = _geoIP.GetClientLocation(HttpContext);
-        var header = new EventHeader(app.Id, location.CountryCode, location.RegionName);
-        var trackingEvents = validEvents.Select(e => NewTrackingEvent(clientIp, userAgent ?? "", header, e));
+        var trackingEvents = validEvents.Select(e => NewTrackingEvent(app.Id, location.CountryCode, location.RegionName, clientIp, userAgent ?? "", e));
 
         _buffer.AddRange(ref trackingEvents);
 
@@ -179,7 +177,7 @@ public class EventsController : Controller
         return (true, string.Empty);
     }
 
-    private TrackingEvent NewTrackingEvent(string clientIp, string userAgent, EventHeader header, EventBody body)
+    private static TrackingEvent NewTrackingEvent(string appId, string countryCode, string regionName, string clientIp, string userAgent, EventBody body)
     {
         var (stringProps, numericProps) = body.SplitProps();
         return new TrackingEvent
@@ -187,7 +185,7 @@ public class EventsController : Controller
             ClientIpAddress = clientIp,
             UserAgent = userAgent,
 
-            AppId = header.AppId,
+            AppId = appId,
             EventName = body.EventName,
             Timestamp = body.Timestamp.ToUniversalTime(),
             SessionId = body.SessionId,
@@ -199,15 +197,15 @@ public class EventsController : Controller
             EngineVersion = body.SystemProps.EngineVersion ?? "",
             AppBuildNumber = body.SystemProps.AppBuildNumber ?? "",
             SdkVersion = body.SystemProps.SdkVersion ?? "",
-            CountryCode = header.CountryCode ?? "",
-            RegionName = header.RegionName ?? "",
+            CountryCode = countryCode,
+            RegionName = regionName,
             StringProps = stringProps.ToJsonString(),
             NumericProps = numericProps.ToJsonString(),
             IsDebug = body.SystemProps.IsDebug,
         };
     }
 
-    private bool TryParseDocument(string json, out JsonDocument? doc)
+    private static bool TryParseDocument(string json, out JsonDocument? doc)
     {
         try
         {

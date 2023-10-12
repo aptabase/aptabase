@@ -33,20 +33,6 @@ public class SystemProperties
     public string SdkVersion { get; set; } = "";
 }
 
-public struct EventHeader
-{
-    public string AppId { get; private set; }
-    public string? CountryCode { get; private set; }
-    public string? RegionName { get; private set; }
-
-    public EventHeader(string appId, string? countryCode = null, string? regionName = null)
-    {
-        AppId = appId;
-        CountryCode = countryCode;
-        RegionName = regionName;
-    }
-}
-
 public class EventBody
 {
     [Required, StringLength(60)]
