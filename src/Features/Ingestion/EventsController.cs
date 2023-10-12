@@ -136,7 +136,10 @@ public class EventsController : Controller
             return (false, "Future events are not allowed.");
 
         if (body.Timestamp < DateTime.UtcNow.AddDays(-1))
+        {
+            _logger.LogWarning("Event timestamp {EventTimestamp} is too old.", body.Timestamp);
             return (false, "Event is too old.");
+        }
 
         var locale = LocaleFormatter.FormatLocale(body.SystemProps.Locale);
         if (locale is null)
@@ -168,9 +171,6 @@ public class EventsController : Controller
 
                 if (prop.Value.ValueKind == JsonValueKind.Object || prop.Value.ValueKind == JsonValueKind.Array)
                     return (false, $"Value of key '{prop.Name}' must be a primitive type. Props was: {body.Props.RootElement.GetRawText()}");
-
-                if (prop.Value.ToString().Length > 200)
-                    return (false, $"Value of key '{prop.Name}' must be less than or equal to 200 characters. Props was: {body.Props.RootElement.GetRawText()}");
             }
         }
 

@@ -65,7 +65,10 @@ public class EventBody
                 if (property.Value.ValueKind == JsonValueKind.Number)
                     numericValues.Add(property.Name, property.Value.GetDecimal());
                 else if (property.Value.ValueKind == JsonValueKind.String)
-                    stringValues.Add(property.Name, property.Value.GetString());
+                {
+                    var propertyValue = property.Value.GetString() ?? "";
+                    stringValues.Add(property.Name, propertyValue.Truncate(180, "..."));
+                }
                 else if (property.Value.ValueKind == JsonValueKind.True)
                     stringValues.Add(property.Name, "true");
                 else if (property.Value.ValueKind == JsonValueKind.False)

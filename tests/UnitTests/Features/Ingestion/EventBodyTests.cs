@@ -41,10 +41,28 @@ public class EventBodyTests
 
         var (stringProps, numericProps) = body.SplitProps();
         stringProps.Count.Should().Be(2);
-        stringProps["name"]!.GetValue<String>().Should().Be("Bob");
-        stringProps["isAdult"]!.GetValue<String>().Should().Be("true");
+        stringProps["name"]!.GetValue<string>().Should().Be("Bob");
+        stringProps["isAdult"]!.GetValue<string>().Should().Be("true");
 
         numericProps.Count.Should().Be(1);
         numericProps["age"]!.GetValue<decimal>().Should().Be(10);
+    }
+
+    [Fact]
+    public void SplitProps_should_truncate_long_values()
+    {
+        var body = new EventBody
+        {
+            Timestamp = DateTime.UtcNow.AddDays(5),
+            Props = JsonDocument.Parse(@"{
+                ""type"": ""ERROR"",
+                ""value"": ""12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890""
+            }")
+        };
+
+        var (stringProps, numericProps) = body.SplitProps();
+        stringProps.Count.Should().Be(2);
+        stringProps["type"]!.GetValue<string>().Should().Be("ERROR");
+        stringProps["value"]!.GetValue<string>().Should().Be("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567...");
     }
 }
