@@ -1,11 +1,15 @@
 namespace Aptabase.Features.GeoIP;
 
-public struct GeoLocation
+public readonly struct GeoLocation
 {
-    public string CountryCode { get; init; }
-    public string RegionName { get; init; }
+    public readonly string CountryCode { get; init; }
+    public readonly string RegionName { get; init; }
 
-    public static GeoLocation Empty => new();
+    public static GeoLocation Empty => new()
+    {
+        CountryCode = "",
+        RegionName = ""
+    };
 }
 
 public interface IGeoIPClient

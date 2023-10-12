@@ -24,8 +24,8 @@ public class CloudGeoClient : IGeoIPClient
 
         return new GeoLocation
         {
-            CountryCode = countryCode,
-            RegionName = regionName
+            CountryCode = countryCode ?? "",
+            RegionName = regionName ?? ""
         };
     }
 
