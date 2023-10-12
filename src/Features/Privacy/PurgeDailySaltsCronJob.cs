@@ -15,6 +15,8 @@ public class PurgeDailySaltsCronJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("PurgeDailySaltsCronJob is starting.");
+
         using var timer = new CronTimer("0 0 * * *", TimeZoneInfo.Utc);
 
         while (await timer.WaitForNextTickAsync(cancellationToken))
@@ -23,5 +25,7 @@ public class PurgeDailySaltsCronJob : BackgroundService
             var rows = await _privacyQueries.PurgeOldSalts(cancellationToken);
             _logger.LogInformation("Deleted {rows} rows", rows);
         }
+
+        _logger.LogInformation("PurgeDailySaltsCronJob stopped.");
     }
 }

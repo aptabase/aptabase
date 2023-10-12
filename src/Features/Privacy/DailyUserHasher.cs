@@ -4,27 +4,25 @@ using System.Security.Cryptography;
 using Microsoft.Extensions.Caching.Memory;
 using Dapper;
 
-namespace Aptabase.Features.Ingestion;
+namespace Aptabase.Features.Privacy;
 
-public interface IUserHashService
+public interface IUserHasher
 {
-    Task<string> CalculateHash(DateTime timestamp, string appId, string sessionId, string userAgent);
+    Task<string> CalculateHash(DateTime timestamp, string appId, string sessionId, string clientIP, string userAgent);
 }
 
-public class DailyUserHashService : IUserHashService
+public class DailyUserHasher : IUserHasher
 {
     private readonly IMemoryCache _cache;
     private readonly IDbContext _db;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public DailyUserHashService(IMemoryCache cache, IDbContext db, IHttpContextAccessor httpContextAccessor)
+    public DailyUserHasher(IMemoryCache cache, IDbContext db)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
-        _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
     }
 
-    public async Task<string> CalculateHash(DateTime timestamp, string appId, string sessionId, string userAgent)
+    public async Task<string> CalculateHash(DateTime timestamp, string appId, string sessionId, string clientIP, string userAgent)
     {
         var cacheKey = $"USERID-{appId}-{sessionId}";
 
@@ -33,13 +31,12 @@ public class DailyUserHashService : IUserHashService
         if (_cache.TryGetValue(cacheKey, out string? userId) && !string.IsNullOrEmpty(userId))
             return userId;
 
-        var clientIP = _httpContextAccessor.HttpContext?.ResolveClientIpAddress() ?? "";
         var salt = await GetSaltFor(timestamp.Date.ToString("yyyy-MM-dd"), appId);
         var bytes = Encoding.UTF8.GetBytes($"{clientIP}|${userAgent}");
         var id = SHA256.HashData(bytes.Concat(salt).ToArray());
 
         userId = Convert.ToHexString(id);
-        _cache.Set(cacheKey, userId, TimeSpan.FromHours(24));
+        _cache.Set(cacheKey, userId, TimeSpan.FromHours(48));
         return userId;
     }
 

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Aptabase.Features.GeoIP;
+using Aptabase.Features.Ingestion.Buffer;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -12,19 +13,16 @@ public class EventsController : Controller
 {
     private readonly ILogger _logger;
     private readonly IIngestionCache _cache;
-    private readonly IIngestionClient _ingestionClient;
-    private readonly IUserHashService _userHashService;
+    private readonly IEventBuffer _buffer;
     private readonly IGeoIPClient _geoIP;
 
     public EventsController(IIngestionCache cache,
-                            IIngestionClient ingestionClient,
-                            IUserHashService userHashService,
+                            IEventBuffer buffer,
                             IGeoIPClient geoIP,
                             ILogger<EventsController> logger)
     {
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
-        _ingestionClient = ingestionClient ?? throw new ArgumentNullException(nameof(ingestionClient));
-        _userHashService = userHashService ?? throw new ArgumentNullException(nameof(userHashService));
+        _buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
         _geoIP = geoIP ?? throw new ArgumentNullException(nameof(geoIP));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -75,11 +73,11 @@ public class EventsController : Controller
         if (!isWeb)
             userAgent = $"{body.SystemProps.OSName}/{body.SystemProps.OSVersion} {body.SystemProps.EngineName}/{body.SystemProps.EngineVersion} {body.SystemProps.Locale}";
 
+        var clientIp = HttpContext.ResolveClientIpAddress();
         var location = _geoIP.GetClientLocation(HttpContext);
         var header = new EventHeader(app.Id, location.CountryCode, location.RegionName);
-        var userId = await _userHashService.CalculateHash(body.Timestamp, app.Id, body.SessionId, userAgent ?? "");
-        var row = NewEventRow(userId, header, body);
-        await _ingestionClient.SendEventAsync(row, cancellationToken);
+        var trackingEvent = NewTrackingEvent(clientIp, userAgent ?? "", header, body);
+        _buffer.Add(ref trackingEvent);
 
         return Ok(new { });
     }
@@ -101,7 +99,7 @@ public class EventsController : Controller
         var validEvents = events.Where(e => { 
             var (valid, validationMessage) = IsValidBody(e);
             if (!valid)
-                _logger.LogWarning($"Dropping event from {appKey}. {validationMessage}");
+                _logger.LogWarning("Dropping event from {AppKey}. {ValidationMessage}", appKey, validationMessage);
             return valid;
         }).ToArray();
 
@@ -115,24 +113,20 @@ public class EventsController : Controller
         if (app.IsLocked) 
             return BadRequest($"Owner account is locked.");
 
+        var clientIp = HttpContext.ResolveClientIpAddress();
         var location = _geoIP.GetClientLocation(HttpContext);
         var header = new EventHeader(app.Id, location.CountryCode, location.RegionName);
+        var trackingEvents = validEvents.Select(e => NewTrackingEvent(clientIp, userAgent ?? "", header, e));
 
-        var rows = await Task.WhenAll(validEvents.Select(async e => {
-            var userId = await _userHashService.CalculateHash(e.Timestamp, app.Id, e.SessionId, userAgent ?? "");
-            return NewEventRow(userId, header, e);
-        }));
-
-        await _ingestionClient.BulkSendEventAsync(rows, cancellationToken);
+        _buffer.AddRange(ref trackingEvents);
 
         return Ok(new { });
     }
 
     private IActionResult AppNotFound(string appKey)
     {
-        var msg = $"Appplication not found with given app key: {appKey}";
-        _logger.LogWarning(msg);
-        return NotFound(msg);
+        _logger.LogWarning("Appplication not found with given app key: {AppKey}", appKey);
+        return NotFound($"Appplication not found with given app key: {appKey}");
     }
 
     private (bool, string) IsValidBody(EventBody? body)
@@ -145,6 +139,12 @@ public class EventsController : Controller
 
         if (body.Timestamp < DateTime.UtcNow.AddDays(-1))
             return (false, "Event is too old.");
+
+        var locale = LocaleFormatter.FormatLocale(body.SystemProps.Locale);
+        if (locale is null)
+            _logger.LogWarning("Invalid locale {Locale} received from {OS} using {SdkVersion}", locale, body.SystemProps.OSName, body.SystemProps.SdkVersion);
+
+        body.SystemProps.Locale = locale;
 
         if (body.Props is not null)
         {
@@ -179,25 +179,21 @@ public class EventsController : Controller
         return (true, string.Empty);
     }
 
-    private EventRow NewEventRow(string userId, EventHeader header, EventBody body)
+    private TrackingEvent NewTrackingEvent(string clientIp, string userAgent, EventHeader header, EventBody body)
     {
-        var appId = body.SystemProps.IsDebug ? $"{header.AppId}_DEBUG" : header.AppId;
-
-        var locale = LocaleFormatter.FormatLocale(body.SystemProps.Locale);
-        if (locale is null)
-            _logger.LogWarning("Invalid locale {Locale} received from {OS} using {SdkVersion}", locale, body.SystemProps.OSName, body.SystemProps.SdkVersion);
-
         var (stringProps, numericProps) = body.SplitProps();
-        return new EventRow
+        return new TrackingEvent
         {
-            AppId = appId,
+            ClientIpAddress = clientIp,
+            UserAgent = userAgent,
+
+            AppId = header.AppId,
             EventName = body.EventName,
-            Timestamp = body.Timestamp.ToUniversalTime().ToString("o"),
-            UserId = userId,
+            Timestamp = body.Timestamp.ToUniversalTime(),
             SessionId = body.SessionId,
             OSName = body.SystemProps.OSName ?? "",
             OSVersion = body.SystemProps.OSVersion ?? "",
-            Locale = locale ?? "",
+            Locale = body.SystemProps.Locale ?? "",
             AppVersion = body.SystemProps.AppVersion ?? "",
             EngineName = body.SystemProps.EngineName ?? "",
             EngineVersion = body.SystemProps.EngineVersion ?? "",
@@ -205,10 +201,9 @@ public class EventsController : Controller
             SdkVersion = body.SystemProps.SdkVersion ?? "",
             CountryCode = header.CountryCode ?? "",
             RegionName = header.RegionName ?? "",
-            City = "",
             StringProps = stringProps.ToJsonString(),
             NumericProps = numericProps.ToJsonString(),
-            TTL = body.Timestamp.ToUniversalTime().Add(body.TTL).ToString("o"),
+            IsDebug = body.SystemProps.IsDebug,
         };
     }
 

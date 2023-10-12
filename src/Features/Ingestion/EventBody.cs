@@ -47,14 +47,6 @@ public struct EventHeader
     }
 }
 
-public static class EventsTTL
-{
-    // Events from Debug builds are kept for 6 months
-    public static readonly TimeSpan Debug = TimeSpan.FromDays(182);
-    // Events from Release builds are kept for 5 years
-    public static readonly TimeSpan Release = TimeSpan.FromDays(5 * 365);
-}
-
 public class EventBody
 {
     [Required, StringLength(60)]
@@ -73,8 +65,6 @@ public class EventBody
     public SystemProperties SystemProps { get; set; } = new();
 
     public JsonDocument? Props { get; set; }
-
-    public TimeSpan TTL => SystemProps.IsDebug ? EventsTTL.Debug : EventsTTL.Release;
 
     public (JsonObject, JsonObject) SplitProps()
     {
