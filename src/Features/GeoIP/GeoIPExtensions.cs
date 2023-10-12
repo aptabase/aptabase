@@ -6,10 +6,10 @@ public static class GeoIPExtensions
     {
         if (env.IsManagedCloud)
         {
-            services.AddSingleton<IGeoIPClient, CloudGeoClient>();
+            services.AddSingleton<GeoIPClient, CloudGeoClient>();
             return;
         }
 
-        services.AddSingleton<IGeoIPClient, DatabaseGeoClient>();
+        services.AddSingleton<GeoIPClient, DatabaseGeoClient>();
     }
 }

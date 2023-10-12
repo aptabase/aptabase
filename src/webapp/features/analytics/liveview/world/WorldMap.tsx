@@ -3,11 +3,11 @@ import { MapDataPoint } from "./MapDataPoint";
 import { WorldMapParts } from "./WorldMapParts";
 
 type Point = {
-  lat: number;
-  lng: number;
-  size: number;
+  users: number;
   countryCode: string;
-  region: string;
+  regionName: string;
+  latitude: number;
+  longitude: number;
 };
 
 type Props = {
@@ -15,8 +15,16 @@ type Props = {
   points: Point[];
 };
 
+function calculateRadius(users: number, maxUsers: number) {
+  const minRadius = 5;
+  const maxRadius = 20;
+  const scaleFactor = users / (maxUsers || 1);
+  return minRadius + scaleFactor * (maxRadius - minRadius);
+}
+
 export function WorldMap(props: Props) {
   const [activeCountry, setActiveCountry] = useState<string | undefined>(undefined);
+  const maxUsers = props.points.reduce((max, point) => Math.max(max, point.users), 0);
 
   return (
     <>
@@ -42,8 +50,9 @@ export function WorldMap(props: Props) {
 
         {props.points.map((point) => (
           <MapDataPoint
-            key={`${point.lat}-${point.lng}`}
+            key={`${point.latitude}-${point.longitude}`}
             {...point}
+            radius={calculateRadius(point.users, maxUsers)}
             onMouseEnter={setActiveCountry}
             onMouseLeave={() => setActiveCountry(undefined)}
           />

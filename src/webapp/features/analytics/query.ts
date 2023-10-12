@@ -92,3 +92,15 @@ type EventPropsItem = {
 export function topEventProps(params: QueryParams): Promise<EventPropsItem[]> {
   return api.get<EventPropsItem[]>(`/_stats/top-props`, params);
 }
+
+type LiveGeoDataPoint = {
+  countryCode: string;
+  regionName: string;
+  latitude: number;
+  longitude: number;
+  users: number;
+};
+
+export function liveGeoDataPoints(params: QueryParams): Promise<LiveGeoDataPoint[]> {
+  return api.get<LiveGeoDataPoint[]>(`/_stats/live-geo`, params);
+}

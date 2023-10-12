@@ -1,15 +1,14 @@
-NODE sessions_v1_mv
+NODE sessions_live_v1_mv
 DESCRIPTION >
-    Aggregated events in sessions
+    Recent sessions for live view
 
 SQL >
-
     SELECT
         app_id,
-        user_id,
         session_id,
-        minSimpleState(e.timestamp) AS timestamp,
-        maxSimpleState(e.timestamp) AS timestamp_end,
+        user_id,
+        minSimpleState(e.timestamp) AS timestamp_first,
+        maxSimpleState(e.timestamp) AS timestamp_last,
         anySimpleState(os_name) AS os_name,
         anySimpleState(os_version) AS os_version,
         anySimpleState(locale) AS locale,
@@ -20,18 +19,19 @@ SQL >
         anySimpleState(sdk_version) AS sdk_version,
         anySimpleState(country_code) AS country_code,
         anySimpleState(region_name) AS region_name,
-        countSimpleState() AS events,
-        maxSimpleState(ttl) AS ttl
+        groupArray(event_name) AS events_name,
+        groupArray(e.timestamp) AS events_timestamp,
+        groupArray(string_props) AS events_string_props,
+        groupArray(numeric_props) AS events_numeric_props
     FROM events AS e
     GROUP BY
         app_id,
-        user_id,
-        session_id
+        session_id,
+        user_id
 
 TYPE materialized
-DATASOURCE sessions_v1
+DATASOURCE sessions_live_v1
 ENGINE "AggregatingMergeTree"
-ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
-ENGINE_SORTING_KEY "app_id, user_id, session_id"
-ENGINE_SETTINGS "index_granularity = 1024"
-ENGINE_TTL "ttl"
+ENGINE_SORTING_KEY "app_id, session_id, user_id"
+ENGINE_SETTINGS "index_granularity = 256"
+ENGINE_TTL "timestamp_first + toIntervalHour(8)"
