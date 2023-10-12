@@ -7,8 +7,8 @@ SQL >
         app_id,
         session_id,
         user_id,
-        minSimpleState(e.timestamp) AS timestamp_first,
-        maxSimpleState(e.timestamp) AS timestamp_last,
+        minSimpleState(e.timestamp) AS min_timestamp,
+        maxSimpleState(e.timestamp) AS max_timestamp,
         anySimpleState(os_name) AS os_name,
         anySimpleState(os_version) AS os_version,
         anySimpleState(locale) AS locale,
@@ -34,4 +34,4 @@ DATASOURCE sessions_live_v1
 ENGINE "AggregatingMergeTree"
 ENGINE_SORTING_KEY "app_id, session_id, user_id"
 ENGINE_SETTINGS "index_granularity = 256"
-ENGINE_TTL "timestamp_first + toIntervalHour(8)"
+ENGINE_TTL "min_timestamp + toIntervalHour(8)"
