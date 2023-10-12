@@ -18,6 +18,7 @@ using Aptabase.Features.Billing.LemonSqueezy;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Aptabase.Features.Stats;
 using Aptabase.Features.Apps;
+using Aptabase.Features.Ingestion.Buffer;
 
 public partial class Program
 {
@@ -114,10 +115,12 @@ public partial class Program
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddSingleton<IAppQueries, AppQueries>();
         builder.Services.AddSingleton<IPrivacyQueries, PrivacyQueries>();
-        builder.Services.AddSingleton<IUserHashService, DailyUserHashService>();
+        builder.Services.AddSingleton<IUserHasher, DailyUserHasher>();
         builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
         builder.Services.AddSingleton<IIngestionCache, IngestionCache>();
         builder.Services.AddSingleton<IBlobService, DatabaseBlobService>();
+        builder.Services.AddSingleton<IEventBuffer, InMemoryEventBuffer>();
+        builder.Services.AddHostedService<EventBackgroundWritter>();
         builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
         builder.Services.AddGeoIPClient(appEnv);
         builder.Services.AddEmailClient(appEnv);

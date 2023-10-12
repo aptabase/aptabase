@@ -24,6 +24,12 @@ public class IntegrationTestsFixture : IAsyncLifetime, IDisposable
         return _factory.CreateClient(opts);
     }
 
+    public T GetHostedService<T>() where T : notnull
+    {
+        using var scope = _factory.Services.CreateScope();
+        return scope.ServiceProvider.GetServices<IHostedService>().OfType<T>().Single();
+    }
+
     public void Dispose()
     {
         _factory.Dispose();

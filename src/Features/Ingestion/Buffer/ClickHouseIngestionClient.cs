@@ -2,7 +2,7 @@ using Dapper;
 using ClickHouse.Client.Copy;
 using ClickHouse.Client.ADO;
 
-namespace Aptabase.Features.Ingestion;
+namespace Aptabase.Features.Ingestion.Buffer;
 
 public class ClickHouseIngestionClient : IIngestionClient
 {
@@ -35,11 +35,11 @@ public class ClickHouseIngestionClient : IIngestionClient
         _conn = conn ?? throw new ArgumentNullException(nameof(conn));
     }
 
-    public async Task<long> SendEventAsync(EventRow row, CancellationToken cancellationToken)
+    public async Task<long> SendEventAsync(EventRow row)
     {
-        var cmd = new CommandDefinition($@"INSERT INTO events ({string.Join(",", COLUMNS)}) VALUES (@{string.Join(", @", COLUMNS)})", new {
+        return await _conn.ExecuteAsync($@"INSERT INTO events ({string.Join(",", COLUMNS)}) VALUES (@{string.Join(", @", COLUMNS)})", new {
             app_id = row.AppId,
-            timestamp = DateTime.Parse(row.Timestamp).ToUniversalTime(),
+            timestamp = row.Timestamp,
             event_name = row.EventName,
             user_id = row.UserId,
             session_id = row.SessionId,
@@ -56,13 +56,11 @@ public class ClickHouseIngestionClient : IIngestionClient
             city = row.City,
             string_props = row.StringProps,
             numeric_props = row.NumericProps,
-            ttl = DateTime.Parse(row.TTL).ToUniversalTime(),
-        }, cancellationToken: cancellationToken);
-        
-        return await _conn.ExecuteAsync(cmd);
+            ttl = row.TTL,
+        });
     }
 
-    public async Task<long> BulkSendEventAsync(IEnumerable<EventRow> rows, CancellationToken cancellationToken)
+    public async Task<long> BulkSendEventAsync(IEnumerable<EventRow> rows)
     {
         using var bulkCopy = new ClickHouseBulkCopy(_conn)
         {
@@ -72,7 +70,7 @@ public class ClickHouseIngestionClient : IIngestionClient
 
         var values = rows.Select(row => new object[] { 
             row.AppId,
-            DateTime.Parse(row.Timestamp).ToUniversalTime(),
+            row.Timestamp,
             row.EventName,
             row.UserId,
             row.SessionId,
@@ -89,10 +87,16 @@ public class ClickHouseIngestionClient : IIngestionClient
             row.City,
             row.StringProps,
             row.NumericProps,
-            DateTime.Parse(row.TTL).ToUniversalTime(),
+            row.TTL,
         });
 
-        await bulkCopy.WriteToServerAsync(values, COLUMNS, cancellationToken);
+try {
+        await bulkCopy.WriteToServerAsync(values, COLUMNS);
+} catch (Exception ex)
+{
+    Console.WriteLine(ex);
+}
+        
         return bulkCopy.RowsWritten;
     }
 }

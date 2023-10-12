@@ -2,6 +2,7 @@ using Xunit;
 using System.Net;
 using FluentAssertions;
 using Aptabase.IntegrationTests.Clients;
+using Aptabase.Features.Ingestion.Buffer;
 
 namespace Aptabase.IntegrationTests;
 
@@ -9,10 +10,12 @@ namespace Aptabase.IntegrationTests;
 public class IngestionTests
 {
     private readonly IntegrationTestsFixture _fixture;
+    private readonly EventBackgroundWritter _eventWritter;
 
     public IngestionTests(IntegrationTestsFixture fixture)
     {
         _fixture = fixture;
+        _eventWritter = _fixture.GetHostedService<EventBackgroundWritter>();
     }
 
     [Fact]
@@ -23,6 +26,8 @@ public class IngestionTests
         var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
         var code = await client.TrackEvent(DateTime.UtcNow.AddHours(-10), "Button Clicked", null);
         code.Should().Be(HttpStatusCode.OK);
+
+        await _eventWritter.FlushEvents();
 
         var count = await _fixture.UserA.CountEvents(app.Id, "24h");
         count.Should().Be(1);
@@ -36,6 +41,8 @@ public class IngestionTests
         var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
         var code = await client.TrackEvent(DateTime.UtcNow.AddYears(10), "Button Clicked", null);
         code.Should().Be(HttpStatusCode.OK);
+
+        await _eventWritter.FlushEvents();
 
         var count = await _fixture.UserA.CountEvents(app.Id, "24h");
         count.Should().Be(1);
@@ -54,6 +61,8 @@ public class IngestionTests
         });
         code.Should().Be(HttpStatusCode.OK);
 
+        await _eventWritter.FlushEvents();
+
         var count = await _fixture.UserA.CountEvents(app.Id, "24h");
         count.Should().Be(3);
     }
@@ -71,6 +80,8 @@ public class IngestionTests
         });
         code.Should().Be(HttpStatusCode.OK);
 
+        await _eventWritter.FlushEvents();
+
         var count = await _fixture.UserA.CountEvents(app.Id, "24h");
         count.Should().Be(2);
     }
@@ -83,6 +94,8 @@ public class IngestionTests
         var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
         var code = await client.TrackEvents(Enumerable.Range(1, 26).Select(i => (DateTime.UtcNow, "Button Clicked", (object?)null)));
         code.Should().Be(HttpStatusCode.BadRequest);
+
+        await _eventWritter.FlushEvents();
 
         var count = await _fixture.UserA.CountEvents(app.Id, "24h");
         count.Should().Be(0);
@@ -175,6 +188,8 @@ public class IngestionTests
         var client2 = new IngestionClient(_fixture.CreateClient(), app.AppKey, "12.0.0.0");
         var code2 = await client2.TrackEvent(DateTime.UtcNow, "Button Clicked", null);
         code2.Should().Be(HttpStatusCode.OK);
+
+        await _eventWritter.FlushEvents();
 
         var count = await _fixture.UserA.CountEvents(app.Id, "24h");
         count.Should().Be(21);

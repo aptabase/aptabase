@@ -47,7 +47,7 @@ public class IngestionClient
         return new
         {
             eventName,
-            timestamp = DateTime.UtcNow.ToString("o"),
+            timestamp = timestamp.ToString("o"),
             sessionId = Guid.NewGuid().ToString(),
             systemProps = new
             {
