@@ -64,8 +64,7 @@ public class EventBackgroundWritter : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send events. Will retry later.");
-            _buffer.AddRange(ref events);
+            _logger.LogError(ex, "Failed to send events. {Count} events were discarded.", events.Length);
         }
     }
 
