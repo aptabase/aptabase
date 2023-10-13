@@ -2,11 +2,12 @@ using System.Text.Json;
 
 namespace Aptabase.Features.GeoIP;
 
-public class CloudGeoClient : IGeoIPClient
+public class CloudGeoClient : GeoIPClient
 {
     private readonly Dictionary<string, string> _regions;
 
     public CloudGeoClient(EnvSettings env)
+        : base(env)
     {
         var text = File.ReadAllText(Path.Combine(env.EtcDirectoryPath, "geoip/iso3166-2.json"));
         var regions = JsonSerializer.Deserialize<Dictionary<string, string>>(text);
@@ -16,7 +17,7 @@ public class CloudGeoClient : IGeoIPClient
         _regions = regions;
     }
 
-    public GeoLocation GetClientLocation(HttpContext httpContext)
+    public override GeoLocation GetClientLocation(HttpContext httpContext)
     {
         var countryCode = GetHeader(httpContext, "cdn-requestcountrycode", "CloudFront-Viewer-Country");
         var regionCode = GetHeader(httpContext, "cdn-requeststatecode", "Cloudfront-Viewer-Country-Region");
@@ -29,7 +30,7 @@ public class CloudGeoClient : IGeoIPClient
         };
     }
 
-    private string GetHeader(HttpContext httpContext, params string[] names)
+    private static string GetHeader(HttpContext httpContext, params string[] names)
     {
         foreach (var name in names)
         {

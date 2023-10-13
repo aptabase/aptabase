@@ -32,6 +32,7 @@ export function Page(props: Props) {
 
 type PageHeadingProps = {
   title: string;
+  aside?: JSX.Element;
   subtitle?: string;
   onClick?: VoidFunction;
 };
@@ -40,10 +41,11 @@ export function PageHeading(props: PageHeadingProps) {
   return (
     <div>
       <h1
-        className={twJoin("text-2xl font-medium", !!props.onClick && "cursor-pointer")}
+        className={twJoin("text-2xl font-medium flex items-center gap-2", !!props.onClick && "cursor-pointer")}
         onClick={props.onClick}
       >
         {props.title}
+        {props.aside}
       </h1>
       {props.subtitle && <p className="text-muted-foreground">{props.subtitle}</p>}
     </div>

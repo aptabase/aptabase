@@ -1,4 +1,5 @@
 using Aptabase.Features.Authentication;
+using Aptabase.Features.GeoIP;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aptabase.Features.Stats;
@@ -68,6 +69,15 @@ public record EventPropsItem
     public decimal Min { get; set; }
     public decimal Max { get; set; }
     public decimal Sum { get; set; }
+}
+
+public record LiveGeoDataPoint
+{
+    public string CountryCode { get; set; } = "";
+    public string RegionName { get; set; } = "";
+    public ulong Users { get; set; }
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
 }
 
 public enum TopNValue
@@ -156,9 +166,11 @@ public class QueryParams
 public class StatsController : Controller
 {
     private readonly IQueryClient _queryClient;
+    private readonly GeoIPClient _geodb;
 
-    public StatsController(IQueryClient queryClient)
+    public StatsController(IQueryClient queryClient, GeoIPClient geodb)
     {
+        _geodb = geodb ?? throw new ArgumentNullException(nameof(geodb));
         _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));
     }
 
@@ -254,6 +266,34 @@ public class StatsController : Controller
             app_version = query.AppVersion,
             country_code = query.CountryCode,
         }, cancellationToken);
+
+        return Ok(rows);
+    }
+
+    [HttpGet("/api/_stats/live-geo")]
+    public async Task<IActionResult> LiveGeo([FromQuery] QueryParams body, CancellationToken cancellationToken)
+    {
+        var query = body.Parse(DateTime.UtcNow);
+
+        var rows = await _queryClient.NamedQueryAsync<LiveGeoDataPoint>("live_geo__v1", new {
+            app_id = query.AppId,
+        }, cancellationToken);
+
+        // var rows = new []{
+        //     new LiveGeoDataPoint{ CountryCode = "BR", RegionName = "Santa Catarina", Users = 10 },
+        //     new LiveGeoDataPoint{ CountryCode = "US", RegionName = "New York", Users = 1 },
+        //     new LiveGeoDataPoint{ CountryCode = "ES", RegionName = "Valencia", Users = 5 },
+        //     new LiveGeoDataPoint{ CountryCode = "GB", RegionName = "England", Users = 20 },
+        //     new LiveGeoDataPoint{ CountryCode = "GB", RegionName = "Wales", Users = 20 },
+        //     new LiveGeoDataPoint{ CountryCode = "CH", RegionName = "Zurich", Users = 18 },
+        // };
+
+        foreach (var row in rows)
+        {
+            var (lat, lng) = _geodb.GetLatLng(row.CountryCode, row.RegionName);
+            row.Latitude = lat;
+            row.Longitude = lng;
+        }
 
         return Ok(rows);
     }
