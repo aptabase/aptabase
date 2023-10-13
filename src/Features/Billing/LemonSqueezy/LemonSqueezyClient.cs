@@ -30,7 +30,6 @@ public class LemonSqueezyClient
                 type = "checkouts",
                 attributes = new {
                     checkout_data = new {
-                        name = user.Name,
                         email = user.Email,
                         custom = new {
                             user_id = user.Id,

@@ -118,6 +118,7 @@ public class AuthService : IAuthService
         var claims = new List<Claim>
         {
             new Claim("id", user.Id),
+            new Claim("name", user.Name),
             new Claim("email", user.Email),
         };
 
