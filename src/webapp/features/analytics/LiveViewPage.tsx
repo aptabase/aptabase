@@ -50,8 +50,8 @@ export function Component() {
         </div>
       </div>
 
-      <div className="py-10 md:py-0 md:p-10 flex items-center justify-center">
-        <WorldMap className="md:h-[30rem]" points={dataPoints || []} />
+      <div className="py-0 md:p-10 flex items-center justify-center">
+        <WorldMap className="h-[20rem] sm:h-[30rem]" points={dataPoints || []} />
       </div>
 
       <div className="mt-10">
