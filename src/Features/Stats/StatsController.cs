@@ -12,7 +12,7 @@ public record PeriodicStats
 
 public record PeriodicStatsRow
 {
-    public string Period { get; set; } = "";
+    public DateTime Period { get; set; }
     public double Users { get; set; } = 0;
     public int Sessions { get; set; } = 0;
     public int Events { get; set; } = 0;
