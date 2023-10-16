@@ -80,6 +80,18 @@ public record LiveGeoDataPoint
     public double Longitude { get; set; }
 }
 
+public record LiveRecentSession
+{
+    public string Id { get; set; } = "";
+    public DateTime StartedAt { get; set; }
+    public ulong Duration { get; set; }
+    public ulong EventsCount { get; set; }
+    public string CountryCode { get; set; } = "";
+    public string RegionName { get; set; } = "";
+    public string OsName { get; set; } = "";
+    public string OsVersion { get; set; } = "";
+}
+
 public enum TopNValue
 {
     UniqueSessions,
@@ -279,21 +291,24 @@ public class StatsController : Controller
             app_id = query.AppId,
         }, cancellationToken);
 
-        // var rows = new []{
-        //     new LiveGeoDataPoint{ CountryCode = "BR", RegionName = "Santa Catarina", Users = 10 },
-        //     new LiveGeoDataPoint{ CountryCode = "US", RegionName = "New York", Users = 1 },
-        //     new LiveGeoDataPoint{ CountryCode = "ES", RegionName = "Valencia", Users = 5 },
-        //     new LiveGeoDataPoint{ CountryCode = "GB", RegionName = "England", Users = 20 },
-        //     new LiveGeoDataPoint{ CountryCode = "GB", RegionName = "Wales", Users = 20 },
-        //     new LiveGeoDataPoint{ CountryCode = "CH", RegionName = "Zurich", Users = 18 },
-        // };
-
         foreach (var row in rows)
         {
             var (lat, lng) = _geodb.GetLatLng(row.CountryCode, row.RegionName);
             row.Latitude = lat;
             row.Longitude = lng;
         }
+
+        return Ok(rows);
+    }
+
+    [HttpGet("/api/_stats/live-sessions")]
+    public async Task<IActionResult> LiveSessions([FromQuery] QueryParams body, CancellationToken cancellationToken)
+    {
+        var query = body.Parse(DateTime.UtcNow);
+
+        var rows = await _queryClient.NamedQueryAsync<LiveRecentSession>("live_sessions__v1", new {
+            app_id = query.AppId,
+        }, cancellationToken);
 
         return Ok(rows);
     }

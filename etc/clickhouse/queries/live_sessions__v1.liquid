@@ -1,0 +1,14 @@
+SELECT session_id as Id,	
+       min(min_timestamp) as StartedAt,
+       max(max_timestamp) - min(min_timestamp) as Duration,
+       countMerge(events_count) as EventsCount,
+       any(country_code) as CountryCode,
+       any(region_name) as RegionName,
+       any(os_name) as OsName,
+       any(os_version) as OsVersion
+FROM sessions_live_v1
+PREWHERE app_id = '{{app_id}}'
+GROUP BY session_id
+HAVING StartedAt >= now() - INTERVAL 1 HOUR
+ORDER BY Duration DESC
+LIMIT 6

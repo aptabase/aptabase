@@ -104,3 +104,18 @@ type LiveGeoDataPoint = {
 export function liveGeoDataPoints(params: QueryParams): Promise<LiveGeoDataPoint[]> {
   return api.get<LiveGeoDataPoint[]>(`/_stats/live-geo`, params);
 }
+
+export type LiveRecentSession = {
+  id: string;
+  eventsCount: number;
+  startedAt: string;
+  duration: number;
+  countryCode: string;
+  regionName: string;
+  osName: string;
+  osVersion: string;
+};
+
+export function liveRecentSessions(params: QueryParams): Promise<LiveRecentSession[]> {
+  return api.get<LiveRecentSession[]>(`/_stats/live-sessions`, params);
+}

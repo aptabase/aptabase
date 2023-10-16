@@ -9,6 +9,7 @@ import { Navigate } from "react-router-dom";
 import { AppConfigMenu } from "./mode/AppConfigMenu";
 import { trackEvent } from "@aptabase/web";
 import { useEffect } from "react";
+import { RecentSessionsList } from "./liveview/RecentSessionsList";
 
 Component.displayName = "LiveViewPage";
 export function Component() {
@@ -53,6 +54,8 @@ export function Component() {
       <div className="py-0 md:p-10 flex items-center justify-center">
         <WorldMap className="h-[20rem] sm:h-[30rem]" points={dataPoints || []} />
       </div>
+
+      <RecentSessionsList appId={app.id} buildMode={buildMode} />
 
       <div className="mt-10">
         <DevelopmentNotice />
