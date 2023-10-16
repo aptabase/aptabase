@@ -19,6 +19,7 @@ SQL >
         anySimpleState(sdk_version) AS sdk_version,
         anySimpleState(country_code) AS country_code,
         anySimpleState(region_name) AS region_name,
+        countState() AS events_count,
         groupArray(event_name) AS events_name,
         groupArray(e.timestamp) AS events_timestamp,
         groupArray(string_props) AS events_string_props,
