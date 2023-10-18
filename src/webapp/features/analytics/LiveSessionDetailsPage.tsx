@@ -5,9 +5,11 @@ import { useApps, useCurrentApp } from "@features/apps";
 import { Navigate, useParams } from "react-router-dom";
 import { trackEvent } from "@aptabase/web";
 import { useEffect } from "react";
-import { PingSignal } from "@components/PingSignal";
 import { SessionTimeline } from "./liveview/timeline";
-import { SessionHeaderCard } from "./liveview/SessionHeaderCard";
+import { IconClick, IconClock } from "@tabler/icons-react";
+import { formatNumber } from "@fns/format-number";
+import { CountryFlag, CountryName } from "@features/geo";
+import { OSIcon } from "./dashboard/icons/os";
 
 Component.displayName = "LiveSessionDetailsPage";
 export function Component() {
@@ -27,11 +29,6 @@ export function Component() {
     trackEvent("liveview_session_viewed");
   }, []);
 
-  const aside = () => {
-    if (isLoading) return null;
-    return <PingSignal color="success" size="xs" />;
-  };
-
   return (
     <Page title="Live View">
       <div className="flex justify-between items-center">
@@ -40,9 +37,33 @@ export function Component() {
 
       {data && (
         <div className="mt-10 flex flex-col">
-          <SessionHeaderCard appId={app.id} session={data} />
+          <div className=" grid grid-cols-2 space-y-1 max-w-[16rem]">
+            <div className="flex items-center gap-2">
+              <IconClick className="text-muted-foreground h-5 w-5" />
+              <span>{data.eventsCount} events</span>
+            </div>
 
-          <div className="mt-10 flex flex-col gap-4">
+            <div className="flex gap-2 items-center">
+              <CountryFlag countryCode={data.countryCode} />
+              <div>
+                {data.regionName && <span>{data.regionName} · </span>} <CountryName countryCode={data.countryCode} />
+              </div>
+            </div>
+
+            <div className="flex gap-2 items-center">
+              <IconClock className="text-muted-foreground h-5 w-5" />
+              <span>{formatNumber(data.duration, "duration")}</span>
+            </div>
+
+            <div className="flex gap-2 items-center">
+              <OSIcon name={data.osName} className="h-5 w-5" />
+              <span>
+                {data.osName} {data.osVersion}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-col gap-4">
             <SessionTimeline {...data} />
           </div>
         </div>
