@@ -17,7 +17,7 @@ function getOperatingSystemImageUrl(name: string): string | undefined {
 
 export function OSIcon(props: Props) {
   let lcName = props.name.toLowerCase().replaceAll(/[^a-z]*/g, "");
-  if (lcName === "ios" || lcName === "ipados") {
+  if (lcName === "ios" || lcName === "ipados" || lcName === "tvos") {
     return <IconApple className={props.className} />;
   }
 
