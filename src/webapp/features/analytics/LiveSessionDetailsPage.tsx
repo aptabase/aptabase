@@ -37,29 +37,33 @@ export function Component() {
 
       {data && (
         <div className="mt-10 flex flex-col">
-          <div className=" grid grid-cols-2 space-y-1 max-w-[16rem]">
-            <div className="flex items-center gap-2">
-              <IconClick className="text-muted-foreground h-5 w-5" />
-              <span>{data.eventsCount} events</span>
-            </div>
+          <div className="flex flex-col space-y-1 md:flex-row md:space-y-0">
+            <div className="w-40 space-y-1">
+              <div className="flex gap-2 items-center">
+                <IconClick className="text-muted-foreground h-5 w-5" />
+                <span>{data.eventsCount} events</span>
+              </div>
 
-            <div className="flex gap-2 items-center">
-              <CountryFlag countryCode={data.countryCode} />
-              <div>
-                {data.regionName && <span>{data.regionName} · </span>} <CountryName countryCode={data.countryCode} />
+              <div className="flex gap-2 items-center">
+                <IconClock className="text-muted-foreground h-5 w-5" />
+                <span>{formatNumber(data.duration, "duration")}</span>
               </div>
             </div>
 
-            <div className="flex gap-2 items-center">
-              <IconClock className="text-muted-foreground h-5 w-5" />
-              <span>{formatNumber(data.duration, "duration")}</span>
-            </div>
+            <div className="space-y-1">
+              <div className="flex gap-2 items-center">
+                <CountryFlag countryCode={data.countryCode} />
+                <div>
+                  {data.regionName && <span>{data.regionName} · </span>} <CountryName countryCode={data.countryCode} />
+                </div>
+              </div>
 
-            <div className="flex gap-2 items-center">
-              <OSIcon name={data.osName} className="h-5 w-5" />
-              <span>
-                {data.osName} {data.osVersion}
-              </span>
+              <div className="flex gap-2 items-center">
+                <OSIcon name={data.osName} className="h-5 w-5" />
+                <span>
+                  {data.osName} {data.osVersion}
+                </span>
+              </div>
             </div>
           </div>
 
