@@ -38,7 +38,7 @@ export function Component() {
   };
 
   const aside = () => {
-    if (isLoading) return <></>;
+    if (isLoading) return null;
     return <PingSignal color="success" size="xs" />;
   };
 

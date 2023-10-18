@@ -7,7 +7,7 @@ SELECT session_id as Id,
        any(os_name) as OsName,
        any(os_version) as OsVersion
 FROM sessions_live_v1
-PREWHERE app_id = '{{app_id}}'
+WHERE app_id = '{{app_id}}'
 GROUP BY session_id
 HAVING StartedAt >= now() - INTERVAL 1 HOUR
 ORDER BY Duration DESC

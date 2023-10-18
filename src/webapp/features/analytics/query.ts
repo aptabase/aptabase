@@ -8,6 +8,7 @@ export type TopNItem = {
 export type QueryParams = {
   buildMode: "release" | "debug";
   appId: string;
+  sessionId?: string;
   period?: string;
   countryCode?: string;
   osName?: string;
@@ -118,4 +119,15 @@ export type LiveRecentSession = {
 
 export function liveRecentSessions(params: QueryParams): Promise<LiveRecentSession[]> {
   return api.get<LiveRecentSession[]>(`/_stats/live-sessions`, params);
+}
+
+export type SessionTimeline = {
+  eventsName: string[];
+  eventsTimestamp: string[];
+  eventsStringProps: string[];
+  eventsNumericProps: string[];
+};
+
+export function liveSessionDetails(params: QueryParams): Promise<LiveRecentSession & SessionTimeline> {
+  return api.get<LiveRecentSession & SessionTimeline>(`/_stats/live-session-details`, params);
 }

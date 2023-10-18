@@ -32,7 +32,7 @@ export function Page(props: Props) {
 
 type PageHeadingProps = {
   title: string;
-  aside?: JSX.Element;
+  aside?: JSX.Element | null;
   subtitle?: string;
   onClick?: VoidFunction;
 };

@@ -1,0 +1,23 @@
+TOKEN aptabase-api READ
+
+VERSION 1
+NODE endpoint
+SQL >
+    %
+    SELECT session_id as Id,
+           countMerge(events_count) as EventsCount,
+           min(min_timestamp) as StartedAt,
+           max(max_timestamp) - min(min_timestamp) as Duration,
+           countMerge(events_count) as EventsCount,
+           any(country_code) as CountryCode,
+           any(region_name) as RegionName,
+           any(os_name) as OsName,
+           any(os_version) as OsVersion,
+           groupArrayMerge(events_name) as EventsName,
+		   groupArrayMerge(events_timestamp) as EventsTimestamp,
+		   groupArrayMerge(events_string_props) as EventsStringProps,
+	       groupArrayMerge(events_numeric_props) as EventsNumericProps
+    FROM sessions_live_v1
+    PREWHERE app_id = {{String(app_id)}}
+    AND session_id = {{String(session_id)}}
+    GROUP BY session_id

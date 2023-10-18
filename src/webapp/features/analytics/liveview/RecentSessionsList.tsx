@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { liveRecentSessions } from "../query";
+import { LiveRecentSession, liveRecentSessions } from "../query";
 import { SessionHeaderCard } from "./SessionHeaderCard";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   appId: string;
@@ -8,6 +9,7 @@ type Props = {
 };
 
 export function RecentSessionsList(props: Props) {
+  const navigate = useNavigate();
   const { data } = useQuery(
     ["live-sessions", props.appId, props.buildMode],
     () => liveRecentSessions({ appId: props.appId, buildMode: props.buildMode }),
@@ -18,6 +20,10 @@ export function RecentSessionsList(props: Props) {
 
   if (sessions.length === 0) return null;
 
+  const handleClick = (session: LiveRecentSession) => () => {
+    navigate(`/${props.appId}/live/${session.id}`);
+  };
+
   return (
     <div>
       <p className="font-title text-xl">Recent Sessions</p>
@@ -25,7 +31,9 @@ export function RecentSessionsList(props: Props) {
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
         {sessions.map((s) => (
-          <SessionHeaderCard key={s.id} session={s} />
+          <div key={s.id} className="rounded hover:bg-muted hover:cursor-pointer" onClick={handleClick(s)}>
+            <SessionHeaderCard appId={props.appId} session={s} />
+          </div>
         ))}
       </div>
     </div>

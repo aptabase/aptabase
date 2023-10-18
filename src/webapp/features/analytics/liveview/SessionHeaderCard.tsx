@@ -6,6 +6,7 @@ import { IconClick, IconClock, IconUser } from "@tabler/icons-react";
 import { LiveRecentSession } from "../query";
 
 type Props = {
+  appId: string;
   session: LiveRecentSession;
 };
 
@@ -14,16 +15,16 @@ export function SessionHeaderCard(props: Props) {
   const shortSessionId = props.session.id.split("-")?.[0] ?? props.session.id;
 
   return (
-    <div className="text-sm flex flex-col gap-1 p-2 rounded">
+    <div className="text-sm flex flex-col gap-1 p-2">
       <div className="flex items-center gap-4">
-        <div className="text-lg min-w-[5rem]">{shortSessionId}</div>
+        <div className="text-lg min-w-[6rem]">{shortSessionId}</div>
         <div className="flex items-center gap-1">
           <IconClick className="text-muted-foreground h-4 w-4" />
           <span>{eventsCount} events</span>
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1 min-w-[5rem]">
+        <div className="flex items-center gap-1 min-w-[6rem]">
           <IconUser className="text-muted-foreground h-4 w-4" />
           <span className="tabular-nums">
             <span>{formatTime(startedAt)}</span>
