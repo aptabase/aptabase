@@ -10,7 +10,9 @@ const appKeys: { [host: string]: string } = {
 const appKey = region ? appKeys[region] : isDevelopment ? devAppKey : undefined;
 
 export function initAnalytics() {
-  init(appKey ?? "", {
+  if (!appKey) return;
+
+  init(appKey, {
     appVersion: import.meta.env.APP_VERSION,
   });
 }
