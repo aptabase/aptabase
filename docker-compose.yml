@@ -14,7 +14,7 @@ services:
 
   clickhousedev:
     container_name: aptabase_clickhousedev
-    image: clickhouse/clickhouse-server:23.3.8.21
+    image: clickhouse/clickhouse-server:23.8.4.69
     restart: always
     ports:
       - "8123:8123"
