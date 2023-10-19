@@ -9,6 +9,7 @@ import { useApps } from "@features/apps";
 import { hourCycle } from "@features/env";
 import { MetricsChart } from "./MetricsChart";
 import { formatNumber } from "@fns/format-number";
+import { useDatePicker } from "@hooks/use-datepicker";
 
 type Props = {
   appId: string;
@@ -66,7 +67,7 @@ export function MainChartWidget(props: Props) {
 
   const toggleShowEvents = () => setShowEvents((x) => !x);
 
-  const period = searchParams.get("period") || "";
+  const [period] = useDatePicker();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";

@@ -1,11 +1,12 @@
 import { Application, AppIcon } from "@features/apps";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { GrowthIndicator } from "@components/GrowthIndicator";
 import { SummaryDataContainer } from "./SummaryDataContainer";
 import { EmptyStateWidget } from "./EmptyStateWidget";
 import { AppLockedContent } from "../locked/AppLockedContent";
 import { WaitingForEventsInfo } from "./WaitingForEventsInfo";
 import { DailyUsersChart } from "./DailyUsersChart";
+import { useDatePicker } from "@hooks/use-datepicker";
 
 type Props = {
   app: Application;
@@ -13,8 +14,7 @@ type Props = {
 };
 
 export function AppSummaryWidget(props: Props) {
-  const [searchParams] = useSearchParams();
-  const period = searchParams.get("period") || "";
+  const [period] = useDatePicker();
   const params = period ? `?period=${period}` : "";
 
   if (props.app.lockReason) {

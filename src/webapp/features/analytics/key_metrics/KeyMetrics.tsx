@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { keyMetrics } from "../query";
 import { useApps } from "@features/apps";
 import { KeyMetricsContainer } from "./MetricsContainer";
+import { useDatePicker } from "@hooks/use-datepicker";
 
 type Props = {
   appId: string;
@@ -16,7 +17,7 @@ type Props = {
 export function KeyMetrics(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
-  const period = searchParams.get("period") || "";
+  const [period] = useDatePicker();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";

@@ -1,8 +1,5 @@
-import { Listbox, Transition } from "@headlessui/react";
-import { IconChevronDown } from "@tabler/icons-react";
-import { Fragment } from "react";
-import { useSearchParams } from "react-router-dom";
-import { twJoin } from "tailwind-merge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/Select";
+import { useDatePicker } from "@hooks/use-datepicker";
 
 type Option = {
   value: string;
@@ -27,72 +24,35 @@ const options: Option[] = [
   { value: "all", name: "All time" },
 ];
 
-const Divider = () => <div className="border-t my-1" />;
-
 type StyledOptionProps = {
   option: Option;
 };
 
-function StyledOption(props: StyledOptionProps) {
+function Item(props: StyledOptionProps) {
   if (props.option.name === "Divider") {
-    return <Divider />;
+    return <div className="border-t my-1" />;
   }
 
   return (
-    <Listbox.Option
-      key={props.option.value}
-      className={({ active }) =>
-        twJoin(
-          "relative rounded cursor-pointer select-none py-1.5 pl-3 pr-9 mx-1",
-          active && "bg-accent text-foreground"
-        )
-      }
-      value={props.option}
-    >
-      {() => <span className="block truncate">{props.option?.name}</span>}
-    </Listbox.Option>
+    <SelectItem key={props.option.value} value={props.option.value}>
+      {props.option.name}
+    </SelectItem>
   );
 }
 
 export function DateRangePicker() {
-  let [searchParams, setSearchParams] = useSearchParams();
-  const period = searchParams.get("period") || "24h";
-
-  const onChange = (option: Option) => {
-    setSearchParams((params) => {
-      params.set("period", option.value);
-      return params;
-    });
-  };
-
-  const selected = options.find((option) => option.value === period) || options[0];
+  const [period, setPeriod] = useDatePicker();
 
   return (
-    <Listbox value={selected} onChange={onChange}>
-      {({ open }) => (
-        <div className="relative">
-          <Listbox.Button className="relative w-full tracking-tighter rounded-md py-1.5 pl-3 pr-6 focus-ring hover:bg-accent">
-            <span className="block truncate">{selected.name}</span>
-            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center">
-              <IconChevronDown className="h-4 w-4 text-muted-foreground mr-1" />
-            </span>
-          </Listbox.Button>
-
-          <Transition
-            show={open}
-            as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <Listbox.Options className="absolute z-10 mt-1 max-h-fit w-50 lg:w-40 right-0 overflow-auto border rounded-md bg-background py-1 text-base shadow-lg focus-ring sm:text-sm">
-              {options.map((option) => (
-                <StyledOption key={option.value} option={option} />
-              ))}
-            </Listbox.Options>
-          </Transition>
-        </div>
-      )}
-    </Listbox>
+    <Select value={period} onValueChange={setPeriod}>
+      <SelectTrigger className="w-36">
+        <SelectValue placeholder="Theme" />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option) => (
+          <Item key={option.value} option={option} />
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

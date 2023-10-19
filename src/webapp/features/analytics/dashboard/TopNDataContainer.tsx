@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { QueryParams, TopNItem } from "../query";
 import { useApps } from "@features/apps";
+import { useDatePicker } from "@hooks/use-datepicker";
 
 type ChildrenProps = {
   isLoading: boolean;
@@ -19,7 +20,7 @@ type Props = {
 export function TopNDataContainer(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
-  const period = searchParams.get("period") || "";
+  const [period] = useDatePicker();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";

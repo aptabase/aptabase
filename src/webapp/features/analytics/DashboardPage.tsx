@@ -42,7 +42,7 @@ export function Component() {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <PageHeading title="Dashboard" onClick={resetFilters} />
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
             <AppConfigMenu />
             <DateRangePicker />
           </div>

@@ -3,20 +3,19 @@ import { useApps } from "@features/apps";
 import { LonelyState } from "./LonelyState";
 import { trackEvent } from "@aptabase/web";
 import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
 import { AppConfigMenu } from "./mode/AppConfigMenu";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
 import { AppSummaryWidget } from "./summary/AppSummaryWidget";
 import { DateRangePicker } from "./DateRangePicker";
 import { LazyLoad } from "@components/LazyLoad";
+import { useDatePicker } from "@hooks/use-datepicker";
 
 Component.displayName = "HomePage";
 export function Component() {
   const { apps } = useApps();
 
   const { buildMode } = useApps();
-  const [searchParams] = useSearchParams();
-  const period = searchParams.get("period") || "";
+  const [period] = useDatePicker();
 
   useEffect(() => {
     trackEvent("home_viewed", { period, apps_count: apps.length });
@@ -34,7 +33,7 @@ export function Component() {
     <Page title="Home">
       <div className="flex justify-between items-center">
         <PageHeading title="My Apps" />
-        <div className="flex items-center">
+        <div className="flex items-center space-x-2">
           <AppConfigMenu />
           <DateRangePicker />
         </div>

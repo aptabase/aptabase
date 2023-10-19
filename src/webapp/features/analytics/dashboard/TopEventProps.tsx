@@ -5,6 +5,7 @@ import { topEventProps } from "../query";
 import { useApps } from "@features/apps";
 import { TopNChart } from "./TopNChart";
 import { TopNTitle } from "./TopNTitle";
+import { useDatePicker } from "@hooks/use-datepicker";
 
 type Props = {
   appId: string;
@@ -15,7 +16,7 @@ type AggregateValueName = "events" | "sum" | "median" | "min" | "max";
 export function TopEventProps(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
-  const period = searchParams.get("period") || "";
+  const [period] = useDatePicker();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
