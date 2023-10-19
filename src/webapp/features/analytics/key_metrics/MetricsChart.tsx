@@ -40,7 +40,7 @@ export function MetricsChart(props: Props) {
 
   const showAllLabels = props.granularity === "month";
   const activeMetricLabel =
-    props.activeMetric === "sessions" ? "Sessions" : props.granularity === "month" ? "Avg. Daily Users" : "Users";
+    props.activeMetric === "sessions" ? "Sessions" : props.granularity === "month" ? "Daily Users" : "Users";
 
   const config: ChartConfigurationCustomTypesPerDataset = useMemo(() => {
     return {
