@@ -8,14 +8,14 @@ type Props = {
 };
 
 export function OnboardingDashboard(props: Props) {
-  const { data: hasEvents } = useQuery(
-    ["app-onboarding", props.app.id],
-    async () => {
+  const { data: hasEvents } = useQuery({
+    queryKey: ["app-onboarding", props.app.id],
+    queryFn: async () => {
       const app = await getAppById(props.app.id);
       return app.hasEvents;
     },
-    { refetchInterval: 5000 }
-  );
+    refetchInterval: 5000,
+  });
 
   if (hasEvents) {
     location.reload();

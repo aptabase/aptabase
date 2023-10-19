@@ -16,7 +16,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType>({ user: undefined });
 
 export function AuthProvider(props: Props) {
-  const { isLoading, isError, data: user } = useQuery(["me"], me);
+  const { isLoading, isError, data: user } = useQuery({ queryKey: ["me"], queryFn: me });
 
   if (isLoading) return <LoadingState size="lg" color="primary" delay={0} />;
   if (isError) return <ErrorState />;

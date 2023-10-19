@@ -14,9 +14,9 @@ type Props = {
 };
 
 export function SummaryDataContainer(props: Props) {
-  const { data: metrics } = useQuery(
-    ["key-metrics", props.appId, props.buildMode, props.period],
-    () =>
+  const { data: metrics } = useQuery({
+    queryKey: ["key-metrics", props.appId, props.buildMode, props.period],
+    queryFn: () =>
       keyMetrics({
         buildMode: props.buildMode,
         appId: props.appId,
@@ -26,12 +26,12 @@ export function SummaryDataContainer(props: Props) {
         eventName: "",
         osName: "",
       }),
-    { staleTime: 60000 }
-  );
+    staleTime: 60000,
+  });
 
-  const { data: dailyUsers } = useQuery(
-    ["periodic-stats", props.appId, props.buildMode, props.period],
-    () =>
+  const { data: dailyUsers } = useQuery({
+    queryKey: ["periodic-stats", props.appId, props.buildMode, props.period],
+    queryFn: () =>
       periodicStats({
         buildMode: props.buildMode,
         appId: props.appId,
@@ -41,8 +41,8 @@ export function SummaryDataContainer(props: Props) {
         eventName: "",
         osName: "",
       }).then((s) => s.rows.map((x) => x.users)),
-    { staleTime: 60000 }
-  );
+    staleTime: 60000,
+  });
 
   return props.children({ dailyUsers, metrics });
 }

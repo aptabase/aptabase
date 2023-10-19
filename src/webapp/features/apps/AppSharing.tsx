@@ -27,9 +27,10 @@ export function AppSharing(props: Props) {
     isError,
     data: shares,
     refetch,
-  } = useQuery(["appshares", props.app.id], () =>
-    api.get<AppShare[]>(`/_apps/${props.app.id}/shares`)
-  );
+  } = useQuery({
+    queryKey: ["appshares", props.app.id],
+    queryFn: () => api.get<AppShare[]>(`/_apps/${props.app.id}/shares`),
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,7 +40,7 @@ export function AppSharing(props: Props) {
     refetch();
   };
 
-  if (isLoading) return <LoadingState />;
+  if (isLoading || !shares) return <LoadingState />;
   if (isError) return <ErrorState />;
 
   return (
@@ -73,8 +74,7 @@ export function AppSharing(props: Props) {
         <IconHelp className="h-4 w-4" />
         <AlertTitle>What is App Sharing?</AlertTitle>
         <AlertDescription className="text-muted-foreground">
-          Sharing an app with other users allow them to have read-only access to your app's
-          dashboard.
+          Sharing an app with other users allow them to have read-only access to your app's dashboard.
           <br />
           You remain the owner of the app and can revoke access at any time.
         </AlertDescription>

@@ -28,7 +28,7 @@ export function AppsProvider(props: Props) {
   const location = useLocation();
   const [buildMode, setBuildMode] = useLocalStorage<BuildMode>("buildmode", "debug");
 
-  const { isLoading, isError, data, refetch } = useQuery(["apps"], listApps);
+  const { isLoading, isError, data, refetch } = useQuery({ queryKey: ["apps"], queryFn: listApps });
 
   const createAppAndRefresh = async (name: string): Promise<Application> => {
     const app = await createApp(name);
@@ -42,11 +42,7 @@ export function AppsProvider(props: Props) {
     await refetch();
   };
 
-  const updateAppAndRefresh = async (
-    appId: string,
-    name: string,
-    icon: string
-  ): Promise<Application> => {
+  const updateAppAndRefresh = async (appId: string, name: string, icon: string): Promise<Application> => {
     const app = await updateApp(appId, name, icon);
     toast(`${name} app was successfully updated.`);
     await refetch();

@@ -26,9 +26,9 @@ export function KeyMetrics(props: Props) {
     isLoading,
     isError,
     data: metrics,
-  } = useQuery(
-    ["key-metrics", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
-    () =>
+  } = useQuery({
+    queryKey: ["key-metrics", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
+    queryFn: () =>
       keyMetrics({
         buildMode,
         appId: props.appId,
@@ -38,8 +38,8 @@ export function KeyMetrics(props: Props) {
         eventName,
         osName,
       }),
-    { staleTime: 10000 }
-  );
+    staleTime: 10000,
+  });
 
   return (
     <KeyMetricsContainer>

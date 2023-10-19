@@ -72,9 +72,9 @@ export function MainChartWidget(props: Props) {
   const eventName = searchParams.get("eventName") || "";
   const osName = searchParams.get("osName") || "";
 
-  const { isLoading, isError, data } = useQuery(
-    ["periodic-stats", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
-    () =>
+  const { isLoading, isError, data } = useQuery({
+    queryKey: ["periodic-stats", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
+    queryFn: () =>
       periodicStats({
         buildMode,
         appId: props.appId,
@@ -84,8 +84,8 @@ export function MainChartWidget(props: Props) {
         eventName,
         osName,
       }),
-    { staleTime: 10000 }
-  );
+    staleTime: 10000,
+  });
 
   useEffect(() => {
     trackEvent("dashboard_viewed", { period, name: props.appName });

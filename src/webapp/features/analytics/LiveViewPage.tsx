@@ -18,11 +18,11 @@ export function Component() {
 
   if (!app) return <Navigate to="/" />;
 
-  const { isLoading, data: dataPoints } = useQuery(
-    ["live-geo", app.id, buildMode],
-    () => liveGeoDataPoints({ appId: app.id, buildMode }),
-    { refetchInterval: 10000 }
-  );
+  const { isLoading, data: dataPoints } = useQuery({
+    queryKey: ["live-geo", app.id, buildMode],
+    queryFn: () => liveGeoDataPoints({ appId: app.id, buildMode }),
+    refetchInterval: 10000,
+  });
 
   useEffect(() => {
     trackEvent("liveview_viewed", { name: app.name });

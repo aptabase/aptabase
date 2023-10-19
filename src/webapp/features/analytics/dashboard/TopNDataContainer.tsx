@@ -25,9 +25,9 @@ export function TopNDataContainer(props: Props) {
   const eventName = searchParams.get("eventName") || "";
   const osName = searchParams.get("osName") || "";
 
-  const { isLoading, isError, data } = useQuery(
-    [props.queryName, buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
-    () =>
+  const { isLoading, isError, data } = useQuery({
+    queryKey: [props.queryName, buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
+    queryFn: () =>
       props.query({
         buildMode,
         appId: props.appId,
@@ -37,8 +37,8 @@ export function TopNDataContainer(props: Props) {
         eventName,
         osName,
       }),
-    { staleTime: 10000 }
-  );
+    staleTime: 10000,
+  });
 
   return props.children({ isLoading, isError, items: data || [] });
 }

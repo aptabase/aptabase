@@ -19,9 +19,7 @@ export type BillingInfo = {
 };
 
 export function useBilling(): UseQueryResult<BillingInfo> {
-  return useQuery(["billing"], () => api.get<BillingInfo>(`/_billing`), {
-    refetchOnMount: true,
-  });
+  return useQuery({ queryKey: ["billing"], queryFn: () => api.get<BillingInfo>(`/_billing`), refetchOnMount: true });
 }
 
 export function useBillingState(): "OK" | "OVERUSE" {

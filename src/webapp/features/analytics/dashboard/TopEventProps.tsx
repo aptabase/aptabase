@@ -22,17 +22,18 @@ export function TopEventProps(props: Props) {
   const osName = searchParams.get("osName") || "";
 
   const [stringKeyIndex, setStringKeyIndex] = useState(0);
-  const [selectedNumericKey, setSelectedNumericKey] = useState<
-    [AggregateValueName, string | undefined]
-  >(["events", undefined]);
+  const [selectedNumericKey, setSelectedNumericKey] = useState<[AggregateValueName, string | undefined]>([
+    "events",
+    undefined,
+  ]);
 
   const {
     isLoading,
     isError,
     data: rows,
-  } = useQuery(
-    ["top-event-props", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
-    () =>
+  } = useQuery({
+    queryKey: ["top-event-props", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
+    queryFn: () =>
       topEventProps({
         buildMode,
         appId: props.appId,
@@ -42,8 +43,8 @@ export function TopEventProps(props: Props) {
         eventName,
         osName,
       }),
-    { staleTime: 10000 }
-  );
+    staleTime: 10000,
+  });
 
   const stringKeys = [...new Set((rows || []).map((row) => row.stringKey).filter((x) => !!x))];
 
@@ -51,9 +52,9 @@ export function TopEventProps(props: Props) {
 
   if (!isLoading && stringKeys.length === 0) {
     const value =
-      (rows || []).find(
-        (x) => selectedNumericKey[0] === "events" || x.numericKey === selectedNumericKey[1]
-      )?.[selectedNumericKey[0]] ?? 0;
+      (rows || []).find((x) => selectedNumericKey[0] === "events" || x.numericKey === selectedNumericKey[1])?.[
+        selectedNumericKey[0]
+      ] ?? 0;
 
     return (
       <>

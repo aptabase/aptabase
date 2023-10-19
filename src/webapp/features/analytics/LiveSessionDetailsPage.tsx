@@ -19,11 +19,11 @@ export function Component() {
 
   if (!app || !sessionId) return <Navigate to="/" />;
 
-  const { isLoading, data } = useQuery(
-    ["live-session-details", app.id, buildMode, sessionId],
-    () => liveSessionDetails({ appId: app.id, buildMode, sessionId }),
-    { refetchInterval: 10000 }
-  );
+  const { isLoading, data } = useQuery({
+    queryKey: ["live-session-details", app.id, buildMode, sessionId],
+    queryFn: () => liveSessionDetails({ appId: app.id, buildMode, sessionId }),
+    refetchInterval: 10000,
+  });
 
   useEffect(() => {
     trackEvent("liveview_session_viewed");

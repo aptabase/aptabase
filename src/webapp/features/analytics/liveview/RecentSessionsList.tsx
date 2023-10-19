@@ -10,11 +10,11 @@ type Props = {
 
 export function RecentSessionsList(props: Props) {
   const navigate = useNavigate();
-  const { data } = useQuery(
-    ["live-sessions", props.appId, props.buildMode],
-    () => liveRecentSessions({ appId: props.appId, buildMode: props.buildMode }),
-    { refetchInterval: 10000 }
-  );
+  const { data } = useQuery({
+    queryKey: ["live-sessions", props.appId, props.buildMode],
+    queryFn: () => liveRecentSessions({ appId: props.appId, buildMode: props.buildMode }),
+    refetchInterval: 10000,
+  });
 
   const sessions = data || [];
 
