@@ -12,6 +12,7 @@ import { formatNumber } from "@fns/format-number";
 
 type Props = {
   appId: string;
+  appName: string;
 };
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -46,9 +47,7 @@ function TooltipContent(props: {
 }) {
   return (
     <div className="text-sm whitespace-nowrap">
-      <p className="text-center text-muted-foreground">
-        {formatPeriod(props.granularity, props.label)}
-      </p>
+      <p className="text-center text-muted-foreground">{formatPeriod(props.granularity, props.label)}</p>
       {props.points.map((point) => (
         <p key={point.name}>
           <span className="font-medium">{formatNumber(point.value)}</span>{" "}
@@ -89,8 +88,8 @@ export function MainChartWidget(props: Props) {
   );
 
   useEffect(() => {
-    trackEvent("dashboard_viewed", { period });
-  }, [period]);
+    trackEvent("dashboard_viewed", { period, name: props.appName });
+  }, [period, props.appName]);
 
   // TODO: make this more efficient, we don't need to map over the data multiple times
   const users = (data?.rows || []).map((x) => x.users);

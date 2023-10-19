@@ -25,8 +25,8 @@ export function Component() {
   );
 
   useEffect(() => {
-    trackEvent("liveview_viewed");
-  }, []);
+    trackEvent("liveview_viewed", { name: app.name });
+  }, [app.name]);
 
   const totalUsers = dataPoints?.reduce((total, point) => total + point.users, 0) ?? 0;
 
