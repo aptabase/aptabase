@@ -65,7 +65,7 @@ export function MapDataPoint(props: Props) {
       {tooltip && (
         <WorldMapPopup {...tooltip}>
           <div className="p-2 text-sm">
-            <span className="font-bold">{props.users}</span> recent users
+            <span className="font-bold">{props.users}</span> recent {props.users === 1 ? "user" : "users"}
             <div className="flex gap-1 items-center justify-between">
               <div>
                 {props.regionName && <span>{props.regionName} ·</span>} <CountryName countryCode={props.countryCode} />
