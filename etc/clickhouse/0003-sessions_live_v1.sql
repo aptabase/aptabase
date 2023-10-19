@@ -1,4 +1,4 @@
-CREATE VIEW IF NOT EXISTS sessions_live_v1
+CREATE OR REPLACE VIEW sessions_live_v1
 AS
 SELECT
     app_id,
@@ -17,10 +17,10 @@ SELECT
     anySimpleState(country_code) AS country_code,
     anySimpleState(region_name) AS region_name,
     countState() AS events_count,
-    groupArray(event_name) AS events_name,
-    groupArray(e.timestamp) AS events_timestamp,
-    groupArray(string_props) AS events_string_props,
-    groupArray(numeric_props) AS events_numeric_props
+    groupArrayState(event_name) AS events_name,
+    groupArrayState(e.timestamp) AS events_timestamp,
+    groupArrayState(string_props) AS events_string_props,
+    groupArrayState(numeric_props) AS events_numeric_props
 FROM events AS e
 GROUP BY
     app_id,
