@@ -34,12 +34,15 @@ export function AppSummaryWidget(props: Props) {
   }
 
   return (
-    <Link to={`/${props.app.id}/${params}`} className="border cursor-pointer rounded shadow hover:bg-muted h-full">
+    <Link
+      to={`/${props.app.id}/${params}`}
+      className="border cursor-pointer rounded-t-lg shadow bg-card hover:bg-muted h-full"
+    >
       <SummaryDataContainer appId={props.app.id} buildMode={props.buildMode} period={period}>
         {({ dailyUsers, metrics }) => (
           <>
-            <div className="p-2 h-16">
-              <div className="flex items-start justify-between">
+            <div className="px-3 py-2 h-20">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2 truncate">
                   <AppIcon className="w-6 h-6" iconPath={props.app.iconPath} />
                   <span className="truncate">{props.app.name}</span>
@@ -57,7 +60,7 @@ export function AppSummaryWidget(props: Props) {
               </div>
               <div>{metrics ? <p className="text-sm text-muted-foreground text-right">daily users</p> : null}</div>
             </div>
-            <div className="h-32">
+            <div className="h-28">
               <DailyUsersChart values={dailyUsers ?? []} />
             </div>
           </>

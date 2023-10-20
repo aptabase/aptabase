@@ -41,8 +41,8 @@ export function WorldMap(props: Props) {
         <style
           dangerouslySetInnerHTML={{
             __html: `
-            #worldmap path { opacity: 0.1 }
-            #worldmap path:hover, #worldmap path[data-active="true"] { opacity: 0.2 }`,
+            #worldmap path { opacity: 0.15 }
+            #worldmap path:hover, #worldmap path[data-active="true"] { opacity: 0.4 }`,
           }}
         />
 

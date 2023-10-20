@@ -8,7 +8,7 @@ type Props = {
 
 export function EmptyStateWidget(props: Props) {
   return (
-    <Link to={props.app.id} className="border cursor-pointer rounded shadow hover:bg-muted h-full">
+    <Link to={props.app.id} className="border cursor-pointer rounded shadow bg-card hover:bg-muted h-full">
       <div className="flex flex-col">
         <div className="p-2 h-16">
           <div className="flex items-start justify-between">

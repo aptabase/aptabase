@@ -32,13 +32,13 @@
     color-scheme: dark;
 
     --primary: 221 100% 55%;
-    --background: 240 10% 3.9%;
+    --background: 0 0% 0%;
     --foreground: 0 0% 98%;
     --muted: 0 0% 8%;
     --muted-foreground: 240 5% 64.9%;
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    --card: 0 0% 4%;
     --card-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;

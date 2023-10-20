@@ -21,7 +21,7 @@ export function AppShareListItem(props: Props) {
   };
 
   return (
-    <li className="flex items-center space-x-4 border px-4 py-2 rounded-md justify-between">
+    <li className="flex items-center bg-card space-x-4 border px-4 py-2 rounded-md justify-between">
       <div className="truncate">
         <p className="truncate">{props.email}</p>
         <p className="text-xs text-muted-foreground mt-1">{formatDate(props.createdAt)}</p>

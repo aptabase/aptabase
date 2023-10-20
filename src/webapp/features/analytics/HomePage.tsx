@@ -32,7 +32,7 @@ export function Component() {
   return (
     <Page title="Home">
       <div className="flex justify-between items-center">
-        <PageHeading title="My Apps" />
+        <PageHeading title="Home" />
         <div className="flex items-center space-x-2">
           <AppConfigMenu />
           <DateRangePicker />
