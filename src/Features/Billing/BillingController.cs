@@ -14,6 +14,12 @@ public class BillingUsage
     public long Quota { get; set; }
 }
 
+public class BillingHistoricUsage
+{
+    public DateTime Date { get; set; }
+    public long Events { get; set; }
+}
+
 [ApiController, IsAuthenticated]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class BillingController : Controller
@@ -33,9 +39,7 @@ public class BillingController : Controller
     public async Task<IActionResult> BillingState(CancellationToken cancellationToken)
     {
         var user = this.GetCurrentUserIdentity();
-        var releaseAppIds = await _db.Connection.QueryAsync<string>(@"SELECT id FROM apps WHERE owner_id = @userId", new { userId = user.Id });
-        var debugAppIds = releaseAppIds.Select(id => $"{id}_DEBUG");
-        var appIds = releaseAppIds.Concat(debugAppIds).ToArray();
+        var appIds = await GetOwnedAppIds(user);
 
         var usage = await _queryClient.NamedQuerySingleAsync<BillingUsage>("get_billing_usage", new {
             app_ids = appIds,
@@ -60,6 +64,19 @@ public class BillingController : Controller
             } : null,
             Plan = plan
         });
+    }
+
+    [HttpGet("/api/_billing/historical")]
+    public async Task<IActionResult> HistoricalUsage(CancellationToken cancellationToken)
+    {
+        var user = this.GetCurrentUserIdentity();
+        var appIds = await GetOwnedAppIds(user);
+
+        var rows = await _queryClient.NamedQueryAsync<BillingHistoricUsage>("billing_historical_usage__v1", new {
+            app_ids = appIds,
+        }, cancellationToken);
+
+        return Ok(rows);
     }
 
     [HttpPost("/api/_billing/checkout")]
@@ -90,5 +107,12 @@ public class BillingController : Controller
               WHERE owner_id = @userId
               ORDER BY created_at DESC LIMIT 1",
             new { userId = user.Id });
+    }
+
+    private async Task<string[]> GetOwnedAppIds(UserIdentity user)
+    {
+        var releaseAppIds = await _db.Connection.QueryAsync<string>(@"SELECT id FROM apps WHERE owner_id = @userId", new { userId = user.Id });
+        var debugAppIds = releaseAppIds.Select(id => $"{id}_DEBUG");
+        return releaseAppIds.Concat(debugAppIds).ToArray();
     }
 }

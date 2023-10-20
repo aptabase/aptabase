@@ -1,42 +1,19 @@
 import { trackEvent } from "@aptabase/web";
 import { useQuery } from "@tanstack/react-query";
-import { format, parseJSON } from "date-fns";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Granularity, periodicStats } from "../query";
 import { KeyMetrics } from "./KeyMetrics";
 import { useApps } from "@features/apps";
-import { hourCycle } from "@features/env";
 import { MetricsChart } from "./MetricsChart";
 import { formatNumber } from "@fns/format-number";
+import { formatPeriod } from "@fns/format-date";
 import { useDatePicker } from "@hooks/use-datepicker";
 
 type Props = {
   appId: string;
   appName: string;
 };
-
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-function formatPeriod(granularity: Granularity, period: string) {
-  try {
-    if (granularity === "hour") {
-      return format(parseJSON(period), hourCycle === "h12" ? "haaaaa'm'" : "HH:mm");
-    }
-
-    const [year, month, day] = period.substring(0, 10).split("-");
-    const monthName = months[parseInt(month, 10) - 1];
-
-    switch (granularity) {
-      case "day":
-        return `${monthName} ${day}`;
-      case "month":
-        return `${monthName} ${year}`;
-    }
-  } catch (e) {
-    return period;
-  }
-}
 
 function TooltipContent(props: {
   granularity: Granularity;

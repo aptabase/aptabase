@@ -17,6 +17,9 @@ const root = getComputedStyle(document.documentElement);
 export default {
   primary: "#60A5FA",
   primaryBackground: createLinearGradient("rgba(96, 165, 250, 0.2)", "rgba(96, 165, 250, 0.1)", "transparent"),
+  success: `hsl(${root.getPropertyValue("--success")})`,
+  destructive: `hsl(${root.getPropertyValue("--destructive")})`,
+  warning: `hsl(${root.getPropertyValue("--warning")})`,
   background: `hsl(${root.getPropertyValue("--background")})`,
   highlight: root.getPropertyValue("--chart-highlight"),
 };

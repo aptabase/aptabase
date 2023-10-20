@@ -21,7 +21,7 @@
   --success-foreground: 0 0% 98%;
   --warning: 25 95% 53%;
   --warning-foreground: 0 0% 98%;
-  --chart-highlight: rgb(0, 0, 0, 0.025);
+  --chart-highlight: rgb(0, 0, 0, 0.075);
   --ring: 213 94% 68%;
   --radius: 0.5rem;
 }
@@ -50,7 +50,7 @@
     --success-foreground: 0 0% 98%;
     --warning: 25 95% 53%;
     --warning-foreground: 0 0% 98%;
-    --chart-highlight: rgb(255, 255, 255, 0.1);
+    --chart-highlight: rgb(255, 255, 255, 0.075);
     --ring: 213 94% 68%;
     --radius: 0.5rem;
   }

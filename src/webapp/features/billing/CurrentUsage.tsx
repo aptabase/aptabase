@@ -1,5 +1,4 @@
 import { PingSignal } from "@components/PingSignal";
-import { BillingInfo } from "./useBilling";
 import { twMerge } from "tailwind-merge";
 
 const months = [
@@ -18,38 +17,40 @@ const months = [
 ];
 
 type Props = {
-  billing: BillingInfo;
+  month: number;
+  year: number;
+  usage: number;
+  quota: number;
+  state: "OK" | "OVERUSE";
 };
 
-const getUsageBarColor = (perc: number) => {
-  return perc >= 100 ? "bg-destructive" : perc >= 90 ? "bg-warning" : "bg-primary";
+const colors = {
+  OK: "bg-primary",
+  OVERUSE: "bg-destructive",
 };
 
 export function CurrentUsage(props: Props) {
-  const perc = (props.billing.usage / props.billing.plan.monthlyEvents) * 100;
+  const percentage = props.usage / props.quota;
 
   return (
     <div className="flex flex-col h-full justify-between">
       <div className="flex items-center mb-1 justify-between">
         <span>Usage</span>
         <span className="text-sm text-muted-foreground">
-          {months[props.billing.month - 1]} / {props.billing.year}
+          {months[props.month - 1]} / {props.year}
         </span>
       </div>
       <div className="space-y-1">
         <div className="text-sm flex items-center space-x-1">
-          <span>{props.billing.usage.toLocaleString()}</span>
+          <span>{props.usage.toLocaleString()}</span>
           <span className="text-muted-foreground">
-            / {props.billing.plan.monthlyEvents.toLocaleString()} events ({perc.toFixed(1)}
+            / {props.quota.toLocaleString()} events ({percentage.toFixed(1)}
             %)
           </span>
-          {props.billing.state === "OVERUSE" && <PingSignal color="warning" />}
+          {props.state === "OVERUSE" && <PingSignal color="warning" size="xs" />}
         </div>
         <div className="overflow-hidden rounded bg-accent">
-          <div
-            className={twMerge("h-2 rounded", getUsageBarColor(perc))}
-            style={{ width: `${perc}%` }}
-          />
+          <div className={twMerge("h-2 rounded", colors[props.state])} style={{ width: `${percentage * 100}%` }} />
         </div>
       </div>
     </div>

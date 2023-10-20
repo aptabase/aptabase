@@ -1,0 +1,13 @@
+TOKEN aptabase-api READ
+
+VERSION 1
+NODE endpoint
+SQL >
+    %
+    SELECT toDate(concat(toString(year), '-', toString(month), '-', toString(1))) as Date,
+		   countMerge(events) as Events
+    FROM billing_usage_v1
+    PREWHERE app_id IN {{Array(app_ids, 'String')}}
+    AND Date >= toStartOfMonth(now() - INTERVAL 6 MONTH)
+    GROUP BY Date
+    ORDER BY Date WITH FILL FROM toStartOfMonth(now() - INTERVAL 6 MONTH) TO toStartOfMonth(now() + INTERVAL 1 MONTH) STEP toIntervalMonth(1)
