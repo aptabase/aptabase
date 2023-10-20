@@ -46,8 +46,8 @@ function Body(props: { billing: BillingInfo; historical: BillingHistoricalUsage[
         </div>
       </div>
       <div>
-        <p className="font-medium mb-4">Monthly Usage</p>
-        <div className="h-60">
+        <p>Monthly Usage</p>
+        <div className="h-60 mt-4">
           <MonthlyUsageChart
             dates={props.historical.map((x) => formatPeriod("month", x.date))}
             events={props.historical.map((x) => x.events)}
