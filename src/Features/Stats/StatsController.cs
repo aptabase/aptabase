@@ -86,6 +86,7 @@ public record LiveRecentSession
     public DateTime StartedAt { get; set; }
     public ulong Duration { get; set; }
     public ulong EventsCount { get; set; }
+    public string AppVersion { get; set; } = "";
     public string CountryCode { get; set; } = "";
     public string RegionName { get; set; } = "";
     public string OsName { get; set; } = "";
@@ -98,6 +99,7 @@ public record SessionTimeline
     public DateTime StartedAt { get; set; }
     public ulong Duration { get; set; }
     public ulong EventsCount { get; set; }
+    public string AppVersion { get; set; } = "";
     public string CountryCode { get; set; } = "";
     public string RegionName { get; set; } = "";
     public string OsName { get; set; } = "";

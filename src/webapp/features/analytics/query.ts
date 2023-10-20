@@ -111,6 +111,7 @@ export type LiveRecentSession = {
   eventsCount: number;
   startedAt: string;
   duration: number;
+  appVersion: string;
   countryCode: string;
   regionName: string;
   osName: string;

@@ -6,10 +6,11 @@ import { Navigate, useParams } from "react-router-dom";
 import { trackEvent } from "@aptabase/web";
 import { useEffect } from "react";
 import { SessionTimeline } from "./liveview/timeline";
-import { IconClick, IconClock } from "@tabler/icons-react";
+import { IconClick, IconClock, IconDevices, IconUser } from "@tabler/icons-react";
 import { formatNumber } from "@fns/format-number";
 import { CountryFlag, CountryName } from "@features/geo";
 import { OSIcon } from "./dashboard/icons/os";
+import { formatTime } from "@fns/format-date";
 
 Component.displayName = "LiveSessionDetailsPage";
 export function Component() {
@@ -37,16 +38,25 @@ export function Component() {
 
       {data && (
         <div className="mt-10 flex flex-col">
+          <div className="flex gap-2 items-center mb-1">
+            <IconDevices className="text-muted-foreground h-5 w-5" />
+            <span className="tabular-nums">App Version {data.appVersion}</span>
+          </div>
+          <div className="flex gap-2 items-center mb-1">
+            <IconUser className="text-muted-foreground h-5 w-5" />
+            <span className="tabular-nums">{formatTime(data.startedAt)}</span>
+          </div>
+
           <div className="flex flex-col space-y-1 md:flex-row md:space-y-0">
             <div className="w-40 space-y-1">
               <div className="flex gap-2 items-center">
-                <IconClick className="text-muted-foreground h-5 w-5" />
-                <span>{data.eventsCount} events</span>
+                <IconClock className="text-muted-foreground h-5 w-5" />
+                <span className="tabular-nums">{formatNumber(data.duration, "duration")}</span>
               </div>
 
               <div className="flex gap-2 items-center">
-                <IconClock className="text-muted-foreground h-5 w-5" />
-                <span>{formatNumber(data.duration, "duration")}</span>
+                <IconClick className="text-muted-foreground h-5 w-5" />
+                <span>{data.eventsCount} events</span>
               </div>
             </div>
 
