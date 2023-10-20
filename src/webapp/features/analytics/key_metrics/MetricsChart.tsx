@@ -169,7 +169,7 @@ export function MetricsChart(props: Props) {
               var offsetY = Math.min(...tooltip.dataPoints.map((x) => x.element.tooltipPosition(true).y));
 
               const isMobile = chart.height < 300;
-              const topOffset = isMobile ? 230 : 120;
+              const topOffset = isMobile ? 230 : 100;
 
               const { offsetLeft: positionX } = chart.canvas;
               tooltipRef.current.style.left = positionX + tooltip.caretX + "px";
@@ -196,7 +196,7 @@ export function MetricsChart(props: Props) {
           <div
             ref={tooltipRef}
             style={{ opacity: 0 }}
-            className="absolute pointer-events-none shadow border bg-background p-2 rounded transform -translate-x-1/2"
+            className="absolute pointer-events-none shadow border bg-card p-2 rounded transform -translate-x-1/2"
           >
             {tooltipDataPoint && props.renderTooltip ? props.renderTooltip(tooltipDataPoint) : null}
           </div>
