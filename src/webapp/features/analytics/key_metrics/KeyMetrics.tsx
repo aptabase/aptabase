@@ -8,10 +8,8 @@ import { useDatePicker } from "@hooks/use-datepicker";
 
 type Props = {
   appId: string;
-  activeMetric: "users" | "sessions";
-  onChangeActiveMetric: (metric: "users" | "sessions") => void;
-  showEvents: boolean;
-  onToggleShowEvents: () => void;
+  activeMetric: "users" | "sessions" | "events";
+  onChangeActiveMetric: (metric: "users" | "sessions" | "events") => void;
 };
 
 export function KeyMetrics(props: Props) {
@@ -66,11 +64,11 @@ export function KeyMetrics(props: Props) {
           />
           <Metric
             label="Events"
-            activeClassName="bg-foreground"
             current={metrics?.current.events ?? 0}
             previous={metrics?.previous?.events}
-            active={props.showEvents}
-            onClick={props.onToggleShowEvents}
+            activeClassName="bg-primary"
+            active={props.activeMetric === "events"}
+            onClick={() => props.onChangeActiveMetric("events")}
             format="number"
           />
           <Metric

@@ -1,7 +1,6 @@
 :root {
   color-scheme: light;
 
-  --primary: 221 100% 55%;
   --background: 0 0% 100%;
   --foreground: 240 10% 3.9%;
   --muted: 210 20% 98%;
@@ -22,7 +21,7 @@
   --success-foreground: 0 0% 98%;
   --warning: 25 95% 53%;
   --warning-foreground: 0 0% 98%;
-  --chart-highlight: rgb(0, 0, 0, 0.05);
+  --chart-highlight: rgb(0, 0, 0, 0.025);
   --ring: 213 94% 68%;
   --radius: 0.5rem;
 }
@@ -31,7 +30,6 @@
   :root {
     color-scheme: dark;
 
-    --primary: 221 100% 55%;
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
     --muted: 0 0% 8%;

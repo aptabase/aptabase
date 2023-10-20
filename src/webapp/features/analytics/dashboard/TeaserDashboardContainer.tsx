@@ -15,9 +15,7 @@ type Props = {
 export function TeaserDashboardContainer(props: Props) {
   const containerClassName = "min-h-[12rem] bg-background py-4 sm:px-4";
 
-  const usersPerHour = [
-    10, 30, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 40, 30, 20, 10, 5, 10, 15, 20, 25, 30, 35, 40,
-  ];
+  const usersPerHour = [10, 30, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 40, 30, 20, 10, 5, 10, 15, 20, 25, 30, 35, 40];
 
   return (
     <Page title={props.app.name}>
@@ -41,34 +39,18 @@ export function TeaserDashboardContainer(props: Props) {
               active={true}
               format="number"
             />
-            <Metric
-              label="Sessions"
-              current={94}
-              previous={65}
-              activeClassName="bg-primary"
-              format="number"
-            />
-            <Metric
-              label="Events"
-              activeClassName="bg-foreground"
-              current={3504}
-              previous={2406}
-              format="number"
-            />
+            <Metric label="Sessions" current={94} previous={65} activeClassName="bg-primary" format="number" />
+            <Metric label="Events" activeClassName="bg-foreground" current={3504} previous={2406} format="number" />
             <Metric label="Avg. Duration" current={340} format="duration" />
           </KeyMetricsContainer>
 
           <MetricsChart
             isEmpty={false}
             activeMetric="users"
-            showEvents={false}
             isError={false}
             isLoading={false}
             hasPartialData={true}
-            users={[
-              10, 30, 15, 25, 26, 28, 24, 32, 40, 50, 42, 30, 40, 24, 50, 40, 42, 39, 24, 20, 25,
-              30, 35, 23,
-            ]}
+            users={[10, 30, 15, 25, 26, 28, 24, 32, 40, 50, 42, 30, 40, 24, 50, 40, 42, 39, 24, 20, 25, 30, 35, 23]}
             labels={usersPerHour.map((_, i) => i.toString())}
             sessions={[]}
             events={[]}

@@ -62,10 +62,7 @@ function TooltipContent(props: {
 export function MainChartWidget(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
-  const [keyMetricToShow, setKeyMetricToShow] = useState<"users" | "sessions">("users");
-  const [showEvents, setShowEvents] = useState(false);
-
-  const toggleShowEvents = () => setShowEvents((x) => !x);
+  const [keyMetricToShow, setKeyMetricToShow] = useState<"users" | "sessions" | "events">("users");
 
   const [period] = useDatePicker();
   const countryCode = searchParams.get("countryCode") || "";
@@ -102,17 +99,10 @@ export function MainChartWidget(props: Props) {
   const granularity = data?.granularity || "day";
   return (
     <>
-      <KeyMetrics
-        activeMetric={keyMetricToShow}
-        onChangeActiveMetric={setKeyMetricToShow}
-        showEvents={showEvents}
-        onToggleShowEvents={toggleShowEvents}
-        {...props}
-      />
+      <KeyMetrics activeMetric={keyMetricToShow} onChangeActiveMetric={setKeyMetricToShow} {...props} />
       <MetricsChart
         isEmpty={total === 0}
         activeMetric={keyMetricToShow}
-        showEvents={showEvents}
         isError={isError}
         isLoading={isLoading}
         hasPartialData={period !== "last-month"}

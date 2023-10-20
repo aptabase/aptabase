@@ -1,5 +1,6 @@
 import { Chart } from "@components/Chart";
 import { ChartConfigurationCustomTypesPerDataset } from "chart.js";
+import colors from "../key_metrics/colors";
 
 type Props = {
   values: number[];
@@ -26,13 +27,11 @@ export function DailyUsersChart(props: Props) {
           type: "line",
           label: "Daily Users",
           data: props.values,
-          borderColor: "#3b82f6",
-          tension: 0.2,
+          borderColor: colors.primary,
           fill: "origin",
-          backgroundColor: "rgb(59, 130, 246, 0.1)",
-          borderWidth: 2,
+          backgroundColor: colors.primaryBackground,
+          borderWidth: 1.5,
           pointRadius: 0,
-          pointHoverRadius: 0,
         },
       ],
     },

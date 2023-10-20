@@ -3,21 +3,15 @@ import { useMemo, useRef, useState } from "react";
 import { EmptyState } from "@components/EmptyState";
 import { ErrorState } from "@components/ErrorState";
 import { LoadingState } from "@components/LoadingState";
-import {
-  Chart,
-  type LineAnnotationOptions,
-  type ScriptableContext,
-  type ChartConfigurationCustomTypesPerDataset,
-} from "@components/Chart";
+import { Chart, type LineAnnotationOptions, type ChartConfigurationCustomTypesPerDataset } from "@components/Chart";
 
 type Props = {
   hasPartialData: boolean;
   labels: string[];
-  activeMetric: "users" | "sessions";
+  activeMetric: "users" | "sessions" | "events";
   users: number[];
   sessions: number[];
   events: number[];
-  showEvents: boolean;
   granularity: "hour" | "day" | "month";
   isEmpty?: boolean;
   isLoading?: boolean;
@@ -34,13 +28,24 @@ type TooltipDataPoint = {
   }>;
 };
 
+const labels = {
+  "sessions-hour": "Sessions",
+  "sessions-day": "Sessions",
+  "sessions-month": "Sessions",
+  "events-hour": "Events",
+  "events-day": "Events",
+  "events-month": "Events",
+  "users-hour": "Users",
+  "users-day": "Users",
+  "users-month": "Daily Users",
+};
+
 export function MetricsChart(props: Props) {
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [tooltipDataPoint, setTooltipDataPoint] = useState<TooltipDataPoint | null>(null);
 
   const showAllLabels = props.granularity === "month";
-  const activeMetricLabel =
-    props.activeMetric === "sessions" ? "Sessions" : props.granularity === "month" ? "Daily Users" : "Users";
+  const label = labels[`${props.activeMetric}-${props.granularity}`] ?? "";
 
   const config: ChartConfigurationCustomTypesPerDataset = useMemo(() => {
     return {
@@ -48,39 +53,27 @@ export function MetricsChart(props: Props) {
         labels: props.labels,
         datasets: [
           {
-            order: 2,
-            type: "bar",
-            label: activeMetricLabel,
-            yAxisID: props.activeMetric,
-            data: props[props.activeMetric],
-            backgroundColor: props.hasPartialData
-              ? (ctx: ScriptableContext<"bar">) => {
-                  const total = ctx.chart.data.datasets[0].data.length;
-                  return total - 1 === ctx.dataIndex ? colors.primaryStripped : colors.primary;
-                }
-              : colors.primary,
-            borderRadius: 2,
-          },
-          {
-            order: 1,
+            label,
             type: "line",
-            label: "Events",
-            data: props.events,
-            yAxisID: "events",
-            hidden: !props.showEvents,
-            borderColor: colors.secondary,
-            tension: 0.2,
-            borderWidth: 3,
-            pointRadius: 0,
-            pointHoverRadius: 0,
+            fill: "origin",
+            backgroundColor: colors.primaryBackground,
+            data: props[props.activeMetric],
+            borderColor: colors.primary,
             segment: {
               borderDash: props.hasPartialData
                 ? (ctx) => {
                     const total = props.events.length || 0;
-                    return total - 1 === ctx.p1DataIndex ? [8, 8] : [];
+                    return total - 1 === ctx.p1DataIndex ? [4, 4] : [];
                   }
                 : [],
             },
+            tension: 0,
+            borderWidth: 2,
+            pointRadius: 0,
+            pointBackgroundColor: colors.primary,
+            pointHoverRadius: 6,
+            pointHoverBorderWidth: 4,
+            pointHoverBorderColor: colors.background,
           },
         ],
       },
@@ -113,22 +106,7 @@ export function MetricsChart(props: Props) {
               display: false,
             },
           },
-          [props.activeMetric]: {
-            grid: {
-              tickWidth: 0,
-            },
-            beginAtZero: true,
-            ticks: {
-              maxTicksLimit: 4,
-            },
-            border: {
-              display: false,
-              dash: [4, 4],
-            },
-          },
-          events: {
-            display: props.showEvents,
-            position: "right",
+          y: {
             grid: {
               tickWidth: 0,
             },
@@ -149,11 +127,7 @@ export function MetricsChart(props: Props) {
                 type: "line",
                 display: false,
                 borderColor: colors.highlight,
-                borderWidth: (ctx) => {
-                  const columns = ctx.chart.data.datasets[0].data.length;
-                  const chartWidth = ctx.chart.width + 100;
-                  return chartWidth / columns;
-                },
+                borderWidth: 4,
               },
             ],
           },
@@ -195,7 +169,7 @@ export function MetricsChart(props: Props) {
               var offsetY = Math.min(...tooltip.dataPoints.map((x) => x.element.tooltipPosition(true).y));
 
               const isMobile = chart.height < 300;
-              const topOffset = isMobile ? 320 : 160;
+              const topOffset = isMobile ? 230 : 120;
 
               const { offsetLeft: positionX } = chart.canvas;
               tooltipRef.current.style.left = positionX + tooltip.caretX + "px";
