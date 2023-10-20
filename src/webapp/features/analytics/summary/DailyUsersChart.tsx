@@ -32,6 +32,7 @@ export function DailyUsersChart(props: Props) {
           backgroundColor: colors.primaryBackground,
           borderWidth: 1.5,
           pointRadius: 0,
+          pointHoverRadius: 0,
         },
       ],
     },
