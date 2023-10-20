@@ -32,6 +32,7 @@ export function LonelyState() {
           label="What's your app name?"
           name="name"
           placeholder="My Awesome App"
+          autoComplete="off"
           required={true}
           value={name}
           onChange={(e) => setName(e.target.value)}

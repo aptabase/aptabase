@@ -8,23 +8,23 @@
   </PropertyGroup>
     
   <ItemGroup>
-    <PackageReference Include="Npgsql" Version="7.0.4" />
-    <PackageReference Include="Npgsql.DependencyInjection" Version="7.0.4" />
-    <PackageReference Include="ClickHouse.Client" Version="6.7.3" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.0" />
-    <PackageReference Include="Dapper" Version="2.0.143" />
-    <PackageReference Include="Nanoid" Version="2.1.0" />
+    <PackageReference Include="Npgsql" Version="7.0.6" />
+    <PackageReference Include="Npgsql.DependencyInjection" Version="7.0.6" />
+    <PackageReference Include="ClickHouse.Client" Version="6.7.5" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
+    <PackageReference Include="Dapper" Version="2.1.15" />
+    <PackageReference Include="Nanoid" Version="3.0.0" />
     <PackageReference Include="FluentMigrator" Version="3.3.2" />
     <PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
     <PackageReference Include="FluentMigrator.Runner.Postgres" Version="3.3.2" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.100.140" />
-    <PackageReference Include="AWSSDK.SSO" Version="3.7.100.140" />
-    <PackageReference Include="AWSSDK.SSOOIDC" Version="3.7.100.140" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.200.58" />
+    <PackageReference Include="AWSSDK.SSO" Version="3.7.201.9" />
+    <PackageReference Include="AWSSDK.SSOOIDC" Version="3.7.201.15" />
     <PackageReference Include="Amazon.AspNetCore.DataProtection.SSM" Version="3.1.1" />
     <PackageReference Include="Sgbj.Cron.CronTimer" Version="1.0.2" />
     <PackageReference Include="MaxMind.GeoIP2" Version="5.1.0" />
     <PackageReference Include="Yoh.Text.Json.NamingPolicies" Version="1.0.0" />
-    <PackageReference Include="Scriban" Version="5.7.0" />
+    <PackageReference Include="Scriban" Version="5.9.0" />
   </ItemGroup>
 
   <ItemGroup>

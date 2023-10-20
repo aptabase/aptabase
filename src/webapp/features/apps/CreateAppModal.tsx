@@ -72,21 +72,17 @@ export function CreateAppModal(props: Props) {
                 <Dialog.Title as="h3" className="text-lg font-medium">
                   Register your App
                 </Dialog.Title>
-                <div className="text-sm text-muted-foreground">
-                  Each app has its own dashboard and metrics
-                </div>
+                <div className="text-sm text-muted-foreground">Each app has its own dashboard and metrics</div>
                 <form onSubmit={handleSubmit} className="mt-8 space-y-2">
                   <TextInput
                     name="name"
                     placeholder="My Awesome App"
+                    autoComplete="off"
                     required={true}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
-                  <Button
-                    disabled={name.length < 2 || name.length > 40 || processing}
-                    loading={processing}
-                  >
+                  <Button disabled={name.length < 2 || name.length > 40 || processing} loading={processing}>
                     Create
                   </Button>
                 </form>
