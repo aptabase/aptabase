@@ -14,5 +14,6 @@ export function initAnalytics() {
 
   init(appKey, {
     appVersion: import.meta.env.APP_VERSION,
+    isDebug: isDevelopment,
   });
 }
