@@ -55,6 +55,7 @@ public class DailyUserHasher : IUserHasher
     {
         var newSalt = RandomNumberGenerator.GetBytes(16);
         await _db.Connection.ExecuteAsync($"INSERT INTO app_salts (app_id, date, salt) VALUES (@appId, @date, @newSalt) ON CONFLICT DO NOTHING", new { appId, date, newSalt });
-        return await _db.Connection.ExecuteScalarAsync<byte[]>($"SELECT salt FROM app_salts WHERE app_id = @appId AND date = @date", new { appId, date });
+        var bytes = await _db.Connection.ExecuteScalarAsync<byte[]>($"SELECT salt FROM app_salts WHERE app_id = @appId AND date = @date", new { appId, date });
+        return bytes ?? newSalt;
     }
 }

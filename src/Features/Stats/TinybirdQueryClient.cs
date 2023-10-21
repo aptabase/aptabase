@@ -26,29 +26,8 @@ public class TinybirdQueryClient : IQueryClient
         _options.Converters.Add(new TinybirdDateTimeJsonConverter());
     }
 
-    public async Task<IEnumerable<T>> QueryAsync<T>(string query, CancellationToken cancellationToken)
-    {
-        var q = WebUtility.UrlEncode($"{query} FORMAT JSON");
-        var path = $"/v0/sql?q={q}";
-        var response = await _httpClient.GetAsync(path, cancellationToken);
-
-        await response.EnsureSuccessWithLog(_logger);
-        var result = await response.Content.ReadFromJsonAsync<QueryResult<T>>(_options) ?? new QueryResult<T>();
-        return result.Data;
-    }
-
-    public async Task<T> QuerySingleAsync<T>(string query, CancellationToken cancellationToken) where T : new()
-    {
-        var result = await QueryAsync<T>(query, cancellationToken);
-        if (result.Any())
-            return result.First();
-
-        return new T();
-    }
-
     public async Task<IEnumerable<T>> NamedQueryAsync<T>(string name, object args, CancellationToken cancellationToken)
     {
-
         var query = new QueryBuilder();
         foreach (var prop in args.GetType().GetProperties())
         {
