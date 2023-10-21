@@ -3,7 +3,7 @@ import { useApps } from "@features/apps";
 import { LonelyState } from "./LonelyState";
 import { trackEvent } from "@aptabase/web";
 import { useEffect } from "react";
-import { AppConfigMenu } from "./mode/AppConfigMenu";
+import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
 import { AppSummaryWidget } from "./summary/AppSummaryWidget";
 import { DateRangePicker } from "./DateRangePicker";
@@ -34,7 +34,7 @@ export function Component() {
       <div className="flex justify-between items-center">
         <PageHeading title="Home" />
         <div className="flex items-center space-x-2">
-          <AppConfigMenu />
+          <BuildModeSelector />
           <DateRangePicker />
         </div>
       </div>

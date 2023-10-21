@@ -2,7 +2,7 @@ import { Page, PageHeading } from "@components/Page";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useApps, useCurrentApp } from "@features/apps";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
-import { AppConfigMenu } from "./mode/AppConfigMenu";
+import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { CurrentFilters } from "./CurrentFilters";
 import { MainChartWidget } from "./key_metrics/MainChartWidget";
 import { OSWidget } from "./dashboard/OSWidget";
@@ -43,7 +43,7 @@ export function Component() {
         <div className="flex justify-between items-center">
           <PageHeading title="Dashboard" onClick={resetFilters} />
           <div className="flex items-center space-x-2">
-            <AppConfigMenu />
+            <BuildModeSelector />
             <DateRangePicker />
           </div>
         </div>

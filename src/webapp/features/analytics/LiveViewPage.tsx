@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { liveGeoDataPoints } from "@features/analytics/query";
 import { useApps, useCurrentApp } from "@features/apps";
 import { Navigate } from "react-router-dom";
-import { AppConfigMenu } from "./mode/AppConfigMenu";
+import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { trackEvent } from "@aptabase/web";
 import { useEffect } from "react";
 import { RecentSessionsList } from "./liveview/RecentSessionsList";
@@ -47,7 +47,7 @@ export function Component() {
       <div className="flex justify-between items-center">
         <PageHeading title="Live View" aside={aside()} subtitle={subtitle()} />
         <div className="flex items-center">
-          <AppConfigMenu />
+          <BuildModeSelector />
         </div>
       </div>
 

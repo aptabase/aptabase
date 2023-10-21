@@ -11,7 +11,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-type BuildMode = "debug" | "release";
+export type BuildMode = "debug" | "release";
 
 type AppsContextType = {
   apps: Application[];
