@@ -9,6 +9,7 @@ import { AppSummaryWidget } from "./summary/AppSummaryWidget";
 import { DateRangePicker } from "./DateRangePicker";
 import { LazyLoad } from "@components/LazyLoad";
 import { useDatePicker } from "@hooks/use-datepicker";
+import { NewAppWidget } from "./summary/NewAppWidget";
 
 Component.displayName = "HomePage";
 export function Component() {
@@ -45,6 +46,9 @@ export function Component() {
             <AppSummaryWidget app={app} buildMode={buildMode} />
           </LazyLoad>
         ))}
+        <LazyLoad className="h-48">
+          <NewAppWidget />
+        </LazyLoad>
       </div>
     </Page>
   );

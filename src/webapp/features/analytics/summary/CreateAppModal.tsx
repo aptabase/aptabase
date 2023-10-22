@@ -1,4 +1,4 @@
-import { useApps } from ".";
+import { useApps } from "@features/apps";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -59,7 +59,7 @@ export function CreateAppModal(props: Props) {
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-background border px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-background border px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md sm:p-6">
                 <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
                   <button
                     type="button"
@@ -70,20 +70,26 @@ export function CreateAppModal(props: Props) {
                   </button>
                 </div>
                 <Dialog.Title as="h3" className="text-lg font-medium">
-                  Register your App
+                  Register a new app
                 </Dialog.Title>
-                <div className="text-sm text-muted-foreground">Each app has its own dashboard and metrics</div>
-                <form onSubmit={handleSubmit} className="mt-8 space-y-2">
+                <form onSubmit={handleSubmit} className="mt-2">
                   <TextInput
                     name="name"
-                    placeholder="My Awesome App"
+                    placeholder="App Name"
                     autoComplete="off"
                     required={true}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
-                  <Button disabled={name.length < 2 || name.length > 40 || processing} loading={processing}>
-                    Create
+                  <p className="text-sm text-muted-foreground mt-1">
+                    A friendly name to identify your app. You can change it later.
+                  </p>
+                  <Button
+                    className="mt-4"
+                    disabled={name.length < 2 || name.length > 40 || processing}
+                    loading={processing}
+                  >
+                    Confirm
                   </Button>
                 </form>
               </Dialog.Panel>

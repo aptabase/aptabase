@@ -27,19 +27,23 @@ export function LonelyState() {
         Register your application and configure the analytics SDK to get started.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-2 w-80">
+      <form onSubmit={handleSubmit} className="mt-8">
         <TextInput
           label="What's your app name?"
           name="name"
-          placeholder="My Awesome App"
+          placeholder="App Name"
           autoComplete="off"
           required={true}
+          className="w-80"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <div className="w-20">
-          <Button disabled={name.length < 2 || name.length > 40 || processing}>Create</Button>
-        </div>
+        <p className="text-sm text-muted-foreground mt-1">
+          A friendly name to identify your app. You can change it later.
+        </p>
+        <Button className="mt-4" disabled={name.length < 2 || name.length > 40 || processing}>
+          Create
+        </Button>
       </form>
     </div>
   );
