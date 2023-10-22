@@ -19,7 +19,15 @@ export function EventWidget(props: Props) {
   return (
     <TopNDataContainer appId={props.appId} queryName="top-events" query={topEvents}>
       {(data) => (
-        <TopNChart {...data} title="Events" searchParamKey="eventName" valueLabel="Count" />
+        <TopNChart
+          {...data}
+          id="events"
+          key="events"
+          title="Events"
+          searchParamKey="eventName"
+          defaultFormat="absolute"
+          valueLabel="Count"
+        />
       )}
     </TopNDataContainer>
   );

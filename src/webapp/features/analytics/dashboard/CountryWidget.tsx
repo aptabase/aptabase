@@ -19,11 +19,14 @@ export function CountryWidget(props: Props) {
         {(data) => (
           <TopNChart
             {...data}
+            id="regions"
+            key="regions"
             title={
               <TopNTitle backProperty="countryCode">
                 <Country countryCode={countryCode} />
               </TopNTitle>
             }
+            defaultFormat="percentage"
             valueLabel="Sessions"
           />
         )}
@@ -36,8 +39,11 @@ export function CountryWidget(props: Props) {
       {(data) => (
         <TopNChart
           {...data}
+          id="countries"
+          key="countries"
           title="Countries"
           searchParamKey="countryCode"
+          defaultFormat="percentage"
           valueLabel="Sessions"
           renderRow={(item) => <Country countryCode={item.name} />}
         />

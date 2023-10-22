@@ -95,9 +95,12 @@ export function TopEventProps(props: Props) {
 
   return (
     <TopNChart
+      id="props"
+      key="props"
       title={<TopNTitle backProperty="eventName">{eventName}</TopNTitle>}
       keyLabel={<StringKeySelector stringKeys={stringKeys} onChangeIndex={setStringKeyIndex} />}
       valueLabel={<NumericKeySelector numericKeys={numericKeys} onChange={setSelectedNumericKey} />}
+      defaultFormat="absolute"
       isLoading={isLoading}
       isError={isError}
       items={items}

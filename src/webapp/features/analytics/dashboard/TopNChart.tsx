@@ -4,6 +4,8 @@ import { TopNTitle } from "./TopNTitle";
 import { EmptyState } from "@components/EmptyState";
 import { ErrorState } from "@components/ErrorState";
 import { formatNumber } from "@fns/format-number";
+import { useLocalStorage } from "@hooks/use-localstorage";
+import { twMerge } from "tailwind-merge";
 
 type Item = {
   name: string;
@@ -11,11 +13,13 @@ type Item = {
 };
 
 type Props = {
+  id: string;
   title: string | JSX.Element;
   items: Item[];
   keyLabel?: React.ReactNode;
   valueLabel?: React.ReactNode;
   renderRow?: (item: Item) => React.ReactNode;
+  defaultFormat: "absolute" | "percentage";
   isLoading?: boolean;
   isError?: boolean;
   searchParamKey?: string;
@@ -24,8 +28,20 @@ type Props = {
 const defaultRenderRow = (item: Item) => <>{item.name || <i>Empty</i>}</>;
 
 export function TopNChart(props: Props) {
+  const [format, setFormat] = useLocalStorage<"absolute" | "percentage">(
+    `top_n_${props.id}_format`,
+    props.defaultFormat
+  );
   const total = props.items.reduce((acc, item) => acc + item.value, 0);
   const renderRow = props.renderRow ?? defaultRenderRow;
+
+  const canChangeFormat = props.defaultFormat !== "absolute";
+
+  const toggleFormat = () => {
+    if (!canChangeFormat) return;
+
+    setFormat(format === "absolute" ? "percentage" : "absolute");
+  };
 
   const content = props.isError ? (
     <ErrorState />
@@ -38,17 +54,21 @@ export function TopNChart(props: Props) {
       <div className="flex w-full flex-row justify-between items-end">
         <div>
           {typeof props.title === "string" ? <TopNTitle>{props.title}</TopNTitle> : props.title}
-          {props.keyLabel && (
-            <div className="text-muted-foreground text-sm font-normal">{props.keyLabel}</div>
-          )}
+          {props.keyLabel && <div className="text-muted-foreground text-sm font-normal">{props.keyLabel}</div>}
         </div>
-        <div className="text-muted-foreground text-sm font-normal pr-1">{props.valueLabel}</div>
+        <div
+          onClick={toggleFormat}
+          className={twMerge("text-muted-foreground text-sm font-normal pr-1", canChangeFormat ? "cursor-pointer" : "")}
+        >
+          {props.valueLabel}
+        </div>
       </div>
       <div className="grid text-sm mt-2 max-h-[22rem] overflow-y-auto">
         {props.items.map((item) => (
           <TopNRow
             key={item.name}
             item={item}
+            format={format}
             percentage={Math.round(item.value) / total}
             searchParamKey={props.searchParamKey}
           >
@@ -65,6 +85,7 @@ export function TopNChart(props: Props) {
 type TopNRowProps = {
   item: Item;
   percentage: number;
+  format: "absolute" | "percentage";
   children: React.ReactNode;
   searchParamKey?: string;
 };
@@ -85,7 +106,9 @@ function TopNRow(props: TopNRowProps) {
         />
         <div className="flex z-10">{props.children}</div>
       </div>
-      <p className="text-sm pr-2 z-10">{formatNumber(props.item.value)}</p>
+      <p className="text-sm pr-2 z-10 tabular-nums">
+        {props.format === "percentage" ? `${Math.round(props.percentage * 100)}%` : formatNumber(props.item.value)}
+      </p>
     </div>
   );
 

@@ -59,6 +59,7 @@ export function TeaserDashboardContainer(props: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] pt-[1px] bg-accent">
             <div className={containerClassName}>
               <TopNChart
+                id="countries"
                 items={[
                   { name: "US", value: 731 },
                   { name: "CA", value: 583 },
@@ -69,12 +70,14 @@ export function TeaserDashboardContainer(props: Props) {
                   { name: "DE", value: 50 },
                 ]}
                 title="Countries"
+                defaultFormat="percentage"
                 valueLabel="Sessions"
                 renderRow={(item) => <Country countryCode={item.name} />}
               />
             </div>
             <div className={containerClassName}>
               <TopNChart
+                id="osnames"
                 items={[
                   { name: "macOS", value: 646 },
                   { name: "Windows", value: 545 },
@@ -84,12 +87,14 @@ export function TeaserDashboardContainer(props: Props) {
                   { name: "iPadOS", value: 42 },
                 ]}
                 title="Operating Systems"
+                defaultFormat="percentage"
                 valueLabel="Sessions"
                 renderRow={(item) => <OS name={item.name} />}
               />
             </div>
             <div className={containerClassName}>
               <TopNChart
+                id="events"
                 items={[
                   { name: "app_started", value: 5215 },
                   { name: "screen_view", value: 2432 },
@@ -98,11 +103,13 @@ export function TeaserDashboardContainer(props: Props) {
                   { name: "subscribed", value: 453 },
                 ]}
                 title="Events"
+                defaultFormat="absolute"
                 valueLabel="Count"
               />
             </div>
             <div className={containerClassName}>
               <TopNChart
+                id="appversions"
                 items={[
                   { name: "1.4.1", value: 533 },
                   { name: "1.4.0", value: 423 },
@@ -110,8 +117,9 @@ export function TeaserDashboardContainer(props: Props) {
                   { name: "1.3.2", value: 46 },
                   { name: "1.0.0", value: 12 },
                 ]}
+                defaultFormat="percentage"
                 title="App Versions"
-                valueLabel="Count"
+                valueLabel="Sessions"
               />
             </div>
           </div>

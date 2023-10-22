@@ -19,11 +19,14 @@ export function OSWidget(props: Props) {
         {(data) => (
           <TopNChart
             {...data}
+            id="osversions"
+            key="osversions"
             title={
               <TopNTitle backProperty="osName">
                 <OS name={osName} />
               </TopNTitle>
             }
+            defaultFormat="percentage"
             valueLabel="Sessions"
           />
         )}
@@ -32,16 +35,14 @@ export function OSWidget(props: Props) {
   }
 
   return (
-    <TopNDataContainer
-      appId={props.appId}
-      queryName="top-operatingsystems"
-      query={topOperatingSystem}
-    >
+    <TopNDataContainer appId={props.appId} queryName="top-operatingsystems" query={topOperatingSystem}>
       {(data) => (
         <TopNChart
           {...data}
+          id="osnames"
           title="Operating Systems"
           searchParamKey="osName"
+          defaultFormat="percentage"
           valueLabel="Sessions"
           renderRow={(item) => <OS name={item.name} />}
         />

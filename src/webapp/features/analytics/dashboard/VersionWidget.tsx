@@ -14,15 +14,14 @@ export function VersionWidget(props: Props) {
 
   if (appVersion) {
     return (
-      <TopNDataContainer
-        appId={props.appId}
-        queryName="top-appbuildnumbers"
-        query={topAppBuildNumbers}
-      >
+      <TopNDataContainer appId={props.appId} queryName="top-appbuildnumbers" query={topAppBuildNumbers}>
         {(data) => (
           <TopNChart
             {...data}
+            id="appbuildnumbers"
+            key="appbuildnumbers"
             title={<TopNTitle backProperty="appVersion">{appVersion}</TopNTitle>}
+            defaultFormat="percentage"
             valueLabel="Sessions"
           />
         )}
@@ -35,8 +34,11 @@ export function VersionWidget(props: Props) {
       {(data) => (
         <TopNChart
           {...data}
+          id="appversions"
+          key="appversions"
           title="App Versions"
           searchParamKey="appVersion"
+          defaultFormat="percentage"
           valueLabel="Sessions"
         />
       )}
