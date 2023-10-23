@@ -30,6 +30,14 @@ public class ClickHouseQueryClient : IQueryClient
         return rows.FirstOrDefault() ?? new T();
     }
 
+    public async Task<Stream> StreamResponseAsync(string query, CancellationToken cancellationToken)
+    {
+        using var command = _conn.CreateCommand();
+        command.CommandText = query;
+        var result = await command.ExecuteRawResultAsync(cancellationToken);
+        return await result.ReadAsStreamAsync();
+    }
+
     private readonly ConcurrentDictionary<string, Template> _namedQueries = new();
     private async Task<Template> ReadNamedQuery(string name)
     {

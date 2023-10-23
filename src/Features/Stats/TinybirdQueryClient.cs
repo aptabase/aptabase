@@ -60,4 +60,11 @@ public class TinybirdQueryClient : IQueryClient
             _ => value?.ToString() ?? "",
         };
     }
+
+    public async Task<Stream> StreamResponseAsync(string query, CancellationToken cancellationToken)
+    {
+        var content = new StringContent(query);
+        var response = await _httpClient.PostAsync("/v0/sql", content, cancellationToken);
+        return await response.Content.ReadAsStreamAsync(cancellationToken);
+    }
 }
