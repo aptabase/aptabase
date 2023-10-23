@@ -41,10 +41,8 @@ public class BillingController : Controller
         var user = this.GetCurrentUserIdentity();
         var appIds = await GetOwnedAppIds(user);
 
-        var usage = await _queryClient.NamedQuerySingleAsync<BillingUsage>("get_billing_usage", new {
+        var usage = await _queryClient.NamedQuerySingleAsync<BillingUsage>("get_billing_usage__v1", new {
             app_ids = appIds,
-            year = DateTime.UtcNow.Year,
-            month = DateTime.UtcNow.Month
         }, cancellationToken);
 
         var sub = await GetUserSubscription(user);

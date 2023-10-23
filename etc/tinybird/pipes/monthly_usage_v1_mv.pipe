@@ -1,0 +1,20 @@
+NODE monthly_usage_v1_mv
+DESCRIPTION >
+    Monthly count of events per app
+
+SQL >
+    SELECT
+        app_id,
+        toStartOfMonth(timestamp) AS period,
+        countState() AS events
+    FROM
+      events
+    GROUP BY
+      app_id,
+      period
+
+TYPE materialized
+DATASOURCE monthly_usage_v1
+ENGINE "AggregatingMergeTree"
+ENGINE_SORTING_KEY "app_id, period"
+ENGINE_PARTITION_KEY "toStartOfYear(period)"
