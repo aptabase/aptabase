@@ -11,10 +11,10 @@ export function DevelopmentNotice() {
         <p>
           Let us know what would you like to see here. Live View is under active development and we're looking for
           feedback. Reach us by{" "}
-          <a href="mailto:hi@aptabase.com" className="text-white underline">
+          <a href="mailto:hi@aptabase.com" className="underline hover:text-foreground">
             email
           </a>{" "}
-          or <ContactUsLink className="text-white underline">chat</ContactUsLink>.
+          or <ContactUsLink className="underline hover:text-foreground">chat</ContactUsLink>.
         </p>
       </AlertDescription>
     </Alert>

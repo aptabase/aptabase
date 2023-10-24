@@ -46,7 +46,7 @@ export function BuildModeSelector() {
           </div>
           <p className="text-muted-foreground text-xs text-center">
             Your data is separated by{" "}
-            <a target="_blank" className="underline hover:text-white" href="https://aptabase.com/docs/build-modes">
+            <a target="_blank" className="underline hover:text-foreground" href="https://aptabase.com/docs/build-modes">
               build mode
             </a>
             .
