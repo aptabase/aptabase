@@ -10,6 +10,7 @@ import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { trackEvent } from "@aptabase/web";
 import { useEffect } from "react";
 import { RecentSessionsList } from "./liveview/RecentSessionsList";
+import { DebugModeBanner } from "./mode/DebugModeBanner";
 
 Component.displayName = "LiveViewPage";
 export function Component() {
@@ -44,6 +45,7 @@ export function Component() {
 
   return (
     <Page title="Live View">
+      {buildMode === "debug" && <DebugModeBanner />}
       <div className="flex justify-between items-center">
         <PageHeading title="Live View" aside={aside()} subtitle={subtitle()} />
         <div className="flex items-center">

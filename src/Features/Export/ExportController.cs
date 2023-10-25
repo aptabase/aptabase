@@ -1,46 +1,82 @@
+using System.Text.RegularExpressions;
 using Aptabase.Features.Authentication;
-using Aptabase.Features.GeoIP;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aptabase.Features.Stats;
 
+public class DownloadRequest
+{
+    public string BuildMode { get; set; } = "";
+    public string AppId { get; set; } = "";
+    public string AppName { get; set; } = "";
+    public int Month { get; set; }
+    public int Year { get; set; }
+}
+
+public class MonthlyUsage
+{
+    public int Year { get; set; }
+    public int Month { get; set; }
+    public long Events { get; set; }
+}
+
 [ApiController, IsAuthenticated, HasReadAccessToApp]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-public class ExportController : Controller
+public partial class ExportController : Controller
 {
     private readonly IQueryClient _queryClient;
 
-    public ExportController(IQueryClient queryClient, GeoIPClient geodb)
+    public ExportController(IQueryClient queryClient)
     {
         _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));
     }
 
-    [HttpGet("/api/_export/download")]
-    [AllowAnonymous]
-    public async Task<IActionResult> Download(CancellationToken cancellationToken)
+    [HttpGet("/api/_export/usage")]
+    public async Task<IActionResult> MonthlyUsage([FromQuery] string buildMode, [FromQuery] string appId, CancellationToken cancellationToken)
     {
-        var stream = await _queryClient.StreamResponseAsync(EXPORT_QUERY, cancellationToken);
-        return File(stream, "text/csv");
+        var rows = await _queryClient.NamedQueryAsync<MonthlyUsage>("monthly_usage__v1", new {
+            app_id = GetAppId(buildMode, appId)
+        }, cancellationToken);
+
+        if (buildMode.ToLower() == "debug")
+            return Ok(rows.Take(5));
+
+        return Ok(rows);
     }
 
-    private static readonly string EXPORT_QUERY = @"
-            SELECT 
-                timestamp, 
-                user_id,
-                session_id,
-                event_name,
-                string_props,
-                numeric_props,
-                os_name,
-                os_version,
-                locale,
-                app_version,
-                app_build_number,
-                engine_name,
-                engine_version,
-                country_code,
-                CASE country_code
+    [HttpGet("/api/_export/download")]
+    public async Task<IActionResult> Download([FromQuery] DownloadRequest body, CancellationToken cancellationToken)
+    {
+        var query = $@"SELECT timestamp, user_id, session_id, event_name,
+                              string_props, numeric_props, os_name, os_version,
+                              locale, app_version, app_build_number,
+                              engine_name, engine_version,
+                              country_code, {COUNTRY_NAME_COLUMN}, region_name
+                       FROM events
+                       WHERE app_id = '{GetAppId(body.BuildMode, body.AppId)}'
+                       AND toStartOfMonth(timestamp) = '{body.Year}-{body.Month}-01'
+                       FORMAT CSVWithNames";
+
+        var stream = await _queryClient.StreamResponseAsync(query, cancellationToken);
+        var appName = UnsafeCharacters().Replace(body.AppName, "").ToLower();
+        var fileName = $"{appName}-{body.BuildMode.ToLower()}-{body.Year}-{body.Month.ToString().PadLeft(2, '0')}.csv";
+        return File(stream, "text/csv", fileName);
+    }
+
+    private string GetAppId(string buildMode, string appId)
+    {
+        return buildMode.ToLower() switch
+        {
+            "debug" => $"{appId}_DEBUG",
+            _ => appId,
+        };
+    }
+
+    [GeneratedRegex("[^a-zA-Z0-9]")]
+    private static partial Regex UnsafeCharacters();
+
+    private static readonly string COUNTRY_NAME_COLUMN = @"
+            CASE country_code
                     WHEN 'AF' THEN 'Afghanistan'
                     WHEN 'AX' THEN 'Aland Islands'
                     WHEN 'AL' THEN 'Albania'
@@ -290,8 +326,6 @@ public class ExportController : Controller
                     WHEN 'ZM' THEN 'Zambia'
                     WHEN 'ZW' THEN 'Zimbabwe'
                     ELSE ''
-                END AS country_name,
-                region_name
-        FROM events
-        FORMAT CSVWithNames";
+                END AS country_name";
+
 }

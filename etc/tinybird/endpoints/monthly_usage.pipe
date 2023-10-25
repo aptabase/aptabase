@@ -1,0 +1,15 @@
+TOKEN aptabase-api READ
+
+VERSION 1
+NODE endpoint
+SQL >
+    %
+    SELECT toYear(Date) as Year, toMonth(Date) as Month, Events
+    FROM (
+      SELECT period as Date,
+         countMerge(events) as Events
+      FROM monthly_usage_v1
+      PREWHERE app_id = {{String(app_id)}}
+      GROUP BY period
+      ORDER BY period WITH FILL TO toStartOfMonth(now() + INTERVAL 1 MONTH) STEP toIntervalMonth(1)
+    ) ORDER BY Year DESC, Month DESC
