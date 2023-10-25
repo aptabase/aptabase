@@ -47,14 +47,14 @@ export function ToolsList() {
         <Tool
           icon="excel"
           name="Microsoft Excel"
-          href="https://www.microsoft.com/en-ie/microsoft-365/excel"
+          href="https://www.microsoft.com/en-ie/microsoft-365"
           description="The most popular spreadsheet works great with Aptabase CSV files. Open it on Excel and start exploring your data with Pivot Tables and Charts."
         />
 
         <Tool
           icon="powerbi"
           name="Microsoft Power BI"
-          href="https://powerbi.microsoft.com/en-ie/"
+          href="https://powerbi.microsoft.com/en-us/"
           description="Power BI is another alternative worth considering. It's a powerful tool for data visualization and analysis. It takes longer to learn than Excel, but it's also a lot more powerful."
         />
 
