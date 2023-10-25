@@ -47,8 +47,11 @@ public partial class ExportController : Controller
     [HttpGet("/api/_export/download")]
     public async Task<IActionResult> Download([FromQuery] DownloadRequest body, CancellationToken cancellationToken)
     {
-        var query = $@"SELECT timestamp, user_id, session_id, event_name,
-                              string_props, numeric_props, os_name, os_version,
+        var query = $@"SELECT timestamp, user_id, session_id,
+                              event_name,
+                              replace(replace(string_props, '\u0022', '\''), '\u0027', '\'') as string_props,
+                              numeric_props,
+                              os_name, os_version,
                               locale, app_version, app_build_number,
                               engine_name, engine_version,
                               country_code, {COUNTRY_NAME_COLUMN}, region_name
