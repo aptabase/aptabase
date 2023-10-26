@@ -2,7 +2,6 @@ import { Button } from "@components/Button";
 import { Application, BuildMode } from "@features/apps";
 import { formatNumber } from "@fns/format-number";
 import { trackEvent } from "@aptabase/web";
-import { useEffect } from "react";
 
 type Props = {
   app: Application;

@@ -38,7 +38,7 @@ export function NavMenu(props: { onNavigation?: VoidFunction }) {
           />
           <NavItem
             label="Export"
-            disabled={!currentApp || !currentApp.hasOwnership}
+            disabled={!currentApp}
             href={`/${currentApp?.id}/export`}
             icon={IconCloudDownload}
             onNavigation={props.onNavigation}
