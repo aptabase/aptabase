@@ -58,6 +58,7 @@ public partial class ExportController : Controller
                        FROM events
                        WHERE app_id = '{GetAppId(body.BuildMode, body.AppId)}'
                        AND toStartOfMonth(timestamp) = '{body.Year}-{body.Month}-01'
+                       ORDER BY timestamp DESC
                        FORMAT CSVWithNames";
 
         var stream = await _queryClient.StreamResponseAsync(query, cancellationToken);
