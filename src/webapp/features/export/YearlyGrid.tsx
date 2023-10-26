@@ -1,6 +1,8 @@
 import { Button } from "@components/Button";
 import { Application, BuildMode } from "@features/apps";
 import { formatNumber } from "@fns/format-number";
+import { trackEvent } from "@aptabase/web";
+import { useEffect } from "react";
 
 type Props = {
   app: Application;
@@ -18,13 +20,15 @@ export function YearlyGrid(props: Props) {
     params.set("year", props.year.toString());
     params.set("month", month.toString());
 
+    trackEvent("export", { name: props.app.name });
+
     location.href = `/api/_export/download?${params.toString()}`;
   };
 
   return (
     <div className="space-y-1">
       <p className="font-title text-xl">{props.year}</p>
-      <div className="grid grid-cols-6 max-w-fit gap-3">
+      <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-6 max-w-fit gap-3">
         {props.months.map((month) => (
           <Button
             key={month.number}
