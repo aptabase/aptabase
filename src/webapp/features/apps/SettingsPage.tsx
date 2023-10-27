@@ -10,7 +10,7 @@ Component.displayName = "SettingsPage";
 export function Component() {
   const app = useCurrentApp();
 
-  if (!app) return <Navigate to="/" />;
+  if (!app || !app.hasOwnership) return <Navigate to="/" />;
 
   return (
     <Page title={`${app.name} - Settings`}>

@@ -35,7 +35,7 @@ export function TopNChart(props: Props) {
   const total = props.items.reduce((acc, item) => acc + item.value, 0);
   const renderRow = props.renderRow ?? defaultRenderRow;
 
-  const canChangeFormat = props.defaultFormat !== "absolute";
+  const canChangeFormat = typeof props.valueLabel === "string";
 
   const toggleFormat = () => {
     if (!canChangeFormat) return;

@@ -44,17 +44,17 @@ export function NavMenu(props: { onNavigation?: VoidFunction }) {
             onNavigation={props.onNavigation}
           />
           <NavItem
+            label="Instructions"
+            disabled={!currentApp}
+            href={`/${currentApp?.id}/instructions`}
+            icon={IconCode}
+            onNavigation={props.onNavigation}
+          />
+          <NavItem
             label="Settings"
             disabled={!currentApp || !currentApp.hasOwnership}
             href={`/${currentApp?.id}/settings`}
             icon={IconSettings}
-            onNavigation={props.onNavigation}
-          />
-          <NavItem
-            label="Instructions"
-            disabled={!currentApp || !currentApp.hasOwnership}
-            href={`/${currentApp?.id}/instructions`}
-            icon={IconCode}
             onNavigation={props.onNavigation}
           />
         </NavCategory>

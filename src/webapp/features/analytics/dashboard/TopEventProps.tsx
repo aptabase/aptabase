@@ -93,13 +93,23 @@ export function TopEventProps(props: Props) {
     items = Object.keys(deduped).map((name) => ({ name, value: deduped[name] }));
   }
 
+  // Having the key set to "events" will cause it to inherit settings from the EventWidget
+  // While setting to "props" will have the default settings
+  const key = selectedNumericKey[0] === "events" ? "events" : "props";
+
   return (
     <TopNChart
-      id="props"
-      key="props"
+      id={key}
+      key={key}
       title={<TopNTitle backProperty="eventName">{eventName}</TopNTitle>}
       keyLabel={<StringKeySelector stringKeys={stringKeys} onChangeIndex={setStringKeyIndex} />}
-      valueLabel={<NumericKeySelector numericKeys={numericKeys} onChange={setSelectedNumericKey} />}
+      valueLabel={
+        numericKeys.length === 0 ? (
+          "Events"
+        ) : (
+          <NumericKeySelector numericKeys={numericKeys} onChange={setSelectedNumericKey} />
+        )
+      }
       defaultFormat="absolute"
       isLoading={isLoading}
       isError={isError}
@@ -132,10 +142,6 @@ function NumericKeySelector(props: {
   numericKeys: string[];
   onChange: (value: [AggregateValueName, string | undefined]) => void;
 }) {
-  if (props.numericKeys.length === 0) {
-    return <>Events</>;
-  }
-
   const onChangeValue = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (e.currentTarget.value === "") {
       props.onChange(["events", undefined]);
