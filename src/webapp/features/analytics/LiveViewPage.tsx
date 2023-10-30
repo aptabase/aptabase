@@ -1,6 +1,5 @@
 import { Page, PageHeading } from "@components/Page";
 import { WorldMap } from "./liveview/world/WorldMap";
-import { DevelopmentNotice } from "./liveview/DevelopmentNotice";
 import { PingSignal } from "@components/PingSignal";
 import { useQuery } from "@tanstack/react-query";
 import { liveGeoDataPoints } from "@features/analytics/query";
@@ -58,10 +57,6 @@ export function Component() {
       </div>
 
       <RecentSessionsList appId={app.id} buildMode={buildMode} />
-
-      <div className="mt-10">
-        <DevelopmentNotice />
-      </div>
     </Page>
   );
 }

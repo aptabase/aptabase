@@ -6,6 +6,7 @@ import { LoadingState } from "@components/LoadingState";
 import { ErrorState } from "@components/ErrorState";
 import { EmptyState } from "@components/EmptyState";
 import { ToolsList } from "./ToolsList";
+import { DevelopmentNotice } from "./DevelopmentNotice";
 
 type Props = {
   app: Application;
@@ -74,16 +75,15 @@ export function ExportPageBody(props: Props) {
   const byYear = groupByYear(data);
 
   return (
-    <>
+    <div className="space-y-10">
       <div className="space-y-8">
         {byYear.map((item) => (
           <YearlyGrid key={item.year} app={props.app} buildMode={props.buildMode} {...item} />
         ))}
       </div>
 
-      <div className="mt-20">
-        <ToolsList />
-      </div>
-    </>
+      <ToolsList />
+      <DevelopmentNotice />
+    </div>
   );
 }
