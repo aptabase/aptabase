@@ -14,6 +14,7 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
     <PackageReference Include="Dapper" Version="2.1.15" />
     <PackageReference Include="Nanoid" Version="3.0.0" />
+    <PackageReference Include="FastHashes" Version="3.5.0" />
     <PackageReference Include="FluentMigrator" Version="3.3.2" />
     <PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
     <PackageReference Include="FluentMigrator.Runner.Postgres" Version="3.3.2" />

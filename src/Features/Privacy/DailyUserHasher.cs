@@ -3,6 +3,7 @@ using System.Text;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Caching.Memory;
 using Dapper;
+using FastHashes;
 
 namespace Aptabase.Features.Privacy;
 
@@ -33,11 +34,19 @@ public class DailyUserHasher : IUserHasher
 
         var salt = await GetSaltFor(timestamp.Date.ToString("yyyy-MM-dd"), appId);
         var bytes = Encoding.UTF8.GetBytes($"{clientIP}|${userAgent}");
-        var id = SHA256.HashData(bytes.Concat(salt).ToArray());
+        var hash = ComputeHash(salt, bytes);
+        userId = Convert.ToHexString(hash);
 
-        userId = Convert.ToHexString(id);
         _cache.Set(cacheKey, userId, TimeSpan.FromHours(48));
         return userId;
+    }
+
+    private static byte[] ComputeHash(Span<byte> salt, byte[] bytes)
+    {
+        var key1 = BitConverter.ToUInt64(salt[..8]);
+        var key2 = BitConverter.ToUInt64(salt[0..]);
+        var hasher = new SipHash(SipHashVariant.V24, key1, key2);
+        return hasher.ComputeHash(bytes);
     }
 
     private async Task<byte[]> GetSaltFor(string date, string appId)
