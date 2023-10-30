@@ -21,20 +21,22 @@ for (var i=0; i < sessions; i++)
     var ipAddress = DemoDataSource.GetRandomIpAddress();
     var (appVersion, appBuildNumber, sdkVersion) = DemoDataSource.GetAppInfo();
 
+    var events = new List<Dictionary<string, object>>();
     foreach (var timestamp in timestamps)
     {
         var (eventName, props) = DemoDataSource.NewEvent();
-        var body = JsonContent.Create(new
-        {
-            timestamp = timestamp.ToString("o"),
-            sessionId,
-            eventName,
-            systemProps = new { osName, osVersion, locale, appVersion, appBuildNumber, sdkVersion },
-            props
-        });
-
-        body.Headers.Add("CloudFront-Viewer-Address", ipAddress);
-        var response = await httpClient.PostAsync("/api/v0/event", body);
-        Console.WriteLine($"[{response.StatusCode}] {timestamp:o} {eventName}");
+        var ev = new Dictionary<string, object>();
+        ev.Add("timestamp", timestamp.ToString("o"));
+        ev.Add("sessionId", sessionId);
+        ev.Add("eventName", eventName);
+        ev.Add("systemProps", new { osName, osVersion, locale, appVersion, appBuildNumber, sdkVersion });
+        ev.Add("props", props);
+        events.Add(ev);
     }
+
+    var body = JsonContent.Create(events);
+    body.Headers.Add("CloudFront-Viewer-Address", ipAddress);
+
+    var response = await httpClient.PostAsync("/api/v0/events", body);
+    Console.WriteLine($"[{response.StatusCode}] {events.Count} events");
 }
