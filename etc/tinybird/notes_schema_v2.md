@@ -1,3 +1,14 @@
+this seems to be perform better:
+
+user_id = UInt64
+session_id = UInt64
+
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "app_id, toDate(timestamp), event_name, user_id"
+ENGINE_SAMPLING_KEY "user_id"
+
+---
+
 Future improvements for sessions and events tables:
 
 - Review https://clickhouse.com/blog/common-getting-started-issues-with-clickhouse
