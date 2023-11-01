@@ -8,6 +8,7 @@ public class IngestionClient
     private readonly HttpClient _client;
     private readonly string _ipAddress;
     private readonly string _appKey;
+    private object? _sessionId;
 
     // Use this constructor to avoid rate limiting
     public IngestionClient(HttpClient client, string appKey)
@@ -20,6 +21,19 @@ public class IngestionClient
         _client = client;
         _ipAddress = ipAddress;
         _appKey = appKey;
+        _sessionId = NewSessionId();
+    }
+
+    public static long NewSessionId()
+    {
+        var epochInSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var random = _random.NextInt64(0, 99999999);
+        return epochInSeconds * 100000000 + random;
+    }
+
+    public void SetSessionId(object value)
+    {
+        _sessionId = value;
     }
 
     public async Task<HttpStatusCode> TrackEvent(DateTime timestamp, string eventName, object? props)
@@ -48,7 +62,7 @@ public class IngestionClient
         {
             eventName,
             timestamp = timestamp.ToString("o"),
-            sessionId = Guid.NewGuid().ToString(),
+            sessionId = _sessionId,
             systemProps = new
             {
                 isDebug = false,

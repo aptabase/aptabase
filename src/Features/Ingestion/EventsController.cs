@@ -132,6 +132,49 @@ public class EventsController : Controller
         if (body is null)
             return (false, "Missing event body.");
 
+        if (!body.SessionId.HasValue)
+            return (false, "SessionId is required.");
+
+        var sessionId = body.SessionId.Value;
+
+        if (sessionId.ValueKind != JsonValueKind.String && sessionId.ValueKind != JsonValueKind.Number)
+            return (false, "SessionId must be a string or a number.");
+
+        if (sessionId.ValueKind == JsonValueKind.Number)
+        {
+            try
+            {
+                var numericSessionId = sessionId.GetUInt64();
+                var secondsSinceEpoch = numericSessionId / 100_000_000;
+                var sessionStartedAt = DateTimeOffset.FromUnixTimeSeconds((long)secondsSinceEpoch).UtcDateTime;
+
+                if (sessionStartedAt > DateTime.UtcNow.AddMinutes(1))
+                {
+                    _logger.LogWarning("Session {SessionId} timestamp {StartedAt} is in future, received from {SdkVersion}.", numericSessionId, sessionStartedAt, body.SystemProps.SdkVersion);
+                    return (false, "Future sessions are not allowed.");
+                }
+
+                if (sessionStartedAt < DateTime.UtcNow.AddDays(-7))
+                {
+                    _logger.LogWarning("Session {SessionId} timestamp {StartedAt} is too old, received from {SdkVersion}.", numericSessionId, sessionStartedAt, body.SystemProps.SdkVersion);
+                    return (false, "Session is too old.");
+                }
+            }
+            catch (FormatException)
+            {
+                return (false, "SessionId must be a valid unsigned long number.");
+            }
+        }
+        else if (sessionId.ValueKind == JsonValueKind.String)
+        {
+            var stringSessionId = sessionId.GetString() ?? "";
+            if (string.IsNullOrWhiteSpace(stringSessionId))
+                return (false, "SessionId must not be empty.");
+                
+            if (stringSessionId.Length > 36)
+                return (false, $"SessionId must be less than or equal to 36 characters, was: {stringSessionId}");
+        }
+
         if (body.Timestamp > DateTime.UtcNow.AddMinutes(1))
             return (false, "Future events are not allowed.");
 
@@ -188,7 +231,7 @@ public class EventsController : Controller
             AppId = appId,
             EventName = body.EventName,
             Timestamp = body.Timestamp.ToUniversalTime(),
-            SessionId = body.SessionId,
+            SessionId = body.SessionId?.ToString() ?? "",
             OSName = body.SystemProps.OSName ?? "",
             OSVersion = body.SystemProps.OSVersion ?? "",
             Locale = body.SystemProps.Locale ?? "",

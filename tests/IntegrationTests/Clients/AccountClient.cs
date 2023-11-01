@@ -44,4 +44,9 @@ public class AccountClient
         var metrics = await _client.GetFromJsonAsync<KeyMetrics>($"/api/_stats/metrics?buildMode=release&period={period}&appId={appId}");
         return metrics?.Current.Events ?? 0;
     }
+
+    public async Task<SessionTimeline?> GetSessionTimeline(string appId, object sessionId)
+    {
+        return await _client.GetFromJsonAsync<SessionTimeline>($"/api/_stats/live-session-details?buildMode=release&appId={appId}&sessionId={sessionId}");
+    }
 }

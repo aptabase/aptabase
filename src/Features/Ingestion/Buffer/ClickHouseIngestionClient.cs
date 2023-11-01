@@ -90,13 +90,7 @@ public class ClickHouseIngestionClient : IIngestionClient
             row.TTL,
         });
 
-try {
         await bulkCopy.WriteToServerAsync(values, COLUMNS);
-} catch (Exception ex)
-{
-    Console.WriteLine(ex);
-}
-        
         return bulkCopy.RowsWritten;
     }
 }

@@ -12,7 +12,7 @@ type Props = {
 
 export function SessionHeaderCard(props: Props) {
   const { eventsCount, startedAt, duration, appVersion, countryCode, osName, osVersion, regionName } = props.session;
-  const shortSessionId = props.session.id.split("-")?.[0] ?? props.session.id;
+  const shortSessionId = props.session.id.slice(-8);
 
   return (
     <div className="text-sm flex flex-col gap-1 p-2">

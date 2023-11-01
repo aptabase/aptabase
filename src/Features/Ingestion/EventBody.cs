@@ -45,8 +45,7 @@ public class EventBody
         set => _ts = value > DateTime.UtcNow ? DateTime.UtcNow : value;
     }
 
-    [Required, StringLength(36)]
-    public string SessionId { get; set; } = "";
+    public JsonElement? SessionId { get; set; }
 
     public SystemProperties SystemProps { get; set; } = new();
 

@@ -139,6 +139,41 @@ public class IngestionTests
         var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked", props);
         code.Should().Be(HttpStatusCode.BadRequest);
     }
+
+    [Theory]
+    [InlineData("0ef724ce-7d46-4bde-9e0f-69303ef3f2af")]
+    [InlineData("8ee47a56-a457-4513-a65f-2b8c3065eb95")]
+    [InlineData("1234-5678-9012-3456")]
+    public async Task Can_Ingest_Valid_SessionId(object sessionId)
+    {
+        var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
+
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
+        client.SetSessionId(sessionId);
+        var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked", null);
+        code.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("1234567890123456789012345678901234567890")]
+    [InlineData(null)]
+    [InlineData(true)]
+    [InlineData(0)]
+    [InlineData(-100)]
+    [InlineData(long.MaxValue)]
+    [InlineData(ulong.MaxValue)]
+    [InlineData(179878168000000000)] // March 3rd, 2030
+    [InlineData(149878168000000000)] // June 30th, 2017
+    public async Task Cant_Ingest_Invalid_SessionId(object sessionId)
+    {
+        var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
+
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
+        client.SetSessionId(sessionId);
+        var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked", null);
+        code.Should().Be(HttpStatusCode.BadRequest);
+    }
  
     public static IEnumerable<object[]> InvalidProps => 
         new List<object[]>
