@@ -15,9 +15,9 @@ public class TinybirdIngestionClient : IIngestionClient
     private readonly HttpClient _httpClient;
     private readonly ILogger _logger;
     private readonly TimeSpan[] _retriesDelay = new []{
-        TimeSpan.FromMilliseconds(100),
-        TimeSpan.FromMilliseconds(500),
         TimeSpan.FromMilliseconds(1000),
+        TimeSpan.FromMilliseconds(3000),
+        TimeSpan.FromMilliseconds(5000),
     };
 
     public TinybirdIngestionClient(IHttpClientFactory factory, ILogger<TinybirdIngestionClient> logger)

@@ -46,9 +46,7 @@ public class EventBody
     }
 
     public JsonElement? SessionId { get; set; }
-
     public SystemProperties SystemProps { get; set; } = new();
-
     public JsonDocument? Props { get; set; }
 
     public (JsonObject, JsonObject) SplitProps()
@@ -78,5 +76,146 @@ public class EventBody
         }
 
         return (stringValues, numericValues);
+    }
+
+    public (bool, string) IsValid(ILogger logger)
+    {
+        var (valid, msg) = ValidateSessionId(logger);
+        if (!valid)
+            return (false, msg);
+
+        if (Timestamp > DateTime.UtcNow.AddMinutes(1))
+            return (false, "Future events are not allowed.");
+
+        if (Timestamp < DateTime.UtcNow.AddDays(-1))
+        {
+            logger.LogWarning("Event timestamp {EventTimestamp} is too old.", Timestamp);
+            return (false, "Event is too old.");
+        }
+
+        var locale = LocaleFormatter.FormatLocale(SystemProps.Locale);
+        if (locale is null)
+            logger.LogWarning("Invalid locale {Locale} received from {OS} using {SdkVersion}", locale, SystemProps.OSName, SystemProps.SdkVersion);
+
+        SystemProps.Locale = locale;
+
+        (valid, msg) = ValidateProps();
+        if (!valid)
+            return (false, msg);
+
+        return (true, string.Empty);
+    }
+
+    private (bool, string) ValidateSessionId(ILogger logger)
+    {
+        if (!SessionId.HasValue)
+            return (false, "SessionId is required.");
+
+        var sessionId = SessionId.Value;
+
+        if (sessionId.ValueKind != JsonValueKind.String && sessionId.ValueKind != JsonValueKind.Number)
+            return (false, "SessionId must be a string or a number.");
+
+        if (sessionId.ValueKind == JsonValueKind.Number)
+        {
+            try
+            {
+                var numericSessionId = sessionId.GetUInt64();
+                var (valid, msg) = ValidateNumericSessionId(numericSessionId, logger);
+                if (!valid)
+                    return (false, msg);
+            }
+            catch (FormatException)
+            {
+                return (false, "SessionId must be a valid unsigned long number.");
+            }
+        }
+        
+        if (sessionId.ValueKind == JsonValueKind.String)
+        {
+            var stringSessionId = sessionId.GetString() ?? "";
+            if (ulong.TryParse(stringSessionId, out var numericSessionId))
+            {
+                var (valid, msg) = ValidateNumericSessionId(numericSessionId, logger);
+                if (!valid)
+                    return (false, msg);
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(stringSessionId))
+                    return (false, "SessionId must not be empty.");
+                    
+                if (stringSessionId.Length > 36)
+                    return (false, $"SessionId must be less than or equal to 36 characters, was: {stringSessionId}");
+            }
+        }
+
+        return (true, string.Empty);
+    }
+
+    private (bool, string) ValidateNumericSessionId(ulong id, ILogger logger)
+    {
+        var secondsSinceEpoch = id / 100_000_000;
+        var sessionStartedAt = DateTimeOffset.FromUnixTimeSeconds((long)secondsSinceEpoch).UtcDateTime;
+
+        if (sessionStartedAt > DateTime.UtcNow.AddMinutes(1))
+        {
+            logger.LogWarning("Session {SessionId} timestamp {StartedAt} is in future, received from {SdkVersion}.", id, sessionStartedAt, SystemProps.SdkVersion);
+            return (false, "Future sessions are not allowed.");
+        }
+
+        if (sessionStartedAt < DateTime.UtcNow.AddDays(-7))
+        {
+            logger.LogWarning("Session {SessionId} timestamp {StartedAt} is too old, received from {SdkVersion}.", id, sessionStartedAt, SystemProps.SdkVersion);
+            return (false, "Session is too old.");
+        }
+
+        return (true, string.Empty);
+    }
+
+    private (bool, string) ValidateProps()
+    {
+        if (Props is not null)
+        {
+            if (Props.RootElement.ValueKind == JsonValueKind.String)
+            {
+                var valueAsString = Props.RootElement.GetString() ?? "";
+                if (TryParseDocument(valueAsString, out var doc) && doc is not null)
+                    Props = doc;
+                else 
+                    return (false, $"Props must be an object or a valid stringified JSON, was: {Props.RootElement.GetRawText()}");
+            }
+
+            if (Props.RootElement.ValueKind != JsonValueKind.Object)
+                return (false, $"Props must be an object or a valid stringified JSON, was: {Props.RootElement.GetRawText()}");
+
+            foreach (var prop in Props.RootElement.EnumerateObject())
+            {
+                if (string.IsNullOrWhiteSpace(prop.Name))
+                    return (false, "Property key must not be empty.");
+
+                if (prop.Name.Length > 40)
+                    return (false, $"Property key '{prop.Name}' must be less than or equal to 40 characters. Props was: {Props.RootElement.GetRawText()}");
+
+                if (prop.Value.ValueKind == JsonValueKind.Object || prop.Value.ValueKind == JsonValueKind.Array)
+                    return (false, $"Value of key '{prop.Name}' must be a primitive type. Props was: {Props.RootElement.GetRawText()}");
+            }
+        }
+
+        return (true, string.Empty);
+    }
+
+    private static bool TryParseDocument(string json, out JsonDocument? doc)
+    {
+        try
+        {
+            doc = JsonDocument.Parse(json);
+            return true;
+        }
+        catch
+        {
+            doc = null;
+            return false;
+        }
     }
 }

@@ -6,8 +6,6 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "typescript.tsserver.experimental.enableProjectDiagnostics": true,
   "tinybird.dataProjectSubdir": "etc/tinybird",
-  "dotnet-test-explorer.testProjectPath": "**/*Tests.csproj",
-  "dotnet-test-explorer.testArguments": "/p:CollectCoverage=true /p:CoverletOutputFormat=cobertura",
   "coverage-gutters.coverageFileNames": ["coverage.cobertura.xml"],
   "coverage-gutters.showLineCoverage": false,
   "coverage-gutters.showRulerCoverage": true,

@@ -39,7 +39,7 @@ public class EventsController : Controller
     {
         appKey = appKey?.ToUpper() ?? "";
 
-        var (valid, validationMessage) = IsValidBody(body);
+        var (valid, validationMessage) = body.IsValid(_logger);
         if (!valid)
         {
             _logger.LogWarning($"Dropping event from {appKey} because: {validationMessage}.");
@@ -96,7 +96,7 @@ public class EventsController : Controller
             return BadRequest($"Too many events ({events.Length}) in a single request. Maximum is 25.");
 
         var validEvents = events.Where(e => { 
-            var (valid, validationMessage) = IsValidBody(e);
+            var (valid, validationMessage) = e.IsValid(_logger);
             if (!valid)
                 _logger.LogWarning("Dropping event from {AppKey}. {ValidationMessage}", appKey, validationMessage);
             return valid;
@@ -127,99 +127,6 @@ public class EventsController : Controller
         return NotFound($"Appplication not found with given app key: {appKey}");
     }
 
-    private (bool, string) IsValidBody(EventBody? body)
-    {
-        if (body is null)
-            return (false, "Missing event body.");
-
-        if (!body.SessionId.HasValue)
-            return (false, "SessionId is required.");
-
-        var sessionId = body.SessionId.Value;
-
-        if (sessionId.ValueKind != JsonValueKind.String && sessionId.ValueKind != JsonValueKind.Number)
-            return (false, "SessionId must be a string or a number.");
-
-        if (sessionId.ValueKind == JsonValueKind.Number)
-        {
-            try
-            {
-                var numericSessionId = sessionId.GetUInt64();
-                var secondsSinceEpoch = numericSessionId / 100_000_000;
-                var sessionStartedAt = DateTimeOffset.FromUnixTimeSeconds((long)secondsSinceEpoch).UtcDateTime;
-
-                if (sessionStartedAt > DateTime.UtcNow.AddMinutes(1))
-                {
-                    _logger.LogWarning("Session {SessionId} timestamp {StartedAt} is in future, received from {SdkVersion}.", numericSessionId, sessionStartedAt, body.SystemProps.SdkVersion);
-                    return (false, "Future sessions are not allowed.");
-                }
-
-                if (sessionStartedAt < DateTime.UtcNow.AddDays(-7))
-                {
-                    _logger.LogWarning("Session {SessionId} timestamp {StartedAt} is too old, received from {SdkVersion}.", numericSessionId, sessionStartedAt, body.SystemProps.SdkVersion);
-                    return (false, "Session is too old.");
-                }
-            }
-            catch (FormatException)
-            {
-                return (false, "SessionId must be a valid unsigned long number.");
-            }
-        }
-        else if (sessionId.ValueKind == JsonValueKind.String)
-        {
-            var stringSessionId = sessionId.GetString() ?? "";
-            if (string.IsNullOrWhiteSpace(stringSessionId))
-                return (false, "SessionId must not be empty.");
-                
-            if (stringSessionId.Length > 36)
-                return (false, $"SessionId must be less than or equal to 36 characters, was: {stringSessionId}");
-        }
-
-        if (body.Timestamp > DateTime.UtcNow.AddMinutes(1))
-            return (false, "Future events are not allowed.");
-
-        if (body.Timestamp < DateTime.UtcNow.AddDays(-1))
-        {
-            _logger.LogWarning("Event timestamp {EventTimestamp} is too old.", body.Timestamp);
-            return (false, "Event is too old.");
-        }
-
-        var locale = LocaleFormatter.FormatLocale(body.SystemProps.Locale);
-        if (locale is null)
-            _logger.LogWarning("Invalid locale {Locale} received from {OS} using {SdkVersion}", locale, body.SystemProps.OSName, body.SystemProps.SdkVersion);
-
-        body.SystemProps.Locale = locale;
-
-        if (body.Props is not null)
-        {
-            if (body.Props.RootElement.ValueKind == JsonValueKind.String)
-            {
-                var valueAsString = body.Props.RootElement.GetString() ?? "";
-                if (TryParseDocument(valueAsString, out var doc) && doc is not null)
-                    body.Props = doc;
-                else 
-                    return (false, $"Props must be an object or a valid stringified JSON, was: {body.Props.RootElement.GetRawText()}");
-            }
-
-            if (body.Props.RootElement.ValueKind != JsonValueKind.Object)
-                return (false, $"Props must be an object or a valid stringified JSON, was: {body.Props.RootElement.GetRawText()}");
-
-            foreach (var prop in body.Props.RootElement.EnumerateObject())
-            {
-                if (string.IsNullOrWhiteSpace(prop.Name))
-                    return (false, "Property key must not be empty.");
-
-                if (prop.Name.Length > 40)
-                    return (false, $"Property key '{prop.Name}' must be less than or equal to 40 characters. Props was: {body.Props.RootElement.GetRawText()}");
-
-                if (prop.Value.ValueKind == JsonValueKind.Object || prop.Value.ValueKind == JsonValueKind.Array)
-                    return (false, $"Value of key '{prop.Name}' must be a primitive type. Props was: {body.Props.RootElement.GetRawText()}");
-            }
-        }
-
-        return (true, string.Empty);
-    }
-
     private static TrackingEvent NewTrackingEvent(string appId, string countryCode, string regionName, string clientIp, string userAgent, EventBody body)
     {
         var (stringProps, numericProps) = body.SplitProps();
@@ -246,19 +153,5 @@ public class EventsController : Controller
             NumericProps = numericProps.ToJsonString(),
             IsDebug = body.SystemProps.IsDebug,
         };
-    }
-
-    private static bool TryParseDocument(string json, out JsonDocument? doc)
-    {
-        try
-        {
-            doc = JsonDocument.Parse(json);
-            return true;
-        }
-        catch
-        {
-            doc = null;
-            return false;
-        }
     }
 }
