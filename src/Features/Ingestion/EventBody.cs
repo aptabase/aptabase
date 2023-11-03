@@ -45,7 +45,9 @@ public class EventBody
         set => _ts = value > DateTime.UtcNow ? DateTime.UtcNow : value;
     }
 
-    public JsonElement? SessionId { get; set; }
+    [Required]
+    public string SessionId { get; set; } = "";
+
     public SystemProperties SystemProps { get; set; } = new();
     public JsonDocument? Props { get; set; }
 
@@ -108,47 +110,11 @@ public class EventBody
 
     private (bool, string) ValidateSessionId(ILogger logger)
     {
-        if (!SessionId.HasValue)
-            return (false, "SessionId is required.");
-
-        var sessionId = SessionId.Value;
-
-        if (sessionId.ValueKind != JsonValueKind.String && sessionId.ValueKind != JsonValueKind.Number)
-            return (false, "SessionId must be a string or a number.");
-
-        if (sessionId.ValueKind == JsonValueKind.Number)
-        {
-            try
-            {
-                var numericSessionId = sessionId.GetUInt64();
-                var (valid, msg) = ValidateNumericSessionId(numericSessionId, logger);
-                if (!valid)
-                    return (false, msg);
-            }
-            catch (FormatException)
-            {
-                return (false, "SessionId must be a valid unsigned long number.");
-            }
-        }
+        if (ulong.TryParse(SessionId, out var numericSessionId))
+            return ValidateNumericSessionId(numericSessionId, logger);
         
-        if (sessionId.ValueKind == JsonValueKind.String)
-        {
-            var stringSessionId = sessionId.GetString() ?? "";
-            if (ulong.TryParse(stringSessionId, out var numericSessionId))
-            {
-                var (valid, msg) = ValidateNumericSessionId(numericSessionId, logger);
-                if (!valid)
-                    return (false, msg);
-            }
-            else
-            {
-                if (string.IsNullOrWhiteSpace(stringSessionId))
-                    return (false, "SessionId must not be empty.");
-                    
-                if (stringSessionId.Length > 36)
-                    return (false, $"SessionId must be less than or equal to 36 characters, was: {stringSessionId}");
-            }
-        }
+        if (SessionId.Length > 36)
+            return (false, $"SessionId must be less than or equal to 36 characters, was: {SessionId}");
 
         return (true, string.Empty);
     }

@@ -20,17 +20,18 @@ public class LiveViewTests
     public static IEnumerable<object[]> ValidSessionIds => 
         new List<object[]>
         {
-            new object[] { IngestionClient.NewSessionId() },
+            new object[] { IngestionClient.NewSessionId().ToString() },
             new object[] { Guid.NewGuid().ToString() },
         };
 
     [Theory, MemberData(nameof(ValidSessionIds))]
-    public async Task Can_Get_Session_Details(object sessionId)
+    public async Task Can_Get_Session_Details(string sessionId)
     {
         var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
 
         var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
         client.SetSessionId(sessionId);
+        
         await client.TrackEvent(DateTime.UtcNow, "App Started", null);
         await client.TrackEvent(DateTime.UtcNow, "Button Clicked", null);
         await _eventWritter.FlushEvents();

@@ -4,11 +4,11 @@ namespace Aptabase.IntegrationTests.Clients;
 
 public class IngestionClient
 {
-    private static readonly Random _random = new Random();
+    private static readonly Random _random = new();
     private readonly HttpClient _client;
     private readonly string _ipAddress;
     private readonly string _appKey;
-    private object? _sessionId;
+    private string _sessionId = "";
 
     // Use this constructor to avoid rate limiting
     public IngestionClient(HttpClient client, string appKey)
@@ -24,14 +24,14 @@ public class IngestionClient
         _sessionId = NewSessionId();
     }
 
-    public static long NewSessionId()
+    public static string NewSessionId()
     {
         var epochInSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var random = _random.NextInt64(0, 99999999);
-        return epochInSeconds * 100000000 + random;
+        return (epochInSeconds * 100000000 + random).ToString();
     }
 
-    public void SetSessionId(object value)
+    public void SetSessionId(string value)
     {
         _sessionId = value;
     }
