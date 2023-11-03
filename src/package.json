@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@aptabase/web": "0.3.0",
+    "@aptabase/web": "0.3.1",
     "@fontsource/inter": "5.0.14",
     "@headlessui/react": "1.7.17",
     "@radix-ui/react-popover": "1.0.7",
