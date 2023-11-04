@@ -126,13 +126,13 @@ public class EventBody
 
         if (sessionStartedAt > DateTime.UtcNow.AddMinutes(1))
         {
-            logger.LogWarning("Session {SessionId} timestamp {StartedAt} is in future, received from {SdkVersion}.", id, sessionStartedAt, SystemProps.SdkVersion);
+            logger.LogError("Session {SessionId} timestamp {StartedAt} is in future, received from {SdkVersion}.", id, sessionStartedAt, SystemProps.SdkVersion);
             return (false, "Future sessions are not allowed.");
         }
 
         if (sessionStartedAt < DateTime.UtcNow.AddDays(-7))
         {
-            logger.LogWarning("Session {SessionId} timestamp {StartedAt} is too old, received from {SdkVersion}.", id, sessionStartedAt, SystemProps.SdkVersion);
+            logger.LogError("Session {SessionId} timestamp {StartedAt} is too old, received from {SdkVersion}.", id, sessionStartedAt, SystemProps.SdkVersion);
             return (false, "Session is too old.");
         }
 
