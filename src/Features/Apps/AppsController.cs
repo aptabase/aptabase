@@ -182,7 +182,7 @@ public class AppsController : Controller
             ON CONFLICT DO NOTHING", new
         {
             appId,
-            email,
+            email = email.ToLower(),
         });
 
         return Ok(new { });
