@@ -86,7 +86,7 @@ public class EventBody
         if (!valid)
             return (false, msg);
 
-        if (Timestamp > DateTime.UtcNow.AddMinutes(1))
+        if (Timestamp > DateTime.UtcNow.AddMinutes(10))
             return (false, "Future events are not allowed.");
 
         if (Timestamp < DateTime.UtcNow.AddDays(-1))
@@ -124,7 +124,7 @@ public class EventBody
         var secondsSinceEpoch = id / 100_000_000;
         var sessionStartedAt = DateTimeOffset.FromUnixTimeSeconds((long)secondsSinceEpoch).UtcDateTime;
 
-        if (sessionStartedAt > DateTime.UtcNow.AddMinutes(1))
+        if (sessionStartedAt > DateTime.UtcNow.AddMinutes(10))
         {
             logger.LogError("Session {SessionId} timestamp {StartedAt} is in future, received from {SdkVersion}.", id, sessionStartedAt, SystemProps.SdkVersion);
             return (false, "Future sessions are not allowed.");
