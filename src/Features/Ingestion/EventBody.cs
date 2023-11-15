@@ -72,7 +72,13 @@ public class EventBody
                     stringValues.Add(property.Name, "true");
                 else if (property.Value.ValueKind == JsonValueKind.False)
                     stringValues.Add(property.Name, "false");
+                else if (property.Value.ValueKind == JsonValueKind.Array)
+                    stringValues.Add(property.Name, "[Array]");
+                else if (property.Value.ValueKind == JsonValueKind.Object)
+                    stringValues.Add(property.Name, "{Object}");
                 else if (property.Value.ValueKind == JsonValueKind.Null)
+                    stringValues.Add(property.Name, "");
+                else if (property.Value.ValueKind == JsonValueKind.Undefined)
                     stringValues.Add(property.Name, "");
             }
         }
@@ -162,9 +168,6 @@ public class EventBody
 
                 if (prop.Name.Length > 40)
                     return (false, $"Property key '{prop.Name}' must be less than or equal to 40 characters. Props was: {Props.RootElement.GetRawText()}");
-
-                if (prop.Value.ValueKind == JsonValueKind.Object || prop.Value.ValueKind == JsonValueKind.Array)
-                    return (false, $"Value of key '{prop.Name}' must be a primitive type. Props was: {Props.RootElement.GetRawText()}");
             }
         }
 

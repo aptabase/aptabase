@@ -40,9 +40,11 @@ public class EventBodyTests
         };
 
         var (stringProps, numericProps) = body.SplitProps();
-        stringProps.Count.Should().Be(2);
+        stringProps.Count.Should().Be(4);
         stringProps["name"]!.GetValue<string>().Should().Be("Bob");
         stringProps["isAdult"]!.GetValue<string>().Should().Be("true");
+        stringProps["array"]!.GetValue<string>().Should().Be("[Array]");
+        stringProps["object"]!.GetValue<string>().Should().Be("{Object}");
 
         numericProps.Count.Should().Be(1);
         numericProps["age"]!.GetValue<decimal>().Should().Be(10);

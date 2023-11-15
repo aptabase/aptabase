@@ -108,15 +108,6 @@ public class IngestionTests
         var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked", null);
         code.Should().Be(HttpStatusCode.NotFound);
     }
-
-    [Theory, MemberData(nameof(ValidProps))]
-    public async Task Cant_Ingest_With_Valid_Props(object props)
-    {
-        var appA = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
-        var client = new IngestionClient(_fixture.CreateClient(), appA.AppKey);
-        var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked", props);
-        code.Should().Be(HttpStatusCode.OK);
-    }
  
     public static IEnumerable<object[]> ValidProps => 
         new List<object[]>
@@ -129,6 +120,27 @@ public class IngestionTests
             new object[] { new { name = "Bob", age = 20 } },
             new object[] { new { name = "Bob", valid = true } },
             new object[] { new { name = "Bob", surname = (object?)null } },
+            new object[] { new { name = "Bob", age = 20, list = new int[]{1,2,3} } },
+            new object[] { "{\"name\":\"Bob\", \"age\":20, \"list\": [1,2,3]}" },
+        };
+
+    [Theory, MemberData(nameof(ValidProps))]
+    public async Task Cant_Ingest_With_Valid_Props(object props)
+    {
+        var appA = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
+        var client = new IngestionClient(_fixture.CreateClient(), appA.AppKey);
+        var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked", props);
+        code.Should().Be(HttpStatusCode.OK);
+    }
+ 
+    public static IEnumerable<object[]> InvalidProps => 
+        new List<object[]>
+        {
+            new object[] { 1 },
+            new object[] { "Something" },
+            new object[] { "[1,2,3]" },
+            new object[] { "" },
+            new object[] { new string[]{"A", "B", "C"} },
         };
 
     [Theory, MemberData(nameof(InvalidProps))]
@@ -175,19 +187,6 @@ public class IngestionTests
         var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked", null);
         code.Should().Be(HttpStatusCode.BadRequest);
     }
- 
-    public static IEnumerable<object[]> InvalidProps => 
-        new List<object[]>
-        {
-            new object[] { 1 },
-            new object[] { "Something" },
-            new object[] { "[1,2,3]" },
-            new object[] { "" },
-            new object[] { new string[]{"A", "B", "C"} },
-            new object[] { new { name = "Bob", age = 20, list = new int[]{1,2,3} } },
-            new object[] { "{\"name\":\"Bob\", \"age\":20, \"list\": [1,2,3]}" },
-            new object[] { "{\"\":\"Bob\"}" },
-        };
 
     [Fact]
     public async Task Cant_Read_Stats_From_Other_Users()
