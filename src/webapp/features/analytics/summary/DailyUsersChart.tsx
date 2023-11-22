@@ -30,6 +30,7 @@ export function DailyUsersChart(props: Props) {
           borderColor: colors.primary,
           fill: "origin",
           backgroundColor: colors.primaryBackground,
+          tension: 0.05,
           borderWidth: 1.5,
           pointRadius: 0,
           pointHoverRadius: 0,

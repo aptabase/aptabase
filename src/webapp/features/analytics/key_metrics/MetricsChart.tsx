@@ -67,7 +67,7 @@ export function MetricsChart(props: Props) {
                   }
                 : [],
             },
-            tension: 0,
+            tension: 0.05,
             borderWidth: 2,
             pointRadius: 0,
             pointBackgroundColor: colors.primary,
