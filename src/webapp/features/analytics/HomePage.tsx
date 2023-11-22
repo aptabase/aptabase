@@ -42,11 +42,11 @@ export function Component() {
       {buildMode === "debug" && <DebugModeBanner />}
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
         {apps.map((app) => (
-          <LazyLoad className="h-48" key={app.id}>
+          <LazyLoad className="h-36" key={app.id}>
             <AppSummaryWidget app={app} buildMode={buildMode} />
           </LazyLoad>
         ))}
-        <LazyLoad className="h-48">
+        <LazyLoad className="h-36">
           <NewAppWidget />
         </LazyLoad>
       </div>
