@@ -56,7 +56,7 @@ export function AppSharing(props: Props) {
       <form onSubmit={handleSubmit} className="space-y-4 max-w-[40rem]">
         <div className="flex items-center space-x-2">
           <TextInput
-            label="Share with"
+            label="Share with:"
             name="email"
             type="email"
             required={true}
@@ -69,14 +69,20 @@ export function AppSharing(props: Props) {
           <Button disabled={email.length === 0}>Share</Button>
         </div>
       </form>
-
       <Alert className="max-w-[40rem]">
         <IconHelp className="h-4 w-4" />
-        <AlertTitle>What is App Sharing?</AlertTitle>
+        <AlertTitle>How it works?</AlertTitle>
         <AlertDescription className="text-muted-foreground">
-          Sharing an app with other users allow them to have read-only access to your app's dashboard.
-          <br />
-          You remain the owner of the app and can revoke access at any time.
+          <ol className="list-decimal mx-4 my-2">
+            <li>Sharing an app allow other users to have read-only access to your app's dashboards.</li>
+            <li>You remain the owner of the app and its billing.</li>
+            <li>You can revoke access at any time.</li>
+          </ol>
+
+          <p>
+            <span className="font-bold">Note:</span> Aptabase won't send an email as part of the sharing process. We
+            recommend you getting in contact with them directly and asking them to sign up.
+          </p>
         </AlertDescription>
       </Alert>
     </div>
