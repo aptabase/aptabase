@@ -71,7 +71,7 @@ export function AppSharing(props: Props) {
       </form>
       <Alert className="max-w-[40rem]">
         <IconHelp className="h-4 w-4" />
-        <AlertTitle>How it works?</AlertTitle>
+        <AlertTitle>How does it work?</AlertTitle>
         <AlertDescription className="text-muted-foreground">
           <ol className="list-decimal mx-4 my-2">
             <li>Sharing an app allow other users to have read-only access to your app's dashboards.</li>
