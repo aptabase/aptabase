@@ -26,6 +26,7 @@
     <PackageReference Include="MaxMind.GeoIP2" Version="5.1.0" />
     <PackageReference Include="Yoh.Text.Json.NamingPolicies" Version="1.0.0" />
     <PackageReference Include="Scriban" Version="5.9.0" />
+    <PackageReference Include="MailKit" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
