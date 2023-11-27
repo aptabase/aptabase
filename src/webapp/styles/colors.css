@@ -26,32 +26,30 @@
   --radius: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
+[data-theme="dark"] {
+  color-scheme: dark;
 
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
-    --muted: 0 0% 8%;
-    --muted-foreground: 240 5% 64.9%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --card: 0 0% 4%;
-    --card-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 85.7% 97.3%;
-    --success: 142 71% 45%;
-    --success-foreground: 0 0% 98%;
-    --warning: 25 95% 53%;
-    --warning-foreground: 0 0% 98%;
-    --chart-highlight: rgb(255, 255, 255, 0.075);
-    --ring: 213 94% 68%;
-    --radius: 0.5rem;
-  }
+  --background: 0 0% 0%;
+  --foreground: 0 0% 98%;
+  --muted: 0 0% 8%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 0 0% 4%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 85.7% 97.3%;
+  --success: 142 71% 45%;
+  --success-foreground: 0 0% 98%;
+  --warning: 25 95% 53%;
+  --warning-foreground: 0 0% 98%;
+  --chart-highlight: rgb(255, 255, 255, 0.075);
+  --ring: 213 94% 68%;
+  --radius: 0.5rem;
 }

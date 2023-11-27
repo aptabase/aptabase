@@ -2,12 +2,12 @@ import React, { Fragment } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { IconCreditCard, IconDoorExit } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
-import { useBillingState } from "../billing";
-import { isBillingEnabled } from "../env";
+import { useBillingState } from "@features/billing";
+import { isBillingEnabled } from "@features/env";
 import { signOut, UserAccount, UserAvatar } from "../auth";
 import { twMerge } from "tailwind-merge";
-import { RegionFlag } from "@components/RegionFlag";
 import { PingSignal } from "@components/PingSignal";
+import { ThemeToggle } from "@features/theme";
 
 type Props = {
   user: UserAccount;
@@ -67,7 +67,7 @@ export function UserMenu(props: Props) {
               <span className="text-muted-foreground">Signed in as</span>
               <span className="block truncate text-sm font-medium">{props.user.email}</span>
             </div>
-            <RegionFlag />
+            <ThemeToggle />
           </div>
           {isBillingEnabled && (
             <>

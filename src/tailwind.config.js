@@ -4,6 +4,7 @@ const colors = require("tailwindcss/colors");
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./index.html", "./webapp/**/*.{js,jsx,ts,tsx}"],
+  darkMode: ["class", '[data-theme="dark"]'],
   theme: {
     fontFamily: {
       sans: ["Inter var", ...defaultTheme.fontFamily.sans],

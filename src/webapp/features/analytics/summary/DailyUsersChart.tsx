@@ -1,12 +1,14 @@
 import { Chart } from "@components/Chart";
 import { ChartConfigurationCustomTypesPerDataset } from "chart.js";
-import colors from "../key_metrics/colors";
+import { useChartColors } from "@features/theme";
 
 type Props = {
   values: number[];
 };
 
 export function DailyUsersChart(props: Props) {
+  const colors = useChartColors();
+
   const scales = {
     grid: {
       display: false,

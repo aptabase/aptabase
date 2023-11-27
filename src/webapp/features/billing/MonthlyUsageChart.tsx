@@ -1,5 +1,5 @@
 import { Chart } from "@components/Chart";
-import colors from "@features/analytics/key_metrics/colors";
+import { useChartColors } from "@features/theme";
 import { ChartConfigurationCustomTypesPerDataset } from "chart.js";
 
 type Props = {
@@ -10,6 +10,8 @@ type Props = {
 };
 
 export function MonthlyUsageChart(props: Props) {
+  const colors = useChartColors();
+
   const config: ChartConfigurationCustomTypesPerDataset = {
     data: {
       labels: props.dates,

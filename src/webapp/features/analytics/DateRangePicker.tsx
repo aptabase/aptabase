@@ -46,7 +46,7 @@ export function DateRangePicker() {
   return (
     <Select value={period} onValueChange={setPeriod}>
       <SelectTrigger className="w-36">
-        <SelectValue placeholder="Theme" />
+        <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {options.map((option) => (

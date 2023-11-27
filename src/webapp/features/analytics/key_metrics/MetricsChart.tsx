@@ -1,4 +1,4 @@
-import colors from "./colors";
+import { useChartColors } from "@features/theme";
 import { useMemo, useRef, useState } from "react";
 import { EmptyState } from "@components/EmptyState";
 import { ErrorState } from "@components/ErrorState";
@@ -43,6 +43,7 @@ const labels = {
 export function MetricsChart(props: Props) {
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [tooltipDataPoint, setTooltipDataPoint] = useState<TooltipDataPoint | null>(null);
+  const colors = useChartColors();
 
   const showAllLabels = props.granularity === "month";
   const label = labels[`${props.activeMetric}-${props.granularity}`] ?? "";
@@ -180,7 +181,7 @@ export function MetricsChart(props: Props) {
         },
       },
     };
-  }, [props]);
+  }, [props, colors]);
 
   return (
     <div className="h-60 md:h-80 w-full">
