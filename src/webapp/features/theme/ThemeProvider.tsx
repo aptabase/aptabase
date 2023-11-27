@@ -10,7 +10,7 @@ const updateTheme = (theme: Theme) => {
   }
 };
 
-const preferTheme = window.matchMedia("(prefers-color-scheme: dark)") ? "dark" : "light";
+const preferTheme = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 const defaultTheme = (localStorage.getItem("theme") as Theme) ?? preferTheme;
 updateTheme(defaultTheme);
 
