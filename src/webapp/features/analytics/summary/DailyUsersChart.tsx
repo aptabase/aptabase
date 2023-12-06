@@ -31,7 +31,7 @@ export function DailyUsersChart(props: Props) {
           data: props.values,
           borderColor: colors.primary,
           fill: "origin",
-          backgroundColor: colors.primaryBackground,
+          backgroundColor: (ctx) => colors.primaryBackground(ctx.chart),
           tension: 0.05,
           borderWidth: 1.5,
           pointRadius: 0,

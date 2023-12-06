@@ -57,7 +57,7 @@ export function MetricsChart(props: Props) {
             label,
             type: "line",
             fill: "origin",
-            backgroundColor: colors.primaryBackground,
+            backgroundColor: (ctx) => colors.primaryBackground(ctx.chart),
             data: props[props.activeMetric],
             borderColor: colors.primary,
             segment: {

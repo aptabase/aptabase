@@ -1,23 +1,17 @@
+import { Chart } from "chart.js";
 import { useTheme } from "./ThemeProvider";
 import { useMemo } from "react";
 
-function createLinearGradient(color1: string, color2: string, color3: string): CanvasGradient | string {
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
-
-  if (!context) return color1;
-
-  var gradient = context.createLinearGradient(0, 0, 0, 400);
+function createLinearGradient(chart: Chart, color1: string, color2: string): CanvasGradient | string {
+  const gradient = chart.ctx.createLinearGradient(0, 0, 0, chart.height);
   gradient.addColorStop(0, color1);
-  gradient.addColorStop(0.5, color2);
-  gradient.addColorStop(1, color3);
-
+  gradient.addColorStop(1, color2);
   return gradient;
 }
 
 type ChartColors = {
   primary: string;
-  primaryBackground: CanvasGradient | string;
+  primaryBackground: (chart: Chart) => CanvasGradient | string;
   success: string;
   destructive: string;
   warning: string;
@@ -29,7 +23,8 @@ const getColors = (): ChartColors => {
   const root = getComputedStyle(document.body);
   return {
     primary: "#60A5FA",
-    primaryBackground: createLinearGradient("rgba(96, 165, 250, 0.2)", "rgba(96, 165, 250, 0.1)", "transparent"),
+    primaryBackground: (chart: Chart) =>
+      createLinearGradient(chart, "rgba(96, 165, 250, 0.2)", "rgba(96, 165, 250, 0)"),
     success: `hsl(${root.getPropertyValue("--success")})`,
     destructive: `hsl(${root.getPropertyValue("--destructive")})`,
     warning: `hsl(${root.getPropertyValue("--warning")})`,

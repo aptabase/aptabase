@@ -36,7 +36,7 @@ export function AppSummaryWidget(props: Props) {
   return (
     <Link
       to={`/${props.app.id}/${params}`}
-      className="border cursor-pointer rounded-t-lg shadow bg-card hover:bg-muted h-full flex flex-col"
+      className="border dark:border-none cursor-pointer rounded-t-lg shadow-md bg-card hover:bg-muted h-full flex flex-col"
     >
       <SummaryDataContainer appId={props.app.id} buildMode={props.buildMode} period={period}>
         {({ dailyUsers, metrics }) => (

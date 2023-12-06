@@ -1,8 +1,6 @@
-import { useSearchParams } from "react-router-dom";
 import { TopNDataContainer } from "./TopNDataContainer";
-import { topAppBuildNumbers, topAppVersions } from "../query";
+import { topAppVersions } from "../query";
 import { TopNChart } from "./TopNChart";
-import { TopNTitle } from "./TopNTitle";
 
 type Props = {
   appId: string;
@@ -17,6 +15,7 @@ export function VersionWidget(props: Props) {
           id="appversions"
           key="appversions"
           title="App Versions"
+          searchParamKey="appVersion"
           defaultFormat="percentage"
           valueLabel="Sessions"
         />

@@ -12,7 +12,7 @@ export function NewAppWidget() {
       <CreateAppModal open={showModal} onClose={closeModal} />
       <button
         onClick={openModal}
-        className="border-2 cursor-pointer border-dashed rounded shadow h-full group hover:bg-muted"
+        className="border cursor-pointer border-dashed rounded shadow-md h-full group hover:bg-muted"
       >
         <div className="flex flex-col h-full justify-center items-center space-y-1">
           <IconCubePlus stroke={1.5} className="w-6 h-6 text-muted-foreground group-hover:text-foreground" />
