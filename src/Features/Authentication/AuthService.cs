@@ -88,14 +88,6 @@ public class AuthService : IAuthService
         var cmd = new CommandDefinition("INSERT INTO users (id, name, email) VALUES (@userId, @name, @email)", new { userId, name, email = email.ToLower() }, cancellationToken: cancellationToken);
         await _db.Connection.ExecuteAsync(cmd);
 
-        if (_env.IsManagedCloud)
-        {
-            await _emailClient.SendEmailAsync(email, "Welcome to Aptabase", "Welcome", new()
-            {
-                { "name", name },
-            }, cancellationToken);
-        }
-
         return new UserAccount(new UserIdentity(userId, name, email));
     }
 
