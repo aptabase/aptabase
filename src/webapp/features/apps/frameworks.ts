@@ -20,6 +20,12 @@ const frameworks: Record<string, FrameworkInstructions> = {
     icon: "https://aptabase.com/tools/apple.svg",
     invert: true,
   },
+  browser: {
+    name: "Browser Extension",
+    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-js/main/packages/browser/",
+    repository: "https://github.com/aptabase/aptabase-js/tree/main/packages/browser",
+    icon: "https://aptabase.com/tools/chrome.svg",
+  },
   electron: {
     name: "Electron",
     baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-electron/main/",
@@ -34,10 +40,8 @@ const frameworks: Record<string, FrameworkInstructions> = {
   },
   nativescript: {
     name: "NativeScript",
-    baseURL:
-      "https://raw.githubusercontent.com/goenning/nativescript-plugins/main//packages/nativescript-aptabase",
-    repository:
-      "https://github.com/nstudio/nativescript-plugins/blob/main//packages/nativescript-aptabase",
+    baseURL: "https://raw.githubusercontent.com/goenning/nativescript-plugins/main/packages/nativescript-aptabase",
+    repository: "https://github.com/nstudio/nativescript-plugins/blob/main//packages/nativescript-aptabase",
     icon: "https://aptabase.com/tools/nativescript.svg",
   },
   nextjs: {
