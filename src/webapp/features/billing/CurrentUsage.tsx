@@ -30,7 +30,7 @@ const colors = {
 };
 
 export function CurrentUsage(props: Props) {
-  const percentage = props.usage / props.quota;
+  const percentage = (props.usage / props.quota) * 100;
 
   return (
     <div className="flex flex-col h-full justify-between">
@@ -44,13 +44,13 @@ export function CurrentUsage(props: Props) {
         <div className="text-sm flex items-center space-x-1">
           <span>{props.usage.toLocaleString()}</span>
           <span className="text-muted-foreground">
-            / {props.quota.toLocaleString()} events ({percentage.toFixed(1)}
+            / {props.quota.toLocaleString()} events ({percentage.toFixed(2)}
             %)
           </span>
           {props.state === "OVERUSE" && <PingSignal color="warning" size="xs" />}
         </div>
         <div className="overflow-hidden rounded bg-accent">
-          <div className={twMerge("h-2 rounded", colors[props.state])} style={{ width: `${percentage * 100}%` }} />
+          <div className={twMerge("h-2 rounded", colors[props.state])} style={{ width: `${percentage}%` }} />
         </div>
       </div>
     </div>
