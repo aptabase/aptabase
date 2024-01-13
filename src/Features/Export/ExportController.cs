@@ -9,6 +9,7 @@ public class DownloadRequest
     public string BuildMode { get; set; } = "";
     public string AppId { get; set; } = "";
     public string AppName { get; set; } = "";
+    public string Format { get; set; } = "";
     public int Month { get; set; }
     public int Year { get; set; }
 }
@@ -47,6 +48,7 @@ public partial class ExportController : Controller
     [HttpGet("/api/_export/download")]
     public async Task<IActionResult> Download([FromQuery] DownloadRequest body, CancellationToken cancellationToken)
     {
+        var (formatName, contentType, fileExtension) = GetFormat(body.Format);
         var query = $@"SELECT timestamp, user_id, session_id,
                               event_name,
                               replace(replace(string_props, '\u0022', '\''), '\u0027', '\'') as string_props,
@@ -59,20 +61,29 @@ public partial class ExportController : Controller
                        WHERE app_id = '{GetAppId(body.BuildMode, body.AppId)}'
                        AND toStartOfMonth(timestamp) = '{body.Year}-{body.Month}-01'
                        ORDER BY timestamp DESC
-                       FORMAT CSVWithNames";
+                       FORMAT {formatName}";
 
         var stream = await _queryClient.StreamResponseAsync(query, cancellationToken);
         var appName = UnsafeCharacters().Replace(body.AppName, "").ToLower();
-        var fileName = $"{appName}-{body.BuildMode.ToLower()}-{body.Year}-{body.Month.ToString().PadLeft(2, '0')}.csv";
-        return File(stream, "text/csv", fileName);
+        var fileName = $"{appName}-{body.BuildMode.ToLower()}-{body.Year}-{body.Month.ToString().PadLeft(2, '0')}.{fileExtension}";
+        return File(stream, contentType, fileName);
     }
 
-    private string GetAppId(string buildMode, string appId)
+    private static string GetAppId(string buildMode, string appId)
     {
         return buildMode.ToLower() switch
         {
             "debug" => $"{appId}_DEBUG",
             _ => appId,
+        };
+    }
+
+    private static (string, string, string) GetFormat(string format)
+    {
+        return format.ToLower() switch
+        {
+            "parquet" => ("Parquet", "application/octet-stream", "parquet"),
+            _ => ("CSVWithNames", "text/csv", "csv"),
         };
     }
 

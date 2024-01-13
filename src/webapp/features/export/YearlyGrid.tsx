@@ -7,6 +7,7 @@ type Props = {
   app: Application;
   buildMode: BuildMode;
   year: number;
+  format: string;
   months: Array<{ number: number; name: string; events: number }>;
 };
 
@@ -16,6 +17,7 @@ export function YearlyGrid(props: Props) {
     params.set("appId", props.app.id);
     params.set("appName", props.app.name);
     params.set("buildMode", props.buildMode);
+    params.set("format", props.format);
     params.set("year", props.year.toString());
     params.set("month", month.toString());
 
@@ -25,15 +27,15 @@ export function YearlyGrid(props: Props) {
   };
 
   return (
-    <div className="space-y-1">
-      <p className="font-title text-xl">{props.year}</p>
+    <div>
+      <p className="font-title text-lg">{props.year}</p>
       <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-6 max-w-fit gap-3">
         {props.months.map((month) => (
           <Button
             key={month.number}
             variant="secondary"
             onClick={donload(month.number)}
-            className="w-24 flex flex-col px-0"
+            className="w-24 flex flex-col px-0 tracking-tighter"
           >
             <span className="text-sm font-medium">{month.name}</span>
             <span className="text-xs text-muted-foreground">

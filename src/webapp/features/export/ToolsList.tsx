@@ -41,7 +41,7 @@ function Tool(props: ToolProps) {
 
 export function ToolsList() {
   return (
-    <>
+    <div>
       <p className="text-sm mb-2">Here is a list of some free tools you can use to query your data.</p>
       <div className="space-y-2 max-w-3xl">
         <Tool
@@ -72,6 +72,6 @@ export function ToolsList() {
           description="CSV is a widely supported format that most visualization tools and programming languages support natively. You can use any tool you like to explore your data."
         />
       </div>
-    </>
+    </div>
   );
 }

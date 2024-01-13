@@ -7,6 +7,9 @@ import { ErrorState } from "@components/ErrorState";
 import { EmptyState } from "@components/EmptyState";
 import { ToolsList } from "./ToolsList";
 import { DevelopmentNotice } from "./DevelopmentNotice";
+import { ToggleGroup, ToggleGroupList, ToggleGroupTrigger } from "@components/ToggleGroup";
+import { FormatPicker } from "./FormatPicker";
+import { useState } from "react";
 
 type Props = {
   app: Application;
@@ -56,6 +59,8 @@ function groupByYear(usage: MonthlyUsage[]) {
 }
 
 export function ExportPageBody(props: Props) {
+  const [format, setFormat] = useState("csv");
+
   const { isLoading, isError, data } = useQuery({
     queryKey: ["monthly-usage", props.app.id, props.buildMode],
     queryFn: () => api.get<MonthlyUsage[]>(`/_export/usage`, { appId: props.app.id, buildMode: props.buildMode }),
@@ -76,9 +81,10 @@ export function ExportPageBody(props: Props) {
 
   return (
     <div className="space-y-10">
-      <div className="space-y-8">
+      <div className="space-y-4">
+        <FormatPicker value={format} onChange={setFormat} />
         {byYear.map((item) => (
-          <YearlyGrid key={item.year} app={props.app} buildMode={props.buildMode} {...item} />
+          <YearlyGrid key={item.year} app={props.app} buildMode={props.buildMode} format={format} {...item} />
         ))}
       </div>
 
