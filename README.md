@@ -43,6 +43,12 @@ You can also host Aptabase on your servers. It's free, but you are responsible f
 
 [Learn how →](https://github.com/aptabase/self-hosting).
 
+## 🛠️ Contributing
+
+We welcome contributions from everyone! If you want to contribute to Aptabase, please read the guide below to get started.
+
+[Contributing →](./CONTRIBUTING.md).
+
 # SDKs
 
 We provide SDKs for the most popular frameworks and languages to make it easier to integrate them into your app.

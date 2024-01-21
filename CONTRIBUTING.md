@@ -14,3 +14,11 @@
 That's it! You're ready to start writing some code 🚀
 
 **Note:** Emails are sent via Mailcatcher, the UI is available at `http://localhost:1080`
+
+## Getting some work done
+
+We have a very light process for contributing to Aptabase, simply find an issue you want to work on, ask for it to be assigned to you, and submit a PR when you're done. We'll review it and merge it as soon as possible. If you can't find an issue you want to work on, feel free to open one and we'll discuss it with you.
+
+We recommend you to give a brief description of how you plan to solve the issue before starting to work on it. This will help us to avoid wasting time on PRs that don't get merged.
+
+🚀
