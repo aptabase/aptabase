@@ -7,4 +7,3 @@ coverage.cobertura.xml
 etc/tinybird/.tinyb
 src/node_modules
 src/wwwroot/
-src/Properties/*
