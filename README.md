@@ -27,6 +27,7 @@
 
 💯 **Open-Source**: Our source code is 100% open source. There is nothing hidden. All the server code and SDKs are available for you to inspect and contribute to.
 
+> [!TIP]
 > Like what you see? Don't forget to give us a ⭐️ on GitHub!
 
 # How to get started?
