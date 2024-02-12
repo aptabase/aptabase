@@ -110,13 +110,15 @@ function TopNRow(props: TopNRowProps) {
       <p className="text-sm pr-2 z-10 tabular-nums">
         {props.format === "percentage" ? (
           `${Math.round(props.percentage * 100)}%`
-        ) : (
+        ) : props.item.value >= 1e3 ? (
           <TooltipProvider>
             <Tooltip>
-              {props.item.value >= 1e3 ? <TooltipContent>{props.item.value}</TooltipContent> : undefined}
+              <TooltipContent>{props.item.value}</TooltipContent>
               <TooltipTrigger>{formatNumber(props.item.value)}</TooltipTrigger>
             </Tooltip>
           </TooltipProvider>
+        ) : (
+          props.item.value
         )}
       </p>
     </div>
