@@ -6,6 +6,7 @@ import { ErrorState } from "@components/ErrorState";
 import { formatNumber } from "@fns/format-number";
 import { useLocalStorage } from "@hooks/use-localstorage";
 import { twMerge } from "tailwind-merge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/Tooltip";
 
 type Item = {
   name: string;
@@ -107,7 +108,16 @@ function TopNRow(props: TopNRowProps) {
         <div className="flex z-10">{props.children}</div>
       </div>
       <p className="text-sm pr-2 z-10 tabular-nums">
-        {props.format === "percentage" ? `${Math.round(props.percentage * 100)}%` : formatNumber(props.item.value)}
+        {props.format === "percentage" ? (
+          `${Math.round(props.percentage * 100)}%`
+        ) : (
+          <TooltipProvider>
+            <Tooltip>
+              {props.item.value >= 1e3 ? <TooltipContent>{props.item.value}</TooltipContent> : undefined}
+              <TooltipTrigger>{formatNumber(props.item.value)}</TooltipTrigger>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </p>
     </div>
   );
