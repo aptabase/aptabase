@@ -111,7 +111,7 @@ function TopNRow(props: TopNRowProps) {
         {props.format === "percentage" ? (
           `${Math.round(props.percentage * 100)}%`
         ) : props.item.value >= 1e3 ? (
-          <TooltipProvider>
+          <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipContent>{props.item.value}</TooltipContent>
               <TooltipTrigger>{formatNumber(props.item.value)}</TooltipTrigger>
