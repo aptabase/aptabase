@@ -1,6 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/Select";
 import { useDatePicker } from "@hooks/use-datepicker";
-
+import { DateRangePicker } from "@components/DateRangePicker/date-range-picker";
 type Option = {
   value: string;
   name: string;
@@ -40,19 +40,22 @@ function Item(props: StyledOptionProps) {
   );
 }
 
-export function DateRangePicker() {
+export function DateRangePickerr() {
   const [period, setPeriod] = useDatePicker();
 
   return (
-    <Select value={period} onValueChange={setPeriod}>
-      <SelectTrigger className="w-36">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((option) => (
-          <Item key={option.value} option={option} />
-        ))}
-      </SelectContent>
-    </Select>
+    <>
+      {/* <Select value={period} onValueChange={setPeriod}>
+        <SelectTrigger className="w-36">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <Item key={option.value} option={option} />
+          ))}
+        </SelectContent>
+      </Select> */}
+      <DateRangePicker onUpdate={(values) => console.log(values)} showCompare={false} />
+    </>
   );
 }

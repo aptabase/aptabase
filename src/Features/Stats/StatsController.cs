@@ -147,32 +147,10 @@ public class QueryParams
     public string? EventName { get; set; }
     public string? AppVersion { get; set; }
 
-    public QueryArgs Parse(DateTime relativeTo)
+    public QueryArgs Parse(DateTime startDate, DateTime endDate, Granularity granularity)
     {
-        // Go back 1 second so that when relativeTo is 00:00:00 we start with the previous day
-        // Happens when looking for previous period and "period" is "month" or "last-month"
-        if (relativeTo.TimeOfDay == TimeSpan.Zero)
-            relativeTo = relativeTo.AddSeconds(-1);
-
-        (DateTime? dateFrom, DateTime? dateTo, Granularity granularity) = Period switch
-        {
-            "24h" => (relativeTo.AddHours(-24), relativeTo, Granularity.Hour),
-            "48h" => (relativeTo.AddHours(-48), relativeTo, Granularity.Hour),
-            "7d" => (relativeTo.Date.AddDays(-7), relativeTo, Granularity.Day),
-            "14d" => (relativeTo.Date.AddDays(-14), relativeTo, Granularity.Day),
-            "30d" => (relativeTo.Date.AddDays(-30), relativeTo, Granularity.Day),
-            "90d" => (relativeTo.Date.AddDays(-90), relativeTo, Granularity.Day),
-            "180d" => (relativeTo.Date.AddDays(-180), relativeTo, Granularity.Month),
-            "365d" => (relativeTo.Date.AddDays(-365), relativeTo, Granularity.Month),
-            "month" => (new DateTime(relativeTo.Year, relativeTo.Month, 1), new DateTime(relativeTo.Year, relativeTo.Month, 1).AddMonths(1).AddDays(-1), Granularity.Day),
-            "last-month" => (new DateTime(relativeTo.Year, relativeTo.Month, 1).AddMonths(-1), new DateTime(relativeTo.Year, relativeTo.Month, 1), Granularity.Day),
-            "all" => (default(DateTime?), default(DateTime?), Granularity.Month),
-            _ => (relativeTo.AddHours(-24), relativeTo, Granularity.Hour), // default to 24 hours
-        };
-
-        if ((dateFrom is null && dateTo is not null) || (dateFrom is not null && dateTo is null))
-            throw new ArgumentException("Both dateFrom and dateTo must be defined, or both must be null");
-
+        // if (startDate >= endDate)
+        //     throw new ArgumentException("startDate must be earlier than endDate");
         var appId = BuildMode.ToLower() switch
         {
             "debug" => $"{AppId}_DEBUG",
@@ -183,8 +161,8 @@ public class QueryParams
         {
             AppId = appId,
             SessionId = SessionId,
-            DateFrom = dateFrom,
-            DateTo = dateTo,
+            DateFrom = startDate,
+            DateTo = endDate,
             Granularity = granularity,
             CountryCode = CountryCode,
             OsName = OsName,
@@ -252,14 +230,14 @@ public class StatsController : Controller
     [HttpGet("/api/_stats/metrics")]
     public async Task<IActionResult> KeyMetrics([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        var currentQuery = body.Parse(DateTime.UtcNow);
+        var currentQuery = body.Parse(DateTime.UtcNow, DateTime.UtcNow, Granularity.Day);
         var current = GetKeyMetrics(currentQuery, cancellationToken);
 
         if (!currentQuery.DateFrom.HasValue) {
             return Ok(new KeyMetrics(await current));
         }
 
-        var previousQuery = body.Parse(currentQuery.DateFrom.Value);
+        var previousQuery = body.Parse(currentQuery.DateFrom.Value, currentQuery.DateFrom.Value, Granularity.Day);
         var previous = await GetKeyMetrics(previousQuery, cancellationToken);
         return Ok(new KeyMetrics(await current, previous));
     }
@@ -267,7 +245,7 @@ public class StatsController : Controller
     [HttpGet("/api/_stats/periodic")]
     public async Task<IActionResult> PeriodicStats([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        var query = body.Parse(DateTime.UtcNow);
+        var query = body.Parse(DateTime.UtcNow, DateTime.UtcNow, Granularity.Day);
         var rows = await _queryClient.NamedQueryAsync<PeriodicStatsRow>("key_metrics_periodic__v1", new {
             date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
             date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -289,7 +267,7 @@ public class StatsController : Controller
     [HttpGet("/api/_stats/top-props")]
     public async Task<IActionResult> EventProps([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        var query = body.Parse(DateTime.UtcNow);
+        var query = body.Parse(DateTime.UtcNow, DateTime.UtcNow, Granularity.Day);
         var rows = await _queryClient.NamedQueryAsync<EventPropsItem>("top_props__v1", new {
             date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
             date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -306,7 +284,7 @@ public class StatsController : Controller
     [HttpGet("/api/_stats/live-geo")]
     public async Task<IActionResult> LiveGeo([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        var query = body.Parse(DateTime.UtcNow);
+        var query = body.Parse(DateTime.UtcNow, DateTime.UtcNow, Granularity.Day);
 
         var rows = await _queryClient.NamedQueryAsync<LiveGeoDataPoint>("live_geo__v1", new {
             app_id = query.AppId,
@@ -325,7 +303,7 @@ public class StatsController : Controller
     [HttpGet("/api/_stats/live-sessions")]
     public async Task<IActionResult> LiveSessions([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        var query = body.Parse(DateTime.UtcNow);
+        var query = body.Parse(DateTime.UtcNow, DateTime.UtcNow, Granularity.Day);
 
         var rows = await _queryClient.NamedQueryAsync<LiveRecentSession>("live_sessions__v1", new {
             app_id = query.AppId,
@@ -337,7 +315,7 @@ public class StatsController : Controller
     [HttpGet("/api/_stats/live-session-details")]
     public async Task<IActionResult> LiveSessionDetails([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        var query = body.Parse(DateTime.UtcNow);
+        var query = body.Parse(DateTime.UtcNow, DateTime.UtcNow, Granularity.Day);
 
         var row = await _queryClient.NamedQuerySingleAsync<SessionTimeline>("live_session_details__v1", new {
             app_id = query.AppId,
@@ -362,7 +340,7 @@ public class StatsController : Controller
 
     private async Task<IActionResult> TopN(string nameColumn, TopNValue valueColumn, QueryParams body, CancellationToken cancellationToken)
     {
-        var query = body.Parse(DateTime.UtcNow);
+        var query = body.Parse(DateTime.UtcNow, DateTime.UtcNow, Granularity.Day);
         var rows = await _queryClient.NamedQueryAsync<TopNItem>("top_n__v1", new {
             name_column = nameColumn,
             value_column = valueColumn.ToString(),
