@@ -13,7 +13,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(); // Convert startOfDay to a number
   const timestamp = startOfDay;
-  console.log(fromTimeStamp, toTimeStamp, timestamp);
+
   const condition = timestamp === fromTimeStamp || timestamp === toTimeStamp;
   return (
     <DayPicker

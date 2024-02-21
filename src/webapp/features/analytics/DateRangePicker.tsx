@@ -55,7 +55,7 @@ export function DateRangePickerr() {
           ))}
         </SelectContent>
       </Select> */}
-      <DateRangePicker onUpdate={(values) => console.log(values)} showCompare={false} />
+      <DateRangePicker onUpdate={(values) => setPeriod(values.range)} showCompare={false} />
     </>
   );
 }
