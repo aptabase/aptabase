@@ -10,7 +10,7 @@ import { CountryWidget } from "./dashboard/CountryWidget";
 import { VersionWidget } from "./dashboard/VersionWidget";
 import { EventWidget } from "./dashboard/EventWidget";
 import { OnboardingDashboard } from "./dashboard/OnboardingDashboard";
-import { DateRangePicker } from "./DateRangePicker";
+import { DateRangePickerr } from "./DateRangePicker";
 import { LazyLoad } from "@components/LazyLoad";
 import { TeaserDashboardContainer } from "./dashboard/TeaserDashboardContainer";
 import { AppLockedContent } from "./locked/AppLockedContent";
@@ -44,7 +44,7 @@ export function Component() {
           <PageHeading title="Dashboard" onClick={resetFilters} />
           <div className="flex items-center space-x-2">
             <BuildModeSelector />
-            <DateRangePicker />
+            <DateRangePickerr />
           </div>
         </div>
         <div className="flex w-full justify-end">
