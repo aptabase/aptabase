@@ -1,6 +1,7 @@
 using Aptabase.Features.Authentication;
 using Aptabase.Features.GeoIP;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Aptabase.Features.Stats;
 
@@ -196,6 +197,7 @@ public class QueryParams
 
 [ApiController, IsAuthenticated, HasReadAccessToApp]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+[EnableRateLimiting("Stats")]
 public class StatsController : Controller
 {
     private readonly IQueryClient _queryClient;

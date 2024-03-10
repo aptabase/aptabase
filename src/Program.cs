@@ -99,6 +99,16 @@ public partial class Program
                 })
             );
 
+            c.AddPolicy("Stats", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+                httpContext.ResolveClientIpAddress(),
+                partition => new FixedWindowRateLimiterOptions
+                {
+                    AutoReplenishment = true,
+                    PermitLimit = 1000,
+                    Window = TimeSpan.FromHours(24)
+                })
+            );
+
             c.AddPolicy("EventIngestion", httpContext => RateLimitPartition.GetFixedWindowLimiter(
                 httpContext.ResolveClientIpAddress(),
                 partition => new FixedWindowRateLimiterOptions
