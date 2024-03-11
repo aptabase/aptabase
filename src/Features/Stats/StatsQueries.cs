@@ -13,8 +13,11 @@ public static class StatsQueries
               FROM apps a
               LEFT JOIN app_shares s
               ON s.app_id = a.id
+              LEFT JOIN users u
+              ON u.id = a.owner_id
               WHERE a.id = @appId
               AND (a.owner_id = @userId OR s.email = @userEmail)
+              AND u.lock_reason IS NULL
               LIMIT 1",
             new { appId, userId = user.Id, userEmail = user.Email },
             cancellationToken: cancellationToken
