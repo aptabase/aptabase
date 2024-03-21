@@ -191,7 +191,7 @@ public partial class Program
             {
                 OnPrepareResponse = ctx =>
                 {
-                    ctx.Context.Response.Headers.Add("Content-Security-Policy", "default-src 'self' 'unsafe-inline'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://client.crisp.chat; script-src 'self' 'unsafe-inline' https://client.crisp.chat; font-src 'self' https://client.crisp.chat; connect-src wss://client.relay.crisp.chat https://client.crisp.chat;");
+                    ctx.Context.Response.Headers.Add("Content-Security-Policy", "default-src 'self' 'unsafe-inline'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://client.crisp.chat; script-src 'self' 'unsafe-inline' https://client.crisp.chat; font-src 'self' https://client.crisp.chat; connect-src 'self' wss://client.relay.crisp.chat https://client.crisp.chat;");
                     ctx.Context.Response.Headers.Add("X-Frame-Options", "DENY");
                     ctx.Context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
                     ctx.Context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
