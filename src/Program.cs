@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using ClickHouse.Client.ADO;
 using Aptabase.Data;
 using Aptabase.Data.Migrations;
@@ -15,7 +16,6 @@ using Aptabase.Features.Ingestion;
 using Aptabase.Features.Notification;
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Aptabase.Features.Stats;
 using Aptabase.Features.Apps;
 using Aptabase.Features.Ingestion.Buffer;
@@ -191,7 +191,7 @@ public partial class Program
             {
                 OnPrepareResponse = ctx =>
                 {
-                    ctx.Context.Response.Headers.Add("Content-Security-Policy", "default-src 'self' 'unsafe-inline'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://client.crisp.chat; script-src 'self' 'unsafe-inline' https://client.crisp.chat; font-src 'self' https://client.crisp.chat; connect-src 'self' wss://client.relay.crisp.chat https://client.crisp.chat;");
+                    ctx.Context.Response.Headers.Add("Content-Security-Policy", "default-src 'self' 'unsafe-inline'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://client.crisp.chat; script-src 'self' 'unsafe-inline' https://client.crisp.chat; font-src 'self' https://client.crisp.chat; connect-src 'self' https://raw.githubusercontent.com wss://client.relay.crisp.chat https://client.crisp.chat;");
                     ctx.Context.Response.Headers.Add("X-Frame-Options", "DENY");
                     ctx.Context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
                     ctx.Context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
