@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
 import { AppSummaryWidget } from "./summary/AppSummaryWidget";
-import { DateRangePicker } from "./DateRangePicker";
+import { DateRangePickerr } from "./DateRangePicker";
 import { LazyLoad } from "@components/LazyLoad";
 import { useDatePicker } from "@hooks/use-datepicker";
 import { NewAppWidget } from "./summary/NewAppWidget";
@@ -36,7 +36,7 @@ export function Component() {
         <PageHeading title="Home" />
         <div className="flex items-center space-x-2">
           <BuildModeSelector />
-          <DateRangePicker />
+          <DateRangePickerr />
         </div>
       </div>
       {buildMode === "debug" && <DebugModeBanner />}
