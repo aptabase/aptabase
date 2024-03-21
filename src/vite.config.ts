@@ -23,6 +23,9 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    headers: {
+      "Content-Security-Policy": `default-src 'self' 'unsafe-inline'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://client.crisp.chat; script-src 'self' 'unsafe-inline' https://client.crisp.chat; font-src 'self' https://client.crisp.chat; connect-src wss://client.relay.crisp.chat https://client.crisp.chat ws://localhost:3000 http://localhost:3000`,
+    },
     proxy: {
       "/uploads": {
         target: "http://localhost:5251",
