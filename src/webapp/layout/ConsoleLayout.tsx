@@ -1,3 +1,4 @@
+import { TrialReminder } from "@features/billing";
 import { AppSelector } from "../features/apps";
 import { useAuthState } from "../features/auth";
 import { MobileSidebar, NavMenu, UserMenu } from "../features/navigation";
@@ -25,7 +26,8 @@ export function ConsoleLayout() {
           <div className="p-2 flex flex-grow flex-col mt-2">
             <NavMenu />
           </div>
-          <div className="p-2">
+          <div className="p-2 space-y-1">
+            <TrialReminder />
             <UserMenu user={auth.user} />
           </div>
         </div>

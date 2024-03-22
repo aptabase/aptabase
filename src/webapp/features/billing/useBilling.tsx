@@ -15,6 +15,7 @@ export type BillingInfo = {
     name: string;
     monthlyPrice: number;
     monthlyEvents: number;
+    freeTrialEndsAt?: string;
   };
 };
 

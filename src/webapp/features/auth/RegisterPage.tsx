@@ -53,7 +53,7 @@ export function Component() {
     <Page title="Sign up">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Logo className="mx-auto h-12 w-auto text-primary" />
-        <h2 className="text-center text-3xl font-bold">Get started for free</h2>
+        <h2 className="text-center text-3xl font-bold">Sign up for an account</h2>
         <DataResidency />
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

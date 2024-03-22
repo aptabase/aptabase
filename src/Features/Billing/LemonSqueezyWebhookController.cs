@@ -78,7 +78,11 @@ public class LemonSqueezyWebhookController : Controller
             return BadRequest(new { message = "Missing 'user_id' on meta.custom_data" });
         }
 
-        await _db.Connection.ExecuteAsync(@"UPDATE users SET lock_reason = null WHERE id = @ownerId", new { ownerId });
+        await _db.Connection.ExecuteAsync(
+            @"UPDATE users SET lock_reason = :lockReason WHERE id = @ownerId",
+            new { ownerId, lockReason = body.Status == "expired" ? "B" : null }
+        );
+        
         await _db.Connection.ExecuteAsync(@"INSERT INTO subscriptions
                                                 (id, owner_id, customer_id, product_id, variant_id, status, ends_at)
                                             VALUES

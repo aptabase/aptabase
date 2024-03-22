@@ -54,7 +54,7 @@ public class LemonSqueezyClient
                     variant = new {
                         data = new {
                             type = "variants",
-                            id = "103474"
+                            id = _env.IsProduction ? "103474" : "85183"
                         }
                     }
                 }

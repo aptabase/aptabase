@@ -19,6 +19,7 @@ using Aptabase.Features.Billing.LemonSqueezy;
 using Aptabase.Features.Stats;
 using Aptabase.Features.Apps;
 using Aptabase.Features.Ingestion.Buffer;
+using Aptabase.Features.Billing;
 
 public partial class Program
 {
@@ -124,6 +125,7 @@ public partial class Program
         builder.Services.AddHealthChecks();
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddSingleton<IAppQueries, AppQueries>();
+        builder.Services.AddSingleton<IBillingQueries, BillingQueries>();
         builder.Services.AddSingleton<IPrivacyQueries, PrivacyQueries>();
         builder.Services.AddSingleton<IUserHasher, DailyUserHasher>();
         builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
