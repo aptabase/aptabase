@@ -134,6 +134,8 @@ public partial class Program
         builder.Services.AddSingleton<IEventBuffer, InMemoryEventBuffer>();
         builder.Services.AddHostedService<EventBackgroundWritter>();
         builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
+        builder.Services.AddHostedService<TrialExpiredCronJob>();
+        builder.Services.AddHostedService<TrialNotificationCronJob>();
         builder.Services.AddGeoIPClient(appEnv);
         builder.Services.AddEmailClient(appEnv);
         builder.Services.AddLemonSqueezy(appEnv);

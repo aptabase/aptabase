@@ -10,6 +10,7 @@ public interface IBillingQueries
     Task<Subscription?> GetUserSubscription(UserIdentity user);
     Task<FreeSubscription> GetUserFreeTierOrTrial(UserIdentity user);
     Task<string[]> GetOwnedAppIds(UserIdentity user);
+    Task<int> LockUsersWithExpiredTrials();
 }
 
 public class BillingQueries : IBillingQueries
@@ -46,6 +47,9 @@ public class BillingQueries : IBillingQueries
 
     public async Task<UserIdentity[]> GetTrialsDueSoon()
     {
+        var start = DateTime.UtcNow.AddDays(5).Date;
+        var end = start.AddDays(1).Date;
+
         var users = await _db.Connection.QueryAsync<UserIdentity>(
             @"SELECT DISTINCT u.id, u.name, u.email
               FROM users u
@@ -54,8 +58,20 @@ public class BillingQueries : IBillingQueries
               INNER JOIN apps a
               ON a.owner_id = u.id
               AND a.has_events = true
-              WHERE u.free_trial_ends_at = now() + INTERVAL '7 DAY'
-              AND s.id IS NULL");
+              WHERE u.free_trial_ends_at BETWEEN @start AND @end
+              AND s.id IS NULL", new { start, end });
         return users.ToArray();
+    }
+
+    public async Task<int> LockUsersWithExpiredTrials()
+    {
+        var count = await _db.Connection.ExecuteAsync(
+            @"UPDATE users u
+              SET lock_reason = 'T'
+              WHERE u.free_quota IS NULL
+              AND u.free_trial_ends_at <= now()
+              AND u.lock_reason IS NULL
+              AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.owner_id = u.id)");
+        return count;
     }
 }

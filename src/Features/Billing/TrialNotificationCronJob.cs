@@ -36,7 +36,7 @@ public class TrialNotificationCronJob : BackgroundService
                     await _emailClient.SendEmailAsync(user.Email, "Your Trial ends in 5 days", "TrialEndsSoon", new()
                     {
                         { "name", user.Name },
-                        { "url", $"{_env.SelfBaseUrl}/billing" },
+                        { "url", _env.SelfBaseUrl },
                     }, cancellationToken);
                 }
 
