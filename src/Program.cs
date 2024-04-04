@@ -106,7 +106,7 @@ public partial class Program
                 {
                     AutoReplenishment = true,
                     PermitLimit = 1000,
-                    Window = TimeSpan.FromHours(24)
+                    Window = TimeSpan.FromHours(1)
                 })
             );
 
