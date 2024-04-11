@@ -8,7 +8,7 @@ type AlertProps = {
 
 const variants = {
   default: "text-foreground",
-  warning: "bg-warning/5 border-warning [&>svg]:text-warning",
+  warning: "bg-warning/10 border-warning [&>svg]:text-warning",
 };
 
 const Alert = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & AlertProps>(

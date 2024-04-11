@@ -31,14 +31,14 @@ export function NavMenu(props: { onNavigation?: VoidFunction }) {
           />
           <NavItem
             label="Live View"
-            disabled={!currentApp}
+            disabled={!currentApp || !!currentApp.lockReason}
             href={`/${currentApp?.id}/live`}
             icon={IconActivityHeartbeat}
             onNavigation={props.onNavigation}
           />
           <NavItem
             label="Export"
-            disabled={!currentApp}
+            disabled={!currentApp || !!currentApp.lockReason}
             href={`/${currentApp?.id}/export`}
             icon={IconCloudDownload}
             onNavigation={props.onNavigation}

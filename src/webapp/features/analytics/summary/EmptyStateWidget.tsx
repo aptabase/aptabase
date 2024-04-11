@@ -9,7 +9,7 @@ type Props = {
 export function EmptyStateWidget(props: Props) {
   return (
     <Link
-      to={props.app.id}
+      to={`${props.app.id}/`}
       className="border dark:border-none cursor-pointer rounded shadow-md bg-card hover:bg-muted h-full"
     >
       <div className="flex flex-col">

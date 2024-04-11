@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using ClickHouse.Client.ADO;
 using Aptabase.Data;
 using Aptabase.Data.Migrations;
@@ -15,10 +16,10 @@ using Aptabase.Features.Ingestion;
 using Aptabase.Features.Notification;
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Aptabase.Features.Stats;
 using Aptabase.Features.Apps;
 using Aptabase.Features.Ingestion.Buffer;
+using Aptabase.Features.Billing;
 
 public partial class Program
 {
@@ -99,6 +100,16 @@ public partial class Program
                 })
             );
 
+            c.AddPolicy("Stats", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+                httpContext.ResolveClientIpAddress(),
+                partition => new FixedWindowRateLimiterOptions
+                {
+                    AutoReplenishment = true,
+                    PermitLimit = 1000,
+                    Window = TimeSpan.FromHours(1)
+                })
+            );
+
             c.AddPolicy("EventIngestion", httpContext => RateLimitPartition.GetFixedWindowLimiter(
                 httpContext.ResolveClientIpAddress(),
                 partition => new FixedWindowRateLimiterOptions
@@ -114,6 +125,7 @@ public partial class Program
         builder.Services.AddHealthChecks();
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddSingleton<IAppQueries, AppQueries>();
+        builder.Services.AddSingleton<IBillingQueries, BillingQueries>();
         builder.Services.AddSingleton<IPrivacyQueries, PrivacyQueries>();
         builder.Services.AddSingleton<IUserHasher, DailyUserHasher>();
         builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
@@ -122,6 +134,8 @@ public partial class Program
         builder.Services.AddSingleton<IEventBuffer, InMemoryEventBuffer>();
         builder.Services.AddHostedService<EventBackgroundWritter>();
         builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
+        builder.Services.AddHostedService<TrialExpiredCronJob>();
+        builder.Services.AddHostedService<TrialNotificationCronJob>();
         builder.Services.AddGeoIPClient(appEnv);
         builder.Services.AddEmailClient(appEnv);
         builder.Services.AddLemonSqueezy(appEnv);
@@ -176,11 +190,16 @@ public partial class Program
 
         if (appEnv.IsProduction)
         {
+            app.UseHsts();
             app.MapFallbackToFile("index.html", new StaticFileOptions
             {
                 OnPrepareResponse = ctx =>
                 {
-                    ctx.Context.Response.Headers.Append("Cache-Control", "no-store,no-cache");
+                    ctx.Context.Response.Headers.Add("Content-Security-Policy", "default-src 'self' 'unsafe-inline'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://client.crisp.chat; script-src 'self' 'unsafe-inline' https://client.crisp.chat; font-src 'self' https://client.crisp.chat; connect-src 'self' https://raw.githubusercontent.com wss://client.relay.crisp.chat https://client.crisp.chat;");
+                    ctx.Context.Response.Headers.Add("X-Frame-Options", "DENY");
+                    ctx.Context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+                    ctx.Context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+                    ctx.Context.Response.Headers.Add("Cache-Control", "no-store,no-cache");
                 }
             });
 

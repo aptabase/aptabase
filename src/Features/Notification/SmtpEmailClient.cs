@@ -25,6 +25,10 @@ public class SmtpEmailClient : IEmailClient
         var msg = new MimeMessage();
         msg.From.Add(new MailboxAddress("", _env.SmtpFromAddress));
         msg.To.Add(new MailboxAddress("", to));
+        if (_env.IsManagedCloud && templateName == "TrialEndsSoon")
+        {
+            msg.Bcc.Add(new MailboxAddress("", "goenning@aptabase.com"));
+        }
         msg.Subject = subject;
         msg.Body = new TextPart("html") { Text = body };
         await smtp.SendAsync(msg, cancellationToken);

@@ -1,9 +1,7 @@
-using System.Data;
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
 using Microsoft.AspNetCore.Mvc;
 using Aptabase.Data;
-using Dapper;
 using Aptabase.Features.Stats;
 
 namespace Aptabase.Features.Billing;
@@ -25,12 +23,12 @@ public class BillingHistoricUsage
 public class BillingController : Controller
 {
     private readonly IQueryClient _queryClient;
-    private readonly IDbContext _db;
+    private readonly IBillingQueries _billingQueries;
     private readonly LemonSqueezyClient _lsClient;
 
-    public BillingController(IDbContext db, LemonSqueezyClient lsClient, IQueryClient queryClient)
+    public BillingController(IDbContext db, IBillingQueries billingQueries, LemonSqueezyClient lsClient, IQueryClient queryClient)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        _billingQueries = billingQueries ?? throw new ArgumentNullException(nameof(billingQueries));
         _lsClient = lsClient ?? throw new ArgumentNullException(nameof(lsClient));
         _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));
     }
@@ -39,16 +37,17 @@ public class BillingController : Controller
     public async Task<IActionResult> BillingState(CancellationToken cancellationToken)
     {
         var user = this.GetCurrentUserIdentity();
-        var appIds = await GetOwnedAppIds(user);
+        var appIds = await _billingQueries.GetOwnedAppIds(user);
 
         var usage = await _queryClient.NamedQuerySingleAsync<BillingUsage>("get_billing_usage__v1", new {
             app_ids = appIds,
         }, cancellationToken);
 
-        var sub = await GetUserSubscription(user);
+        var sub = await _billingQueries.GetUserSubscription(user);
         var plan = sub is null || sub.Status == "expired" 
-            ? SubscriptionPlan.AptabaseFree
+            ? SubscriptionPlan.GetFreeVariant(await _billingQueries.GetUserFreeTierOrTrial(user))
             : SubscriptionPlan.GetByVariantId(sub.VariantId);
+
         var state = (usage?.Count ?? 0) < plan.MonthlyEvents ? "OK" : "OVERUSE";
         
         return Ok(new {
@@ -68,7 +67,7 @@ public class BillingController : Controller
     public async Task<IActionResult> HistoricalUsage(CancellationToken cancellationToken)
     {
         var user = this.GetCurrentUserIdentity();
-        var appIds = await GetOwnedAppIds(user);
+        var appIds = await _billingQueries.GetOwnedAppIds(user);
 
         var rows = await _queryClient.NamedQueryAsync<BillingHistoricUsage>("billing_historical_usage__v1", new {
             app_ids = appIds,
@@ -90,27 +89,11 @@ public class BillingController : Controller
     public async Task<IActionResult> GeneratePortalUrl(CancellationToken cancellationToken)
     {
         var user = this.GetCurrentUserIdentity();
-        var sub = await GetUserSubscription(user);
+        var sub = await _billingQueries.GetUserSubscription(user);
         if (sub is null)
             return NotFound();
 
         var url = await _lsClient.GetBillingPortalUrl(sub.Id, cancellationToken);
         return Ok(new { url });
-    }
-
-    private async Task<Subscription?> GetUserSubscription(UserIdentity user)
-    {
-        return await _db.Connection.QueryFirstOrDefaultAsync<Subscription>(
-            @"SELECT * FROM subscriptions 
-              WHERE owner_id = @userId
-              ORDER BY created_at DESC LIMIT 1",
-            new { userId = user.Id });
-    }
-
-    private async Task<string[]> GetOwnedAppIds(UserIdentity user)
-    {
-        var releaseAppIds = await _db.Connection.QueryAsync<string>(@"SELECT id FROM apps WHERE owner_id = @userId", new { userId = user.Id });
-        var debugAppIds = releaseAppIds.Select(id => $"{id}_DEBUG");
-        return releaseAppIds.Concat(debugAppIds).ToArray();
     }
 }

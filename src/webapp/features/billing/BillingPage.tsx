@@ -47,6 +47,7 @@ function Body(props: { billing: BillingInfo; historical: BillingHistoricalUsage[
       </div>
       <div>
         <p>Monthly Usage</p>
+
         <div className="h-60 mt-4">
           <MonthlyUsageChart
             dates={props.historical.map((x) => formatPeriod("month", x.date))}
@@ -54,6 +55,18 @@ function Body(props: { billing: BillingInfo; historical: BillingHistoricalUsage[
             state={props.billing.state}
             quota={props.billing.plan.monthlyEvents}
           />
+        </div>
+
+        <div className="flex items-center justify-end text-xs text-muted-foreground gap-4 mt-2 mr-4">
+          <div className="space-x-1">
+            <div className="bg-success w-2 h-2 rounded-full inline-block" />
+            <span>Quota</span>
+          </div>
+
+          <div className="space-x-1">
+            <div className="bg-primary w-2 h-2 rounded-full inline-block" />
+            <span>Usage</span>
+          </div>
         </div>
       </div>
     </>
