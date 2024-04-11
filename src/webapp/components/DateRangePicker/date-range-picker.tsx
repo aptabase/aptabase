@@ -314,33 +314,6 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
           <div className="flex">
             <div className="flex flex-col">
               <div className="flex flex-col lg:flex-row gap-2 px-3 justify-end items-center lg:items-start pb-4 lg:pb-0">
-                <div className="flex items-center space-x-2 pr-4 py-1">
-                  {showCompare && (
-                    <Switch
-                      defaultChecked={Boolean(rangeCompare)}
-                      onCheckedChange={(checked: boolean) => {
-                        if (checked) {
-                          if (!range.to) {
-                            setRange({
-                              from: range.from,
-                              to: range.from,
-                            });
-                          }
-                          setRangeCompare({
-                            from: new Date(range.from.getFullYear(), range.from.getMonth(), range.from.getDate() - 365),
-                            to: range.to
-                              ? new Date(range.to.getFullYear() - 1, range.to.getMonth(), range.to.getDate())
-                              : new Date(range.from.getFullYear() - 1, range.from.getMonth(), range.from.getDate()),
-                          });
-                        } else {
-                          setRangeCompare(undefined);
-                        }
-                      }}
-                      id="compare-mode"
-                    />
-                  )}
-                  <Label htmlFor="compare-mode">Compare</Label>
-                </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
                     <DateInput

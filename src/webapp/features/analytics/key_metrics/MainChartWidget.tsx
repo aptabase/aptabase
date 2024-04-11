@@ -63,7 +63,7 @@ export function MainChartWidget(props: Props) {
   });
 
   useEffect(() => {
-    trackEvent("dashboard_viewed", { period, name: props.appName });
+    trackEvent("dashboard_viewed", { startDate: period.from, endDate: period.to, name: props.appName });
   }, [period, props.appName]);
 
   // TODO: make this more efficient, we don't need to map over the data multiple times

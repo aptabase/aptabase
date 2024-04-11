@@ -41,7 +41,7 @@ function Item(props: StyledOptionProps) {
 }
 
 export function DateRangePickerr() {
-  const [period, setPeriod] = useDatePicker();
+  const [_, setPeriod] = useDatePicker();
 
   return (
     <>
@@ -55,7 +55,15 @@ export function DateRangePickerr() {
           ))}
         </SelectContent>
       </Select> */}
-      <DateRangePicker onUpdate={(values) => setPeriod(values.range)} showCompare={false} />
+      <DateRangePicker
+        onUpdate={(values) =>
+          setPeriod({
+            from: values.range.from.toISOString(),
+            to: values.range.to?.toISOString() ?? new Date().toISOString(),
+          })
+        }
+        showCompare={false}
+      />
     </>
   );
 }

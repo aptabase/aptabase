@@ -15,7 +15,7 @@ type Props = {
 
 export function AppSummaryWidget(props: Props) {
   const [period] = useDatePicker();
-  const params = period ? `?period=${period}` : "";
+  const params = period ? `?from=${period.from}&to=${period.to}` : "";
 
   if (props.app.lockReason) {
     return (

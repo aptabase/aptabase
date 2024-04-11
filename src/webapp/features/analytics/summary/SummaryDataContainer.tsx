@@ -8,7 +8,7 @@ type ChildrenProps = {
 
 type Props = {
   appId: string;
-  period: string;
+  period: { from: string; to: string };
   buildMode: "release" | "debug";
   children: (props: ChildrenProps) => JSX.Element;
 };

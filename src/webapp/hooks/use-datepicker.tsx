@@ -1,16 +1,27 @@
 import { useSearchParams } from "react-router-dom";
 
-const setStoredValue = (value: string) => window.localStorage?.setItem("period", value);
-const getStoredValue = () => window.localStorage?.getItem("period") ?? "24h";
+type DateRange = {from:string, to:string}
+const setStoredValue = (value: DateRange) => {
+  window.localStorage?.setItem("from", value.from);
+  window.localStorage?.setItem("to",value.to)
+}
+const getStoredValue = () => {
 
-export function useDatePicker(): [string, (value: string) => void] {
+  const from = window.localStorage?.getItem("from") ?? new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString();
+  const to = window.localStorage?.getItem("to") ?? new Date().toISOString();
+
+  return {from,to}
+}
+
+export function useDatePicker(): [DateRange, (value: DateRange) => void] {
   let [searchParams, setSearchParams] = useSearchParams();
-  const period = searchParams.get("period") ?? getStoredValue();
+  const period = {from: searchParams.get("from") ?? getStoredValue().from, to: searchParams.get("to") ?? getStoredValue().to};
 
-  const setPeriod = (value: string) => {
+  const setPeriod = (value: DateRange) => {
     setStoredValue(value);
     setSearchParams((params) => {
-      params.set("period", value);
+      params.set("from", value.from);
+      params.set("to", value.to);
       return params;
     });
   };
