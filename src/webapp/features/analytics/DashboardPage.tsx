@@ -10,7 +10,7 @@ import { CountryWidget } from "./dashboard/CountryWidget";
 import { VersionWidget } from "./dashboard/VersionWidget";
 import { EventWidget } from "./dashboard/EventWidget";
 import { OnboardingDashboard } from "./dashboard/OnboardingDashboard";
-import { DateRangePickerr } from "./DateRangePicker";
+import { DateRangePicker } from "./DateRangePicker";
 import { LazyLoad } from "@components/LazyLoad";
 import { TeaserDashboardContainer } from "./dashboard/TeaserDashboardContainer";
 import { AppLockedContent } from "./locked/AppLockedContent";
@@ -40,11 +40,11 @@ export function Component() {
     <Page title={app.name}>
       {buildMode === "debug" && <DebugModeBanner />}
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center">
           <PageHeading title="Dashboard" onClick={resetFilters} />
           <div className="flex items-center space-x-2">
             <BuildModeSelector />
-            <DateRangePickerr />
+            <DateRangePicker />
           </div>
         </div>
         <div className="flex w-full justify-end">

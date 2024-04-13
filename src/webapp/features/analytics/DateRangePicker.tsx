@@ -1,6 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/Select";
 import { useDatePicker } from "@hooks/use-datepicker";
-import { DateRangePicker } from "@components/DateRangePicker/date-range-picker";
+import { DateRangePickerComponent } from "@components/DateRangePicker/date-range-picker";
 type Option = {
   value: string;
   name: string;
@@ -40,8 +40,8 @@ function Item(props: StyledOptionProps) {
   );
 }
 
-export function DateRangePickerr() {
-  const [_, setPeriod] = useDatePicker();
+export function DateRangePicker() {
+  const [period, setPeriod] = useDatePicker();
 
   return (
     <>
@@ -55,13 +55,15 @@ export function DateRangePickerr() {
           ))}
         </SelectContent>
       </Select> */}
-      <DateRangePicker
+      <DateRangePickerComponent
         onUpdate={(values) =>
           setPeriod({
             from: values.range.from.toISOString(),
             to: values.range.to?.toISOString() ?? new Date().toISOString(),
           })
         }
+        initialDateFrom={period.from}
+        initialDateTo={period.to}
         showCompare={false}
       />
     </>
