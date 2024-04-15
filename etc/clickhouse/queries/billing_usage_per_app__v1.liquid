@@ -1,0 +1,5 @@
+SELECT replace(app_id, '_DEBUG', '') as AppId,
+countMerge(events) as Count
+FROM monthly_usage_v1
+WHERE period = '{{period}}'
+GROUP BY replace(app_id, '_DEBUG', '')

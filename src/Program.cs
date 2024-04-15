@@ -20,6 +20,7 @@ using Aptabase.Features.Stats;
 using Aptabase.Features.Apps;
 using Aptabase.Features.Ingestion.Buffer;
 using Aptabase.Features.Billing;
+using Features.Cache;
 
 public partial class Program
 {
@@ -124,6 +125,7 @@ public partial class Program
         builder.Services.AddSingleton(appEnv);
         builder.Services.AddHealthChecks();
         builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddSingleton<ICache, DatabaseCache>();
         builder.Services.AddSingleton<IAppQueries, AppQueries>();
         builder.Services.AddSingleton<IBillingQueries, BillingQueries>();
         builder.Services.AddSingleton<IPrivacyQueries, PrivacyQueries>();
@@ -134,8 +136,14 @@ public partial class Program
         builder.Services.AddSingleton<IEventBuffer, InMemoryEventBuffer>();
         builder.Services.AddHostedService<EventBackgroundWritter>();
         builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
-        builder.Services.AddHostedService<TrialExpiredCronJob>();
-        builder.Services.AddHostedService<TrialNotificationCronJob>();
+
+        if (appEnv.IsBillingEnabled)
+        {
+            builder.Services.AddHostedService<OveruseNotificationCronJob>();
+            builder.Services.AddHostedService<TrialExpiredCronJob>();
+            builder.Services.AddHostedService<TrialNotificationCronJob>();
+        }
+
         builder.Services.AddGeoIPClient(appEnv);
         builder.Services.AddEmailClient(appEnv);
         builder.Services.AddLemonSqueezy(appEnv);

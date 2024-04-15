@@ -1,22 +1,9 @@
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
 using Microsoft.AspNetCore.Mvc;
-using Aptabase.Data;
 using Aptabase.Features.Stats;
 
 namespace Aptabase.Features.Billing;
-
-public class BillingUsage
-{
-    public long Count { get; set; }
-    public long Quota { get; set; }
-}
-
-public class BillingHistoricUsage
-{
-    public DateTime Date { get; set; }
-    public long Events { get; set; }
-}
 
 [ApiController, IsAuthenticated]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -26,7 +13,7 @@ public class BillingController : Controller
     private readonly IBillingQueries _billingQueries;
     private readonly LemonSqueezyClient _lsClient;
 
-    public BillingController(IDbContext db, IBillingQueries billingQueries, LemonSqueezyClient lsClient, IQueryClient queryClient)
+    public BillingController(IBillingQueries billingQueries, LemonSqueezyClient lsClient, IQueryClient queryClient)
     {
         _billingQueries = billingQueries ?? throw new ArgumentNullException(nameof(billingQueries));
         _lsClient = lsClient ?? throw new ArgumentNullException(nameof(lsClient));

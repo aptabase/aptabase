@@ -1,0 +1,12 @@
+TOKEN aptabase-api READ
+
+VERSION 1
+NODE endpoint
+SQL >
+    %
+    SELECT replace(app_id, '_DEBUG', '') as AppId,
+        countMerge(events) as Count
+    FROM monthly_usage_v1
+    WHERE period = {{String(period, '2000-01-01')}}
+    GROUP BY replace(app_id, '_DEBUG', '')
+    HAVING Count >= 5000
