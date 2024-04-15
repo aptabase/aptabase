@@ -22,6 +22,8 @@ public class FreeSubscription
 
 public class SubscriptionPlan
 {
+    public const int FreeTrialMonthlyQuota = 1_000_000;
+
     public string Name { get; }
     public int MonthlyPrice { get; }
     public int MonthlyEvents { get; }
@@ -43,7 +45,7 @@ public class SubscriptionPlan
             return new SubscriptionPlan("Free Plan", (int)sub.FreeQuota.Value, 0, 0, null);
 
         if (sub.FreeTrialEndsAt.HasValue)
-            return new SubscriptionPlan("Free Trial", 200_000, 0, 0, sub.FreeTrialEndsAt);
+            return new SubscriptionPlan("Free Trial", FreeTrialMonthlyQuota, 0, 0, sub.FreeTrialEndsAt);
 
         throw new InvalidOperationException("No free subscription found");
     }

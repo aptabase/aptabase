@@ -15,22 +15,29 @@ public class PurgeDailySaltsCronJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        try
+        while (!cancellationToken.IsCancellationRequested) 
         {
-            _logger.LogInformation("PurgeDailySaltsCronJob is starting.");
-
-            using var timer = new CronTimer("0 0 * * *", TimeZoneInfo.Utc);
-
-            while (await timer.WaitForNextTickAsync(cancellationToken))
+            try
             {
-                _logger.LogInformation("Purging daily salts");
-                var rows = await _privacyQueries.PurgeOldSalts(cancellationToken);
-                _logger.LogInformation("Deleted {rows} rows", rows);
+                _logger.LogInformation("PurgeDailySaltsCronJob is starting.");
+
+                using var timer = new CronTimer("0 0 * * *", TimeZoneInfo.Utc);
+
+                while (await timer.WaitForNextTickAsync(cancellationToken))
+                {
+                    _logger.LogInformation("Purging daily salts");
+                    var rows = await _privacyQueries.PurgeOldSalts(cancellationToken);
+                    _logger.LogInformation("Deleted {rows} rows", rows);
+                }
             }
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("PurgeDailySaltsCronJob stopped.");
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("PurgeDailySaltsCronJob stopped.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "PurgeDailySaltsCronJob crashed.");
+            }
         }
     }
 }

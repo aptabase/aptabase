@@ -60,7 +60,7 @@ function Body(props: { billing: BillingInfo; historical: BillingHistoricalUsage[
         <div className="flex items-center justify-end text-xs text-muted-foreground gap-4 mt-2 mr-4">
           <div className="space-x-1">
             <div className="bg-success w-2 h-2 rounded-full inline-block" />
-            <span>Quota</span>
+            <span>Limit</span>
           </div>
 
           <div className="space-x-1">

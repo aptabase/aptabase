@@ -6,11 +6,13 @@ type Props = {
 
 const titles: Record<string, string> = {
   B: "App is locked due to billing",
+  O: "App is locked due to overuse",
   T: "Expired Trial",
 };
 
 const desriptions: Record<string, string> = {
-  B: "Subscribe to a suitable plan to unlock",
+  B: "Upgrade to a suitable plan to unlock",
+  O: "Upgrade to a suitable plan to unlock",
   T: "Subscribe to unlock",
 };
 

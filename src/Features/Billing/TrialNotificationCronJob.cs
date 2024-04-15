@@ -20,32 +20,39 @@ public class TrialNotificationCronJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        try
+        while (!cancellationToken.IsCancellationRequested) 
         {
-            _logger.LogInformation("TrialNotificationCronJob is starting.");
-
-            using var timer = new CronTimer("0 0 * * *", TimeZoneInfo.Utc);
-
-            while (await timer.WaitForNextTickAsync(cancellationToken))
+            try
             {
-                _logger.LogInformation("Searching for users to notify about trial expiration.");
-                var users = await _billingQueries.GetTrialsDueSoon();
-                foreach (var user in users)
-                {
-                    _logger.LogInformation("Sending trial notification to {name} ({user})", user.Name, user.Email);
-                    await _emailClient.SendEmailAsync(user.Email, "Your Trial ends in 5 days", "TrialEndsSoon", new()
-                    {
-                        { "name", user.Name },
-                        { "url", _env.SelfBaseUrl },
-                    }, cancellationToken);
-                }
+                _logger.LogInformation("TrialNotificationCronJob is starting.");
 
-                _logger.LogInformation("Sent trial notifications to {count} users", users.Length);
+                using var timer = new CronTimer("0 0 * * *", TimeZoneInfo.Utc);
+
+                while (await timer.WaitForNextTickAsync(cancellationToken))
+                {
+                    _logger.LogInformation("Searching for users to notify about trial expiration.");
+                    var users = await _billingQueries.GetTrialsDueSoon();
+                    foreach (var user in users)
+                    {
+                        _logger.LogInformation("Sending trial notification to {name} ({user})", user.Name, user.Email);
+                        await _emailClient.SendEmailAsync(user.Email, "Your Trial ends in 5 days", "TrialEndsSoon", new()
+                        {
+                            { "name", user.Name },
+                            { "url", _env.SelfBaseUrl },
+                        }, cancellationToken);
+                    }
+
+                    _logger.LogInformation("Sent trial notifications to {count} users", users.Length);
+                }
             }
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("TrialNotificationCronJob stopped.");
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("TrialNotificationCronJob stopped.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "TrialNotificationCronJob crashed.");
+            }
         }
     }
 }
