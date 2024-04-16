@@ -35,7 +35,7 @@ public class SESEmailClient : IEmailClient
         return new AmazonSimpleEmailServiceClient(credentials, Amazon.RegionEndpoint.USEast1);
     }
 
-    private SendEmailRequest NewRequest(string to, string subject, string body)
+    private static SendEmailRequest NewRequest(string to, string subject, string body)
     {
         return new SendEmailRequest
         {

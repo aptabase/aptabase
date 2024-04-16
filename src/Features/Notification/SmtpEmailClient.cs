@@ -13,8 +13,6 @@ public class SmtpEmailClient : IEmailClient
         _env = env ?? throw new ArgumentNullException(nameof(env));
     }
 
-    private static string[] BillingTemplates => new[] { "TrialEndsSoon", "UsageLevel80", "UsageLevel90", "UsageLevel100" };
-
     public async Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string>? properties, CancellationToken cancellationToken)
     {
         using var smtp = new SmtpClient();
@@ -27,10 +25,6 @@ public class SmtpEmailClient : IEmailClient
         var msg = new MimeMessage();
         msg.From.Add(new MailboxAddress("", _env.SmtpFromAddress));
         msg.To.Add(new MailboxAddress("", to));
-        if (_env.IsManagedCloud && BillingTemplates.Contains(templateName))
-        {
-            msg.Bcc.Add(new MailboxAddress("", "goenning@aptabase.com"));
-        }
         msg.Subject = subject;
         msg.Body = new TextPart("html") { Text = body };
         await smtp.SendAsync(msg, cancellationToken);
