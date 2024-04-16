@@ -38,33 +38,41 @@ public class OveruseNotificationCronJob : BackgroundService
                     var users = await _billingQueries.GetUserQuotaForApps(usagePerApp.Select(x => x.AppId).ToArray());
                     foreach (var user in users)
                     {
-                        var quota = user.GetQuota();
-                        var usage = usagePerApp.Where(x => user.AppIds.Contains(x.AppId)).Sum(x => x.Count);
-                        var perc = usage * 1.0 / quota;
-                        _logger.LogInformation("User {UserId} has used {Usage} ({Perc:P}) out of {Quota} events.", user.Id, usage, perc, quota);
-
-                        var (subject, templateName) = GetSubjectTemplateName(perc);
-                        if (string.IsNullOrEmpty(templateName) || string.IsNullOrEmpty(subject))
-                            continue; // No need to send notification
-
-                        var cacheKey = $"OveruseNotification.{user.Id}.{templateName}.{DateTime.UtcNow.Year}-{DateTime.UtcNow.Month.ToString().PadLeft(2, '0')}";
-                        if (await _cache.Exists(cacheKey))
-                            continue; // Already sent notification
-
-                        await _emailClient.SendEmailAsync(user.Email, subject, templateName, new()
+                        try
                         {
-                            { "name", user.Name.Split(" ").ElementAtOrDefault(0) ?? user.Name },
-                            { "quota", quota.ToString("N0") },
-                            { "url", _env.SelfBaseUrl },
-                        }, cancellationToken);
+                            var quota = user.GetQuota();
+                            var usage = usagePerApp.Where(x => user.AppIds.Contains(x.AppId)).Sum(x => x.Count);
+                            var perc = usage * 1.0 / quota;
+                            _logger.LogInformation("User {UserId} has used {Usage} ({Perc:P}) out of {Quota} events.", user.Id, usage, perc, quota);
 
-                        if (usage >= quota)
-                        {
-                            // Pause ingestion
+                            var (subject, templateName) = GetSubjectTemplateName(perc);
+                            if (string.IsNullOrEmpty(templateName) || string.IsNullOrEmpty(subject))
+                                continue; // No need to send notification
+
+                            var cacheKey = $"OveruseNotification.{user.Id}.{templateName}.{DateTime.UtcNow.Year}-{DateTime.UtcNow.Month.ToString().PadLeft(2, '0')}";
+                            if (await _cache.Exists(cacheKey))
+                                continue; // Already sent notification
+
+                            await _emailClient.SendEmailAsync(user.Email, subject, templateName, new()
+                            {
+                                { "name", user.Name.Split(" ").ElementAtOrDefault(0) ?? user.Name },
+                                { "quota", quota.ToString("N0") },
+                                { "url", _env.SelfBaseUrl },
+                            }, cancellationToken);
+
+                            if (usage >= quota)
+                            {
+                                // Pause ingestion
+                            }
+
+                            await _cache.Set(cacheKey, DateTime.UtcNow.ToString("o"), TimeSpan.FromDays(60));
                         }
-
-                        await _cache.Set(cacheKey, DateTime.UtcNow.ToString("o"), TimeSpan.FromDays(60));
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "OveruseNotificationCronJob failed to process usage for user {UserId}.", user.Id);
+                        }
                     }
+                    _logger.LogInformation("Finished processing overuse notifications.");
                 }
             }
             catch (OperationCanceledException)
