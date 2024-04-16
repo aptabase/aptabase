@@ -51,7 +51,7 @@ public class OveruseNotificationCronJob : BackgroundService
                         if (await _cache.Exists(cacheKey))
                             continue; // Already sent notification
 
-                        await _emailClient.SendEmailAsync("goenning@sumbitlabs.com", subject, templateName, new()
+                        await _emailClient.SendEmailAsync(user.Email, subject, templateName, new()
                         {
                             { "name", user.Name.Split(" ").ElementAtOrDefault(0) ?? user.Name },
                             { "quota", quota.ToString("N0") },
