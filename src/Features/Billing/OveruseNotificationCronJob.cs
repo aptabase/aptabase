@@ -62,7 +62,8 @@ public class OveruseNotificationCronJob : BackgroundService
 
                             if (usage >= quota)
                             {
-                                // Pause ingestion
+                                _logger.LogInformation("User {UserId} has reached the limit, pausing ingestion.", user.Id);
+                                await _billingQueries.LockUser(user.Id, "O");
                             }
 
                             await _cache.Set(cacheKey, DateTime.UtcNow.ToString("o"), TimeSpan.FromDays(60));

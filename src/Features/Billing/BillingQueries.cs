@@ -12,6 +12,7 @@ public interface IBillingQueries
     Task<FreeSubscription> GetUserFreeTierOrTrial(UserIdentity user);
     Task<string[]> GetOwnedAppIds(UserIdentity user);
     Task<int> LockUsersWithExpiredTrials();
+    Task<int> LockUser(string userId, string reason);
     Task<IEnumerable<BillingUsageByApp>> GetBillingUsageByApp(int year, int month);
     Task<IEnumerable<UserQuota>> GetUserQuotaForApps(string[] appIds);
 }
@@ -104,5 +105,12 @@ public class BillingQueries : IBillingQueries
               AND u.lock_reason IS NULL
               AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.owner_id = u.id)");
         return count;
+    }
+
+    public async Task<int> LockUser(string userId, string reason)
+    {
+        return await _db.Connection.ExecuteAsync(
+            @"UPDATE users SET lock_reason = @reason WHERE id = @userId",
+            new { userId, reason });
     }
 }
