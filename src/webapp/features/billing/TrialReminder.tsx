@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import { useBilling } from "./useBilling";
 import { Alert, AlertDescription } from "@components/Alert";
+import { isBillingEnabled } from "@features/env";
 
 export function TrialReminder() {
   const { data: billing } = useBilling();
 
-  if (!billing || !billing.plan.freeTrialEndsAt) return null;
+  if (!isBillingEnabled || !billing || !billing.plan.freeTrialEndsAt) return null;
 
   const endsAt = new Date(billing.plan.freeTrialEndsAt);
   const differenceInMs = new Date(endsAt).getTime() - new Date().getTime();

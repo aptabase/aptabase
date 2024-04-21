@@ -84,12 +84,10 @@ public class AuthService : IAuthService
 
     public async Task<UserAccount> CreateAccountAsync(string name, string email, CancellationToken cancellationToken)
     {
-        var freeTrialEndsAt = DateTime.UtcNow.AddDays(_env.IsManagedCloud ? 30 : 9999).AddHours(12);
-
         var userId = NanoId.New();
         var cmd = new CommandDefinition(
-            "INSERT INTO users (id, name, email, free_trial_ends_at) VALUES (@userId, @name, @email, @freeTrialEndsAt)",
-            new { userId, name, email = email.ToLower(), freeTrialEndsAt },
+            "INSERT INTO users (id, name, email, free_quota) VALUES (@userId, @name, @email, 20000)",
+            new { userId, name, email = email.ToLower() },
             cancellationToken: cancellationToken
         );
         

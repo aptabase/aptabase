@@ -142,6 +142,7 @@ public partial class Program
             builder.Services.AddHostedService<OveruseNotificationCronJob>();
             builder.Services.AddHostedService<TrialExpiredCronJob>();
             builder.Services.AddHostedService<TrialNotificationCronJob>();
+            builder.Services.AddHostedService<ResetOveruseCronJob>();
         }
 
         builder.Services.AddGeoIPClient(appEnv);
