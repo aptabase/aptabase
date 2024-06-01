@@ -66,6 +66,8 @@ We provide SDKs for the most popular frameworks and languages to make it easier 
 - [Unreal Engine](https://github.com/aptabase/aptabase-unreal)
 - [Unity Engine](https://github.com/aptabase/aptabase-unity)
 
+🛠️ Don't see the SDK for your platform? You can build your own! Check out our guide on [how to build your own SDK](https://github.com/aptabase/aptabase/wiki/How-to-build-your-own-SDK).
+
 # Need help?
 
 - Find us on [Discord](https://discord.gg/d9d97unCUk) or [Twitter](https://twitter.com/aptabase)
