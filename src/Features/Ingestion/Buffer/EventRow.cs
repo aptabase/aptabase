@@ -16,6 +16,7 @@ public readonly struct EventRow
     public readonly string SessionId;
     public readonly string OSName;
     public readonly string OSVersion;
+    public readonly string DeviceModel;
     public readonly string Locale;
     public readonly string AppVersion;
     public readonly string AppBuildNumber;
@@ -40,6 +41,7 @@ public readonly struct EventRow
         SessionId = e.SessionId;
         OSName = e.OSName;
         OSVersion = e.OSVersion;
+        DeviceModel = e.DeviceModel;
         Locale = e.Locale;
         AppVersion = e.AppVersion;
         AppBuildNumber = e.AppBuildNumber;
@@ -64,6 +66,7 @@ public readonly struct EventRow
         WriteProperty(writer, "sessionId", SessionId);
         WriteProperty(writer, "osName", OSName);
         WriteProperty(writer, "osVersion", OSVersion);
+        WriteProperty(writer, "deviceModel", DeviceModel);
         WriteProperty(writer, "locale", Locale);
         WriteProperty(writer, "appVersion", AppVersion);
         WriteProperty(writer, "appBuildNumber", AppBuildNumber);

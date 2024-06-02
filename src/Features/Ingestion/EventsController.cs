@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Aptabase.Features.GeoIP;
 using Aptabase.Features.Ingestion.Buffer;
 using Microsoft.AspNetCore.Cors;
@@ -141,6 +140,7 @@ public class EventsController : Controller
             SessionId = body.SessionId?.ToString() ?? "",
             OSName = body.SystemProps.OSName ?? "",
             OSVersion = body.SystemProps.OSVersion ?? "",
+            DeviceModel = body.SystemProps.DeviceModel ?? "",
             Locale = body.SystemProps.Locale ?? "",
             AppVersion = body.SystemProps.AppVersion ?? "",
             EngineName = body.SystemProps.EngineName ?? "",

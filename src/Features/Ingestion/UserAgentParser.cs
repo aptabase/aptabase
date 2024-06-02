@@ -6,7 +6,6 @@ public static class UserAgentParser
 {
     private static Dictionary<string, string> osKeys = new Dictionary<string, string>
     {
-
         { "ipad", "iPadOS" },
         { "iphone", "iOS" },
         { "ios", "iOS" },

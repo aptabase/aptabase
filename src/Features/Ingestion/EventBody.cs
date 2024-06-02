@@ -31,6 +31,9 @@ public class SystemProperties
 
     [Required, StringLength(40)]
     public string SdkVersion { get; set; } = "";
+
+    [StringLength(100)]
+    public string? DeviceModel { get; set; }
 }
 
 public class EventBody

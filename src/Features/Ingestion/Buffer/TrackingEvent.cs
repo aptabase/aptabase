@@ -13,6 +13,7 @@ public readonly struct TrackingEvent
     public readonly string SessionId { get; init; }
     public readonly string OSName { get; init; }
     public readonly string OSVersion { get; init; }
+    public readonly string DeviceModel { get; init; }
     public readonly string Locale { get; init; }
     public readonly string AppVersion { get; init; }
     public readonly string AppBuildNumber { get; init; }

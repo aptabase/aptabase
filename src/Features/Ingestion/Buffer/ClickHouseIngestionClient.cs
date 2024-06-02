@@ -6,7 +6,7 @@ namespace Aptabase.Features.Ingestion.Buffer;
 
 public class ClickHouseIngestionClient : IIngestionClient
 {
-    private ClickHouseConnection _conn;
+    private readonly ClickHouseConnection _conn;
 
     private readonly string[] COLUMNS = new string[] {
         "app_id",
@@ -16,6 +16,7 @@ public class ClickHouseIngestionClient : IIngestionClient
         "session_id",
         "os_name",
         "os_version",
+        "device_model",
         "locale",
         "app_version",
         "app_build_number",
@@ -45,6 +46,7 @@ public class ClickHouseIngestionClient : IIngestionClient
             session_id = row.SessionId,
             os_name = row.OSName,
             os_version = row.OSVersion,
+            device_model = row.DeviceModel,
             locale = row.Locale,
             app_version = row.AppVersion,
             app_build_number = row.AppBuildNumber,
@@ -76,6 +78,7 @@ public class ClickHouseIngestionClient : IIngestionClient
             row.SessionId,
             row.OSName,
             row.OSVersion,
+            row.DeviceModel,
             row.Locale,
             row.AppVersion,
             row.AppBuildNumber,

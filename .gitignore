@@ -9,3 +9,5 @@ src/node_modules
 src/wwwroot/
 src/Properties/*
 !src/Properties/launchSettings.example.json
+/tests/IntegrationTests/Properties/launchSettings.json
+/tests/UnitTests/Properties/launchSettings.json
