@@ -88,6 +88,10 @@ module.exports = {
           },
         },
       },
+      minWidth: {
+        64: "16rem",
+        128: "32rem",
+      },
     },
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],

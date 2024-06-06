@@ -10,6 +10,7 @@ import { Markdown } from "@components/Markdown";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "@components/Select";
 import { ErrorState } from "@components/ErrorState";
 import { LoadingState } from "@components/LoadingState";
+import { IconCopy } from "@tabler/icons-react";
 
 const fetchInstructions = async (id: string): Promise<[FrameworkInstructions, string]> => {
   const fw = frameworks[id];
@@ -39,6 +40,8 @@ export function Component() {
 
   const [fw, content] = data || [];
 
+  const [justCopied, setJustCopied] = useState(false);
+
   return (
     <Page title={`${app.name} - Instructions`}>
       <PageHeading title="Instructions" subtitle="Instrument your app with our SDK" />
@@ -47,7 +50,19 @@ export function Component() {
           <p className="text-muted-foreground text-sm mb-1">
             App Key for <span className="text-foreground">{app.name}</span>
           </p>
-          <span className="font-medium text-xl mb-2">{app.appKey} </span>
+          <div className="flex items-center mb-2 gap-2 min-w-64">
+            <span className="font-medium text-xl">{app.appKey}</span>
+            <IconCopy
+              className="cursor-pointer hover:text-muted-foreground transition-colors duration-200 ease-in-out"
+              stroke={2}
+              onClick={() => {
+                setJustCopied(true);
+                setTimeout(() => setJustCopied(false), 2000);
+                navigator.clipboard.writeText(app.appKey);
+              }}
+            />
+            {justCopied && <span className="text-xs">Copied!</span>}
+          </div>
           <p className="text-muted-foreground text-sm mt-2">It is used by the SDK to identify your app</p>
         </div>
 
