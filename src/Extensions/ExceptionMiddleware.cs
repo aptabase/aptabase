@@ -23,19 +23,35 @@ public class ExceptionMiddleware
         {
             _logger.LogWarning("Request to {Path} timed out. {Exception}", context.Request.Path.Value, ex.Message);
         }
+        catch (TaskCanceledException) when (context.RequestAborted.IsCancellationRequested)
+        {
+            _logger.LogWarning("Request to {Path} was cancelled.", context.Request.Path.Value);
+
+            context.Response.StatusCode = 418; // I'm a teapot
+        }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {
             _logger.LogWarning("Request to {Path} was cancelled.", context.Request.Path.Value);
 
-            if (!context.Response.HasStarted)
-                context.Response.StatusCode = 418; // I'm a teapot
+            context.Response.StatusCode = 418; // I'm a teapot
         }
         catch (BadHttpRequestException) when (context.RequestAborted.IsCancellationRequested)
         {
             _logger.LogWarning("Request to {Path} was cancelled.", context.Request.Path.Value);
 
-            if (!context.Response.HasStarted)
-                context.Response.StatusCode = 418; // I'm a teapot
+            context.Response.StatusCode = 418; // I'm a teapot
+        }
+        catch (HttpRequestException ex)
+        {
+            context.Response.StatusCode = (int)(ex.StatusCode ?? HttpStatusCode.InternalServerError);
+
+            _logger.LogError(ex, "Dependency error on {Path}", context.Request.Path.Value);
+        }
+        catch (Exception ex)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+            _logger.LogError(ex, "Unexpected error on {Path}", context.Request.Path.Value);
         }
     }
 }
