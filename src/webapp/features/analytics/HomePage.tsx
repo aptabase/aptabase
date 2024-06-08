@@ -19,7 +19,7 @@ export function Component() {
   const [period] = useDatePicker();
 
   useEffect(() => {
-    trackEvent("home_viewed", { period, apps_count: apps.length });
+    trackEvent("home_viewed", { startDate: period.from, endDate: period.to, apps_count: apps.length });
   }, [period, apps]);
 
   if (apps.length === 0) {

@@ -40,7 +40,7 @@ export function Component() {
     <Page title={app.name}>
       {buildMode === "debug" && <DebugModeBanner />}
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center">
           <PageHeading title="Dashboard" onClick={resetFilters} />
           <div className="flex items-center space-x-2">
             <BuildModeSelector />
