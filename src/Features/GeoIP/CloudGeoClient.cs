@@ -19,7 +19,7 @@ public class CloudGeoClient : GeoIPClient
 
     public override GeoLocation GetClientLocation(HttpContext httpContext)
     {
-        var countryCode = GetHeader(httpContext, "cdn-requestcountrycode", "CloudFront-Viewer-Country");
+        var countryCode = GetHeader(httpContext, "cdn-requestcountrycode", "CloudFront-Viewer-Country", "CF-IPCountry");
         var regionCode = GetHeader(httpContext, "cdn-requeststatecode", "Cloudfront-Viewer-Country-Region");
         var regionName = _regions.TryGetValue($"{countryCode}-{regionCode}", out var name) ? name : "";
 
