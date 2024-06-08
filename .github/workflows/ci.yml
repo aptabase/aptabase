@@ -32,10 +32,10 @@ jobs:
           - 1080:1080
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup .NET Core SDK 7.x
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 7.x
 
@@ -52,20 +52,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           tags: aptabase:latest
           outputs: type=docker,dest=/tmp/aptabase.tar
 
       - name: Upload Image
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: aptabase
           path: /tmp/aptabase.tar
@@ -77,13 +77,13 @@ jobs:
     needs: [build, test]
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Download Image
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: aptabase
           path: /tmp
@@ -93,7 +93,7 @@ jobs:
 
       # Push to Public Registry
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -116,10 +116,10 @@ jobs:
     needs: [publish]
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Download Image
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: aptabase
           path: /tmp
@@ -128,13 +128,13 @@ jobs:
         run: docker load --input /tmp/aptabase.tar
 
       - name: Configure AWS credentials (US)
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::907052285437:role/github-action
           aws-region: us-east-1
 
       - name: Login to Amazon ECR (US)
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: "true"
 
@@ -155,10 +155,10 @@ jobs:
     needs: [publish]
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Download Image
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: aptabase
           path: /tmp
@@ -167,13 +167,13 @@ jobs:
         run: docker load --input /tmp/aptabase.tar
 
       - name: Configure AWS credentials (EU)
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::907052285437:role/github-action
           aws-region: eu-central-1
 
       - name: Login to Amazon ECR (EU)
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: "true"
 
