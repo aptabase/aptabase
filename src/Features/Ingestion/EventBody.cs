@@ -11,13 +11,13 @@ public class SystemProperties
     [StringLength(30)]
     public string? OSName { get; set; }
 
-    [StringLength(30)]
+    [StringLength(100)]
     public string? OSVersion { get; set; }
 
     [StringLength(10)]
     public string? Locale { get; set; }
 
-    [StringLength(20)]
+    [StringLength(50)]
     public string? AppVersion { get; set; }
 
     [StringLength(20)]
