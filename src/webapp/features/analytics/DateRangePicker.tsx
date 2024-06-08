@@ -9,6 +9,9 @@ type Option = {
 const options: Option[] = [
   { value: "24h", name: "Last 24 hours" },
   { value: "48h", name: "Last 48 hours" },
+  { value: "divider-5", name: "Divider" },
+  { value: "today", name: "Today" },
+  { value: "yesterday", name: "Yesterday" },
   { value: "divider-2", name: "Divider" },
   { value: "7d", name: "Last 7 days" },
   { value: "14d", name: "Last 14 days" },

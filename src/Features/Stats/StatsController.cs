@@ -167,6 +167,8 @@ public class QueryParams
             "365d" => (relativeTo.Date.AddDays(-365), relativeTo, Granularity.Month),
             "month" => (new DateTime(relativeTo.Year, relativeTo.Month, 1), new DateTime(relativeTo.Year, relativeTo.Month, 1).AddMonths(1).AddDays(-1), Granularity.Day),
             "last-month" => (new DateTime(relativeTo.Year, relativeTo.Month, 1).AddMonths(-1), new DateTime(relativeTo.Year, relativeTo.Month, 1), Granularity.Day),
+            "today" => (relativeTo.Date, relativeTo.Date.AddDays(1).AddSeconds(-1), Granularity.Hour),
+            "yesterday" => (relativeTo.Date.AddDays(-1), relativeTo.Date.AddSeconds(-1), Granularity.Hour),
             "all" => (default(DateTime?), default(DateTime?), Granularity.Month),
             _ => (relativeTo.AddHours(-24), relativeTo, Granularity.Hour), // default to 24 hours
         };
