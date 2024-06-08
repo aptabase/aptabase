@@ -4,6 +4,8 @@ import { EmptyState } from "@components/EmptyState";
 import { ErrorState } from "@components/ErrorState";
 import { LoadingState } from "@components/LoadingState";
 import { Chart, type LineAnnotationOptions, type ChartConfigurationCustomTypesPerDataset } from "@components/Chart";
+import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
+import { PeriodicStats } from "../query";
 
 type Props = {
   hasPartialData: boolean;
@@ -18,6 +20,7 @@ type Props = {
   isError?: boolean;
   formatLabel?: (label: string | number) => string;
   renderTooltip?: (dataPoint: TooltipDataPoint) => JSX.Element;
+  refetch?: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<PeriodicStats, Error>>;
 };
 
 type TooltipDataPoint = {
@@ -186,7 +189,7 @@ export function MetricsChart(props: Props) {
   return (
     <div className="h-60 md:h-80 w-full">
       {props.isError ? (
-        <ErrorState />
+        <ErrorState refetch={props.refetch} />
       ) : props.isLoading ? (
         <LoadingState />
       ) : props.isEmpty ? (
