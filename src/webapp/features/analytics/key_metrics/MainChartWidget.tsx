@@ -47,7 +47,7 @@ export function MainChartWidget(props: Props) {
   const eventName = searchParams.get("eventName") || "";
   const osName = searchParams.get("osName") || "";
 
-  const { isLoading, isError, data } = useQuery({
+  const { isLoading, isError, data, refetch } = useQuery({
     queryKey: ["periodic-stats", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     queryFn: () =>
       periodicStats({
@@ -92,6 +92,7 @@ export function MainChartWidget(props: Props) {
         renderTooltip={({ label, points }) => (
           <TooltipContent granularity={granularity} label={label} points={points} />
         )}
+        refetch={refetch}
       />
     </>
   );

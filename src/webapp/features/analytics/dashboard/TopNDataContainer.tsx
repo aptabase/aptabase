@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { QueryObserverResult, RefetchOptions, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { QueryParams, TopNItem } from "../query";
 import { useApps } from "@features/apps";
@@ -8,6 +8,7 @@ type ChildrenProps = {
   isLoading: boolean;
   isError: boolean;
   items: TopNItem[];
+  refetch?: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<TopNItem[], Error>>;
 };
 
 type Props = {
@@ -26,7 +27,7 @@ export function TopNDataContainer(props: Props) {
   const eventName = searchParams.get("eventName") || "";
   const osName = searchParams.get("osName") || "";
 
-  const { isLoading, isError, data } = useQuery({
+  const { isLoading, isError, data, refetch } = useQuery({
     queryKey: [props.queryName, buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     queryFn: () =>
       props.query({
@@ -41,5 +42,5 @@ export function TopNDataContainer(props: Props) {
     staleTime: 10000,
   });
 
-  return props.children({ isLoading, isError, items: data || [] });
+  return props.children({ isLoading, isError, items: data || [], refetch });
 }

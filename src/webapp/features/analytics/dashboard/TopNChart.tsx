@@ -7,6 +7,7 @@ import { formatNumber } from "@fns/format-number";
 import { useLocalStorage } from "@hooks/use-localstorage";
 import { twMerge } from "tailwind-merge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/Tooltip";
+import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 
 type Item = {
   name: string;
@@ -24,6 +25,7 @@ type Props = {
   isLoading?: boolean;
   isError?: boolean;
   searchParamKey?: string;
+  refetch?: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<any, Error>>;
 };
 
 const defaultRenderRow = (item: Item) => <>{item.name || <i>Empty</i>}</>;
@@ -45,7 +47,7 @@ export function TopNChart(props: Props) {
   };
 
   const content = props.isError ? (
-    <ErrorState />
+    <ErrorState refetch={props.refetch} />
   ) : props.isLoading ? (
     <TopNSkeleton />
   ) : props.items.length === 0 ? (

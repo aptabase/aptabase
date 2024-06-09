@@ -32,6 +32,7 @@ export function TopEventProps(props: Props) {
     isLoading,
     isError,
     data: rows,
+    refetch,
   } = useQuery({
     queryKey: ["top-event-props", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
     queryFn: () =>
@@ -114,6 +115,7 @@ export function TopEventProps(props: Props) {
       isLoading={isLoading}
       isError={isError}
       items={items}
+      refetch={refetch}
     />
   );
 }
