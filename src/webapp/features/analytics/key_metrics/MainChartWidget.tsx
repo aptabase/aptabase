@@ -41,19 +41,30 @@ export function MainChartWidget(props: Props) {
   const [searchParams] = useSearchParams();
   const [keyMetricToShow, setKeyMetricToShow] = useState<"users" | "sessions" | "events">("users");
 
-  const [period] = useDatePicker();
+  const { startDate, endDate } = useDatePicker();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
   const osName = searchParams.get("osName") || "";
 
   const { isLoading, isError, data, refetch } = useQuery({
-    queryKey: ["periodic-stats", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
+    queryKey: [
+      "periodic-stats",
+      buildMode,
+      props.appId,
+      startDate,
+      endDate,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
     queryFn: () =>
       periodicStats({
         buildMode,
         appId: props.appId,
-        period,
+        startDate,
+        endDate,
         countryCode,
         appVersion,
         eventName,
@@ -63,8 +74,12 @@ export function MainChartWidget(props: Props) {
   });
 
   useEffect(() => {
-    trackEvent("dashboard_viewed", { period, name: props.appName });
-  }, [period, props.appName]);
+    trackEvent("dashboard_viewed", {
+      startDate,
+      endDate,
+      name: props.appName,
+    });
+  }, [startDate, endDate, props.appName]);
 
   // TODO: make this more efficient, we don't need to map over the data multiple times
   const users = (data?.rows || []).map((x) => x.users);
@@ -82,7 +97,7 @@ export function MainChartWidget(props: Props) {
         activeMetric={keyMetricToShow}
         isError={isError}
         isLoading={isLoading}
-        hasPartialData={period !== "last-month"}
+        hasPartialData={false} // TODO fix: period !== "last-month"
         users={users}
         sessions={sessions}
         events={events}

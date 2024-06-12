@@ -6,6 +6,22 @@ type Option = {
   name: string;
 };
 
+export const PERIOD_ENUM = {
+  "24h": "24h",
+  "48h": "48h",
+  today: "today",
+  yesterday: "yesterday",
+  "7d": "7d",
+  "14d": "14d",
+  "30d": "30d",
+  month: "month",
+  "last-month": "last-month",
+  "90d": "90d",
+  "180d": "180d",
+  "365d": "365d",
+  all: "all",
+};
+
 const options: Option[] = [
   { value: "24h", name: "Last 24 hours" },
   { value: "48h", name: "Last 48 hours" },
@@ -44,7 +60,7 @@ function Item(props: StyledOptionProps) {
 }
 
 export function DateRangePicker() {
-  const [period, setPeriod] = useDatePicker();
+  const { period, setPeriod } = useDatePicker();
 
   return (
     <Select value={period} onValueChange={setPeriod}>

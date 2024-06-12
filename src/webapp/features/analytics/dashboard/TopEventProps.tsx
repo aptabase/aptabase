@@ -16,7 +16,7 @@ type AggregateValueName = "events" | "sum" | "median" | "min" | "max";
 export function TopEventProps(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
-  const [period] = useDatePicker();
+  const { startDate, endDate } = useDatePicker();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
@@ -34,12 +34,23 @@ export function TopEventProps(props: Props) {
     data: rows,
     refetch,
   } = useQuery({
-    queryKey: ["top-event-props", buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
+    queryKey: [
+      "top-event-props",
+      buildMode,
+      props.appId,
+      startDate,
+      endDate,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
     queryFn: () =>
       topEventProps({
         buildMode,
         appId: props.appId,
-        period,
+        startDate,
+        endDate,
         countryCode,
         appVersion,
         eventName,

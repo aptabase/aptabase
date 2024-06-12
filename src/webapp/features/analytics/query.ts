@@ -9,7 +9,8 @@ export type QueryParams = {
   buildMode: "release" | "debug";
   appId: string;
   sessionId?: string;
-  period?: string;
+  startDate?: string;
+  endDate?: string;
   countryCode?: string;
   osName?: string;
   eventName?: string;
