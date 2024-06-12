@@ -2,11 +2,11 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "applicationUrl": "http://*:5251",
+      "applicationUrl": "https://*:5251",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DOTNET_ENVIRONMENT": "Development",
-        "BASE_URL": "http://localhost:3000",
+        "BASE_URL": "https://localhost:3000",
         "DATABASE_URL": "Server=localhost;Port=5432;User Id=aptabase;Password=aptabase_pw;Database=aptabase",
         "CLICKHOUSE_URL": "Host=localhost;Port=8123;Username=aptabase;Password=aptabase_pw",
         "AUTH_SECRET": "E9F5C811CD74B9A3921A5DB502C0EDBE64B746000663AF04D91C249687FA969B",
