@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { KeyMetrics, keyMetrics, periodicStats } from "../query";
+import { Granularity, KeyMetrics, keyMetrics, periodicStats } from "../query";
 import { StartEndDate } from "@hooks/use-datepicker";
 
 type ChildrenProps = {
@@ -11,6 +11,7 @@ type Props = {
   appId: string;
   startDate: string;
   endDate: string;
+  granularity: Granularity;
   buildMode: "release" | "debug";
   children: (props: ChildrenProps) => JSX.Element;
 };
@@ -24,6 +25,7 @@ export function SummaryDataContainer(props: Props) {
         appId: props.appId,
         startDate: props.startDate,
         endDate: props.endDate,
+        granularity: props.granularity,
         countryCode: "",
         appVersion: "",
         eventName: "",

@@ -11,6 +11,7 @@ export type QueryParams = {
   sessionId?: string;
   startDate?: string;
   endDate?: string;
+  granularity?: Granularity;
   countryCode?: string;
   osName?: string;
   eventName?: string;

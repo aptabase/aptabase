@@ -117,7 +117,7 @@ public enum TopNValue
     TotalEvents
 }
 
-public enum Granularity
+public enum GranularityEnum
 {
     Hour,
     Day,
@@ -130,7 +130,7 @@ public record QueryArgs
     public string? SessionId { get; set; } = "";
     public DateTime? DateFrom { get; set; }
     public DateTime? DateTo { get; set; }
-    public Granularity Granularity { get; set; }
+    public GranularityEnum Granularity { get; set; }
     public string? CountryCode { get; set; }
     public string? OsName { get; set; }
     public string? DeviceModel { get; set; }
@@ -146,7 +146,7 @@ public class QueryParams
     public string? Period { get; set; }
     public string? StartDate { get; set; }
     public string? EndDate { get; set; }
-    public Granularity Granularity { get; set; }
+    public GranularityEnum? Granularity { get; set; }
     public string? CountryCode { get; set; }
     public string? OsName { get; set; }
     public string? EventName { get; set; }
@@ -161,34 +161,33 @@ public class QueryParams
             relativeTo = relativeTo.AddSeconds(-1);
 
         DateTime? dateFrom = relativeTo.AddHours(-24), dateTo = relativeTo;
-        Granularity granularity = this.Granularity;
-        if (Period != null)
-        {
-            (dateFrom, dateTo, granularity) = Period switch
-            {
-                "24h" => (relativeTo.AddHours(-24), relativeTo, Granularity.Hour),
-                "48h" => (relativeTo.AddHours(-48), relativeTo, Granularity.Hour),
-                "7d" => (relativeTo.Date.AddDays(-7), relativeTo, Granularity.Day),
-                "14d" => (relativeTo.Date.AddDays(-14), relativeTo, Granularity.Day),
-                "30d" => (relativeTo.Date.AddDays(-30), relativeTo, Granularity.Day),
-                "90d" => (relativeTo.Date.AddDays(-90), relativeTo, Granularity.Day),
-                "180d" => (relativeTo.Date.AddDays(-180), relativeTo, Granularity.Month),
-                "365d" => (relativeTo.Date.AddDays(-365), relativeTo, Granularity.Month),
-                "month" => (new DateTime(relativeTo.Year, relativeTo.Month, 1), new DateTime(relativeTo.Year, relativeTo.Month, 1).AddMonths(1).AddDays(-1), Granularity.Day),
-                "last-month" => (new DateTime(relativeTo.Year, relativeTo.Month, 1).AddMonths(-1), new DateTime(relativeTo.Year, relativeTo.Month, 1), Granularity.Day),
-                "today" => (relativeTo.Date, relativeTo.Date.AddDays(1).AddSeconds(-1), Granularity.Hour),
-                "yesterday" => (relativeTo.Date.AddDays(-1), relativeTo.Date.AddSeconds(-1), Granularity.Hour),
-                "all" => (default(DateTime?), default(DateTime?), Granularity.Month),
-                _ => (relativeTo.AddHours(-24), relativeTo, Granularity.Hour), // default to 24 hours
-            };
-        }
-        else if (StartDate != null && EndDate != null)
+        GranularityEnum granularity = Granularity ?? GranularityEnum.Hour;
+        if (StartDate != null && EndDate != null)
         {
             dateFrom = DateTime.Parse(StartDate);
             dateTo = DateTime.Parse(EndDate);
+        } 
+        // Kept for backwards compatibility. Currently StartDate/EndDate should always be send by client
+        else if (Period != null)
+        {
+            (dateFrom, dateTo, granularity) = Period switch
+            {
+                "24h" => (relativeTo.AddHours(-24), relativeTo, GranularityEnum.Hour),
+                "48h" => (relativeTo.AddHours(-48), relativeTo, GranularityEnum.Hour),
+                "7d" => (relativeTo.Date.AddDays(-7), relativeTo, GranularityEnum.Day),
+                "14d" => (relativeTo.Date.AddDays(-14), relativeTo, GranularityEnum.Day),
+                "30d" => (relativeTo.Date.AddDays(-30), relativeTo, GranularityEnum.Day),
+                "90d" => (relativeTo.Date.AddDays(-90), relativeTo, GranularityEnum.Day),
+                "180d" => (relativeTo.Date.AddDays(-180), relativeTo, GranularityEnum.Month),
+                "365d" => (relativeTo.Date.AddDays(-365), relativeTo, GranularityEnum.Month),
+                "month" => (new DateTime(relativeTo.Year, relativeTo.Month, 1), new DateTime(relativeTo.Year, relativeTo.Month, 1).AddMonths(1).AddDays(-1), GranularityEnum.Day),
+                "last-month" => (new DateTime(relativeTo.Year, relativeTo.Month, 1).AddMonths(-1), new DateTime(relativeTo.Year, relativeTo.Month, 1), GranularityEnum.Day),
+                "today" => (relativeTo.Date, relativeTo.Date.AddDays(1).AddSeconds(-1), GranularityEnum.Hour),
+                "yesterday" => (relativeTo.Date.AddDays(-1), relativeTo.Date.AddSeconds(-1), GranularityEnum.Hour),
+                "all" => (default(DateTime?), default(DateTime?), GranularityEnum.Month),
+                _ => (relativeTo.AddHours(-24), relativeTo, GranularityEnum.Hour), // default to 24 hours
+            };
         }
-
-        
 
         if ((dateFrom is null && dateTo is not null) || (dateFrom is not null && dateTo is null))
             throw new ArgumentException("Both dateFrom and dateTo must be defined, or both must be null");

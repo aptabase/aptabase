@@ -21,7 +21,7 @@ type Props = {
 export function TopNDataContainer(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
-  const { startDate, endDate } = useDatePicker();
+  const { startDate, endDate, granularity } = useDatePicker();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
@@ -35,6 +35,7 @@ export function TopNDataContainer(props: Props) {
         appId: props.appId,
         startDate,
         endDate,
+        granularity,
         countryCode,
         appVersion,
         eventName,

@@ -41,7 +41,7 @@ export function MainChartWidget(props: Props) {
   const [searchParams] = useSearchParams();
   const [keyMetricToShow, setKeyMetricToShow] = useState<"users" | "sessions" | "events">("users");
 
-  const { startDate, endDate } = useDatePicker();
+  const { startDate, endDate, granularity } = useDatePicker();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
@@ -65,6 +65,7 @@ export function MainChartWidget(props: Props) {
         appId: props.appId,
         startDate,
         endDate,
+        granularity,
         countryCode,
         appVersion,
         eventName,
@@ -88,7 +89,7 @@ export function MainChartWidget(props: Props) {
   const labels = (data?.rows || []).map((x) => x.period);
   const total = sessions.reduce((a, b) => a + b, 0);
 
-  const granularity = data?.granularity || "day";
+  const granularityFromData = data?.granularity || "day"; // TODO: can this be removed since it's only client now?
   return (
     <>
       <KeyMetrics activeMetric={keyMetricToShow} onChangeActiveMetric={setKeyMetricToShow} {...props} />
@@ -101,9 +102,9 @@ export function MainChartWidget(props: Props) {
         users={users}
         sessions={sessions}
         events={events}
-        granularity={granularity}
+        granularity={granularityFromData}
         labels={labels}
-        formatLabel={(label) => formatPeriod(granularity, label.toString())}
+        formatLabel={(label) => formatPeriod(granularityFromData, label.toString())}
         renderTooltip={({ label, points }) => (
           <TooltipContent granularity={granularity} label={label} points={points} />
         )}

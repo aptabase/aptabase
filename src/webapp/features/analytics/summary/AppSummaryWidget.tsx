@@ -14,7 +14,7 @@ type Props = {
 };
 
 export function AppSummaryWidget(props: Props) {
-  const { startDate, endDate, period } = useDatePicker();
+  const { startDate, endDate, granularity, period } = useDatePicker();
   const params = period ? `?period=${period}` : "";
 
   if (props.app.lockReason) {
@@ -38,7 +38,13 @@ export function AppSummaryWidget(props: Props) {
       to={`/${props.app.id}/${params}`}
       className="border dark:border-none cursor-pointer rounded-t-lg shadow-md bg-card hover:bg-muted h-full flex flex-col"
     >
-      <SummaryDataContainer appId={props.app.id} buildMode={props.buildMode} startDate={startDate} endDate={endDate}>
+      <SummaryDataContainer
+        appId={props.app.id}
+        buildMode={props.buildMode}
+        startDate={startDate}
+        endDate={endDate}
+        granularity={granularity}
+      >
         {({ dailyUsers, metrics }) => (
           <>
             <div className="px-3 py-2 h-20">
