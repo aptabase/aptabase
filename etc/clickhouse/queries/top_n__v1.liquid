@@ -19,6 +19,9 @@ AND event_name = '{{event_name}}'
 {% if os_name %}
 AND os_name = '{{os_name}}'
 {% endif %}
+{% if device_model %}
+AND device_model = '{{device_model}}'
+{% endif %}
 {% if app_version %}
 AND app_version = '{{app_version}}'
 {% endif %}

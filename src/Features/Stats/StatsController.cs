@@ -133,6 +133,7 @@ public record QueryArgs
     public Granularity Granularity { get; set; }
     public string? CountryCode { get; set; }
     public string? OsName { get; set; }
+    public string? DeviceModel { get; set; }
     public string? EventName { get; set; }
     public string? AppVersion { get; set; }
 }
@@ -147,6 +148,7 @@ public class QueryParams
     public string? OsName { get; set; }
     public string? EventName { get; set; }
     public string? AppVersion { get; set; }
+    public string? DeviceModel { get; set; }
 
     public QueryArgs Parse(DateTime relativeTo)
     {
@@ -191,6 +193,7 @@ public class QueryParams
             Granularity = granularity,
             CountryCode = CountryCode,
             OsName = OsName,
+            DeviceModel = DeviceModel,
             EventName = EventName,
             AppVersion = AppVersion,
         };
@@ -221,6 +224,12 @@ public class StatsController : Controller
     public async Task<IActionResult> TopOSVersions([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         return await TopN("os_version", TopNValue.UniqueSessions, body, cancellationToken);
+    }
+
+    [HttpGet("/api/_stats/top-devices")]
+    public async Task<IActionResult> TopDevices([FromQuery] QueryParams body, CancellationToken cancellationToken)
+    {
+        return await TopN("device_model", TopNValue.UniqueSessions, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/top-operatingsystems")]
@@ -377,6 +386,7 @@ public class StatsController : Controller
             os_name = query.OsName,
             app_version = query.AppVersion,
             country_code = query.CountryCode,
+            device_model = query.DeviceModel,
         }, cancellationToken);
 
         return Ok(rows);
