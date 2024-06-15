@@ -35,4 +35,4 @@ DATASOURCE sessions_live_v1
 ENGINE "AggregatingMergeTree"
 ENGINE_SORTING_KEY "app_id, session_id, user_id"
 ENGINE_SETTINGS "index_granularity = 256"
-ENGINE_TTL "min_timestamp + toIntervalHour(8)"
+ENGINE_TTL "min_timestamp + toIntervalDay(30)"

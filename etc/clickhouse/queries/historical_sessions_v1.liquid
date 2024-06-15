@@ -1,0 +1,36 @@
+SELECT session_id as Id,	
+       min(min_timestamp) as StartedAt,
+       max(max_timestamp) - min(min_timestamp) as Duration,
+       countMerge(events_count) as EventsCount,
+       any(app_version) as AppVersion,
+       any(country_code) as CountryCode,
+       any(region_name) as RegionName,
+       any(os_name) as OsName,
+       any(os_version) as OsVersion
+FROM sessions_live_v1
+WHERE app_id = '{{app_id}}'
+{% if country_code %}
+AND country_code = '{{country_code}}'
+{% endif %}
+{% if event_name %}
+AND event_name = '{{event_name}}'
+{% endif %}
+{% if os_name %}
+AND os_name = '{{os_name}}'
+{% endif %}
+{% if app_version %}
+AND app_version = '{{app_version}}'
+{% endif %}
+{% if date_to %}
+AND (min_timestamp < '{{date_to}}' OR (min_timestamp = '{{date_to}}' AND session_id < '{{session_id}}'))
+{% endif %}
+{% if date_from %}
+AND (min_timestamp > '{{date_from}}' OR (min_timestamp = '{{date_from}}' AND session_id > '{{session_id}}'))
+{% endif %}
+GROUP BY session_id
+{% if date_from %}
+ORDER BY StartedAt ASC, Id ASC
+{% else %}
+ORDER BY StartedAt DESC, Id DESC
+{% endif %}
+LIMIT 10
