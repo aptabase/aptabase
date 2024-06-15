@@ -281,7 +281,7 @@ public class StatsController : Controller
     public async Task<IActionResult> PeriodicStats([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         var query = body.Parse(DateTime.UtcNow);
-        var rows = await _queryClient.NamedQueryAsync<PeriodicStatsRow>("key_metrics_periodic__v1", new {
+        var rows = await _queryClient.NamedQueryAsync<PeriodicStatsRow>("key_metrics_periodic__v2", new {
             date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
             date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
             granularity = query.Granularity.ToString(),
@@ -290,6 +290,7 @@ public class StatsController : Controller
             os_name = query.OsName,
             app_version = query.AppVersion,
             country_code = query.CountryCode,
+            device_model = query.DeviceModel,
         }, cancellationToken);
 
         return Ok(new PeriodicStats
@@ -303,7 +304,7 @@ public class StatsController : Controller
     public async Task<IActionResult> EventProps([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
         var query = body.Parse(DateTime.UtcNow);
-        var rows = await _queryClient.NamedQueryAsync<EventPropsItem>("top_props__v1", new {
+        var rows = await _queryClient.NamedQueryAsync<EventPropsItem>("top_props__v2", new {
             date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
             date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
             app_id = query.AppId,
@@ -311,6 +312,7 @@ public class StatsController : Controller
             os_name = query.OsName,
             app_version = query.AppVersion,
             country_code = query.CountryCode,
+            device_model = query.DeviceModel,
         }, cancellationToken);
 
         return Ok(rows);
@@ -362,7 +364,7 @@ public class StatsController : Controller
 
     private async Task<KeyMetricsRow> GetKeyMetrics(QueryArgs args, CancellationToken cancellationToken)
     {
-        return await _queryClient.NamedQuerySingleAsync<KeyMetricsRow>("key_metrics__v1", new {
+        return await _queryClient.NamedQuerySingleAsync<KeyMetricsRow>("key_metrics__v2", new {
             date_from = args.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
             date_to = args.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
             app_id = args.AppId,
@@ -370,13 +372,14 @@ public class StatsController : Controller
             os_name = args.OsName,
             app_version = args.AppVersion,
             country_code = args.CountryCode,
+            device_model = args.DeviceModel,
         }, cancellationToken);
     }
 
     private async Task<IActionResult> TopN(string nameColumn, TopNValue valueColumn, QueryParams body, CancellationToken cancellationToken)
     {
         var query = body.Parse(DateTime.UtcNow);
-        var rows = await _queryClient.NamedQueryAsync<TopNItem>("top_n__v1", new {
+        var rows = await _queryClient.NamedQueryAsync<TopNItem>("top_n__v2", new {
             name_column = nameColumn,
             value_column = valueColumn.ToString(),
             date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),

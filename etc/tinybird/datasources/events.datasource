@@ -9,6 +9,7 @@ SCHEMA >
     `session_id` String `json:$.sessionId`,
     `os_name` LowCardinality(String) `json:$.osName`,
     `os_version` String `json:$.osVersion`,
+    `device_model` String `json:$.deviceModel`,
     `locale` LowCardinality(String) `json:$.locale`,
     `app_version` String `json:$.appVersion`,
     `app_build_number` String `json:$.appBuildNumber`,

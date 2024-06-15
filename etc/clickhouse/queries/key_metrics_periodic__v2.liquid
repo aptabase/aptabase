@@ -1,0 +1,56 @@
+SELECT
+    {% if granularity == 'Hour' %}
+     toStartOfHour(timestamp)
+    {% elsif granularity == 'Day' %}
+     toStartOfDay(timestamp)
+    {% else %}
+     toStartOfMonth(timestamp)
+    {% endif %} AS Period,
+    {% if granularity == 'Month' %}
+     uniqExact(user_id) / (date_diff('day', Period, toLastDayOfMonth(Period)) + 1)
+    {% else %}
+     uniqExact(user_id)
+    {% endif %} AS Users,
+    uniqExact(session_id) AS Sessions,
+    count() AS Events
+FROM events
+PREWHERE app_id = '{{app_id}}'
+WHERE 1 = 1
+{% if date_from and date_to %}
+AND timestamp BETWEEN '{{date_from}}' AND '{{date_to}}'
+{% endif %}
+{% if country_code %}
+AND country_code = '{{country_code}}'
+{% endif %}
+{% if event_name %}
+AND event_name = '{{event_name}}'
+{% endif %}
+{% if os_name %}
+AND os_name = '{{os_name}}'
+{% endif %}
+{% if device_model %}
+AND device_model = '{{device_model}}'
+{% endif %}
+{% if app_version %}
+AND app_version = '{{app_version}}'
+{% endif %}
+GROUP by Period
+ORDER BY Period ASC
+WITH FILL
+{% if date_from and date_to %}
+{% if granularity == 'Hour' %}
+FROM toStartOfHour(toDateTime('{{date_from}}')) TO toStartOfHour(toDateTime('{{date_to}}'))
+{% elsif granularity == 'Day' %}
+FROM toStartOfDay(toDateTime('{{date_from}}')) TO toStartOfDay(toDateTime('{{date_to}}'))
+{% else %}
+FROM toStartOfMonth(toDateTime('{{date_from}}')) TO toStartOfMonth(toDateTime('{{date_to}}'))
+{% endif %}
+{% endif %}
+STEP
+{% if granularity == 'Hour' %}
+toIntervalHour(1)
+{% elsif granularity == 'Day' %}
+toIntervalDay(1) 
+{% else %}
+toIntervalMonth(1)
+{% endif %}

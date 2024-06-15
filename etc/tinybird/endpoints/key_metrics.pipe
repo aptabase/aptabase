@@ -1,6 +1,6 @@
 TOKEN aptabase-api READ
 
-VERSION 1
+VERSION 2
 NODE endpoint
 SQL >
     %
@@ -28,6 +28,9 @@ SQL >
        {% end %}
        {% if defined(os_name) %}
        AND os_name = {{String(os_name)}}
+       {% end %}
+       {% if defined(device_model) %}
+       AND os_name = {{String(device_model)}}
        {% end %}
        {% if defined(app_version) %}
        AND app_version = {{String(app_version)}}
