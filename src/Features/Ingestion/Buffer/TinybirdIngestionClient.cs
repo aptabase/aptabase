@@ -14,11 +14,12 @@ public class TinybirdIngestionClient : IIngestionClient
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger _logger;
-    private readonly TimeSpan[] _retriesDelay = new []{
+    private readonly TimeSpan[] _retriesDelay =
+    [
         TimeSpan.FromMilliseconds(1000),
         TimeSpan.FromMilliseconds(3000),
         TimeSpan.FromMilliseconds(5000),
-    };
+    ];
 
     public TinybirdIngestionClient(IHttpClientFactory factory, ILogger<TinybirdIngestionClient> logger)
     {
@@ -30,15 +31,15 @@ public class TinybirdIngestionClient : IIngestionClient
 
     public Task<long> SendEventAsync(EventRow row)
     {
-        return PostAsync(EventsPath, new[] { row });
+        return PostAsync(EventsPath, [row]);
     }
 
-    public Task<long> BulkSendEventAsync(IEnumerable<EventRow> rows)
+    public Task<long> BulkSendEventAsync(IEnumerable<EventRow> rows, CancellationToken ct = default)
     {
-        return PostAsync(EventsPath, rows);
+        return PostAsync(EventsPath, rows, ct);
     }
 
-    private async Task<long> PostAsync(string path, IEnumerable<EventRow> rows)
+    private async Task<long> PostAsync(string path, IEnumerable<EventRow> rows, CancellationToken ct = default)
     {
         using var content = SerializeBody(rows);
 
@@ -46,7 +47,7 @@ public class TinybirdIngestionClient : IIngestionClient
         {
             try
             {
-                var response = await _httpClient.PostAsync(path, content);
+                var response = await _httpClient.PostAsync(path, content, ct);
                 response.EnsureSuccessStatusCode();
                 
                 var result = await response.Content.ReadFromJsonAsync<InsertResult>() ?? new InsertResult();
@@ -62,7 +63,7 @@ public class TinybirdIngestionClient : IIngestionClient
         throw new Exception($"Failed to send events to Tinybird after {_retriesDelay.Length} retries.");
     }
 
-    private static HttpContent SerializeBody(IEnumerable<EventRow> rows)
+    private static StringContent SerializeBody(IEnumerable<EventRow> rows)
     {
         using var writer = new StringWriter();
         foreach (var row in rows)

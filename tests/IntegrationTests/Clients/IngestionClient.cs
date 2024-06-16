@@ -8,7 +8,7 @@ public class IngestionClient
     private readonly HttpClient _client;
     private readonly string _ipAddress;
     private readonly string _appKey;
-    private string _sessionId = "";
+    private string? _sessionId = "";
 
     // Use this constructor to avoid rate limiting
     public IngestionClient(HttpClient client, string appKey)
@@ -31,7 +31,7 @@ public class IngestionClient
         return (epochInSeconds * 100000000 + random).ToString();
     }
 
-    public void SetSessionId(string value)
+    public void SetSessionId(string? value)
     {
         _sessionId = value;
     }

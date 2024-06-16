@@ -54,11 +54,11 @@ public class IngestionTests
         var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
 
         var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
-        var code = await client.TrackEvents(new List<(DateTime, string, object?)> {
+        var code = await client.TrackEvents([
             (DateTime.UtcNow, "App Started", null),
             (DateTime.UtcNow, "Menu Opened", null),
             (DateTime.UtcNow, "Button Clicked", null),
-        });
+        ]);
         code.Should().Be(HttpStatusCode.OK);
 
         await _eventWritter.FlushEvents();
@@ -73,11 +73,11 @@ public class IngestionTests
         var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
 
         var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
-        var code = await client.TrackEvents(new List<(DateTime, string, object?)> {
+        var code = await client.TrackEvents([
             (DateTime.UtcNow, "App Started", null),
             (DateTime.UtcNow, "Menu Opened", null),
             (DateTime.UtcNow, "Button Clicked", "INVALID PROPS"),
-        });
+        ]);
         code.Should().Be(HttpStatusCode.OK);
 
         await _eventWritter.FlushEvents();
@@ -110,19 +110,18 @@ public class IngestionTests
     }
  
     public static IEnumerable<object[]> ValidProps => 
-        new List<object[]>
-        {
-            new object[] { "{}" },
-            new object[] { "{\"name\":\"Bob\"}" },
-            new object[] { "{\"name\":\"Bob\", \"age\":20}" },
-            new object[] { new { } },
-            new object[] { new { age = 20 } },
-            new object[] { new { name = "Bob", age = 20 } },
-            new object[] { new { name = "Bob", valid = true } },
-            new object[] { new { name = "Bob", surname = (object?)null } },
-            new object[] { new { name = "Bob", age = 20, list = new int[]{1,2,3} } },
-            new object[] { "{\"name\":\"Bob\", \"age\":20, \"list\": [1,2,3]}" },
-        };
+    [
+        ["{}"],
+        ["{\"name\":\"Bob\"}"],
+        ["{\"name\":\"Bob\", \"age\":20}"],
+        [new { }],
+        [new { age = 20 }],
+        [new { name = "Bob", age = 20 }],
+        [new { name = "Bob", valid = true }],
+        [new { name = "Bob", surname = (object?)null }],
+        [new { name = "Bob", age = 20, list = new int[]{1,2,3} }],
+        ["{\"name\":\"Bob\", \"age\":20, \"list\": [1,2,3]}"],
+    ];
 
     [Theory, MemberData(nameof(ValidProps))]
     public async Task Cant_Ingest_With_Valid_Props(object props)
@@ -134,14 +133,13 @@ public class IngestionTests
     }
  
     public static IEnumerable<object[]> InvalidProps => 
-        new List<object[]>
-        {
-            new object[] { 1 },
-            new object[] { "Something" },
-            new object[] { "[1,2,3]" },
-            new object[] { "" },
-            new object[] { new string[]{"A", "B", "C"} },
-        };
+    [
+        [1],
+        ["Something"],
+        ["[1,2,3]"],
+        [""],
+        [new string[]{"A", "B", "C"}],
+    ];
 
     [Theory, MemberData(nameof(InvalidProps))]
     public async Task Cant_Ingest_With_Invalid_Props(object props)
@@ -153,13 +151,12 @@ public class IngestionTests
     }
 
     public static IEnumerable<object[]> ValidSessionIds => 
-        new List<object[]>
-        {
-            new object[] { "8ee47a56-a457-4513-a65f-2b8c3065eb95" },
-            new object[] { "0ef724ce-7d46-4bde-9e0f-69303ef3f2af" },
-            new object[] { "1234-5678-9012-3456" },
-            new object[] { IngestionClient.NewSessionId().ToString() },
-        };
+    [
+        ["8ee47a56-a457-4513-a65f-2b8c3065eb95"],
+        ["0ef724ce-7d46-4bde-9e0f-69303ef3f2af"],
+        ["1234-5678-9012-3456"],
+        [IngestionClient.NewSessionId().ToString()],
+    ];
 
     [Theory, MemberData(nameof(ValidSessionIds))]
     public async Task Can_Ingest_Valid_SessionId(string sessionId)
@@ -177,7 +174,7 @@ public class IngestionTests
     [InlineData("")]
     [InlineData("1234567890123456789012345678901234567890")]
     [InlineData(null)]
-    public async Task Cant_Ingest_Invalid_SessionId(string sessionId)
+    public async Task Cant_Ingest_Invalid_SessionId(string? sessionId)
     {
         var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
 

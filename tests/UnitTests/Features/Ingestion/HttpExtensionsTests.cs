@@ -16,7 +16,7 @@ public class HttpExtensionsTests
     public void ResolveClientIpAddress(string[] headerValue, string expected)
     {
         var context = new DefaultHttpContext();
-        context.Request.Headers.Add("CloudFront-Viewer-Address", new StringValues(headerValue));
+        context.Request.Headers.Append("CloudFront-Viewer-Address", new StringValues(headerValue));
         var value = context.ResolveClientIpAddress();
         Assert.Equal(expected, value);
     }
