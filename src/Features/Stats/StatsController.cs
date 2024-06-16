@@ -5,12 +5,6 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace Aptabase.Features.Stats;
 
-public record PeriodicStats
-{
-    public IEnumerable<PeriodicStatsRow> Rows { get; set; } = Array.Empty<PeriodicStatsRow>();
-    public string Granularity { get; set; } = "";
-}
-
 public record PeriodicStatsRow
 {
     public DateTime Period { get; set; }
@@ -130,7 +124,7 @@ public record QueryArgs
     public string? SessionId { get; set; } = "";
     public DateTime? DateFrom { get; set; }
     public DateTime? DateTo { get; set; }
-    public GranularityEnum Granularity { get; set; }
+    public GranularityEnum? Granularity { get; set; }
     public string? CountryCode { get; set; }
     public string? OsName { get; set; }
     public string? DeviceModel { get; set; }
@@ -184,15 +178,6 @@ public class QueryParams
 
     public QueryArgs Parse()
     {
-        if ((StartDate is null  && EndDate is not null) || (StartDate is not null && EndDate is null)) {
-            throw new ArgumentException("StartDate and EndDate either both defined, or both null.");
-        }
-
-        DateTime dateTo = EndDate ?? DateTime.UtcNow;
-        DateTime dateFrom = StartDate 
-                            ?? dateTo.Subtract(new TimeSpan(24, 0, 0));
-        GranularityEnum granularity = Granularity ?? GranularityEnum.Hour;
-
         var appId = BuildMode.ToLower() switch
         {
             "debug" => $"{AppId}_DEBUG",
@@ -203,9 +188,9 @@ public class QueryParams
         {
             AppId = appId,
             SessionId = SessionId,
-            DateFrom = dateFrom,
-            DateTo = dateTo,
-            Granularity = granularity,
+            DateFrom = StartDate,
+            DateTo = EndDate,
+            Granularity = Granularity,
             CountryCode = CountryCode,
             OsName = OsName,
             DeviceModel = DeviceModel,
@@ -308,11 +293,7 @@ public class StatsController : Controller
             device_model = query.DeviceModel,
         }, cancellationToken);
 
-        return Ok(new PeriodicStats
-        {
-            Rows = rows,
-            Granularity = query.Granularity.ToString().ToLower()
-        });
+        return Ok(rows);
     }
 
     [HttpGet("/api/_stats/top-props")]

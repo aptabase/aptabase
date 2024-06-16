@@ -1,6 +1,6 @@
 import { PERIOD_ENUM } from "@features/analytics/DateRangePicker";
 import { Granularity } from "@features/analytics/query";
-import { endOfDay, endOfMonth, startOfDay, startOfHour, startOfMinute, startOfMonth, sub } from "date-fns";
+import { endOfDay, endOfMinute, endOfMonth, startOfDay, startOfHour, startOfMinute, startOfMonth, sub } from "date-fns";
 import { useSearchParams } from "react-router-dom";
 
 const setStoredValue = (value: string) => window.localStorage?.setItem("period", value);
@@ -47,13 +47,13 @@ function mapPeriodToStartEnd(period: string): StartEndDate {
 
   switch (period) {
     case PERIOD_ENUM["24h"]: {
-      endDate = endOfDay(new Date());
+      endDate = endOfMinute(new Date());
       startDate = startOfMinute(sub(endDate, { hours: 24 }));
       granularity = "hour";
       break;
     }
     case PERIOD_ENUM["48h"]: {
-      endDate = endOfDay(new Date());
+      endDate = endOfMinute(new Date());
       startDate = startOfMinute(sub(endDate, { hours: 48 }));
       granularity = "hour";
       break;

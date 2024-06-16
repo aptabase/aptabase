@@ -82,14 +82,19 @@ export function MainChartWidget(props: Props) {
     });
   }, [startDate, endDate, props.appName]);
 
-  // TODO: make this more efficient, we don't need to map over the data multiple times
-  const users = (data?.rows || []).map((x) => x.users);
-  const sessions = (data?.rows || []).map((x) => x.sessions);
-  const events = (data?.rows || []).map((x) => x.events);
-  const labels = (data?.rows || []).map((x) => x.period);
+  const users: number[] = [],
+    sessions: number[] = [],
+    events: number[] = [],
+    labels: string[] = [];
+
+  data?.forEach((x) => {
+    users.push(x.users);
+    sessions.push(x.sessions);
+    events.push(x.events);
+    labels.push(x.period);
+  });
   const total = sessions.reduce((a, b) => a + b, 0);
 
-  const granularityFromData = data?.granularity || "day"; // TODO: can this be removed since it's only client now?
   return (
     <>
       <KeyMetrics activeMetric={keyMetricToShow} onChangeActiveMetric={setKeyMetricToShow} {...props} />
@@ -102,9 +107,9 @@ export function MainChartWidget(props: Props) {
         users={users}
         sessions={sessions}
         events={events}
-        granularity={granularityFromData}
+        granularity={granularity}
         labels={labels}
-        formatLabel={(label) => formatPeriod(granularityFromData, label.toString())}
+        formatLabel={(label) => formatPeriod(granularity, label.toString())}
         renderTooltip={({ label, points }) => (
           <TooltipContent granularity={granularity} label={label} points={points} />
         )}

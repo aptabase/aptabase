@@ -46,7 +46,7 @@ export function SummaryDataContainer(props: Props) {
         appVersion: "",
         eventName: "",
         osName: "",
-      }).then((s) => s.rows.map((x) => x.users)),
+      }).then((s) => s.map((x) => x.users)),
     staleTime: 60000,
   });
 
