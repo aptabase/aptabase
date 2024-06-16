@@ -1,5 +1,5 @@
 # Server Build
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS server
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS server
 WORKDIR /work/src
 
 COPY ./src/Aptabase.csproj /work/src
@@ -23,7 +23,7 @@ COPY ./src ./
 RUN npm run build
 
 # Final
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
 COPY --from=server /work/publish .

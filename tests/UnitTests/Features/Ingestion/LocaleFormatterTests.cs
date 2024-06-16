@@ -25,7 +25,7 @@ public class LocaleFormatterTests
     [InlineData("zh-Hans", "zh-hans")]
     [InlineData("English", null)]
     [InlineData("nlNL", null)]
-    public void FormatLocale(string locale, string expectedLocale)
+    public void FormatLocale(string? locale, string? expectedLocale)
     {
         var result = LocaleFormatter.FormatLocale(locale);
         Assert.Equal(expectedLocale, result);

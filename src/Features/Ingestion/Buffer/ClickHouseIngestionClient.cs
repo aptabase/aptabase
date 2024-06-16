@@ -8,7 +8,7 @@ public class ClickHouseIngestionClient : IIngestionClient
 {
     private readonly ClickHouseConnection _conn;
 
-    private readonly string[] COLUMNS = new string[] {
+    private readonly string[] COLUMNS = [
         "app_id",
         "timestamp",
         "event_name",
@@ -29,7 +29,7 @@ public class ClickHouseIngestionClient : IIngestionClient
         "string_props",
         "numeric_props",
         "ttl"
-    };
+    ];
 
     public ClickHouseIngestionClient(ClickHouseConnection conn, ILogger<ClickHouseIngestionClient> logger)
     {
@@ -62,12 +62,13 @@ public class ClickHouseIngestionClient : IIngestionClient
         });
     }
 
-    public async Task<long> BulkSendEventAsync(IEnumerable<EventRow> rows)
+    public async Task<long> BulkSendEventAsync(IEnumerable<EventRow> rows, CancellationToken ct = default)
     {
         using var bulkCopy = new ClickHouseBulkCopy(_conn)
         {
             DestinationTableName = "events",
             BatchSize = 1000,
+            ColumnNames = COLUMNS,
         };
 
         var values = rows.Select(row => new object[] { 
@@ -92,8 +93,8 @@ public class ClickHouseIngestionClient : IIngestionClient
             row.NumericProps,
             row.TTL,
         });
-
-        await bulkCopy.WriteToServerAsync(values, COLUMNS);
+        await bulkCopy.InitAsync();
+        await bulkCopy.WriteToServerAsync(values, ct);
         return bulkCopy.RowsWritten;
     }
 }

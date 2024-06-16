@@ -11,7 +11,7 @@ public class StringExtensionsTests
     [InlineData("Hello", "Hello")]
     [InlineData("HelloWorld", "HelloWorld")]
     [InlineData("Hello World", "Hello W...")]
-    public void Truncate(string input, string expected)
+    public void Truncate(string? input, string expected)
     {
         var value = (input ?? "").Truncate(10, "...");
 
