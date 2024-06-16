@@ -9,7 +9,9 @@ export type QueryParams = {
   buildMode: "release" | "debug";
   appId: string;
   sessionId?: string;
-  period?: string;
+  startDate?: string;
+  endDate?: string;
+  granularity?: Granularity;
   countryCode?: string;
   osName?: string;
   eventName?: string;
@@ -65,15 +67,12 @@ export function keyMetrics(params: QueryParams): Promise<KeyMetrics> {
 
 export type Granularity = "hour" | "day" | "month";
 
-export type PeriodicStats = {
-  granularity: Granularity;
-  rows: {
-    period: string;
-    users: number;
-    sessions: number;
-    events: number;
-  }[];
-};
+export type PeriodicStats = Array<{
+  period: string;
+  users: number;
+  sessions: number;
+  events: number;
+}>;
 
 export function periodicStats(params: QueryParams): Promise<PeriodicStats> {
   return api.get<PeriodicStats>(`/_stats/periodic`, params);

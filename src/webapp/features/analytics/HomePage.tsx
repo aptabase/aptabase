@@ -16,11 +16,15 @@ export function Component() {
   const { apps } = useApps();
 
   const { buildMode } = useApps();
-  const [period] = useDatePicker();
+  const { startDate, endDate } = useDatePicker();
 
   useEffect(() => {
-    trackEvent("home_viewed", { period, apps_count: apps.length });
-  }, [period, apps]);
+    trackEvent("home_viewed", {
+      startDate,
+      endDate,
+      apps_count: apps.length,
+    });
+  }, [startDate, endDate, apps]);
 
   if (apps.length === 0) {
     return (

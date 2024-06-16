@@ -1,6 +1,7 @@
 obj
 bin
 .vs
+.idea
 .DS_Store
 coverage.cobertura.xml
 

@@ -21,19 +21,21 @@ type Props = {
 export function TopNDataContainer(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
-  const [period] = useDatePicker();
+  const { startDate, endDate, granularity } = useDatePicker();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
   const osName = searchParams.get("osName") || "";
 
   const { isLoading, isError, data, refetch } = useQuery({
-    queryKey: [props.queryName, buildMode, props.appId, period, countryCode, appVersion, eventName, osName],
+    queryKey: [props.queryName, buildMode, props.appId, startDate, endDate, countryCode, appVersion, eventName, osName],
     queryFn: () =>
       props.query({
         buildMode,
         appId: props.appId,
-        period,
+        startDate,
+        endDate,
+        granularity,
         countryCode,
         appVersion,
         eventName,
