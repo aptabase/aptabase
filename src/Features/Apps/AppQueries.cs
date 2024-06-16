@@ -18,6 +18,7 @@ public interface IAppQueries
 {
     Task<Application?> GetActiveAppByAppKey(string appKey, CancellationToken cancellationToken);
     Task MaskAsOnboarded(string appId, CancellationToken cancellationToken);
+    Task<Application?> GetOwnedAppAsync(string appId, string userId);
 }
 
 public class AppQueries : IAppQueries
@@ -54,5 +55,20 @@ public class AppQueries : IAppQueries
         );
 
         await _db.Connection.ExecuteAsync(cmd);
+    }
+
+    public async Task<Application?> GetOwnedAppAsync(string appId, string userId)
+    {
+        return await _db.Connection.QueryFirstOrDefaultAsync<Application>(
+            @"SELECT a.id, a.name, a.icon_path, a.app_key, true as has_ownership, 
+                     a.has_events, u.lock_reason
+              FROM apps a
+              INNER JOIN users u
+              ON u.id = a.owner_id
+              WHERE a.id = @appId
+              AND a.owner_id = @userId
+              AND a.deleted_at IS NULL",
+            new { appId, userId }
+        );
     }
 }
