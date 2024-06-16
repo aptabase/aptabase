@@ -21,6 +21,7 @@ using Aptabase.Features.Apps;
 using Aptabase.Features.Ingestion.Buffer;
 using Aptabase.Features.Billing;
 using Features.Cache;
+using Aptabase.Features.FeatureFlags;
 
 public partial class Program
 {
@@ -117,6 +118,16 @@ public partial class Program
                 {
                     AutoReplenishment = true,
                     PermitLimit = 20,
+                    Window = TimeSpan.FromSeconds(1)
+                })
+            );
+
+            c.AddPolicy("FeatureFlags", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+                httpContext.ResolveClientIpAddress(),
+                partition => new FixedWindowRateLimiterOptions
+                {
+                    AutoReplenishment = true,
+                    PermitLimit = 10,
                     Window = TimeSpan.FromSeconds(1)
                 })
             );
