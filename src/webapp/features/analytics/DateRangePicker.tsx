@@ -25,7 +25,7 @@ export const PERIOD_ENUM = {
 const options: Option[] = [
   { value: "today", name: "Today" },
   { value: "yesterday", name: "Yesterday" },
-  { value: "divider-5", name: "Divider" },
+  { value: "divider-6", name: "Divider" },
   { value: "24h", name: "Last 24 hours" },
   { value: "48h", name: "Last 48 hours" },
   { value: "divider-2", name: "Divider" },
