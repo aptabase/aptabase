@@ -59,7 +59,7 @@ function mapPeriodToStartEnd(period: string): StartEndDate {
       break;
     }
     case PERIOD_ENUM.today: {
-      endDate = endOfDay(new Date());
+      endDate = endOfMinute(new Date());
       startDate = startOfDay(new Date());
       granularity = "hour";
       break;
