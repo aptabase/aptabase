@@ -25,6 +25,7 @@ type Props = {
   isLoading?: boolean;
   isError?: boolean;
   searchParamKey?: string;
+  externalLink?: (item: Item) => string;
   refetch?: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<any, Error>>;
 };
 
@@ -74,6 +75,7 @@ export function TopNChart(props: Props) {
             format={format}
             percentage={Math.round(item.value) / total}
             searchParamKey={props.searchParamKey}
+            externalLink={props.externalLink?.(item)}
           >
             <div className="px-2">{renderRow(item)}</div>
           </TopNRow>
@@ -91,12 +93,23 @@ type TopNRowProps = {
   format: "absolute" | "percentage";
   children: React.ReactNode;
   searchParamKey?: string;
+  externalLink?: string;
 };
 
 function TopNRow(props: TopNRowProps) {
-  const targetUrl = new URL(window.location.href);
-  if (props.searchParamKey) {
-    targetUrl.searchParams.set(props.searchParamKey, props.item.name);
+  let targetUrlStr = "";
+  if (props.externalLink) {
+    targetUrlStr = props.externalLink;
+  } else {
+    const targetUrl = new URL(window.location.href);
+
+    targetUrlStr = window.location.href;
+    if (props.searchParamKey) {
+      if (props.searchParamKey) {
+        targetUrl.searchParams.set(props.searchParamKey, props.item.name);
+      }
+      targetUrlStr = targetUrl.toString();
+    }
   }
 
   const content = (
@@ -126,9 +139,9 @@ function TopNRow(props: TopNRowProps) {
     </div>
   );
 
-  if (targetUrl.toString() !== window.location.href) {
+  if (targetUrlStr !== window.location.href) {
     return (
-      <Link to={targetUrl.toString()} preventScrollReset={true}>
+      <Link to={targetUrlStr} preventScrollReset={true}>
         {content}
       </Link>
     );

@@ -121,6 +121,10 @@ export function liveRecentSessions(params: QueryParams): Promise<LiveRecentSessi
   return api.get<LiveRecentSession[]>(`/_stats/live-sessions`, params);
 }
 
+export function historicalSessions(params: QueryParams): Promise<LiveRecentSession[]> {
+  return api.get<LiveRecentSession[]>(`/_stats/historical-sessions`, params);
+}
+
 export type SessionTimeline = {
   eventsName: string[];
   eventsTimestamp: string[];

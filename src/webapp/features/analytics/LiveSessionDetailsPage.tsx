@@ -1,22 +1,25 @@
+import { trackEvent } from "@aptabase/web";
+import { Button } from "@components/Button";
 import { Page, PageHeading } from "@components/Page";
-import { useQuery } from "@tanstack/react-query";
 import { liveSessionDetails } from "@features/analytics/query";
 import { useApps, useCurrentApp } from "@features/apps";
-import { Navigate, useParams } from "react-router-dom";
-import { trackEvent } from "@aptabase/web";
-import { useEffect } from "react";
-import { SessionTimeline } from "./liveview/timeline";
-import { IconClick, IconClock, IconDevices, IconUser } from "@tabler/icons-react";
-import { formatNumber } from "@fns/format-number";
 import { CountryFlag, CountryName } from "@features/geo";
+import { formatDate, formatTime } from "@fns/format-date";
+import { formatNumber } from "@fns/format-number";
+import { IconArrowLeft, IconClick, IconClock, IconDevices, IconUser } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { OSIcon } from "./dashboard/icons/os";
-import { formatTime } from "@fns/format-date";
+import { SessionTimeline } from "./liveview/timeline";
 
 Component.displayName = "LiveSessionDetailsPage";
 export function Component() {
   const { buildMode } = useApps();
   const app = useCurrentApp();
   const { sessionId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   if (!app || !sessionId) return <Navigate to="/" />;
 
@@ -32,8 +35,20 @@ export function Component() {
 
   return (
     <Page title="Live View">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-row justify-between items-center">
         <PageHeading title="Session Timeline" subtitle={sessionId} />
+        {location.state?.sessionFilters && (
+          <Button
+            className="mb-5"
+            variant="ghost"
+            onClick={() =>
+              navigate(`/${app.id}/sessions/`, { state: { sessionFilters: location.state.sessionFilters } })
+            }
+          >
+            <IconArrowLeft />
+            Back to sessions
+          </Button>
+        )}
       </div>
 
       {data && (
@@ -44,7 +59,7 @@ export function Component() {
           </div>
           <div className="flex gap-2 items-center mb-1">
             <IconUser className="text-muted-foreground h-5 w-5" />
-            <span className="tabular-nums">{formatTime(data.startedAt)}</span>
+            <span className="tabular-nums">{`${formatDate(data.startedAt)} ${formatTime(data.startedAt)}`}</span>
           </div>
 
           <div className="flex flex-col space-y-1 md:flex-row md:space-y-0">
