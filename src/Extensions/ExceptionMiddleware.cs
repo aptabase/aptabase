@@ -19,28 +19,24 @@ public class ExceptionMiddleware
         {
             await _next(context);
         }
-        catch (BadHttpRequestException ex) when (ex.StatusCode == (int)HttpStatusCode.RequestTimeout)
-        {
-            _logger.LogWarning("Request to {Path} timed out. {Exception}", context.Request.Path.Value, ex.Message);
-        }
         catch (TaskCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {
-            _logger.LogWarning("Request to {Path} was cancelled.", context.Request.Path.Value);
-
             context.Response.StatusCode = 418; // I'm a teapot
         }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {
-            _logger.LogWarning("Request to {Path} was cancelled.", context.Request.Path.Value);
-
             context.Response.StatusCode = 418; // I'm a teapot
         }
-        catch (BadHttpRequestException) when (context.RequestAborted.IsCancellationRequested)
+        catch (BadHttpRequestException ex) when (context.RequestAborted.IsCancellationRequested || ex.StatusCode == (int)HttpStatusCode.RequestTimeout)
         {
-            _logger.LogWarning("Request to {Path} was cancelled.", context.Request.Path.Value);
-
             context.Response.StatusCode = 418; // I'm a teapot
         }
+#pragma warning disable CS0618 // Type or member is obsolete
+        catch (Microsoft.AspNetCore.Server.Kestrel.Core.BadHttpRequestException) when (context.RequestAborted.IsCancellationRequested)
+        {
+            context.Response.StatusCode = 418; // I'm a teapot
+        }
+#pragma warning restore CS0618 // Type or member is obsolete
         catch (HttpRequestException ex)
         {
             context.Response.StatusCode = (int)(ex.StatusCode ?? HttpStatusCode.InternalServerError);
