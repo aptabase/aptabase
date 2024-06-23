@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { KeyMetrics, keyMetrics, periodicStats } from "../query";
+import { Granularity, KeyMetrics, keyMetrics, periodicStats } from "../query";
+import { StartEndDate } from "@hooks/use-datepicker";
 
 type ChildrenProps = {
   dailyUsers?: number[];
@@ -8,19 +9,23 @@ type ChildrenProps = {
 
 type Props = {
   appId: string;
-  period: string;
+  startDate: string;
+  endDate: string;
+  granularity: Granularity;
   buildMode: "release" | "debug";
   children: (props: ChildrenProps) => JSX.Element;
 };
 
 export function SummaryDataContainer(props: Props) {
   const { data: metrics } = useQuery({
-    queryKey: ["key-metrics", props.appId, props.buildMode, props.period],
+    queryKey: ["key-metrics", props.appId, props.buildMode, props.startDate, props.endDate],
     queryFn: () =>
       keyMetrics({
         buildMode: props.buildMode,
         appId: props.appId,
-        period: props.period,
+        startDate: props.startDate,
+        endDate: props.endDate,
+        granularity: props.granularity,
         countryCode: "",
         appVersion: "",
         eventName: "",
@@ -30,17 +35,18 @@ export function SummaryDataContainer(props: Props) {
   });
 
   const { data: dailyUsers } = useQuery({
-    queryKey: ["periodic-stats", props.appId, props.buildMode, props.period],
+    queryKey: ["periodic-stats", props.appId, props.buildMode, props.startDate, props.endDate],
     queryFn: () =>
       periodicStats({
         buildMode: props.buildMode,
         appId: props.appId,
-        period: props.period,
+        startDate: props.startDate,
+        endDate: props.endDate,
         countryCode: "",
         appVersion: "",
         eventName: "",
         osName: "",
-      }).then((s) => s.rows.map((x) => x.users)),
+      }).then((s) => s.map((x) => x.users)),
     staleTime: 60000,
   });
 
