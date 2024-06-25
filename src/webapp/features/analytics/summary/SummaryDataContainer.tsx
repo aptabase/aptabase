@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Granularity, KeyMetrics, keyMetrics, periodicStats } from "../query";
-import { StartEndDate } from "@hooks/use-datepicker";
 
 type ChildrenProps = {
   dailyUsers?: number[];
@@ -42,6 +41,7 @@ export function SummaryDataContainer(props: Props) {
         appId: props.appId,
         startDate: props.startDate,
         endDate: props.endDate,
+        granularity: props.granularity,
         countryCode: "",
         appVersion: "",
         eventName: "",
