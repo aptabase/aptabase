@@ -1,6 +1,8 @@
+import { trackEvent } from "@aptabase/web";
 import { Page, PageHeading } from "@components/Page";
 import { UserSessionsList } from "@features/analytics/sessions/UsersSessionsList";
 import { useApps, useCurrentApp } from "@features/apps";
+import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
@@ -11,6 +13,10 @@ export function Component() {
   const { buildMode } = useApps();
 
   if (!app) return <Navigate to="/" />;
+
+  useEffect(() => {
+    trackEvent("user_sessions_viewed");
+  }, []);
 
   return (
     <Page title="User Sessions">
