@@ -285,7 +285,7 @@ public class StatsController : Controller
         var rows = await _queryClient.NamedQueryAsync<PeriodicStatsRow>("key_metrics_periodic__v2", new {
             date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
             date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
-            granularity = query.Granularity!.Value.ToString(),
+            granularity = (query.Granularity ?? GranularityEnum.Hour).ToString(),
             app_id = query.AppId,
             event_name = query.EventName,
             os_name = query.OsName,
