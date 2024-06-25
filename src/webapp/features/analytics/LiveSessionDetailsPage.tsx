@@ -37,7 +37,7 @@ export function Component() {
     <Page title="Live View">
       <div className="flex flex-row justify-between items-center">
         <PageHeading title="Session Timeline" subtitle={sessionId} />
-        {location.state?.sessionFilters && (
+        {location.state?.sessionFilters ? (
           <Button
             className="mb-5"
             variant="ghost"
@@ -47,6 +47,11 @@ export function Component() {
           >
             <IconArrowLeft />
             Back to sessions
+          </Button>
+        ) : (
+          <Button className="mb-5" variant="ghost" onClick={() => navigate(`/${app.id}/live/`)}>
+            <IconArrowLeft />
+            Back to Live View
           </Button>
         )}
       </div>

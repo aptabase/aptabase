@@ -1,7 +1,7 @@
 import { Button } from "@components/Button";
 import { SessionStartEndDateFilters, SessionsGridDisplay } from "@features/analytics/sessions/SessionsGridDisplay";
 import { IconChevronLeft, IconChevronRight, IconChevronsLeft } from "@tabler/icons-react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { QueryParams, historicalSessions } from "../query";
@@ -31,9 +31,10 @@ export function UserSessionsList(props: Props) {
     return params as QueryParams;
   }, [props, dateFilters]);
 
-  const { data, isSuccess } = useQuery({
+  const { data, isSuccess, isPlaceholderData } = useQuery({
     queryKey: ["historical-sessions", props.appId, props.buildMode, dateFilters],
     queryFn: () => historicalSessions(requestParams),
+    placeholderData: keepPreviousData,
   });
 
   const sessions = [...(data || [])];
@@ -68,24 +69,31 @@ export function UserSessionsList(props: Props) {
   };
 
   return (
-    <div className="flex flex-col">
-      <SessionsGridDisplay appId={props.appId} sessions={sessions} sessionFilters={dateFilters} />
+    <div className="flex flex-col min-h-[calc(100vh-120px)]">
+      <div className="mb-auto">
+        <SessionsGridDisplay
+          appId={props.appId}
+          sessions={sessions}
+          sessionFilters={dateFilters}
+          isLoading={isPlaceholderData}
+        />
+      </div>
 
-      <div className="flex justify-end mt-4 mr-16">
+      <div className="flex justify-end mt-4 mr-16 ">
         {!!dateFilters.sessionId && (
-          <Button variant="ghost" onClick={firstPageClick}>
+          <Button disabled={isPlaceholderData} variant="ghost" onClick={firstPageClick}>
             <IconChevronsLeft></IconChevronsLeft>
             First
           </Button>
         )}
-        {!!dateFilters.sessionId && (
-          <Button variant="ghost" onClick={previousPageClick}>
+        {(!!dateFilters.sessionId || isPlaceholderData) && (
+          <Button disabled={isPlaceholderData} variant="ghost" onClick={previousPageClick}>
             <IconChevronLeft></IconChevronLeft>
             Previous
           </Button>
         )}
-        {sessions.length >= SESSIONS_PAGE_SIZE && (
-          <Button variant="ghost" onClick={nextPageClick}>
+        {(sessions.length >= SESSIONS_PAGE_SIZE || isPlaceholderData) && (
+          <Button disabled={isPlaceholderData} variant="ghost" onClick={nextPageClick}>
             Next
             <IconChevronRight></IconChevronRight>
           </Button>
