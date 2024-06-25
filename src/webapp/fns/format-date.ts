@@ -35,3 +35,9 @@ export function formatPeriod(granularity: "hour" | "day" | "month", period: stri
     return period;
   }
 }
+
+export function formatDateWithoutYear(value: Date | string | undefined): string {
+  if (!value) return "";
+
+  return format(new Date(value), "MMM d", { locale: enUS });
+}

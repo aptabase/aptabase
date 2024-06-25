@@ -1,14 +1,14 @@
+import { trackEvent } from "@aptabase/web";
 import { Page, PageHeading } from "@components/Page";
-import { WorldMap } from "./liveview/world/WorldMap";
 import { PingSignal } from "@components/PingSignal";
-import { useQuery } from "@tanstack/react-query";
 import { liveGeoDataPoints } from "@features/analytics/query";
 import { useApps, useCurrentApp } from "@features/apps";
-import { Navigate } from "react-router-dom";
-import { BuildModeSelector } from "./mode/BuildModeSelector";
-import { trackEvent } from "@aptabase/web";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import { RecentSessionsList } from "./liveview/RecentSessionsList";
+import { WorldMap } from "./liveview/world/WorldMap";
+import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
 
 Component.displayName = "LiveViewPage";

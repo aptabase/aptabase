@@ -86,6 +86,7 @@ public record LiveRecentSession
     public string RegionName { get; set; } = "";
     public string OsName { get; set; } = "";
     public string OsVersion { get; set; } = "";
+    public string DeviceModel { get; set; } = "";
 }
 
 public record SessionTimeline
@@ -284,7 +285,7 @@ public class StatsController : Controller
         var rows = await _queryClient.NamedQueryAsync<PeriodicStatsRow>("key_metrics_periodic__v2", new {
             date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
             date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
-            granularity = query.Granularity.ToString(),
+            granularity = query.Granularity!.Value.ToString(),
             app_id = query.AppId,
             event_name = query.EventName,
             os_name = query.OsName,
@@ -353,6 +354,26 @@ public class StatsController : Controller
         var row = await _queryClient.NamedQuerySingleAsync<SessionTimeline>("live_session_details__v1", new {
             app_id = query.AppId,
             session_id = query.SessionId,
+        }, cancellationToken);
+
+        return Ok(row);
+    }
+
+    [HttpGet("/api/_stats/historical-sessions")]
+    public async Task<IActionResult> HistoricalSessions([FromQuery] QueryParams body, CancellationToken cancellationToken)
+    {
+        var query = body.Parse();
+
+        var row = await _queryClient.NamedQueryAsync<LiveRecentSession>("historical_sessions_v1", new
+        {
+            app_id = query.AppId,
+            session_id = query.SessionId,
+            date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
+            date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
+            event_name = query.EventName,
+            os_name = query.OsName,
+            app_version = query.AppVersion,
+            country_code = query.CountryCode
         }, cancellationToken);
 
         return Ok(row);

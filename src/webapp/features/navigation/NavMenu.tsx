@@ -1,16 +1,17 @@
+import { useCurrentApp } from "@features/apps";
+import { isSupportEnabled } from "@features/env";
+import { SupportNavCategory } from "@features/support";
 import {
+  IconActivityHeartbeat,
+  IconCloudDownload,
   IconCode,
   IconGraph,
   IconLayoutGrid,
   IconSettings,
-  IconActivityHeartbeat,
-  IconCloudDownload,
+  IconUsers,
 } from "@tabler/icons-react";
 import { NavCategory } from "./NavCategory";
 import { NavItem } from "./NavItem";
-import { isSupportEnabled } from "@features/env";
-import { SupportNavCategory } from "@features/support";
-import { useCurrentApp } from "@features/apps";
 
 export function NavMenu(props: { onNavigation?: VoidFunction }) {
   const currentApp = useCurrentApp();
@@ -34,6 +35,13 @@ export function NavMenu(props: { onNavigation?: VoidFunction }) {
             disabled={!currentApp || !!currentApp.lockReason}
             href={`/${currentApp?.id}/live`}
             icon={IconActivityHeartbeat}
+            onNavigation={props.onNavigation}
+          />
+          <NavItem
+            label="User Sessions"
+            disabled={!currentApp || !!currentApp.lockReason}
+            href={`/${currentApp?.id}/sessions`}
+            icon={IconUsers}
             onNavigation={props.onNavigation}
           />
           <NavItem
