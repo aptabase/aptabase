@@ -364,7 +364,7 @@ public class StatsController : Controller
     {
         var query = body.Parse();
 
-        var row = await _queryClient.NamedQueryAsync<LiveRecentSession>("historical_sessions_v1", new
+        var row = await _queryClient.NamedQueryAsync<LiveRecentSession>("historical_sessions__v1", new
         {
             app_id = query.AppId,
             session_id = query.SessionId,
