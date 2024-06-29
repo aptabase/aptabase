@@ -32,7 +32,7 @@ SQL >
 	AND (min_timestamp < {{String(date_to)}} OR (min_timestamp = {{String(date_to)}} AND session_id < {{String(session_id)}}))
 	{% end %}
 	{% if defined(date_from) %}
-	AND (min_timestamp > {{String(date_from)}} OR (min_timestamp = {{String(date_from)}} AND session_id > {String(session_id)}}))
+	AND (min_timestamp > {{String(date_from)}} OR (min_timestamp = {{String(date_from)}} AND session_id > {{String(session_id)}}))
 	{% end %}
 	GROUP BY session_id
 	{% if defined(date_from) %}
