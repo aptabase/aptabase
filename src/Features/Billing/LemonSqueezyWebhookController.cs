@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
+using Aptabase.Data;
 using Aptabase.Features.Billing.LemonSqueezy;
+using Dapper;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
-using Aptabase.Data;
-using Dapper;
+using System.Text.Json;
 
 namespace Aptabase.Features.Billing;
 
@@ -32,33 +32,41 @@ public class LemonSqueezyWebhookController : Controller
     [HttpPost("/webhook/lemonsqueezy")]
     public async Task<IActionResult> Post(CancellationToken cancellationToken)
     {
-        var (isValid, body) = await ValidateSignature(HttpContext);
+        var (isValid, body) = await ValidateSignatureAsync(HttpContext);
+
         if (!isValid)
         {
             _logger.LogWarning("Invalid LemonSqueezy Signature");
+
             return Unauthorized(new { message = "Invalid LemonSqueezy Signature" });
         }
 
         var ev = JsonSerializer.Deserialize<WebhookEvent>(body, LemonSqueezyClient.JsonSettings);
+
         if (ev == null)
         {
             _logger.LogWarning("Invalid JSON Body: {Body}", body);
+
             return BadRequest(new { message = "Invalid JSON Body" });
         }
 
         if (ev.Meta.CustomData.TryGetValue("region", out var eventRegion) == false)
         {
             _logger.LogError("LemonSqueezy event is missing region");
+
             return BadRequest(new { message = "Missing 'region' on meta.custom_data" });
         }
 
         if (eventRegion != _region)
+        {
             return Ok(new { message = "Ignoring event from different region" });
-        
-        var task = ev.Meta.EventName switch {
+        }
+
+        var task = ev.Meta.EventName switch
+        {
             "subscription_created" => HandleSubscriptionCreatedOrUpdated(ev, cancellationToken),
             "subscription_updated" => HandleSubscriptionCreatedOrUpdated(ev, cancellationToken),
-            _ => HandleUnknownEvent(ev, cancellationToken),
+            _ => HandleUnknownEvent(ev),
         };
 
         return await task;
@@ -67,45 +75,65 @@ public class LemonSqueezyWebhookController : Controller
     private async Task<IActionResult> HandleSubscriptionCreatedOrUpdated([FromBody] WebhookEvent ev, CancellationToken cancellationToken)
     {
         var body = JsonSerializer.Deserialize<SubscriptionAttributes>(ev.Data.Attributes, LemonSqueezyClient.JsonSettings);
+
         if (body == null)
+        {
             return BadRequest(new { message = "Event body is null" });
+        }
 
         var subId = Convert.ToInt64(ev.Data.Id);
         var ownerId = ev.Meta.CustomData["user_id"];
+
         if (string.IsNullOrEmpty(ownerId))
         {
             _logger.LogError("LemonSqueezy event is missing user_id");
+
             return BadRequest(new { message = "Missing 'user_id' on meta.custom_data" });
         }
 
         await _db.Connection.ExecuteAsync(
-            @"UPDATE users SET lock_reason = :lockReason WHERE id = @ownerId",
-            new { ownerId, lockReason = body.Status == "expired" ? "B" : null }
+            @"UPDATE users SET lock_reason = null WHERE id = @ownerId",
+            new { ownerId }
         );
-        
-        await _db.Connection.ExecuteAsync(@"INSERT INTO subscriptions
-                                                (id, owner_id, customer_id, product_id, variant_id, status, ends_at)
-                                            VALUES
-                                                (@subId, @ownerId, @customerId, @productId, @variantId, @status, @endsAt)
-                                            ON CONFLICT (id) 
-                                            DO UPDATE SET product_id = @productId,
-                                                        variant_id = @variantId,
-                                                        status = @status,
-                                                        ends_at = @endsAt,
-                                                        modified_at = now()", new {
-            subId,
-            ownerId,
-            customerId = body.CustomerID,
-            productId = body.ProductID,
-            variantId = body.VariantID,
-            status = body.Status,
-            endsAt = body.EndsAt
-        });
+
+        if (body.Status == "expired")
+        {
+            await _db.Connection.ExecuteAsync(
+                @"DELETE FROM subscriptions WHERE id = @subId",
+            new
+            {
+                subId,
+            });
+        }
+        else
+        {
+            await _db.Connection.ExecuteAsync(
+                @"INSERT INTO subscriptions
+                    (id, owner_id, customer_id, product_id, variant_id, status, ends_at)
+                VALUES
+                    (@subId, @ownerId, @customerId, @productId, @variantId, @status, @endsAt)
+                ON CONFLICT (id) 
+                DO UPDATE SET product_id = @productId,
+                            variant_id = @variantId,
+                            status = @status,
+                            ends_at = @endsAt,
+                            modified_at = now()",
+            new
+            {
+                subId,
+                ownerId,
+                customerId = body.CustomerID,
+                productId = body.ProductID,
+                variantId = body.VariantID,
+                status = body.Status,
+                endsAt = body.EndsAt,
+            });
+        }
 
         return Ok(new {});
     }
 
-    private async Task<(bool, string)> ValidateSignature(HttpContext http)
+    private async Task<(bool, string)> ValidateSignatureAsync(HttpContext http)
     {
         using var reader = new StreamReader(Request.Body);
         string body = await reader.ReadToEndAsync();
@@ -119,14 +147,17 @@ public class LemonSqueezyWebhookController : Controller
         var signatureBytes = Encoding.UTF8.GetBytes(signature);
 
         if (!CryptographicOperations.FixedTimeEquals(digestBytes, signatureBytes))
+        {
             return (false, string.Empty);
+        }
 
         return (true, body);
     }
 
-    private Task<IActionResult> HandleUnknownEvent(WebhookEvent ev, CancellationToken cancellationToken)
+    private Task<IActionResult> HandleUnknownEvent(WebhookEvent ev)
     {
         _logger.LogError("Unknown LemonSqueezy event: {EventName}", ev.Meta.EventName);
+
         return Task.FromResult<IActionResult>(BadRequest(new { message = "Unknown event" }));
     }
 }

@@ -1,7 +1,7 @@
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
-using Microsoft.AspNetCore.Mvc;
 using Aptabase.Features.Stats;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Aptabase.Features.Billing;
 
@@ -37,14 +37,16 @@ public class BillingController : Controller
 
         var state = (usage?.Count ?? 0) < plan.MonthlyEvents ? "OK" : "OVERUSE";
         
-        return Ok(new {
+        return Ok(new
+        {
             State = state,
             Usage = usage?.Count ?? 0,
-            Month = DateTime.UtcNow.Month,
-            Year = DateTime.UtcNow.Year,
-            Subscription = sub != null ? new {
-                Status = sub.Status,
-                EndsAt = sub.EndsAt,
+            DateTime.UtcNow.Month,
+            DateTime.UtcNow.Year,
+            Subscription = sub != null ? new
+            {
+                sub.Status,
+                sub.EndsAt,
             } : null,
             Plan = plan
         });
@@ -56,7 +58,8 @@ public class BillingController : Controller
         var user = this.GetCurrentUserIdentity();
         var appIds = await _billingQueries.GetOwnedAppIds(user);
 
-        var rows = await _queryClient.NamedQueryAsync<BillingHistoricUsage>("billing_historical_usage__v1", new {
+        var rows = await _queryClient.NamedQueryAsync<BillingHistoricUsage>("billing_historical_usage__v1", new
+        {
             app_ids = appIds,
         }, cancellationToken);
 
@@ -77,10 +80,14 @@ public class BillingController : Controller
     {
         var user = this.GetCurrentUserIdentity();
         var sub = await _billingQueries.GetUserSubscription(user);
+
         if (sub is null)
+        {
             return NotFound();
+        }
 
         var url = await _lsClient.GetBillingPortalUrl(sub.Id, cancellationToken);
+
         return Ok(new { url });
     }
 }
