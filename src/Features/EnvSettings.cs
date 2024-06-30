@@ -32,7 +32,9 @@ public class EnvSettings
     // A random secret key used for signing auth tokens
     // E.g: GMvqFuPEiRZt6RtaB5OT
     // Variable Name: AUTH_SECRET
-    public byte[] AuthSecret { get; private set; } = new byte[0];
+    public byte[] AuthSecret { get; private set; } = [];
+
+    public string? MailCatcherConnectionString { get; private set; }
 
     // The host of the SMTP server
     // E.g: smtp.someprovider.com
@@ -95,8 +97,8 @@ public class EnvSettings
             IsDevelopment = isDevelopment,
             Region = region,
             SelfBaseUrl = MustGet("BASE_URL"),
-            ConnectionString = MustGet("DATABASE_URL"),
-            ClickHouseConnectionString = Get("CLICKHOUSE_URL"),
+            ConnectionString = GetOrNull("ConnectionStrings__postgresdb") ?? MustGet("DATABASE_URL"),
+            ClickHouseConnectionString = GetOrNull("ConnectionStrings__clickhousedb") ?? Get("CLICKHOUSE_URL"),
             TinybirdBaseUrl = Get("TINYBIRD_BASE_URL"),
             TinybirdToken = Get("TINYBIRD_TOKEN"),
             AuthSecret = Encoding.ASCII.GetBytes(MustGet("AUTH_SECRET")),
@@ -108,6 +110,7 @@ public class EnvSettings
             SmtpUsername = Get("SMTP_USERNAME"),
             SmtpPassword = Get("SMTP_PASSWORD"),
             SmtpFromAddress = Get("SMTP_FROM_ADDRESS"),
+            MailCatcherConnectionString = GetOrNull("ConnectionStrings__mailcatcher"),
 
             OAuthGitHubClientId = Get("OAUTH_GITHUB_CLIENT_ID"),
             OAuthGitHubClientSecret = Get("OAUTH_GITHUB_CLIENT_SECRET"),
@@ -123,6 +126,11 @@ public class EnvSettings
     private EnvSettings()
     {
 
+    }
+
+    private static string? GetOrNull(string name)
+    {
+        return Environment.GetEnvironmentVariable(name);
     }
 
     private static string Get(string name)

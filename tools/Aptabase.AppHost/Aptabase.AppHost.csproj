@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>807c20d7-fc42-4645-8c9c-6d26a96d40ae</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="8.0.2" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="8.0.2" />
+    <PackageReference Include="Aspire.Hosting.NodeJs" Version="8.0.2" />
+    <PackageReference Include="MailCatcher.Hosting" Version="1.0.0" />
+    <PackageReference Include="ClickHouse.Hosting" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Aptabase.csproj" />
+  </ItemGroup>
+
+</Project>

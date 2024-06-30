@@ -10,6 +10,17 @@ public static class NotificationExtensions
             return;
         }
 
+        if (!string.IsNullOrEmpty(env.MailCatcherConnectionString))
+        {
+            services.AddSingleton<IEmailClient, MailCatcherSmtpClient>(sp =>
+            {
+                var smtpUri = new Uri(env.MailCatcherConnectionString);
+
+                return new MailCatcherSmtpClient(smtpUri.Host, smtpUri.Port);
+            });
+            return;
+        }
+
         if (!string.IsNullOrEmpty(env.SmtpHost))
         {
             services.AddSingleton<IEmailClient, SmtpEmailClient>();

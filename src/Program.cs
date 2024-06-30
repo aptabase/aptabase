@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Hosting;
 using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
 
@@ -187,6 +188,11 @@ public partial class Program
                 .WithVersionTable(new VersionTable())
                 .ScanIn(typeof(Program).Assembly).For.Migrations()
             );
+
+        if (appEnv.IsDevelopment)
+        {
+            builder.AddServiceDefaults();
+        }
 
         var app = builder.Build();
         

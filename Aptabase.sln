@@ -1,13 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 25.0.1706.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aptabase", "src\Aptabase.csproj", "{9324014B-7845-4000-A251-3EF4E93C5138}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aptabase", "src\Aptabase.csproj", "{9324014B-7845-4000-A251-3EF4E93C5138}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aptabase.UnitTests", "tests\UnitTests\Aptabase.UnitTests.csproj", "{840E5844-C128-4178-A552-6C8438C437FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aptabase.UnitTests", "tests\UnitTests\Aptabase.UnitTests.csproj", "{840E5844-C128-4178-A552-6C8438C437FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aptabase.IntegrationTests", "tests\IntegrationTests\Aptabase.IntegrationTests.csproj", "{F5DB13B5-53F6-423D-B270-AEC7BA180628}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aptabase.IntegrationTests", "tests\IntegrationTests\Aptabase.IntegrationTests.csproj", "{F5DB13B5-53F6-423D-B270-AEC7BA180628}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aptabase.AppHost", "tools\Aptabase.AppHost\Aptabase.AppHost.csproj", "{8CD1C46E-FB3F-4B44-B6B5-6700389AA96C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7A5DEDE4-1D11-425E-BF8B-90C8F9A3A8A4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{38694226-E4F0-4A4C-A661-EE6BAB621B3A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9C6DBF2C-8C3E-431B-9B1A-C2FE270939A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,17 +27,27 @@ Global
 		{9324014B-7845-4000-A251-3EF4E93C5138}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9324014B-7845-4000-A251-3EF4E93C5138}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9324014B-7845-4000-A251-3EF4E93C5138}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F5DB13B5-53F6-423D-B270-AEC7BA180628}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F5DB13B5-53F6-423D-B270-AEC7BA180628}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F5DB13B5-53F6-423D-B270-AEC7BA180628}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F5DB13B5-53F6-423D-B270-AEC7BA180628}.Release|Any CPU.Build.0 = Release|Any CPU
 		{840E5844-C128-4178-A552-6C8438C437FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{840E5844-C128-4178-A552-6C8438C437FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{840E5844-C128-4178-A552-6C8438C437FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{840E5844-C128-4178-A552-6C8438C437FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5DB13B5-53F6-423D-B270-AEC7BA180628}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5DB13B5-53F6-423D-B270-AEC7BA180628}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5DB13B5-53F6-423D-B270-AEC7BA180628}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5DB13B5-53F6-423D-B270-AEC7BA180628}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CD1C46E-FB3F-4B44-B6B5-6700389AA96C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CD1C46E-FB3F-4B44-B6B5-6700389AA96C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CD1C46E-FB3F-4B44-B6B5-6700389AA96C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CD1C46E-FB3F-4B44-B6B5-6700389AA96C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9324014B-7845-4000-A251-3EF4E93C5138} = {7A5DEDE4-1D11-425E-BF8B-90C8F9A3A8A4}
+		{840E5844-C128-4178-A552-6C8438C437FB} = {9C6DBF2C-8C3E-431B-9B1A-C2FE270939A5}
+		{F5DB13B5-53F6-423D-B270-AEC7BA180628} = {9C6DBF2C-8C3E-431B-9B1A-C2FE270939A5}
+		{8CD1C46E-FB3F-4B44-B6B5-6700389AA96C} = {38694226-E4F0-4A4C-A661-EE6BAB621B3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DCB4E336-8A28-440F-AF5B-0319777764A4}
