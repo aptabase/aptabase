@@ -10,30 +10,30 @@
   <ItemGroup>
     <PackageReference Include="Npgsql" Version="8.0.3" />
     <PackageReference Include="Npgsql.DependencyInjection" Version="8.0.3" />
-    <PackageReference Include="ClickHouse.Client" Version="7.5.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.6.0" />
+    <PackageReference Include="ClickHouse.Client" Version="7.5.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.6.2" />
     <PackageReference Include="Dapper" Version="2.1.35" />
-    <PackageReference Include="Nanoid" Version="3.0.0" />
+    <PackageReference Include="Nanoid" Version="3.1.0" />
     <PackageReference Include="FastHashes" Version="3.5.0" />
     <PackageReference Include="FluentMigrator" Version="5.2.0" />
     <PackageReference Include="FluentMigrator.Runner" Version="5.2.0" />
     <PackageReference Include="FluentMigrator.Runner.Postgres" Version="5.2.0" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.300.105" />
-    <PackageReference Include="AWSSDK.SSO" Version="3.7.300.105" />
-    <PackageReference Include="AWSSDK.SSOOIDC" Version="3.7.302.16" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.300.111" />
+    <PackageReference Include="AWSSDK.SSO" Version="3.7.300.111" />
+    <PackageReference Include="AWSSDK.SSOOIDC" Version="3.7.302.22" />
     <PackageReference Include="Amazon.AspNetCore.DataProtection.SSM" Version="3.2.1" />
     <PackageReference Include="Sgbj.Cron.CronTimer" Version="1.0.2" />
     <PackageReference Include="MaxMind.GeoIP2" Version="5.2.0" />
     <PackageReference Include="Yoh.Text.Json.NamingPolicies" Version="1.1.2" />
     <PackageReference Include="Scriban" Version="5.10.0" />
-    <PackageReference Include="MailKit" Version="4.6.0" />
-    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.3.0" />
-    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="8.0.1" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.8.1" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.8.1" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.8.1" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.8.0" />
+    <PackageReference Include="MailKit" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.6.0" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="8.0.2" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
   </ItemGroup>
 
   <ItemGroup>
