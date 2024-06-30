@@ -32,7 +32,7 @@ public class ExceptionMiddleware
             context.Response.StatusCode = 418; // I'm a teapot
         }
 #pragma warning disable CS0618 // Type or member is obsolete
-        catch (Microsoft.AspNetCore.Server.Kestrel.Core.BadHttpRequestException) when (context.RequestAborted.IsCancellationRequested)
+        catch (Microsoft.AspNetCore.Server.Kestrel.Core.BadHttpRequestException)
         {
             context.Response.StatusCode = 418; // I'm a teapot
         }
@@ -42,6 +42,10 @@ public class ExceptionMiddleware
             context.Response.StatusCode = (int)(ex.StatusCode ?? HttpStatusCode.InternalServerError);
 
             _logger.LogError(ex, "Dependency error on {Path}", context.Request.Path.Value);
+        }
+        catch (Microsoft.AspNetCore.Authentication.AuthenticationFailureException)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
         }
         catch (Exception ex)
         {
