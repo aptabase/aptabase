@@ -20,7 +20,7 @@ SQL >
 	AND country_code = {{String(country_code)}}
 	{% end %}
 	{% if defined(event_name) %}
-	AND event_name = {{String(event_name)}}
+	AND has(events_name, {{String(event_name)}})
 	{% end %}
 	{% if defined(os_name) %}
 	AND os_name = {{String(os_name)}}
