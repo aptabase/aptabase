@@ -4,7 +4,7 @@ VERSION 2
 NODE endpoint
 SQL >
     %
-    SELECT uniqExact(user_id) / (date_diff('day', min(min), max(max)) + 1) as DailyUsers,
+    SELECT uniqExact(user_id) / (date_diff('day', min(min), max(max)) + if(date_diff('day', min(min), max(max)) = 0, 1, 0)) AS DailyUsers,
            uniqExact(session_id) as Sessions,
            if(isNaN(median(max - min)), 0, median(max - min)) as DurationSeconds,
            sum(count) as Events
