@@ -1,11 +1,11 @@
+import { useApps } from "@features/apps";
+import { useDatePicker } from "@hooks/use-datepicker";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { topEventProps } from "../query";
-import { useApps } from "@features/apps";
 import { TopNChart } from "./TopNChart";
 import { TopNTitle } from "./TopNTitle";
-import { useDatePicker } from "@hooks/use-datepicker";
 
 type Props = {
   appId: string;
@@ -49,8 +49,8 @@ export function TopEventProps(props: Props) {
       topEventProps({
         buildMode,
         appId: props.appId,
-        startDate,
-        endDate,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
         granularity,
         countryCode,
         appVersion,

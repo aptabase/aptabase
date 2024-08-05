@@ -1,4 +1,5 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/Select";
+import { DatePickerSuggest } from "@datepicker-suggest/react";
+import { useDatePicker } from "@hooks/use-datepicker";
 
 type Option = {
   value: string;
@@ -46,33 +47,29 @@ type StyledOptionProps = {
   option: Option;
 };
 
-function Item(props: StyledOptionProps) {
-  if (props.option.name === "Divider") {
-    return <div className="border-t my-1" />;
-  }
+export function DatePickerSuggestPeriod() {
+  const { startDate, endDate, setStartEndDate } = useDatePicker();
 
   return (
-    <SelectItem key={props.option.value} value={props.option.value}>
-      {props.option.name}
-    </SelectItem>
-  );
-}
-
-export function DateRangePicker() {
-  // const { period, setPeriod } = useDatePicker();
-  const period = "";
-  const setPeriod = () => {};
-
-  return (
-    <Select value={period} onValueChange={setPeriod}>
-      <SelectTrigger className="w-36">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((option) => (
-          <Item key={option.value} option={option} />
-        ))}
-      </SelectContent>
-    </Select>
+    <>
+      <div className="flex">
+        <DatePickerSuggest
+          value={startDate}
+          panelClassName="w-72"
+          onChange={(dateUpdate) => {
+            const newStartDate = dateUpdate ?? startDate;
+            setStartEndDate({ startDate: newStartDate, endDate: endDate });
+          }}
+        />
+        <DatePickerSuggest
+          panelClassName="w-72"
+          value={endDate}
+          onChange={(dateUpdate) => {
+            const newEndDate = dateUpdate ?? endDate;
+            setStartEndDate({ endDate: newEndDate, startDate: startDate });
+          }}
+        />
+      </div>
+    </>
   );
 }

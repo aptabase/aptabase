@@ -1,14 +1,14 @@
+import { trackEvent } from "@aptabase/web";
+import { LazyLoad } from "@components/LazyLoad";
 import { Page, PageHeading } from "@components/Page";
 import { useApps } from "@features/apps";
-import { LonelyState } from "./LonelyState";
-import { trackEvent } from "@aptabase/web";
+import { useDatePicker } from "@hooks/use-datepicker";
 import { useEffect } from "react";
+import { DateRangePicker } from "./DateRangePicker";
+import { LonelyState } from "./LonelyState";
 import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
 import { AppSummaryWidget } from "./summary/AppSummaryWidget";
-import { DateRangePicker } from "./DateRangePicker";
-import { LazyLoad } from "@components/LazyLoad";
-import { useDatePicker } from "@hooks/use-datepicker";
 import { NewAppWidget } from "./summary/NewAppWidget";
 
 Component.displayName = "HomePage";
@@ -20,8 +20,8 @@ export function Component() {
 
   useEffect(() => {
     trackEvent("home_viewed", {
-      startDate,
-      endDate,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
       apps_count: apps.length,
     });
   }, [startDate, endDate, apps]);

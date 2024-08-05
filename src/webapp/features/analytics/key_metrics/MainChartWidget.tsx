@@ -1,14 +1,14 @@
 import { trackEvent } from "@aptabase/web";
+import { useApps } from "@features/apps";
+import { formatPeriod } from "@fns/format-date";
+import { formatNumber } from "@fns/format-number";
+import { useDatePicker } from "@hooks/use-datepicker";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Granularity, periodicStats } from "../query";
 import { KeyMetrics } from "./KeyMetrics";
-import { useApps } from "@features/apps";
 import { MetricsChart } from "./MetricsChart";
-import { formatNumber } from "@fns/format-number";
-import { formatPeriod } from "@fns/format-date";
-import { useDatePicker } from "@hooks/use-datepicker";
 
 type Props = {
   appId: string;
@@ -47,6 +47,13 @@ export function MainChartWidget(props: Props) {
   const eventName = searchParams.get("eventName") || "";
   const osName = searchParams.get("osName") || "";
 
+  // useEffect(() => {
+  //   const { startDate, endDate, granularity } = mapStartEndDateToQueryParams(startEndDate);
+  //   console.log("startDate", startDate);
+  //   console.log("endDate", endDate);
+  //   console.log("granularity", granularity);
+  // }, [startEndDate]);
+
   const { isLoading, isError, data, refetch } = useQuery({
     queryKey: [
       "periodic-stats",
@@ -63,8 +70,8 @@ export function MainChartWidget(props: Props) {
       periodicStats({
         buildMode,
         appId: props.appId,
-        startDate,
-        endDate,
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
         granularity,
         countryCode,
         appVersion,
@@ -76,8 +83,8 @@ export function MainChartWidget(props: Props) {
 
   useEffect(() => {
     trackEvent("dashboard_viewed", {
-      startDate,
-      endDate,
+      startDate: startDate?.toISOString(),
+      endDate: endDate?.toISOString(),
       name: props.appName,
     });
   }, [startDate, endDate, props.appName]);

@@ -1,4 +1,5 @@
 @import "./colors.css";
+@import "@datepicker-suggest/react/index.css";
 
 @tailwind base;
 @tailwind components;

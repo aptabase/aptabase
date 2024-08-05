@@ -1,19 +1,19 @@
-import { Page, PageHeading } from "@components/Page";
-import { Navigate, useNavigate } from "react-router-dom";
-import { useApps, useCurrentApp } from "@features/apps";
-import { DebugModeBanner } from "./mode/DebugModeBanner";
-import { BuildModeSelector } from "./mode/BuildModeSelector";
-import { CurrentFilters } from "./CurrentFilters";
-import { MainChartWidget } from "./key_metrics/MainChartWidget";
-import { OSWidget } from "./dashboard/OSWidget";
-import { CountryWidget } from "./dashboard/CountryWidget";
-import { VersionWidget } from "./dashboard/VersionWidget";
-import { EventWidget } from "./dashboard/EventWidget";
-import { OnboardingDashboard } from "./dashboard/OnboardingDashboard";
-import { DateRangePicker } from "./DateRangePicker";
 import { LazyLoad } from "@components/LazyLoad";
+import { Page, PageHeading } from "@components/Page";
+import { useApps, useCurrentApp } from "@features/apps";
+import { Navigate, useNavigate } from "react-router-dom";
+import { CurrentFilters } from "./CurrentFilters";
+import { DatePickerSuggestPeriod } from "./DatePickerSuggestPeriod";
+import { CountryWidget } from "./dashboard/CountryWidget";
+import { EventWidget } from "./dashboard/EventWidget";
+import { OSWidget } from "./dashboard/OSWidget";
+import { OnboardingDashboard } from "./dashboard/OnboardingDashboard";
 import { TeaserDashboardContainer } from "./dashboard/TeaserDashboardContainer";
+import { VersionWidget } from "./dashboard/VersionWidget";
+import { MainChartWidget } from "./key_metrics/MainChartWidget";
 import { AppLockedContent } from "./locked/AppLockedContent";
+import { BuildModeSelector } from "./mode/BuildModeSelector";
+import { DebugModeBanner } from "./mode/DebugModeBanner";
 
 Component.displayName = "DashboardPage";
 
@@ -44,7 +44,7 @@ export function Component() {
           <PageHeading title="Dashboard" onClick={resetFilters} />
           <div className="flex items-center space-x-2">
             <BuildModeSelector />
-            <DateRangePicker />
+            <DatePickerSuggestPeriod />
           </div>
         </div>
         <div className="flex w-full justify-end">

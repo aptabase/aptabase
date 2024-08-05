@@ -1,12 +1,12 @@
-import { Application, AppIcon } from "@features/apps";
-import { Link } from "react-router-dom";
 import { GrowthIndicator } from "@components/GrowthIndicator";
-import { SummaryDataContainer } from "./SummaryDataContainer";
-import { EmptyStateWidget } from "./EmptyStateWidget";
-import { AppLockedContent } from "../locked/AppLockedContent";
-import { WaitingForEventsInfo } from "./WaitingForEventsInfo";
-import { DailyUsersChart } from "./DailyUsersChart";
+import { AppIcon, Application } from "@features/apps";
 import { useDatePicker } from "@hooks/use-datepicker";
+import { Link } from "react-router-dom";
+import { AppLockedContent } from "../locked/AppLockedContent";
+import { DailyUsersChart } from "./DailyUsersChart";
+import { EmptyStateWidget } from "./EmptyStateWidget";
+import { SummaryDataContainer } from "./SummaryDataContainer";
+import { WaitingForEventsInfo } from "./WaitingForEventsInfo";
 
 type Props = {
   app: Application;
@@ -14,7 +14,10 @@ type Props = {
 };
 
 export function AppSummaryWidget(props: Props) {
-  const { startDate, endDate, granularity, period } = useDatePicker();
+  const { startDate, endDate, granularity } = useDatePicker();
+
+  // TODO: bog period is not used - replace with startDate and endDate
+  const period = "";
   const params = period ? `?period=${period}` : "";
 
   if (props.app.lockReason) {
@@ -41,8 +44,8 @@ export function AppSummaryWidget(props: Props) {
       <SummaryDataContainer
         appId={props.app.id}
         buildMode={props.buildMode}
-        startDate={startDate}
-        endDate={endDate}
+        startDate={startDate.toISOString()}
+        endDate={endDate.toISOString()}
         granularity={granularity}
       >
         {({ dailyUsers, metrics }) => (

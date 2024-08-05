@@ -1,10 +1,10 @@
-import { Metric } from "./Metric";
+import { useApps } from "@features/apps";
+import { useDatePicker } from "@hooks/use-datepicker";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { keyMetrics } from "../query";
-import { useApps } from "@features/apps";
+import { Metric } from "./Metric";
 import { KeyMetricsContainer } from "./MetricsContainer";
-import { useDatePicker } from "@hooks/use-datepicker";
 
 type Props = {
   appId: string;
@@ -31,8 +31,8 @@ export function KeyMetrics(props: Props) {
       keyMetrics({
         buildMode,
         appId: props.appId,
-        startDate,
-        endDate,
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
         granularity,
         countryCode,
         appVersion,

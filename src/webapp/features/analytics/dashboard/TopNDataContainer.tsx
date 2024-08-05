@@ -1,8 +1,8 @@
+import { useApps } from "@features/apps";
+import { useDatePicker } from "@hooks/use-datepicker";
 import { QueryObserverResult, RefetchOptions, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { QueryParams, TopNItem } from "../query";
-import { useApps } from "@features/apps";
-import { useDatePicker } from "@hooks/use-datepicker";
 
 type ChildrenProps = {
   isLoading: boolean;
@@ -33,8 +33,8 @@ export function TopNDataContainer(props: Props) {
       props.query({
         buildMode,
         appId: props.appId,
-        startDate,
-        endDate,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
         granularity,
         countryCode,
         appVersion,
