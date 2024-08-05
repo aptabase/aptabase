@@ -1,10 +1,11 @@
-import { Metric } from "./Metric";
-import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
-import { keyMetrics } from "../query";
 import { useApps } from "@features/apps";
+import { useQuery } from "@tanstack/react-query";
+import { useAtomValue } from "jotai";
+import { useSearchParams } from "react-router-dom";
+import { dateFilterValuesAtom } from "../../../atoms/date-atoms";
+import { keyMetrics } from "../query";
+import { Metric } from "./Metric";
 import { KeyMetricsContainer } from "./MetricsContainer";
-import { useDatePicker } from "@hooks/use-datepicker";
 
 type Props = {
   appId: string;
@@ -15,7 +16,7 @@ type Props = {
 export function KeyMetrics(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
-  const { startDate, endDate, granularity } = useDatePicker();
+  const { startDateIso, endDateIso, granularity } = useAtomValue(dateFilterValuesAtom);
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
@@ -26,13 +27,23 @@ export function KeyMetrics(props: Props) {
     isError,
     data: metrics,
   } = useQuery({
-    queryKey: ["key-metrics", buildMode, props.appId, startDate, endDate, countryCode, appVersion, eventName, osName],
+    queryKey: [
+      "key-metrics",
+      buildMode,
+      props.appId,
+      startDateIso,
+      endDateIso,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
     queryFn: () =>
       keyMetrics({
         buildMode,
         appId: props.appId,
-        startDate,
-        endDate,
+        startDate: startDateIso,
+        endDate: endDateIso,
         granularity,
         countryCode,
         appVersion,
@@ -40,6 +51,7 @@ export function KeyMetrics(props: Props) {
         osName,
       }),
     staleTime: 10000,
+    enabled: !!startDateIso && !!endDateIso && !!granularity,
   });
 
   return (

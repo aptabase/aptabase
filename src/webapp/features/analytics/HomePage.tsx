@@ -1,30 +1,33 @@
+import { trackEvent } from "@aptabase/web";
+import { LazyLoad } from "@components/LazyLoad";
 import { Page, PageHeading } from "@components/Page";
 import { useApps } from "@features/apps";
-import { LonelyState } from "./LonelyState";
-import { trackEvent } from "@aptabase/web";
+import { useAtomValue } from "jotai";
 import { useEffect } from "react";
+import { dateFilterValuesAtom } from "../../atoms/date-atoms";
+import { DateFilterContainer } from "./date-filters/DateFilterContainer";
+import { LonelyState } from "./LonelyState";
 import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
 import { AppSummaryWidget } from "./summary/AppSummaryWidget";
-import { DateRangePicker } from "./DateRangePicker";
-import { LazyLoad } from "@components/LazyLoad";
-import { useDatePicker } from "@hooks/use-datepicker";
 import { NewAppWidget } from "./summary/NewAppWidget";
 
 Component.displayName = "HomePage";
 export function Component() {
-  const { apps } = useApps();
-
-  const { buildMode } = useApps();
-  const { startDate, endDate } = useDatePicker();
+  const { apps, buildMode } = useApps();
+  const { startDateIso, endDateIso } = useAtomValue(dateFilterValuesAtom);
 
   useEffect(() => {
+    if (!startDateIso || !endDateIso) {
+      return;
+    }
+
     trackEvent("home_viewed", {
-      startDate,
-      endDate,
+      startDate: startDateIso,
+      endDate: endDateIso,
       apps_count: apps.length,
     });
-  }, [startDate, endDate, apps]);
+  }, [startDateIso, endDateIso, apps]);
 
   if (apps.length === 0) {
     return (
@@ -38,9 +41,9 @@ export function Component() {
     <Page title="Home">
       <div className="flex justify-between items-center">
         <PageHeading title="Home" />
-        <div className="flex items-center space-x-2">
+        <div className="flex items-end space-x-2">
           <BuildModeSelector />
-          <DateRangePicker />
+          <DateFilterContainer />
         </div>
       </div>
       {buildMode === "debug" && <DebugModeBanner />}

@@ -1,12 +1,13 @@
+import { ThemeProvider } from "@features/theme";
 import "@fontsource/inter";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "cal-sans";
+import { Provider } from "jotai";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import router from "./router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { initAnalytics } from "./analytics";
-import { ThemeProvider } from "@features/theme";
+import router from "./router";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,9 +23,11 @@ const root = document.getElementById("root") as HTMLElement;
 ReactDOM.createRoot(root).render(
   <React.StrictMode>
     <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
+      <Provider>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </Provider>
     </ThemeProvider>
   </React.StrictMode>
 );

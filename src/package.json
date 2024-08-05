@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@aptabase/web": "0.4.0",
+    "@datepicker-suggest/react": "0.0.7",
     "@fontsource/inter": "5.0.14",
     "@headlessui/react": "2.1.2",
     "@radix-ui/react-popover": "1.0.7",
@@ -24,6 +25,8 @@
     "chartjs-plugin-annotation": "3.0.1",
     "date-fns": "3.6.0",
     "framer-motion": "10.16.4",
+    "jotai": "^2.9.1",
+    "jotai-location": "^0.5.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-markdown": "9.0.0",

@@ -1,14 +1,15 @@
 import { trackEvent } from "@aptabase/web";
+import { useApps } from "@features/apps";
+import { formatPeriod } from "@fns/format-date";
+import { formatNumber } from "@fns/format-number";
 import { useQuery } from "@tanstack/react-query";
+import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { dateFilterValuesAtom } from "../../../atoms/date-atoms";
 import { Granularity, periodicStats } from "../query";
 import { KeyMetrics } from "./KeyMetrics";
-import { useApps } from "@features/apps";
 import { MetricsChart } from "./MetricsChart";
-import { formatNumber } from "@fns/format-number";
-import { formatPeriod } from "@fns/format-date";
-import { useDatePicker } from "@hooks/use-datepicker";
 
 type Props = {
   appId: string;
@@ -41,7 +42,7 @@ export function MainChartWidget(props: Props) {
   const [searchParams] = useSearchParams();
   const [keyMetricToShow, setKeyMetricToShow] = useState<"users" | "sessions" | "events">("users");
 
-  const { startDate, endDate, granularity } = useDatePicker();
+  const { startDateIso, endDateIso, granularity } = useAtomValue(dateFilterValuesAtom);
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
@@ -52,8 +53,8 @@ export function MainChartWidget(props: Props) {
       "periodic-stats",
       buildMode,
       props.appId,
-      startDate,
-      endDate,
+      startDateIso,
+      endDateIso,
       countryCode,
       appVersion,
       eventName,
@@ -63,8 +64,8 @@ export function MainChartWidget(props: Props) {
       periodicStats({
         buildMode,
         appId: props.appId,
-        startDate,
-        endDate,
+        startDate: startDateIso,
+        endDate: endDateIso,
         granularity,
         countryCode,
         appVersion,
@@ -72,15 +73,19 @@ export function MainChartWidget(props: Props) {
         osName,
       }),
     staleTime: 10000,
+    enabled: !!startDateIso && !!endDateIso && !!granularity,
   });
 
   useEffect(() => {
+    if (!startDateIso || !endDateIso) {
+      return;
+    }
     trackEvent("dashboard_viewed", {
-      startDate,
-      endDate,
+      startDate: startDateIso,
+      endDate: endDateIso,
       name: props.appName,
     });
-  }, [startDate, endDate, props.appName]);
+  }, [startDateIso, endDateIso, props.appName]);
 
   const users: number[] = [],
     sessions: number[] = [],
@@ -103,7 +108,8 @@ export function MainChartWidget(props: Props) {
         activeMetric={keyMetricToShow}
         isError={isError}
         isLoading={isLoading}
-        hasPartialData={false} // TODO fix: period !== "last-month"
+        // TODO: this should be set whenever our endDate is not Now - some delta (depending on granularity)
+        hasPartialData={false}
         users={users}
         sessions={sessions}
         events={events}

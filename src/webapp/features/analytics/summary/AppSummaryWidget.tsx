@@ -1,12 +1,13 @@
-import { Application, AppIcon } from "@features/apps";
-import { Link } from "react-router-dom";
 import { GrowthIndicator } from "@components/GrowthIndicator";
-import { SummaryDataContainer } from "./SummaryDataContainer";
-import { EmptyStateWidget } from "./EmptyStateWidget";
+import { AppIcon, Application } from "@features/apps";
+import { useAtomValue } from "jotai";
+import { Link } from "react-router-dom";
+import { dateFilterValuesAtom, periodAtom } from "../../../atoms/date-atoms";
 import { AppLockedContent } from "../locked/AppLockedContent";
-import { WaitingForEventsInfo } from "./WaitingForEventsInfo";
 import { DailyUsersChart } from "./DailyUsersChart";
-import { useDatePicker } from "@hooks/use-datepicker";
+import { EmptyStateWidget } from "./EmptyStateWidget";
+import { SummaryDataContainer } from "./SummaryDataContainer";
+import { WaitingForEventsInfo } from "./WaitingForEventsInfo";
 
 type Props = {
   app: Application;
@@ -14,7 +15,9 @@ type Props = {
 };
 
 export function AppSummaryWidget(props: Props) {
-  const { startDate, endDate, granularity, period } = useDatePicker();
+  const period = useAtomValue(periodAtom);
+  const { startDateIso, endDateIso, granularity } = useAtomValue(dateFilterValuesAtom);
+
   const params = period ? `?period=${period}` : "";
 
   if (props.app.lockReason) {
@@ -35,14 +38,14 @@ export function AppSummaryWidget(props: Props) {
 
   return (
     <Link
-      to={`/${props.app.id}/${params}`}
+      to={`/${props.app.id}${params}`}
       className="border dark:border-none cursor-pointer rounded-t-lg shadow-md bg-card hover:bg-muted h-full flex flex-col"
     >
       <SummaryDataContainer
         appId={props.app.id}
         buildMode={props.buildMode}
-        startDate={startDate}
-        endDate={endDate}
+        startDate={startDateIso}
+        endDate={endDateIso}
         granularity={granularity}
       >
         {({ dailyUsers, metrics }) => (
