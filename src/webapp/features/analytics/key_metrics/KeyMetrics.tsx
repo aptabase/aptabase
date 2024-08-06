@@ -15,7 +15,7 @@ type Props = {
 export function KeyMetrics(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
-  const { startDate, endDate, granularity } = useDatePicker();
+  const { startDateIso, endDateIso, granularity } = useDatePicker();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
@@ -26,13 +26,23 @@ export function KeyMetrics(props: Props) {
     isError,
     data: metrics,
   } = useQuery({
-    queryKey: ["key-metrics", buildMode, props.appId, startDate, endDate, countryCode, appVersion, eventName, osName],
+    queryKey: [
+      "key-metrics",
+      buildMode,
+      props.appId,
+      startDateIso,
+      endDateIso,
+      countryCode,
+      appVersion,
+      eventName,
+      osName,
+    ],
     queryFn: () =>
       keyMetrics({
         buildMode,
         appId: props.appId,
-        startDate: startDate?.toISOString(),
-        endDate: endDate?.toISOString(),
+        startDate: startDateIso,
+        endDate: endDateIso,
         granularity,
         countryCode,
         appVersion,

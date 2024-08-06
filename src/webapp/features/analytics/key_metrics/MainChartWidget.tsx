@@ -41,7 +41,7 @@ export function MainChartWidget(props: Props) {
   const [searchParams] = useSearchParams();
   const [keyMetricToShow, setKeyMetricToShow] = useState<"users" | "sessions" | "events">("users");
 
-  const { startDate, endDate, granularity } = useDatePicker();
+  const { startDateIso, endDateIso, granularity } = useDatePicker();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
@@ -59,8 +59,8 @@ export function MainChartWidget(props: Props) {
       "periodic-stats",
       buildMode,
       props.appId,
-      startDate,
-      endDate,
+      startDateIso,
+      endDateIso,
       countryCode,
       appVersion,
       eventName,
@@ -70,8 +70,8 @@ export function MainChartWidget(props: Props) {
       periodicStats({
         buildMode,
         appId: props.appId,
-        startDate: startDate?.toISOString(),
-        endDate: endDate?.toISOString(),
+        startDate: startDateIso,
+        endDate: endDateIso,
         granularity,
         countryCode,
         appVersion,
@@ -83,11 +83,11 @@ export function MainChartWidget(props: Props) {
 
   useEffect(() => {
     trackEvent("dashboard_viewed", {
-      startDate: startDate?.toISOString(),
-      endDate: endDate?.toISOString(),
+      startDate: startDateIso,
+      endDate: endDateIso,
       name: props.appName,
     });
-  }, [startDate, endDate, props.appName]);
+  }, [startDateIso, endDateIso, props.appName]);
 
   const users: number[] = [],
     sessions: number[] = [],

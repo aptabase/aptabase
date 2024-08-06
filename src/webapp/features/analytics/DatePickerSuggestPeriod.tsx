@@ -48,26 +48,27 @@ type StyledOptionProps = {
 };
 
 export function DatePickerSuggestPeriod() {
-  const { startDate, endDate, setStartEndDate } = useDatePicker();
+  const { startDate, endDate, setStartDate, setEndDate } = useDatePicker();
 
   return (
     <>
       <div className="flex">
         <DatePickerSuggest
-          value={startDate}
           panelClassName="w-72"
-          onChange={(dateUpdate) => {
-            const newStartDate = dateUpdate ?? startDate;
-            setStartEndDate({ startDate: newStartDate, endDate: endDate });
+          suggestion={startDate}
+          onSuggestionChange={(dateSuggestion) => {
+            const newStartDate = dateSuggestion ?? startDate;
+            setStartDate(newStartDate);
           }}
         />
         <DatePickerSuggest
           panelClassName="w-72"
-          value={endDate}
-          onChange={(dateUpdate) => {
-            const newEndDate = dateUpdate ?? endDate;
-            setStartEndDate({ endDate: newEndDate, startDate: startDate });
+          suggestion={endDate}
+          onSuggestionChange={(dateSuggestion) => {
+            const newEndDate = dateSuggestion ?? endDate;
+            setEndDate(newEndDate);
           }}
+          initialSuggestion={endDate.label}
         />
       </div>
     </>

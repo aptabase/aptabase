@@ -14,7 +14,7 @@ type Props = {
 };
 
 export function AppSummaryWidget(props: Props) {
-  const { startDate, endDate, granularity } = useDatePicker();
+  const { startDateIso, endDateIso, granularity } = useDatePicker();
 
   // TODO: bog period is not used - replace with startDate and endDate
   const period = "";
@@ -44,8 +44,8 @@ export function AppSummaryWidget(props: Props) {
       <SummaryDataContainer
         appId={props.app.id}
         buildMode={props.buildMode}
-        startDate={startDate.toISOString()}
-        endDate={endDate.toISOString()}
+        startDate={startDateIso}
+        endDate={endDateIso}
         granularity={granularity}
       >
         {({ dailyUsers, metrics }) => (

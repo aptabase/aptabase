@@ -1,9 +1,9 @@
+import { DateSuggestion, SuggestionEngine } from "@datepicker-suggest/core";
 import { PERIOD_ENUM } from "@features/analytics/DateRangePicker";
 import { Granularity } from "@features/analytics/query";
 import {
   differenceInDays,
   differenceInHours,
-  differenceInMinutes,
   endOfDay,
   endOfMinute,
   endOfMonth,
@@ -12,7 +12,6 @@ import {
   startOfMinute,
   startOfMonth,
   sub,
-  subHours,
 } from "date-fns";
 import { useSearchParams } from "react-router-dom";
 
@@ -24,113 +23,108 @@ const getStoredValue = (key: string) => {
 const getStoredPeriod = () => window.localStorage.getItem("period");
 
 export function useDatePicker(): {
-  startDate: Date;
-  endDate: Date;
+  startDate: DateSuggestion;
+  endDate: DateSuggestion;
   granularity: Granularity;
-  setStartEndDate: ({ startDate, endDate }: { startDate: Date; endDate: Date }) => void;
+  startDateIso: string;
+  endDateIso: string;
+  setStartDate: (value: DateSuggestion) => void;
+  setEndDate: (value: DateSuggestion) => void;
 } {
   let [searchParams, setSearchParams] = useSearchParams();
-  let startDateMs = +(searchParams.get("startDate") ?? getStoredValue("startDate") ?? "");
-  const endDatePersisted = searchParams.get("endDate") ?? getStoredValue("endDate");
-
-  let endDateMs = tryParseEndDate(endDatePersisted)?.getTime();
+  let startDateLabel = searchParams.get("startDate") ?? getStoredValue("startDate");
+  let endDateLabel = searchParams.get("endDate") ?? getStoredValue("endDate");
 
   const period = searchParams.get("period") ?? getStoredPeriod();
   if (period) {
-    const { startDate, endDate } = mapPeriodToStartEnd(period);
-    startDateMs = startDate.getTime();
-    endDateMs = endDate.getTime();
+    // TODO: bog write another function to map period to start and end labels
+    // const { startDate, endDate } = mapPeriodToStartEnd(period);
+    // startDateMs = startDate.getTime();
+    // endDateMs = endDate.getTime();
+    startDateLabel = encodeURIComponent("24 hours ago");
+    endDateLabel = "now";
 
     window.localStorage.setItem("period", "");
   }
 
-  if (!startDateMs && !endDateMs) {
-    const { startDate, endDate } = mapPeriodToStartEnd(PERIOD_ENUM["24h"]);
-    startDateMs = startDate.getTime();
-    endDateMs = endDate.getTime();
+  if (!startDateLabel) {
+    startDateLabel = encodeURIComponent("24 hours ago");
+    setSearchParams((params) => {
+      params.set("startDate", encodeURIComponent("24 hours ago"));
+      return params;
+    });
+  }
+  if (!endDateLabel) {
+    endDateLabel = "now";
+    setSearchParams((params) => {
+      params.set("endDate", "now");
+      return params;
+    });
   }
 
-  if (!startDateMs) {
-    startDateMs = subHours(new Date(), 24).getTime();
-  }
-  if (!endDateMs) {
-    endDateMs = new Date().getTime();
-  }
+  const suggest = new SuggestionEngine();
+  const startDate = suggest
+    .generateSuggestions(decodeURIComponent(startDateLabel))
+    .find((s) => s.label.toLowerCase() === decodeURIComponent(startDateLabel).toLowerCase()) ?? {
+    id: "",
+    label: "",
+    date: new Date(0),
+  };
+  const endDate = suggest
+    .generateSuggestions(decodeURIComponent(endDateLabel))
+    .find((s) => s.label.toLowerCase() === decodeURIComponent(endDateLabel).toLowerCase()) ?? {
+    id: "xx",
+    label: "now",
+    date: new Date(),
+  };
 
-  const setStartEndDate = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
-    let endDateToStore = endDate.getTime().toString();
-    if (differenceInMinutes(new Date(), endDate) < 1) {
-      endDateToStore = "now";
+  const setStartDate = (date: DateSuggestion) => {
+    if (date.label.toLowerCase() === startDate.label.toLowerCase()) {
+      return;
     }
-
-    const startDateToStore = startDate.getTime().toString();
-
-    setStoredValue(startDateToStore, "startDate");
-    setStoredValue(endDateToStore, "endDate");
+    const startDateToStore = encodeURIComponent(date.label);
     setSearchParams((params) => {
       params.set("startDate", startDateToStore);
+      return params;
+    });
+    // setStoredValue(startDateToStore, "startDate");
+  };
+
+  const setEndDate = (date: DateSuggestion) => {
+    if (date.label.toLowerCase() === endDate.label.toLowerCase()) {
+      return;
+    }
+    const endDateToStore = encodeURIComponent(date.label);
+    setSearchParams((params) => {
       params.set("endDate", endDateToStore);
       return params;
     });
+    // setStoredValue(endDateToStore, "endDate");
   };
 
-  // const [startEndDate, setStartEndDate] = useState<StartEndDate>(mapPeriodToStartEnd(period));
+  // const setStartEndDate = ({ startDate, endDate }: { startDate: DateSuggestion; endDate: DateSuggestion }) => {
+  //   const startDateToStore = encodeURIComponent(startDate.label);
+  //   const endDateToStore = encodeURIComponent(endDate.label);
 
-  // const storedStartDate = getStoredValue("startDate");
-  // const storedEndDate = getStoredValue("endDate");
-  // if (storedStartDate) {
-  //   startEndDate.startDate = new Date(storedStartDate);
-  // }
-  // if (storedEndDate) {
-  //   startEndDate.endDate = new Date(storedEndDate);
-  // }
-
-  // useEffect(() => {
-  //   setDatePeriod({ startDate: startEndDate.startDate, endDate: startEndDate.endDate });
-  // }, [startEndDate]);
-
-  // const setDatePeriod = (value: { startDate?: Date; endDate?: Date }) => {
-  //   if (value.startDate) {
-  //     setStoredValue(value.startDate, "startDate");
-  //     // setSearchParams((params) => {
-  //     //   params.set("startDate", value.startDate!.toISOString());
-  //     //   return params;
-  //     // });
-  //   }
-  //   if (value.endDate) {
-  //     setStoredValue(value.endDate, "endDate");
-  //     // setSearchParams((params) => {
-  //     //   params.set("endDate", value.endDate!.toISOString());
-  //     //   return params;
-  //     // });
-  //   }
-
-  /*if (value.startDate?.getTime() != startEndDate.startDate.getTime()) {
-      setStartEndDate({
-        startDate: value.startDate ?? startEndDate.startDate,
-        endDate: { ...startEndDate.endDate },
-        granularity: startEndDate.granularity,
-      });
-    }
-
-    if (value.endDate?.getTime() != startEndDate.endDate.getTime()) {
-      setStartEndDate({
-        startDate: { ...startEndDate.startDate },
-        endDate: value.endDate ?? startEndDate.endDate,
-        granularity: startEndDate.granularity,
-      });
-    }*/
+  //   // setStoredValue(startDateToStore, "startDate");
+  //   // setStoredValue(endDateToStore, "endDate");
+  //   setSearchParams((params) => {
+  //     params.set("startDate", startDateToStore);
+  //     params.set("endDate", endDateToStore);
+  //     return params;
+  //   });
   // };
 
-  const startDate = new Date(startDateMs);
-  const endDate = new Date(endDateMs);
-  const granularity = getGranularity(startDate, endDate);
+  const granularity = getGranularity(startDate.date, endDate.date);
 
   return {
     startDate,
     endDate,
     granularity,
-    setStartEndDate,
+    startDateIso: startDate.date.toISOString(),
+    endDateIso: endDate.date.toISOString(),
+    setStartDate,
+    setEndDate,
   };
 }
 

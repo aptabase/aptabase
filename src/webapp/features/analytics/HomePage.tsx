@@ -16,15 +16,15 @@ export function Component() {
   const { apps } = useApps();
 
   const { buildMode } = useApps();
-  const { startDate, endDate } = useDatePicker();
+  const { startDateIso, endDateIso } = useDatePicker();
 
   useEffect(() => {
     trackEvent("home_viewed", {
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
+      startDate: startDateIso,
+      endDate: endDateIso,
       apps_count: apps.length,
     });
-  }, [startDate, endDate, apps]);
+  }, [startDateIso, endDateIso, apps]);
 
   if (apps.length === 0) {
     return (
