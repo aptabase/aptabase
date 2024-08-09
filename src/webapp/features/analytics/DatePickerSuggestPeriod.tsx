@@ -50,6 +50,22 @@ const options: Option[] = [
   { value: "all", name: "All time" },
 ];
 
+const optionsSuggestions = [
+  "Today",
+  "Yesterday",
+  "24 hours ago",
+  "48 hours ago",
+  "7 days ago",
+  "30 days ago",
+  "This month",
+  "Last month",
+  "3 months ago",
+  "6 months ago",
+  "12 months ago",
+  "This year",
+  "Last year",
+];
+
 export function DatePickerSuggestPeriod() {
   const [startDate, setStartDate] = useAtom(startDateAtom);
   const startDatePersistentLabel = useAtomValue(startDatePersistentLabelAtom);
@@ -87,6 +103,7 @@ export function DatePickerSuggestPeriod() {
               setStartDate(newStartDate);
             }}
             initialSuggestion={startDatePersistentLabel}
+            optionsSuggestions={optionsSuggestions}
           />
         </div>
         <div className="flex flex-col">
