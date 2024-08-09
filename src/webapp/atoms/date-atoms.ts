@@ -1,6 +1,6 @@
 import { DateSuggestion } from "@datepicker-suggest/core";
 import { Granularity } from "@features/analytics/query";
-import { getGranularity } from "@hooks/use-datepicker";
+import { differenceInDays, differenceInHours } from "date-fns";
 import { atom, useAtomValue } from "jotai";
 import { atomWithLocation } from "jotai-location";
 
@@ -83,4 +83,20 @@ export function readDateSuggestionValues() {
     endDateIso: useAtomValue(endDateIsoStringAtom),
     granularity: useAtomValue(granularityAtom),
   };
+}
+
+function getGranularity(startDate: Date | undefined, endDate: Date | undefined) {
+  if (!startDate || !endDate) {
+    return "hour";
+  }
+  const diffInHours = differenceInHours(endDate, startDate);
+  if (diffInHours < 72) {
+    return "hour";
+  }
+
+  const diffInDays = differenceInDays(endDate, startDate);
+  if (diffInDays > 90) {
+    return "month";
+  }
+  return "day";
 }
