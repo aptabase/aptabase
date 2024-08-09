@@ -2,14 +2,39 @@ import { DateSuggestion } from "@datepicker-suggest/core";
 import { Granularity } from "@features/analytics/query";
 import { getGranularity } from "@hooks/use-datepicker";
 import { atom, useAtomValue } from "jotai";
+import { atomWithLocation } from "jotai-location";
+
+const locationAtom = atomWithLocation();
 
 function atomWithStorage<T extends string | number | boolean>(key: string, initialValue: T) {
-  const _local = atom(localStorage.hasOwnProperty(key) ? decodeURIComponent(localStorage[key]) : initialValue);
+  const defaultValue = localStorage.hasOwnProperty(key) ? decodeURIComponent(localStorage[key]) : initialValue;
+  const _local = atom(defaultValue);
+
   return atom(
-    (get) => get(_local),
+    (get) => {
+      const searchParamValue = get(locationAtom).searchParams?.get(key);
+      if (searchParamValue) {
+        return decodeURIComponent(searchParamValue);
+      }
+
+      return get(_local);
+    },
     (get, set, newValue: T) => {
-      localStorage[key] = encodeURIComponent(newValue);
-      set(_local, newValue);
+      const storedValue = encodeURIComponent(newValue);
+      localStorage[key] = storedValue;
+      set(locationAtom, (prev) => {
+        let newSearchParams = new URLSearchParams([[key, storedValue]]);
+        if (prev.searchParams) {
+          newSearchParams = prev.searchParams;
+        }
+
+        newSearchParams.set(key, storedValue);
+        return {
+          ...prev,
+          searchParams: newSearchParams,
+        };
+      });
+      set(_local, storedValue);
     }
   );
 }
