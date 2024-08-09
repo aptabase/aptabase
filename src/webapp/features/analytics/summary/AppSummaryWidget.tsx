@@ -1,7 +1,7 @@
 import { GrowthIndicator } from "@components/GrowthIndicator";
 import { AppIcon, Application } from "@features/apps";
-import { useDatePicker } from "@hooks/use-datepicker";
 import { Link } from "react-router-dom";
+import { readDateSuggestionValues } from "../../../atoms/date-atoms";
 import { AppLockedContent } from "../locked/AppLockedContent";
 import { DailyUsersChart } from "./DailyUsersChart";
 import { EmptyStateWidget } from "./EmptyStateWidget";
@@ -14,7 +14,7 @@ type Props = {
 };
 
 export function AppSummaryWidget(props: Props) {
-  const { startDateIso, endDateIso, granularity } = useDatePicker();
+  const { startDateIso, endDateIso, granularity } = readDateSuggestionValues();
 
   // TODO: bog period is not used - replace with startDate and endDate
   const period = "";

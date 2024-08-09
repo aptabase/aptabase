@@ -1,7 +1,7 @@
 import { useApps } from "@features/apps";
-import { useDatePicker } from "@hooks/use-datepicker";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
+import { readDateSuggestionValues } from "../../../atoms/date-atoms";
 import { keyMetrics } from "../query";
 import { Metric } from "./Metric";
 import { KeyMetricsContainer } from "./MetricsContainer";
@@ -15,7 +15,7 @@ type Props = {
 export function KeyMetrics(props: Props) {
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
-  const { startDateIso, endDateIso, granularity } = useDatePicker();
+  const { startDateIso, endDateIso, granularity } = readDateSuggestionValues();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
@@ -50,6 +50,7 @@ export function KeyMetrics(props: Props) {
         osName,
       }),
     staleTime: 10000,
+    enabled: !!startDateIso && !!endDateIso && !!granularity,
   });
 
   return (

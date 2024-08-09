@@ -1,5 +1,12 @@
 import { DatePickerSuggest } from "@datepicker-suggest/react";
-import { useDatePicker } from "@hooks/use-datepicker";
+import { useAtom, useAtomValue } from "jotai";
+import { useEffect } from "react";
+import {
+  endDateAtom,
+  endDatePersistentLabelAtom,
+  startDateAtom,
+  startDatePersistentLabelAtom,
+} from "../../atoms/date-atoms";
 
 type Option = {
   value: string;
@@ -43,33 +50,56 @@ const options: Option[] = [
   { value: "all", name: "All time" },
 ];
 
-type StyledOptionProps = {
-  option: Option;
-};
-
 export function DatePickerSuggestPeriod() {
-  const { startDate, endDate, setStartDate, setEndDate } = useDatePicker();
+  const [startDate, setStartDate] = useAtom(startDateAtom);
+  const startDatePersistentLabel = useAtomValue(startDatePersistentLabelAtom);
+  const [endDate, setEndDate] = useAtom(endDateAtom);
+  const endDatePersistentLabel = useAtomValue(endDatePersistentLabelAtom);
+
+  useEffect(() => {
+    if (!endDate || !startDate) {
+      return;
+    }
+    if (endDate.date.getTime() < startDate.date.getTime()) {
+      setEndDate(startDate);
+    }
+  }, [endDate]);
+
+  useEffect(() => {
+    if (!startDate || !endDate) {
+      return;
+    }
+    if (startDate.date.getTime() > endDate.date.getTime()) {
+      setStartDate(endDate);
+    }
+  }, [startDate]);
 
   return (
     <>
-      <div className="flex">
-        <DatePickerSuggest
-          panelClassName="w-72"
-          suggestion={startDate}
-          onSuggestionChange={(dateSuggestion) => {
-            const newStartDate = dateSuggestion ?? startDate;
-            setStartDate(newStartDate);
-          }}
-        />
-        <DatePickerSuggest
-          panelClassName="w-72"
-          suggestion={endDate}
-          onSuggestionChange={(dateSuggestion) => {
-            const newEndDate = dateSuggestion ?? endDate;
-            setEndDate(newEndDate);
-          }}
-          initialSuggestion={endDate.label}
-        />
+      <div className="flex gap-2">
+        <div className="flex flex-col">
+          <label className="text-xs font-light mb-1 ml-1 text-gray-700 dark:text-gray-300">Start date</label>
+          <DatePickerSuggest
+            panelClassName="w-72"
+            suggestion={startDate ?? undefined}
+            onSuggestionChange={(dateSuggestion) => {
+              const newStartDate = dateSuggestion ?? startDate;
+              setStartDate(newStartDate);
+            }}
+            initialSuggestion={startDatePersistentLabel}
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className="text-xs font-light mb-1 ml-1 text-gray-700 dark:text-gray-300">End date</label>
+          <DatePickerSuggest
+            panelClassName="w-72"
+            onSuggestionChange={(dateSuggestion) => {
+              const newEndDate = dateSuggestion ?? endDate;
+              setEndDate(newEndDate);
+            }}
+            initialSuggestion={endDatePersistentLabel}
+          />
+        </div>
       </div>
     </>
   );

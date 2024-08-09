@@ -2,10 +2,10 @@ import { trackEvent } from "@aptabase/web";
 import { useApps } from "@features/apps";
 import { formatPeriod } from "@fns/format-date";
 import { formatNumber } from "@fns/format-number";
-import { useDatePicker } from "@hooks/use-datepicker";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { readDateSuggestionValues } from "../../../atoms/date-atoms";
 import { Granularity, periodicStats } from "../query";
 import { KeyMetrics } from "./KeyMetrics";
 import { MetricsChart } from "./MetricsChart";
@@ -41,7 +41,7 @@ export function MainChartWidget(props: Props) {
   const [searchParams] = useSearchParams();
   const [keyMetricToShow, setKeyMetricToShow] = useState<"users" | "sessions" | "events">("users");
 
-  const { startDateIso, endDateIso, granularity } = useDatePicker();
+  const { startDateIso, endDateIso, granularity } = readDateSuggestionValues();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
   const eventName = searchParams.get("eventName") || "";
@@ -53,6 +53,10 @@ export function MainChartWidget(props: Props) {
   //   console.log("endDate", endDate);
   //   console.log("granularity", granularity);
   // }, [startEndDate]);
+
+  // if (!startDateIso || !endDateIso || !granularity) {
+  //   return <div>No date suggestion values</div>;
+  // }
 
   const { isLoading, isError, data, refetch } = useQuery({
     queryKey: [
@@ -79,9 +83,13 @@ export function MainChartWidget(props: Props) {
         osName,
       }),
     staleTime: 10000,
+    enabled: !!startDateIso && !!endDateIso && !!granularity,
   });
 
   useEffect(() => {
+    if (!startDateIso || !endDateIso) {
+      return;
+    }
     trackEvent("dashboard_viewed", {
       startDate: startDateIso,
       endDate: endDateIso,

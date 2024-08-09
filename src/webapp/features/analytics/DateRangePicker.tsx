@@ -59,7 +59,6 @@ function Item(props: StyledOptionProps) {
 }
 
 export function DateRangePicker() {
-  // const { period, setPeriod } = useDatePicker();
   const period = "";
   const setPeriod = () => {};
 

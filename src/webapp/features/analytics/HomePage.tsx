@@ -2,9 +2,9 @@ import { trackEvent } from "@aptabase/web";
 import { LazyLoad } from "@components/LazyLoad";
 import { Page, PageHeading } from "@components/Page";
 import { useApps } from "@features/apps";
-import { useDatePicker } from "@hooks/use-datepicker";
 import { useEffect } from "react";
-import { DateRangePicker } from "./DateRangePicker";
+import { readDateSuggestionValues } from "../../atoms/date-atoms";
+import { DatePickerSuggestPeriod } from "./DatePickerSuggestPeriod";
 import { LonelyState } from "./LonelyState";
 import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
@@ -16,9 +16,13 @@ export function Component() {
   const { apps } = useApps();
 
   const { buildMode } = useApps();
-  const { startDateIso, endDateIso } = useDatePicker();
+  const { startDateIso, endDateIso } = readDateSuggestionValues();
 
   useEffect(() => {
+    if (!startDateIso || !endDateIso) {
+      return;
+    }
+
     trackEvent("home_viewed", {
       startDate: startDateIso,
       endDate: endDateIso,
@@ -38,9 +42,9 @@ export function Component() {
     <Page title="Home">
       <div className="flex justify-between items-center">
         <PageHeading title="Home" />
-        <div className="flex items-center space-x-2">
+        <div className="flex items-end space-x-2">
           <BuildModeSelector />
-          <DateRangePicker />
+          <DatePickerSuggestPeriod />
         </div>
       </div>
       {buildMode === "debug" && <DebugModeBanner />}

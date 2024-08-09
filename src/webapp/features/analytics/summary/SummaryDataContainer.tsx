@@ -8,8 +8,8 @@ type ChildrenProps = {
 
 type Props = {
   appId: string;
-  startDate: string;
-  endDate: string;
+  startDate: string | undefined;
+  endDate: string | undefined;
   granularity: Granularity;
   buildMode: "release" | "debug";
   children: (props: ChildrenProps) => JSX.Element;
@@ -31,6 +31,7 @@ export function SummaryDataContainer(props: Props) {
         osName: "",
       }),
     staleTime: 60000,
+    enabled: !!props.startDate && !!props.endDate,
   });
 
   const { data: dailyUsers } = useQuery({
@@ -48,6 +49,7 @@ export function SummaryDataContainer(props: Props) {
         osName: "",
       }).then((s) => s.map((x) => x.users)),
     staleTime: 60000,
+    enabled: !!props.startDate && !!props.endDate,
   });
 
   return props.children({ dailyUsers, metrics });

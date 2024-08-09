@@ -244,7 +244,10 @@ function mapPeriodToStartEnd(period: string): { startDate: Date; endDate: Date }
   };
 }
 
-function getGranularity(startDate: Date, endDate: Date) {
+export function getGranularity(startDate: Date | undefined, endDate: Date | undefined) {
+  if (!startDate || !endDate) {
+    return "hour";
+  }
   const diffInHours = differenceInHours(endDate, startDate);
   if (diffInHours < 72) {
     return "hour";

@@ -1,6 +1,6 @@
-import { IconBug, IconRocket } from "@tabler/icons-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@components/Popover";
 import { BuildMode, useApps } from "@features/apps";
-import { Popover, PopoverTrigger, PopoverContent } from "@components/Popover";
+import { IconBug, IconRocket } from "@tabler/icons-react";
 import { twJoin } from "tailwind-merge";
 
 const options = [
@@ -15,11 +15,11 @@ export function BuildModeSelector() {
     <Popover>
       <PopoverTrigger className="relative">
         {buildMode === "release" ? (
-          <IconRocket className="h-5 w-5" stroke="1" />
+          <IconRocket className="h-5 w-5 mb-2" stroke="1" />
         ) : (
           <>
             <div className="absolute rounded-full bg-warning h-1.5 w-1.5 top-0 right-0" />
-            <IconBug className="h-5 w-5" stroke="1" />
+            <IconBug className="h-5 w-5 mb-2" stroke="1" />
           </>
         )}
       </PopoverTrigger>
