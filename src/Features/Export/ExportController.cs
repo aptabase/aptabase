@@ -1,8 +1,9 @@
-using System.Text.RegularExpressions;
 using Aptabase.Features.Authentication;
+using Aptabase.Features.Stats;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 
-namespace Aptabase.Features.Stats;
+namespace Aptabase.Features.Export;
 
 public class DownloadRequest
 {
@@ -12,6 +13,7 @@ public class DownloadRequest
     public string Format { get; set; } = "";
     public int Month { get; set; }
     public int Year { get; set; }
+    public long Events { get; set; }
 }
 
 public class MonthlyUsage
@@ -23,14 +25,10 @@ public class MonthlyUsage
 
 [ApiController, IsAuthenticated, HasReadAccessToApp]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-public partial class ExportController : Controller
+public partial class ExportController(IQueryClient queryClient, ILogger<ExportController> logger) : Controller
 {
-    private readonly IQueryClient _queryClient;
-
-    public ExportController(IQueryClient queryClient)
-    {
-        _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));
-    }
+    private readonly IQueryClient _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));
+    private readonly ILogger<ExportController> _logger = logger;
 
     [HttpGet("/api/_export/usage")]
     public async Task<IActionResult> MonthlyUsage([FromQuery] string buildMode, [FromQuery] string appId, CancellationToken cancellationToken)
@@ -39,16 +37,21 @@ public partial class ExportController : Controller
             app_id = GetAppId(buildMode, appId)
         }, cancellationToken);
 
-        if (buildMode.ToLower() == "debug")
+        if (buildMode.Equals("debug", StringComparison.OrdinalIgnoreCase))
+        {
             return Ok(rows.Take(5));
+        }
 
         return Ok(rows);
     }
 
-    [HttpGet("/api/_export/download")]
-    public async Task<IActionResult> Download([FromQuery] DownloadRequest body, CancellationToken cancellationToken)
+    [HttpGet("/api/_export/download2")]
+    public async Task<IActionResult> Download2([FromQuery] DownloadRequest body, CancellationToken cancellationToken)
     {
         var (formatName, contentType, fileExtension) = GetFormat(body.Format);
+        var appName = UnsafeCharacters().Replace(body.AppName, "").ToLower();
+        var fileName = $"{appName}-{body.BuildMode.ToLower()}-{body.Year}-{body.Month.ToString().PadLeft(2, '0')}.{fileExtension}";
+
         var query = $@"SELECT timestamp, user_id, session_id,
                               event_name,
                               replace(replace(string_props, '\u0022', '\''), '\u0027', '\'') as string_props,
@@ -64,9 +67,63 @@ public partial class ExportController : Controller
                        FORMAT {formatName}";
 
         var stream = await _queryClient.StreamResponseAsync(query, cancellationToken);
+
+        return File(stream, contentType, fileName);
+    }
+
+    [HttpGet("/api/_export/download")]
+    public Task<StreamingFileResult> Download([FromQuery] DownloadRequest body)
+    {
+        var (formatName, contentType, fileExtension) = GetFormat(body.Format);
         var appName = UnsafeCharacters().Replace(body.AppName, "").ToLower();
         var fileName = $"{appName}-{body.BuildMode.ToLower()}-{body.Year}-{body.Month.ToString().PadLeft(2, '0')}.{fileExtension}";
-        return File(stream, contentType, fileName);
+
+        return Task.FromResult(new StreamingFileResult(async (stream, httpContext, cancellationToken) =>
+        {
+            httpContext.Response.StatusCode = StatusCodes.Status200OK;
+
+            try
+            {
+                const int pageSize = 10000; 
+                long processedRecords = 0;
+
+                while (processedRecords < body.Events && !cancellationToken.IsCancellationRequested)
+                {
+                    var query = $@"
+                    SELECT timestamp, user_id, session_id,
+                           event_name,
+                           replace(replace(string_props, '\u0022', '\''), '\u0027', '\'') as string_props,
+                           numeric_props,
+                           os_name, os_version,
+                           locale, app_version, app_build_number,
+                           engine_name, engine_version,
+                           country_code, {COUNTRY_NAME_COLUMN}, region_name
+                    FROM events
+                    WHERE app_id = '{GetAppId(body.BuildMode, body.AppId)}'
+                    AND toStartOfMonth(timestamp) = '{body.Year}-{body.Month}-01'
+                    ORDER BY timestamp DESC
+                    LIMIT {pageSize}
+                    OFFSET {processedRecords}
+                    FORMAT {formatName}";
+
+                    using var pageStream = await _queryClient.StreamResponseAsync(query, cancellationToken);
+                    await pageStream.CopyToAsync(stream, cancellationToken);
+
+                    processedRecords += pageSize;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while streaming download");
+
+                if (!httpContext.Response.HasStarted)
+                {
+                    httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                    await httpContext.Response.WriteAsync("An error occurred while processing your request.", cancellationToken);
+                }
+            }
+            
+        }, contentType, fileName));
     }
 
     private static string GetAppId(string buildMode, string appId)

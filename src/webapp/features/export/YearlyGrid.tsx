@@ -12,14 +12,15 @@ type Props = {
 };
 
 export function YearlyGrid(props: Props) {
-  const donload = (month: number) => () => {
+  const download = (month: any) => () => {
     const params = new URLSearchParams();
     params.set("appId", props.app.id);
     params.set("appName", props.app.name);
     params.set("buildMode", props.buildMode);
     params.set("format", props.format);
     params.set("year", props.year.toString());
-    params.set("month", month.toString());
+    params.set("month", month.number.toString());
+    params.set("events", month.events.toString());
 
     trackEvent("export", { name: props.app.name });
 
@@ -34,7 +35,7 @@ export function YearlyGrid(props: Props) {
           <Button
             key={month.number}
             variant="secondary"
-            onClick={donload(month.number)}
+            onClick={download(month)}
             className="w-24 flex flex-col px-0 tracking-tighter"
           >
             <span className="text-sm font-medium">{month.name}</span>
