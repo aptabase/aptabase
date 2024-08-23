@@ -2,6 +2,7 @@ using Aptabase.Features.Authentication;
 using Aptabase.Features.Stats;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Aptabase.Features.Export;
 
@@ -45,14 +46,16 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
         return Ok(rows);
     }
 
-    [HttpGet("/api/_export/download2")]
-    public async Task<IActionResult> Download2([FromQuery] DownloadRequest body, CancellationToken cancellationToken)
+    [HttpGet("/api/_export/download")]
+    public async Task<IActionResult> Download([FromQuery] DownloadRequest body)
     {
         var (formatName, contentType, fileExtension) = GetFormat(body.Format);
         var appName = UnsafeCharacters().Replace(body.AppName, "").ToLower();
         var fileName = $"{appName}-{body.BuildMode.ToLower()}-{body.Year}-{body.Month.ToString().PadLeft(2, '0')}.{fileExtension}";
 
-        var query = $@"SELECT timestamp, user_id, session_id,
+        if (formatName == "Parquet")
+        {
+            var query = $@"SELECT timestamp, user_id, session_id,
                               event_name,
                               replace(replace(string_props, '\u0022', '\''), '\u0027', '\'') as string_props,
                               numeric_props,
@@ -64,27 +67,22 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
                        WHERE app_id = '{GetAppId(body.BuildMode, body.AppId)}'
                        AND toStartOfMonth(timestamp) = '{body.Year}-{body.Month}-01'
                        ORDER BY timestamp DESC
-                       FORMAT {formatName}";
+                       FORMAT 
+            {formatName}";
 
-        var stream = await _queryClient.StreamResponseAsync(query, cancellationToken);
+            var stream = await _queryClient.StreamResponseAsync(query, HttpContext.RequestAborted);
 
-        return File(stream, contentType, fileName);
-    }
+            return File(stream, contentType, fileName);
+        }
 
-    [HttpGet("/api/_export/download")]
-    public Task<StreamingFileResult> Download([FromQuery] DownloadRequest body)
-    {
-        var (formatName, contentType, fileExtension) = GetFormat(body.Format);
-        var appName = UnsafeCharacters().Replace(body.AppName, "").ToLower();
-        var fileName = $"{appName}-{body.BuildMode.ToLower()}-{body.Year}-{body.Month.ToString().PadLeft(2, '0')}.{fileExtension}";
-
-        return Task.FromResult(new StreamingFileResult(async (stream, httpContext, cancellationToken) =>
+        return new StreamingFileResult(async (stream, httpContext, cancellationToken) =>
         {
             httpContext.Response.StatusCode = StatusCodes.Status200OK;
 
+            // todo use s3 buckets
             try
             {
-                const int pageSize = 10000; 
+                const int pageSize = 100000; 
                 long processedRecords = 0;
 
                 while (processedRecords < body.Events && !cancellationToken.IsCancellationRequested)
@@ -123,7 +121,7 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
                 }
             }
             
-        }, contentType, fileName));
+        }, contentType, fileName);
     }
 
     private static string GetAppId(string buildMode, string appId)
