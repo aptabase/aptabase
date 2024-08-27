@@ -1,10 +1,7 @@
-import { useRef, MutableRefObject, useState, useEffect } from "react";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
-function useLazyLoad<T extends Element>(
-  ref: MutableRefObject<T>,
-  rootMargin: string = "0px"
-): boolean {
+function useLazyLoad<T extends Element>(ref: MutableRefObject<T>, rootMargin: string = "0px"): boolean {
   const [isIntersecting, setIntersecting] = useState<boolean>(false);
 
   useEffect(() => {

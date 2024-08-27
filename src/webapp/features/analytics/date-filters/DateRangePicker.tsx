@@ -1,25 +1,10 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/Select";
-import { useDatePicker } from "@hooks/use-datepicker";
+import { useAtom } from "jotai";
+import { periodAtom } from "../../../atoms/date-atoms";
 
 type Option = {
   value: string;
   name: string;
-};
-
-export const PERIOD_ENUM = {
-  "24h": "24h",
-  "48h": "48h",
-  today: "today",
-  yesterday: "yesterday",
-  "7d": "7d",
-  "14d": "14d",
-  "30d": "30d",
-  month: "month",
-  "last-month": "last-month",
-  "90d": "90d",
-  "180d": "180d",
-  "365d": "365d",
-  all: "all",
 };
 
 const options: Option[] = [
@@ -30,17 +15,14 @@ const options: Option[] = [
   { value: "48h", name: "Last 48 hours" },
   { value: "divider-2", name: "Divider" },
   { value: "7d", name: "Last 7 days" },
-  { value: "14d", name: "Last 14 days" },
   { value: "30d", name: "Last 30 days" },
   { value: "divider-1", name: "Divider" },
-  { value: "month", name: "This month" },
-  { value: "last-month", name: "Last month" },
-  { value: "divider-3", name: "Divider" },
   { value: "90d", name: "Last 3 months" },
   { value: "180d", name: "Last 6 months" },
   { value: "365d", name: "Last 12 months" },
   { value: "divider-4", name: "Divider" },
   { value: "all", name: "All time" },
+  { value: "custom", name: "Custom" },
 ];
 
 type StyledOptionProps = {
@@ -60,7 +42,7 @@ function Item(props: StyledOptionProps) {
 }
 
 export function DateRangePicker() {
-  const { period, setPeriod } = useDatePicker();
+  const [period, setPeriod] = useAtom(periodAtom);
 
   return (
     <Select value={period} onValueChange={setPeriod}>

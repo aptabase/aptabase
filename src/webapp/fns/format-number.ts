@@ -1,4 +1,4 @@
-import { formatDuration, intervalToDuration } from "date-fns";
+import { FormatDurationOptions, formatDuration, intervalToDuration } from "date-fns";
 
 const formatDistanceLocale: Record<string, string> = {
   xSeconds: "{{count}}s",
@@ -6,11 +6,11 @@ const formatDistanceLocale: Record<string, string> = {
   xHours: "{{count}}h",
 };
 
-const durationFormat = {
+const durationFormat: FormatDurationOptions = {
   format: ["hours", "minutes", "seconds"],
   locale: {
-    formatDistance: (token, count) => formatDistanceLocale[token].replace("{{count}}", count),
-  } as Locale,
+    formatDistance: (token, count) => formatDistanceLocale[token].replace("{{count}}", count.toString()),
+  },
 };
 
 function formatLargeNumber(num: number): string {
