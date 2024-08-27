@@ -82,7 +82,7 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
             // todo use s3 buckets
             try
             {
-                const int pageSize = 200000; 
+                const int pageSize = 100000; 
                 long processedRecords = 0;
 
                 while (processedRecords < body.Events && !cancellationToken.IsCancellationRequested)
