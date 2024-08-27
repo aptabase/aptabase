@@ -1,17 +1,18 @@
-import { Link } from "react-router-dom";
-import { TopNSkeleton } from "./TopNSkeleton";
-import { TopNTitle } from "./TopNTitle";
 import { EmptyState } from "@components/EmptyState";
 import { ErrorState } from "@components/ErrorState";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/Tooltip";
 import { formatNumber } from "@fns/format-number";
 import { useLocalStorage } from "@hooks/use-localstorage";
-import { twMerge } from "tailwind-merge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/Tooltip";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { twMerge } from "tailwind-merge";
+import { TopNSkeleton } from "./TopNSkeleton";
+import { TopNTitle } from "./TopNTitle";
 
 type Item = {
   name: string;
   value: number;
+  key?: string;
 };
 
 type Props = {
@@ -70,7 +71,7 @@ export function TopNChart(props: Props) {
       <div className="grid text-sm mt-2 max-h-[22rem] overflow-y-auto">
         {props.items.map((item) => (
           <TopNRow
-            key={item.name}
+            key={item.key ?? item.name}
             item={item}
             format={format}
             percentage={Math.round(item.value) / total}

@@ -1,11 +1,11 @@
+import { useApps } from "@features/apps";
+import { useDatePicker } from "@hooks/use-datepicker";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { topEventProps } from "../query";
-import { useApps } from "@features/apps";
 import { TopNChart } from "./TopNChart";
 import { TopNTitle } from "./TopNTitle";
-import { useDatePicker } from "@hooks/use-datepicker";
 
 type Props = {
   appId: string;
@@ -90,20 +90,22 @@ export function TopEventProps(props: Props) {
         (selectedNumericKey[0] === "events" || x.numericKey === selectedNumericKey[1])
     )
     .map((row) => ({
-      name: row.stringValue,
+      name: (row.stringValue ? row.stringValue : "n/a") + (row.numericKey ? ` (${row.numericKey}) ` : ""),
       value: row[selectedNumericKey[0]],
+      key: [row.stringValue, row.numericKey, row.stringKey].join("-"),
     }))
     .sort((a, b) => b.value - a.value);
 
   /// When we have multiple numeric events, we need to dedupe the string props
-  /// when the "Events" value is selected, becauuse the query returns it multiple times
+  /// when the "Events" value is selected, because the query returns it multiple times
   if (numericKeys.length >= 2 && selectedNumericKey[0] === "events") {
     const deduped = items.reduce((acc, item) => {
-      acc[item.name] = item.value;
+      acc[item.name] = { value: item.value, key: item.key };
+      // acc[item.name] = item.value;
       return acc;
-    }, {} as Record<string, number>);
+    }, {} as Record<string, { value: number; key: string }>);
 
-    items = Object.keys(deduped).map((name) => ({ name, value: deduped[name] }));
+    items = Object.keys(deduped).map((name) => ({ name, value: deduped[name].value, key: deduped[name].key }));
   }
 
   // Having the key set to "events" will cause it to inherit settings from the EventWidget
