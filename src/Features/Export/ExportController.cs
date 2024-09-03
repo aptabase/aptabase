@@ -1,6 +1,7 @@
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Stats;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Aptabase.Features.Export;
@@ -11,9 +12,6 @@ public class DownloadRequest
     public string AppId { get; set; } = "";
     public string AppName { get; set; } = "";
     public string Format { get; set; } = "";
-    public int Month { get; set; }
-    public int Year { get; set; }
-    public long Events { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
 }
@@ -62,6 +60,26 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
         var appName = UnsafeCharacters().Replace(body.AppName, "").ToLower();
         var fileName = $"{appName}-{body.BuildMode.ToLower()}-{startDate:yyyy-MM-dd}.{fileExtension}";
 
+        var countQuery = $@"SELECT COUNT(*) as event_count
+                       FROM events
+                       WHERE app_id = '{GetAppId(body.BuildMode, body.AppId)}'
+                       AND timestamp BETWEEN '{startDate:yyyy-MM-dd HH:mm:ss}' AND '{endDate:yyyy-MM-dd HH:mm:ss}'
+                       FORMAT JSON";
+
+        using var stream = await _queryClient.StreamResponseAsync(countQuery, HttpContext.RequestAborted);
+        long eventCount = 0;
+        using var reader = new StreamReader(stream);
+        var jsonString = await reader.ReadToEndAsync();
+        using var doc = JsonDocument.Parse(jsonString);
+        var root = doc.RootElement;
+
+        if (root.TryGetProperty("data", out JsonElement data) &&
+            data.GetArrayLength() > 0 &&
+            data[0].TryGetProperty("event_count", out JsonElement countElement))
+        {
+            long.TryParse(countElement.GetString(), out eventCount);
+        }
+
         if (formatName == "Parquet")
         {
             var query = $@"SELECT timestamp, user_id, session_id,
@@ -78,9 +96,7 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
                        ORDER BY timestamp DESC
                        FORMAT {formatName}";
 
-            var stream = await _queryClient.StreamResponseAsync(query, HttpContext.RequestAborted);
-
-            return File(stream, contentType, fileName);
+            return File(await _queryClient.StreamResponseAsync(query, HttpContext.RequestAborted), contentType, fileName);
         }
 
         return new StreamingFileResult(async (stream, httpContext, cancellationToken) =>
@@ -93,7 +109,7 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
                 const int pageSize = 100000; 
                 long processedRecords = 0;
 
-                while (processedRecords < body.Events && !cancellationToken.IsCancellationRequested)
+                while (processedRecords < eventCount && !cancellationToken.IsCancellationRequested)
                 {
                     var query = $@"
                     SELECT timestamp, user_id, session_id,

@@ -18,7 +18,7 @@ type WeekWithStartEnd = {
   endDay: Date;
 };
 
-const EVENTS_COUNT_WITH_DROPDOWN = 70; //1000000;
+const EVENTS_COUNT_WITH_DROPDOWN = 1000000;
 
 export function YearlyGrid(props: Props) {
   const download = (fullMonth?: Props["months"][number], startDate?: Date, endDate?: Date) => () => {
