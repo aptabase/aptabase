@@ -77,7 +77,10 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
             data.GetArrayLength() > 0 &&
             data[0].TryGetProperty("event_count", out JsonElement countElement))
         {
-            long.TryParse(countElement.GetString(), out eventCount);
+            if (!countElement.TryGetInt64(out eventCount))
+            {
+                _ = long.TryParse(countElement.GetString(), out eventCount);
+            }
         }
 
         if (formatName == "Parquet")
