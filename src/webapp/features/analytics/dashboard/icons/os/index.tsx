@@ -1,5 +1,7 @@
 import { Icon3dCubeSphere } from "@tabler/icons-react";
 import { IconApple } from "./apple";
+import { IconFedoraLinux } from "./fedoralinux";
+
 
 type Props = {
   name: string;
@@ -19,6 +21,9 @@ export function OSIcon(props: Props) {
   let lcName = props.name.toLowerCase().replaceAll(/[^a-z]*/g, "");
   if (lcName === "ios" || lcName === "ipados" || lcName === "tvos") {
     return <IconApple className={props.className} />;
+  }
+  if (lcName === "fedora") {
+    return <IconFedoraLinux className={props.className} />;
   }
 
   const imageUrl = getOperatingSystemImageUrl(lcName);
