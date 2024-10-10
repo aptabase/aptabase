@@ -13,10 +13,6 @@ const router = createBrowserRouter([
         index: true,
         lazy: () => import("./features/auth/LoginPage"),
       },
-      {
-        path: "register",
-        lazy: () => import("./features/auth/RegisterPage"),
-      },
     ],
   },
   {

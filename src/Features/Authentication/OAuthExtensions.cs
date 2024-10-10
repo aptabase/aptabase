@@ -4,6 +4,8 @@ using System.Text.Json.Serialization;
 using Aptabase.Features;
 using Aptabase.Features.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication;
 
@@ -41,6 +43,16 @@ public static class OAuthExtensions
         public string Email { get; set; } = "";
         [JsonPropertyName("email_verified")]
         public bool EmailVerified { get; set; }
+    }
+
+    public class AuthentikUser
+    {
+        [JsonPropertyName("sub")]
+        public string Id { get; set; } = "";
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = "";
+        [JsonPropertyName("email")]
+        public string Email { get; set; } = "";
     }
 
     public static AuthenticationBuilder AddGitHub(this AuthenticationBuilder builder, EnvSettings env)
@@ -95,6 +107,67 @@ public static class OAuthExtensions
             };
         });
     }
+
+ public static AuthenticationBuilder AddAuthentik(this AuthenticationBuilder builder, EnvSettings env)
+{
+   
+
+    return builder.AddOpenIdConnect("authentik", o =>
+    {
+        o.ClientId = env.OAuthAuthentikClientId;
+        o.ClientSecret = env.OAuthAuthentikClientSecret;
+        o.Authority = "https://sso.informatik.sexy/application/o/neulandnextanalytics/";
+        o.MetadataAddress = "https://sso.informatik.sexy/application/o/neulandnextanalytics/.well-known/openid-configuration";
+        o.CallbackPath = new PathString("/api/_auth/authentik/callback");
+        o.ResponseType = "code"; // Standard OAuth 2.0 flow
+
+        o.Scope.Add("openid");
+        o.Scope.Add("profile");
+        o.Scope.Add("email");
+
+        o.SaveTokens = true; // Saves tokens in the authentication ticket
+        o.GetClaimsFromUserInfoEndpoint = true;
+
+        o.TokenValidationParameters.ValidateIssuer = true;
+        o.TokenValidationParameters.ValidateAudience = true;
+
+        o.CorrelationCookie.SameSite = env.IsDevelopment ? SameSiteMode.Unspecified : SameSiteMode.None;
+        o.CorrelationCookie.HttpOnly = true;
+        o.CorrelationCookie.IsEssential = true;
+        o.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+        o.Events = new OpenIdConnectEvents
+        {
+            OnAccessDenied = context =>
+            {
+                context.HandleResponse();
+                context.HttpContext.Response.Redirect($"{env.SelfBaseUrl}/auth");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = async context =>
+            {
+                var authentikUser = context.Principal;
+
+                var email = authentikUser?.FindFirst(c => c.Type == "email")?.Value;
+                var name = authentikUser?.FindFirst(c => c.Type == "name")?.Value ?? authentikUser?.Identity?.Name;
+                var id = authentikUser?.FindFirst(c => c.Type == "sub")?.Value;
+
+                if (string.IsNullOrWhiteSpace(email))
+                    throw new Exception("Email not found, can't login with Authentik.");
+
+                var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+                var user = await authService.FindOrCreateAccountWithOAuth(name ?? "", email, "authentik", id ?? "", context.HttpContext.RequestAborted);
+
+                // Add custom claims to the identity
+                var identity = (System.Security.Claims.ClaimsIdentity)context.Principal.Identity;
+                identity.AddClaim(new System.Security.Claims.Claim("id", user.Id.ToString()));
+                identity.AddClaim(new System.Security.Claims.Claim("name", user.Name));
+                identity.AddClaim(new System.Security.Claims.Claim("email", user.Email));
+            }
+        };
+    });
+}
+
 
     public static AuthenticationBuilder AddGoogle(this AuthenticationBuilder builder, EnvSettings env)
     {

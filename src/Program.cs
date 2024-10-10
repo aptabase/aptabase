@@ -17,6 +17,7 @@ using Features.Cache;
 using FluentMigrator.Runner;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
@@ -77,16 +78,19 @@ public partial class Program
         builder.Services.AddMemoryCache();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                        .AddCookie(options =>
-                        {
-                            options.ExpireTimeSpan = TimeSpan.FromDays(365);
-                            options.Cookie.Name = "auth-session";
-                            options.Cookie.SameSite = SameSiteMode.Strict;
-                            options.Cookie.HttpOnly = true;
-                            options.Cookie.IsEssential = true;
-                            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-                            options.Cookie.MaxAge = TimeSpan.FromDays(365);
-                        }).AddGitHub(appEnv).AddGoogle(appEnv);
+.AddCookie(options =>
+{
+    options.ExpireTimeSpan = TimeSpan.FromDays(365);
+    options.Cookie.Name = "auth-session";
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.MaxAge = TimeSpan.FromDays(365);
+})
+.AddGitHub(appEnv)
+.AddGoogle(appEnv)
+.AddAuthentik(appEnv);
 
         builder.Services.AddRateLimiter(c =>
         {

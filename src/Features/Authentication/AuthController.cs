@@ -54,13 +54,13 @@ public class AuthController : Controller
         return Ok(new { });
     }
 
-    [HttpPost("/api/_auth/register")]
-    [EnableRateLimiting("SignUp")]
-    public async Task<IActionResult> Register([FromBody] RegisterBodyRequest body, CancellationToken cancellationToken)
-    {
-        await _authService.SendRegisterEmailAsync(body.Name.Trim(), body.Email.Trim(), cancellationToken);
-        return Ok(new { });
-    }
+    // [HttpPost("/api/_auth/register")]
+    // [EnableRateLimiting("SignUp")]
+    // public async Task<IActionResult> Register([FromBody] RegisterBodyRequest body, CancellationToken cancellationToken)
+    // {
+    //     await _authService.SendRegisterEmailAsync(body.Name.Trim(), body.Email.Trim(), cancellationToken);
+    //     return Ok(new { });
+    // }
 
     [HttpGet("/api/_auth/github")]
     public IActionResult GitHub()
@@ -72,6 +72,12 @@ public class AuthController : Controller
     public IActionResult Google()
     {
         return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "google");
+    }
+
+    [HttpGet("/api/_auth/authentik")]
+    public IActionResult Authentik()
+    {
+        return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "authentik");
     }
 
     [HttpGet("/api/_auth/me")]

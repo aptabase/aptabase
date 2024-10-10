@@ -1,16 +1,14 @@
-import { requestSignInLink } from "@features/auth";
 import { Page } from "@components/Page";
+import { requestSignInLink } from "@features/auth";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { DataResidency } from "./DataResidency";
 import { LegalNotice } from "./LegalNotice";
+import { Logo } from "./Logo";
 import { RegionSwitch } from "./RegionSwitch";
+import { SignInWithAuthentik } from "./SignInWithAuthentik";
 import { SignInWithGitHub } from "./SignInWithGitHub";
 import { SignInWithGoogle } from "./SignInWithGoogle";
-import { isOAuthEnabled } from "@features/env";
-import { Logo } from "./Logo";
-import { Button } from "@components/Button";
-import { TextInput } from "@components/TextInput";
 
 type FormStatus = "idle" | "loading" | "success" | "notfound";
 
@@ -54,11 +52,7 @@ const RedirectErrorMessage = () => {
   }
   const message = error === "expired" ? "This link has expired." : "This link is invalid.";
 
-  return (
-    <p className="mx-auto text-center mb-10 text-destructive text-sm">
-      {message} Please request a new one.
-    </p>
-  );
+  return <p className="mx-auto text-center mb-10 text-destructive text-sm">{message} Please request a new one.</p>;
 };
 
 Component.displayName = "LoginPage";
@@ -87,25 +81,26 @@ export function Component() {
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="py-8 px-4 sm:rounded-lg sm:px-10">
-          {isOAuthEnabled && (
-            <>
-              <div className="space-y-2">
-                <SignInWithGitHub />
-                <SignInWithGoogle />
-              </div>
+          {/* {isOAuthEnabled && ( */}
+          <>
+            <div className="space-y-2">
+              <SignInWithGitHub />
+              <SignInWithGoogle />
+              <SignInWithAuthentik />
+            </div>
 
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-muted">OR</span>
-                </div>
+            {/* <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                <div className="w-full border-t" />
               </div>
-            </>
-          )}
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-muted">OR</span>
+              </div>
+            </div> */}
+          </>
+          {/* )} */}
 
-          <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+          {/* <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
             <TextInput
               label="Enter your email address"
               name="email"
@@ -120,7 +115,7 @@ export function Component() {
             <p className="text-center text-sm h-10 text-muted-foreground">
               <StatusMessage status={status} />
             </p>
-          </form>
+          </form> */}
         </div>
         <LegalNotice operation="signin" />
         <RegionSwitch />
