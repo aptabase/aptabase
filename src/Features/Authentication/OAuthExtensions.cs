@@ -4,8 +4,6 @@ using System.Text.Json.Serialization;
 using Aptabase.Features;
 using Aptabase.Features.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication;
 
@@ -22,7 +20,7 @@ public static class OAuthExtensions
         [JsonPropertyName("email")]
         public string Email { get; set; } = "";
     }
-    
+
     public class GitHubEmail
     {
         [JsonPropertyName("email")]
@@ -53,6 +51,8 @@ public static class OAuthExtensions
         public string Name { get; set; } = "";
         [JsonPropertyName("email")]
         public string Email { get; set; } = "";
+        [JsonPropertyName("groups")]
+        public string[] Groups { get; set; } = Array.Empty<string>();
     }
 
     public static AuthenticationBuilder AddGitHub(this AuthenticationBuilder builder, EnvSettings env)
@@ -108,65 +108,64 @@ public static class OAuthExtensions
         });
     }
 
- public static AuthenticationBuilder AddAuthentik(this AuthenticationBuilder builder, EnvSettings env)
-{
-   
-
-    return builder.AddOpenIdConnect("authentik", o =>
+    public static AuthenticationBuilder AddAuthentik(this AuthenticationBuilder builder, EnvSettings env)
     {
-        o.ClientId = env.OAuthAuthentikClientId;
-        o.ClientSecret = env.OAuthAuthentikClientSecret;
-        o.Authority = "https://sso.informatik.sexy/application/o/neulandnextanalytics/";
-        o.MetadataAddress = "https://sso.informatik.sexy/application/o/neulandnextanalytics/.well-known/openid-configuration";
-        o.CallbackPath = new PathString("/api/_auth/authentik/callback");
-        o.ResponseType = "code"; // Standard OAuth 2.0 flow
-
-        o.Scope.Add("openid");
-        o.Scope.Add("profile");
-        o.Scope.Add("email");
-
-        o.SaveTokens = true; // Saves tokens in the authentication ticket
-        o.GetClaimsFromUserInfoEndpoint = true;
-
-        o.TokenValidationParameters.ValidateIssuer = true;
-        o.TokenValidationParameters.ValidateAudience = true;
-
-        o.CorrelationCookie.SameSite = env.IsDevelopment ? SameSiteMode.Unspecified : SameSiteMode.None;
-        o.CorrelationCookie.HttpOnly = true;
-        o.CorrelationCookie.IsEssential = true;
-        o.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-
-        o.Events = new OpenIdConnectEvents
+        return builder.AddOAuth("authentik", o =>
         {
-            OnAccessDenied = context =>
+            o.ClientId = env.OAuthAuthentikClientId;
+            o.ClientSecret = env.OAuthAuthentikClientSecret;
+            o.Scope.Add("openid");
+            o.Scope.Add("profile");
+            o.Scope.Add("email");
+            o.AuthorizationEndpoint = "https://sso.informatik.sexy/application/o/authorize/";
+            o.TokenEndpoint = "https://sso.informatik.sexy/application/o/token/";
+            o.UserInformationEndpoint = "https://sso.informatik.sexy/application/o/userinfo/";
+            o.CallbackPath = new PathString("/api/_auth/authentik/callback");
+
+            o.CorrelationCookie.SameSite = env.IsDevelopment ? SameSiteMode.Unspecified : SameSiteMode.None;
+            o.CorrelationCookie.HttpOnly = true;
+            o.CorrelationCookie.IsEssential = true;
+            o.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+            o.ClaimActions.MapJsonKey("id", "id");
+            o.ClaimActions.MapJsonKey("name", "name");
+            o.ClaimActions.MapJsonKey("email", "email");
+
+            o.Events = new OAuthEvents
             {
-                context.HandleResponse();
-                context.HttpContext.Response.Redirect($"{env.SelfBaseUrl}/auth");
-                return Task.CompletedTask;
-            },
-            OnTokenValidated = async context =>
-            {
-                var authentikUser = context.Principal;
+                OnAccessDenied = context =>
+                {
+                    context.HandleResponse();
+                    context.HttpContext.Response.Redirect($"{env.SelfBaseUrl}/auth");
+                    return Task.CompletedTask;
+                },
+                OnCreatingTicket = async context =>
+                {
+                    var authentikUser = await MakeOAuthRequest<AuthentikUser>(context, "https://sso.informatik.sexy/application/o/userinfo/");
+                    if (authentikUser is null)
+                    {
+                        throw new Exception("Failed to retrieve Authentik user information.");
+                    }
+                    if (!authentikUser.Groups.Contains("Aptabase"))
+                    {
+                        throw new Exception("User is not in the Neuland Next Admin group");
+                    }
+                    // authenik user id is too long for the database, this is a temporary fix
+                    if (authentikUser.Id.Length > 40)
+                    {
+                        authentikUser.Id = authentikUser.Id.Substring(0, 40);
+                    }
+                    var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+                    var user = await authService.FindOrCreateAccountWithOAuth(authentikUser.Name, authentikUser.Email, "authentik", authentikUser.Id, context.HttpContext.RequestAborted);
 
-                var email = authentikUser?.FindFirst(c => c.Type == "email")?.Value;
-                var name = authentikUser?.FindFirst(c => c.Type == "name")?.Value ?? authentikUser?.Identity?.Name;
-                var id = authentikUser?.FindFirst(c => c.Type == "sub")?.Value;
 
-                if (string.IsNullOrWhiteSpace(email))
-                    throw new Exception("Email not found, can't login with Authentik.");
+                    context.RunClaimActions(JsonSerializer.SerializeToElement(new { id = user.Id, name = user.Name, email = user.Email }));
 
-                var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
-                var user = await authService.FindOrCreateAccountWithOAuth(name ?? "", email, "authentik", id ?? "", context.HttpContext.RequestAborted);
+                }
+            };
+        });
+    }
 
-                // Add custom claims to the identity
-                var identity = (System.Security.Claims.ClaimsIdentity)context.Principal.Identity;
-                identity.AddClaim(new System.Security.Claims.Claim("id", user.Id.ToString()));
-                identity.AddClaim(new System.Security.Claims.Claim("name", user.Name));
-                identity.AddClaim(new System.Security.Claims.Claim("email", user.Email));
-            }
-        };
-    });
-}
 
 
     public static AuthenticationBuilder AddGoogle(this AuthenticationBuilder builder, EnvSettings env)
