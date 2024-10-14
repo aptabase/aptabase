@@ -1,42 +1,49 @@
-version: "3"
 services:
-  pgdev:
-    container_name: aptabase_pgdev
+  aptabase:
+    container_name: aptabase_app
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: always
-    image: postgres:15
-    volumes:
-      - pgdev-data:/var/lib/postgresql/data
+    depends_on:
+      - aptabase_events_db
+      - aptabase_db
     ports:
-      - "5432:5432"
+      - 8000:8080
+    environment:
+      BASE_URL: http://localhost:8000 # replace with your ip or domain, including port if needed
+      AUTH_SECRET: c4rI4x8kz5DgKJ1is5Eiu9bNncSQ6ROD # get a strong secret from https://randomkeygen.com/
+      DATABASE_URL: Server=aptabase_db;Port=5432;User Id=aptabase;Password=sTr0NGp4ssw0rd;Database=aptabase
+      CLICKHOUSE_URL: Host=aptabase_events_db;Port=8123;Username=aptabase;Password=sTr0NGp4ssw0rd
+      OAUTH_AUTHENTIK_CLIENT_ID: abcdefghijklmnopqrstuvwxyz # replace with your client id
+      OAUTH_AUTHENTIK_CLIENT_SECRET: abcdefghijklmnopqrstuvwxyz # replace with your client secret
+
+  aptabase_db:
+    container_name: aptabase_db
+    image: postgres:15-alpine
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: aptabase
-      POSTGRES_PASSWORD: aptabase_pw
+      POSTGRES_PASSWORD: sTr0NGp4ssw0rd
 
-  clickhousedev:
-    container_name: aptabase_clickhousedev
-    image: clickhouse/clickhouse-server:23.8.4.69
+  aptabase_events_db:
+    container_name: aptabase_events_db
+    image: clickhouse/clickhouse-server:23.8.4.69-alpine
     restart: always
-    ports:
-      - "8123:8123"
     volumes:
-      - clickhousedev-data:/var/lib/clickhouse
+      - events-db-data:/var/lib/clickhouse
     environment:
       CLICKHOUSE_USER: aptabase
-      CLICKHOUSE_PASSWORD: aptabase_pw
+      CLICKHOUSE_PASSWORD: sTr0NGp4ssw0rd
     ulimits:
       nofile:
         soft: 262144
         hard: 262144
 
-  mailcatcher:
-    container_name: aptabase_mailcatcher
-    image: dockage/mailcatcher:0.8.2
-    ports:
-      - 1025:1025
-      - 1080:1080
-
 volumes:
-  pgdev-data:
+  db-data:
     driver: local
-  clickhousedev-data:
+  events-db-data:
     driver: local
