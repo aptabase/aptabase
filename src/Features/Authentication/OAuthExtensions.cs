@@ -146,23 +146,30 @@ public static class OAuthExtensions
                     {
                         throw new Exception("Failed to retrieve Authentik user information.");
                     }
+
                     if (!authentikUser.Groups.Contains("Aptabase"))
                     {
-                        throw new Exception("User is not in the Neuland Next Admin group");
+                        // Redirect to login page if the user is not in the Aptabasee group
+                        context.HttpContext.Response.StatusCode = 302;
+                        context.HttpContext.Response.Headers["Location"] = $"{env.SelfBaseUrl}/auth";
+                        await context.HttpContext.Response.CompleteAsync();
+                        return;
                     }
+
                     // authenik user id is too long for the database, this is a temporary fix
                     if (authentikUser.Id.Length > 40)
                     {
                         authentikUser.Id = authentikUser.Id.Substring(0, 40);
                     }
+
                     var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
                     var user = await authService.FindOrCreateAccountWithOAuth(authentikUser.Name, authentikUser.Email, "authentik", authentikUser.Id, context.HttpContext.RequestAborted);
 
-
                     context.RunClaimActions(JsonSerializer.SerializeToElement(new { id = user.Id, name = user.Name, email = user.Email }));
-
-                }
+                },
             };
+
+
         });
     }
 

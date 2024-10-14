@@ -80,13 +80,13 @@ public partial class Program
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 .AddCookie(options =>
 {
-    options.ExpireTimeSpan = TimeSpan.FromDays(365);
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
     options.Cookie.Name = "auth-session";
     options.Cookie.SameSite = SameSiteMode.Strict;
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    options.Cookie.MaxAge = TimeSpan.FromDays(365);
+    options.Cookie.MaxAge = TimeSpan.FromDays(7);
 })
 .AddGitHub(appEnv)
 .AddGoogle(appEnv)

@@ -43,16 +43,16 @@ public class AuthController : Controller
         _tokenManager = tokenManager ?? throw new ArgumentNullException(nameof(tokenManager));
     }
 
-    [HttpPost("/api/_auth/signin")]
-    public async Task<IActionResult> SignIn([FromBody] SignInBodyRequest body, CancellationToken cancellationToken)
-    {
-        var found = await _authService.SendSignInEmailAsync(body.Email.Trim(), cancellationToken);
+    // [HttpPost("/api/_auth/signin")]
+    // public async Task<IActionResult> SignIn([FromBody] SignInBodyRequest body, CancellationToken cancellationToken)
+    // {
+    //     var found = await _authService.SendSignInEmailAsync(body.Email.Trim(), cancellationToken);
 
-        if (!found)
-            return NotFound(new { });
+    //     if (!found)
+    //         return NotFound(new { });
 
-        return Ok(new { });
-    }
+    //     return Ok(new { });
+    // }
 
     // [HttpPost("/api/_auth/register")]
     // [EnableRateLimiting("SignUp")]
@@ -62,17 +62,17 @@ public class AuthController : Controller
     //     return Ok(new { });
     // }
 
-    [HttpGet("/api/_auth/github")]
-    public IActionResult GitHub()
-    {
-        return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "github");
-    }
+    // [HttpGet("/api/_auth/github")]
+    // public IActionResult GitHub()
+    // {
+    //     return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "github");
+    // }
 
-    [HttpGet("/api/_auth/google")]
-    public IActionResult Google()
-    {
-        return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "google");
-    }
+    // [HttpGet("/api/_auth/google")]
+    // public IActionResult Google()
+    // {
+    //     return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "google");
+    // }
 
     [HttpGet("/api/_auth/authentik")]
     public IActionResult Authentik()

@@ -7,8 +7,6 @@ import { LegalNotice } from "./LegalNotice";
 import { Logo } from "./Logo";
 import { RegionSwitch } from "./RegionSwitch";
 import { SignInWithAuthentik } from "./SignInWithAuthentik";
-import { SignInWithGitHub } from "./SignInWithGitHub";
-import { SignInWithGoogle } from "./SignInWithGoogle";
 
 type FormStatus = "idle" | "loading" | "success" | "notfound";
 
@@ -84,8 +82,6 @@ export function Component() {
           {/* {isOAuthEnabled && ( */}
           <>
             <div className="space-y-2">
-              <SignInWithGitHub />
-              <SignInWithGoogle />
               <SignInWithAuthentik />
             </div>
 
