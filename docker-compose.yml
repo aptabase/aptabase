@@ -1,9 +1,8 @@
 services:
   aptabase:
     container_name: aptabase_app
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/robert27/aptabase:authentik
+     
     restart: always
     depends_on:
       - aptabase_events_db
