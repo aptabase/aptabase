@@ -2,11 +2,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS server
 WORKDIR /work/src
 
-# Install dependencies for ARM architecture
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libc6-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 COPY ./src/Aptabase.csproj /work/src
 
 RUN dotnet restore "./Aptabase.csproj"
