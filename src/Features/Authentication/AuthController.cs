@@ -80,9 +80,24 @@ public class AuthController : Controller
     public async Task<IActionResult> Me(CancellationToken cancellationToken)
     {
         var identity = this.GetCurrentUserIdentity();
-        var user = await _authService.FindUserById(identity.Id, cancellationToken);
+        var user = await _authService.FindUserByIdAsync(identity.Id, cancellationToken);
         if (user is null)
             return NotFound();
+
+        return Ok(user);
+    }
+
+    [HttpPost("/api/_auth/account/delete")]
+    [IsAuthenticated]
+    [EnableCors("AllowAptabaseCom")]
+    public async Task<IActionResult> DeleteAccount(CancellationToken cancellationToken)
+    {
+        var identity = this.GetCurrentUserIdentity();
+        var user = await _authService.FindUserByIdAsync(identity.Id, cancellationToken);
+        if (user is null)
+            return NotFound();
+
+        await _authService.DeleteUserByIdAsync(identity.Id, cancellationToken);
 
         return Ok(user);
     }
@@ -100,7 +115,7 @@ public class AuthController : Controller
         try
         {
             var result = _tokenManager.ParseAuthToken(token);
-            var user = await _authService.FindUserByEmail(result.Email, cancellationToken);
+            var user = await _authService.FindUserByEmailAsync(result.Email, cancellationToken);
 
             if (result.Type == AuthTokenType.Register && user == null)
                 user = await _authService.CreateAccountAsync(result.Name, result.Email, cancellationToken);

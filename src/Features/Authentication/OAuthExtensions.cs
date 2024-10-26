@@ -89,7 +89,7 @@ public static class OAuthExtensions
                         throw new Exception("Could not find a verified email, can't login with GitHub.");
 
                     var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
-                    var user = await authService.FindOrCreateAccountWithOAuth(ghUser.Name, ghUser.Email, "github", ghUser.Id.ToString(), context.HttpContext.RequestAborted);
+                    var user = await authService.FindOrCreateAccountWithOAuthAsync(ghUser.Name, ghUser.Email, "github", ghUser.Id.ToString(), context.HttpContext.RequestAborted);
                     context.RunClaimActions(JsonSerializer.SerializeToElement(new { id = user.Id, name = user.Name, email = user.Email }));
                 }
             };
@@ -137,7 +137,7 @@ public static class OAuthExtensions
                         throw new Exception("Email not verified, can't login with Google.");
 
                     var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
-                    var user = await authService.FindOrCreateAccountWithOAuth(googleUser.Name, googleUser.Email, "google", googleUser.Id, context.HttpContext.RequestAborted);
+                    var user = await authService.FindOrCreateAccountWithOAuthAsync(googleUser.Name, googleUser.Email, "google", googleUser.Id, context.HttpContext.RequestAborted);
                     context.RunClaimActions(JsonSerializer.SerializeToElement(new { id = user.Id, name = user.Name, email = user.Email }));
                 }
             };

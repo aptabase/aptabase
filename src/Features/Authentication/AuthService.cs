@@ -13,12 +13,13 @@ public interface IAuthService
     Task SendRegisterEmailAsync(string name, string email, CancellationToken cancellationToken);
     Task SignInAsync(UserAccount user);
     Task SignOutAsync();
-    Task<UserAccount?> FindUserById(string id, CancellationToken cancellationToken);
-    Task<UserAccount?> FindUserByEmail(string email, CancellationToken cancellationToken);
-    Task<UserAccount?> FindUserByOAuthProvider(string providerName, string providerUid, CancellationToken cancellationToken);
-    Task<UserAccount> FindOrCreateAccountWithOAuth(string name, string email, string providerName, string providerUid, CancellationToken cancellationToken);
+    Task<UserAccount?> FindUserByIdAsync(string id, CancellationToken cancellationToken);
+    Task<UserAccount?> FindUserByEmailAsync(string email, CancellationToken cancellationToken);
+    Task<UserAccount?> FindUserByOAuthProviderAsync(string providerName, string providerUid, CancellationToken cancellationToken);
+    Task<UserAccount> FindOrCreateAccountWithOAuthAsync(string name, string email, string providerName, string providerUid, CancellationToken cancellationToken);
     Task<UserAccount> CreateAccountAsync(string name, string email, CancellationToken cancellationToken);
     Task AttachUserAuthProviderAsync(UserAccount user, string providerName, string providerUid, CancellationToken cancellationToken);
+    Task DeleteUserByIdAsync(string id, CancellationToken cancellationToken);
 }
 
 public class AuthService : IAuthService
@@ -48,7 +49,7 @@ public class AuthService : IAuthService
 
     public async Task<bool> SendSignInEmailAsync(string email, CancellationToken cancellationToken)
     {
-        var user = await FindUserByEmail(email, cancellationToken);
+        var user = await FindUserByEmailAsync(email, cancellationToken);
         if (user != null)
         {
             var token = _tokenManager.CreateAuthToken(AuthTokenType.SignIn, user.Name, user.Email);
@@ -66,7 +67,7 @@ public class AuthService : IAuthService
 
     public async Task SendRegisterEmailAsync(string name, string email, CancellationToken cancellationToken)
     {
-        var user = await FindUserByEmail(email, cancellationToken);
+        var user = await FindUserByEmailAsync(email, cancellationToken);
         if (user != null)
         {
             await SendSignInEmailAsync(email, cancellationToken);
@@ -114,9 +115,9 @@ public class AuthService : IAuthService
 
         var claims = new List<Claim>
         {
-            new Claim("id", user.Id),
-            new Claim("name", user.Name),
-            new Claim("email", user.Email),
+            new("id", user.Id),
+            new("name", user.Name),
+            new("email", user.Email),
         };
 
         var claimsIdentity = new ClaimsIdentity(
@@ -134,25 +135,67 @@ public class AuthService : IAuthService
             authProperties);
     }
 
-    public async Task<UserAccount?> FindUserById(string id, CancellationToken cancellationToken)
+    public async Task DeleteUserByIdAsync(string id, CancellationToken cancellationToken)
+    {
+        using var transaction = await _db.Connection.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            var sql = @"
+            DELETE FROM public.app_shares 
+            WHERE app_id IN (SELECT id FROM public.apps WHERE owner_id = @userId);
+
+            DELETE FROM public.app_salts 
+            WHERE app_id IN (SELECT id FROM public.apps WHERE owner_id = @userId);
+
+            DELETE FROM public.apps 
+            WHERE owner_id = @userId;
+
+            DELETE FROM public.user_providers 
+            WHERE user_id = @userId;
+
+            DELETE FROM public.subscriptions 
+            WHERE owner_id = @userId;
+
+            DELETE FROM public.users 
+            WHERE id = @userId;";
+
+            var cmd = new CommandDefinition(
+                sql,
+                new { userId = id },
+                transaction: transaction,
+                cancellationToken: cancellationToken
+            );
+
+            await _db.Connection.ExecuteAsync(cmd);
+
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
+    }
+
+    public async Task<UserAccount?> FindUserByIdAsync(string id, CancellationToken cancellationToken)
     {
         var cmd = new CommandDefinition($"SELECT id, name, email, lock_reason FROM users WHERE id = @id", new { id }, cancellationToken: cancellationToken);
         return await _db.Connection.QuerySingleOrDefaultAsync<UserAccount>(cmd);
     }
 
-    public async Task<UserAccount?> FindUserByEmail(string email, CancellationToken cancellationToken)
+    public async Task<UserAccount?> FindUserByEmailAsync(string email, CancellationToken cancellationToken)
     {
         var cmd = new CommandDefinition($"SELECT id, name, email, lock_reason FROM users WHERE email = @email", new { email = email.ToLower() }, cancellationToken: cancellationToken);
         return await _db.Connection.QuerySingleOrDefaultAsync<UserAccount>(cmd);
     }
 
-    public async Task<UserAccount> FindOrCreateAccountWithOAuth(string name, string email, string providerName, string providerUid, CancellationToken cancellationToken)
+    public async Task<UserAccount> FindOrCreateAccountWithOAuthAsync(string name, string email, string providerName, string providerUid, CancellationToken cancellationToken)
     {
-        var user = await this.FindUserByOAuthProvider(providerName, providerUid, cancellationToken);
+        var user = await FindUserByOAuthProviderAsync(providerName, providerUid, cancellationToken);
         if (user is not null)
             return user;
 
-        user = await FindUserByEmail(email, cancellationToken);
+        user = await FindUserByEmailAsync(email, cancellationToken);
         if (user is not null)
         {
             await AttachUserAuthProviderAsync(user, providerName, providerUid, cancellationToken);
@@ -164,7 +207,7 @@ public class AuthService : IAuthService
         return user;
     }
 
-    public async Task<UserAccount?> FindUserByOAuthProvider(string providerName, string providerUid, CancellationToken cancellationToken)
+    public async Task<UserAccount?> FindUserByOAuthProviderAsync(string providerName, string providerUid, CancellationToken cancellationToken)
     {
         var cmd = new CommandDefinition($@"
             SELECT u.id, u.name, u.email, u.lock_reason
