@@ -135,12 +135,10 @@ public class AuthService : IAuthService
             authProperties);
     }
 
-    public async Task DeleteUserByIdAsync(string id, CancellationToken cancellationToken)
+    public Task DeleteUserByIdAsync(string id, CancellationToken cancellationToken)
     {
-        using var transaction = await _db.Connection.BeginTransactionAsync(cancellationToken);
-        try
-        {
-            var sql = @"
+        var sql = @"
+        BEGIN;
             DELETE FROM public.app_shares 
             WHERE app_id IN (SELECT id FROM public.apps WHERE owner_id = @userId);
 
@@ -157,24 +155,16 @@ public class AuthService : IAuthService
             WHERE owner_id = @userId;
 
             DELETE FROM public.users 
-            WHERE id = @userId;";
+            WHERE id = @userId;
+        COMMIT;";
 
-            var cmd = new CommandDefinition(
-                sql,
-                new { userId = id },
-                transaction: transaction,
-                cancellationToken: cancellationToken
-            );
+        var cmd = new CommandDefinition(
+            sql,
+            new { userId = id },
+            cancellationToken: cancellationToken
+        );
 
-            await _db.Connection.ExecuteAsync(cmd);
-
-            await transaction.CommitAsync(cancellationToken);
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+        return _db.Connection.ExecuteAsync(cmd);
     }
 
     public async Task<UserAccount?> FindUserByIdAsync(string id, CancellationToken cancellationToken)

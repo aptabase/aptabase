@@ -1,13 +1,13 @@
-import React, { Fragment } from "react";
-import { Menu, Transition } from "@headlessui/react";
-import { IconCreditCard, IconDoorExit } from "@tabler/icons-react";
-import { Link } from "react-router-dom";
+import { PingSignal } from "@components/PingSignal";
 import { useBillingState } from "@features/billing";
 import { isBillingEnabled } from "@features/env";
-import { signOut, UserAccount, UserAvatar } from "../auth";
-import { twMerge } from "tailwind-merge";
-import { PingSignal } from "@components/PingSignal";
 import { ThemeToggle } from "@features/theme";
+import { Menu, Transition } from "@headlessui/react";
+import { IconCreditCard, IconDoorExit } from "@tabler/icons-react";
+import React, { Fragment } from "react";
+import { Link } from "react-router-dom";
+import { twMerge } from "tailwind-merge";
+import { signOut, UserAccount, UserAvatar } from "../auth";
 
 type Props = {
   user: UserAccount;
@@ -74,7 +74,7 @@ export function UserMenu(props: Props) {
               <Divider />
               <MenuItem href="/billing">
                 <IconCreditCard className="w-4 h-4" />
-                <span>Billing</span>
+                <span>Billing & Profile</span>
                 {billing === "OVERUSE" && <PingSignal color="warning" size="sm" />}
               </MenuItem>
             </>
