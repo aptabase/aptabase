@@ -13,4 +13,5 @@ public class VersionTable : IVersionTableMetaData
     public string DescriptionColumnName => "description";
     public object? ApplicationContext { get; set; }
     public bool OwnsSchema => true;
+    public bool CreateWithPrimaryKey => false;
 }
