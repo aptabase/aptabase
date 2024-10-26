@@ -1,11 +1,14 @@
-import { Page, PageHeading } from "@components/Page";
-import { CurrentUsage } from "./CurrentUsage";
-import { CurrentPlan } from "./CurrentPlan";
-import { BillingHistoricalUsage, BillingInfo, useBilling, useHistoricalData } from "./useBilling";
+import { Button } from "@components/Button";
 import { ErrorState } from "@components/ErrorState";
 import { LoadingState } from "@components/LoadingState";
-import { MonthlyUsageChart } from "./MonthlyUsageChart";
+import { Page, PageHeading } from "@components/Page";
 import { formatPeriod } from "@fns/format-date";
+import { useState } from "react";
+import { CurrentPlan } from "./CurrentPlan";
+import { CurrentUsage } from "./CurrentUsage";
+import { DeleteAccountModal } from "./DeleteAccountModal";
+import { MonthlyUsageChart } from "./MonthlyUsageChart";
+import { BillingHistoricalUsage, BillingInfo, useBilling, useHistoricalData } from "./useBilling";
 
 Component.displayName = "BillingPage";
 export function Component() {
@@ -29,6 +32,10 @@ export function Component() {
 }
 
 function Body(props: { billing: BillingInfo; historical: BillingHistoricalUsage[] }) {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const openDeleteModal = () => setShowDeleteModal(true);
+  const closeDeleteModal = () => setShowDeleteModal(false);
+
   return (
     <>
       <div className="grid lg:grid-cols-2 items-stretch gap-4">
@@ -69,6 +76,48 @@ function Body(props: { billing: BillingInfo; historical: BillingHistoricalUsage[
           </div>
         </div>
       </div>
+
+      <div className="mt-12">
+        <PageHeading title="Danger Zone" subtitle="Be careful with these actions" />
+        <div className="border-[0.5px] border-destructive rounded-md mt-4">
+          <DangerZoneItem
+            title="Delete Account"
+            description="Once you delete your account, there is no going back."
+            subDescription="All events and associated data will be permanently erased from our database."
+            actionText="Delete account"
+            onClick={openDeleteModal}
+          />
+        </div>
+      </div>
+
+      <DeleteAccountModal open={showDeleteModal} onClose={closeDeleteModal} />
     </>
+  );
+}
+
+function DangerZoneItem({
+  title,
+  description,
+  subDescription,
+  actionText,
+  onClick,
+}: {
+  title: string;
+  description: string;
+  subDescription: string;
+  actionText: string;
+  onClick: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between p-4 border-b border-destructive last:border-b-0">
+      <div>
+        <h3 className="font-semibold">{title}</h3>
+        <p className="text-sm text-muted-foreground">{description}</p>
+        <p className="text-sm text-muted-foreground">{subDescription}</p>
+      </div>
+      <Button variant="destructive" onClick={onClick}>
+        {actionText}
+      </Button>
+    </div>
   );
 }
