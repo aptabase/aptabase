@@ -77,9 +77,17 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
             data.GetArrayLength() > 0 &&
             data[0].TryGetProperty("event_count", out JsonElement countElement))
         {
-            if (!countElement.TryGetInt64(out eventCount))
+            switch (countElement.ValueKind)
             {
-                _ = long.TryParse(countElement.GetString(), out eventCount);
+                case JsonValueKind.Number:
+                    _ = countElement.TryGetInt64(out eventCount);
+                    break;
+                case JsonValueKind.String:
+                    var countString = countElement.GetString();
+                    _ = long.TryParse(countString, out eventCount);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unexpected event_count type: {countElement.ValueKind}");
             }
         }
 
