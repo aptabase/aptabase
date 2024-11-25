@@ -92,7 +92,16 @@ export function MainChartWidget(props: Props) {
     events: number[] = [],
     labels: string[] = [];
 
-  data?.forEach((x) => {
+  let visibleData = data;
+  // If the start date matches start of date we are filtering by 'All time'
+  // So avoid displaying all samples until the first one that contains data
+  if (startDateIso === new Date(0).toISOString() && !!data?.length) {
+    const firstItemWithData = data.findIndex((x) => !!x.events || !!x.sessions || !!x.users);
+    const sliceDataFrom = firstItemWithData > 2 ? firstItemWithData - 2 : Math.max(0, firstItemWithData);
+    visibleData = data.slice(sliceDataFrom);
+  }
+
+  visibleData?.forEach((x) => {
     users.push(x.users);
     sessions.push(x.sessions);
     events.push(x.events);
