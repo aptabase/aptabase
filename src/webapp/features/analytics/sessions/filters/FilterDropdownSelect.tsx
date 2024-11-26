@@ -22,7 +22,7 @@ export function FilterDropdownSelect(props: Props) {
       >
         <SelectValue placeholder={props.placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="max-h-[410px] overflow-y-auto">
         {props.data.items
           ?.filter((i) => !!i.name)
           .map((option) => (
