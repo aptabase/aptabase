@@ -1,4 +1,5 @@
 import { api } from "@fns/api";
+import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 
 export type TopNItem = {
   name: string;
@@ -16,6 +17,13 @@ export type QueryParams = {
   osName?: string;
   eventName?: string;
   appVersion?: string;
+};
+
+export type TopNQueryChildrenProps = {
+  isLoading: boolean;
+  isError: boolean;
+  items: TopNItem[];
+  refetch?: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<TopNItem[], Error>>;
 };
 
 export function topCountries(params: QueryParams): Promise<TopNItem[]> {
