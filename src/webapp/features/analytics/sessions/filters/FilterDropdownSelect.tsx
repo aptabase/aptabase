@@ -1,5 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/Select";
 import { TopNQueryChildrenProps } from "@features/analytics/query";
+import { useMemo } from "react";
 
 type Props = {
   value: string | undefined;
@@ -13,6 +14,11 @@ export function FilterDropdownSelect(props: Props) {
     return null;
   }
 
+  const options = useMemo(
+    () => props.data.items?.filter((i) => !!i.name).sort((a, b) => a.name.localeCompare(b.name)),
+    [props.data.items]
+  );
+
   return (
     <Select value={props.value} onValueChange={props.onValueChange}>
       <SelectTrigger
@@ -23,13 +29,11 @@ export function FilterDropdownSelect(props: Props) {
         <SelectValue placeholder={props.placeholder} />
       </SelectTrigger>
       <SelectContent className="max-h-[410px] overflow-y-auto">
-        {props.data.items
-          ?.filter((i) => !!i.name)
-          .map((option) => (
-            <SelectItem key={option.value} value={option.name}>
-              {option.name || "Unknown"}
-            </SelectItem>
-          ))}
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.name}>
+            {option.name || "Unknown"}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );
