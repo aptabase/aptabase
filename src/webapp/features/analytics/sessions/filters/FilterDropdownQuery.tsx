@@ -3,8 +3,6 @@ import { useApps } from "@features/apps";
 import { useQuery } from "@tanstack/react-query";
 import { startOfDay, subMonths, subWeeks } from "date-fns";
 
-export const EMPTY_DROPDOWN_VALUE = "EMPTY_DROPDOWN_VALUE";
-
 type Props = {
   appId: string;
   queryKey: string;
