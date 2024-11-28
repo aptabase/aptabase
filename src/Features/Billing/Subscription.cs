@@ -57,8 +57,8 @@ public class SubscriptionPlan
             ?? throw new InvalidOperationException($"Subscription Variant not found for ID {variantId}");
     }
 
-    private static readonly SubscriptionPlan[] DevelopmentPlans = new[]
-    {
+    private static readonly SubscriptionPlan[] DevelopmentPlans =
+    [
         new SubscriptionPlan("200k Plan", 200_000, 10, 85183, null),
         new SubscriptionPlan("1M Plan", 1_000_000, 20, 85184, null),
         new SubscriptionPlan("2M Plan", 2_000_000, 40, 85185, null),
@@ -67,10 +67,10 @@ public class SubscriptionPlan
         new SubscriptionPlan("20M Plan", 20_000_000, 240, 85190, null),
         new SubscriptionPlan("30M Plan", 30_000_000, 300, 85192, null),
         new SubscriptionPlan("50M Plan", 50_000_000, 450, 85194, null),
-    };
+    ];
 
-    private static readonly SubscriptionPlan[] ProductionPlans = new[]
-    {
+    private static readonly SubscriptionPlan[] ProductionPlans =
+    [
         new SubscriptionPlan("200k Plan", 200_000, 10, 103474, null),
         new SubscriptionPlan("1M Plan", 1_000_000, 20, 103475, null),
         new SubscriptionPlan("2M Plan", 2_000_000, 40, 103476, null),
@@ -79,5 +79,7 @@ public class SubscriptionPlan
         new SubscriptionPlan("20M Plan", 20_000_000, 240, 103479, null),
         new SubscriptionPlan("30M Plan", 30_000_000, 300, 103480, null),
         new SubscriptionPlan("50M Plan", 50_000_000, 450, 103481, null),
-    };
+        new SubscriptionPlan("100M Plan", 100_000_000, 750, 614418, null),
+        new SubscriptionPlan("200M Plan", 200_000_000, 1200, 614417, null),
+    ];
 }
