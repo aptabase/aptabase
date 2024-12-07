@@ -93,7 +93,7 @@ export function TopEventProps(props: Props) {
         (selectedNumericKey[0] === "events" || x.numericKey === selectedNumericKey[1])
     )
     .map((row) => ({
-      name: (row.stringValue ? row.stringValue : "n/a") + (row.numericKey ? ` (${row.numericKey}) ` : ""),
+      name: row.stringValue,
       value: row[selectedNumericKey[0]],
       key: [row.stringValue, row.numericKey, row.stringKey].join("-"),
     }))
@@ -103,8 +103,10 @@ export function TopEventProps(props: Props) {
   /// when the "Events" value is selected, because the query returns it multiple times
   if (numericKeys.length >= 2 && selectedNumericKey[0] === "events") {
     const deduped = items.reduce((acc, item) => {
-      acc[item.name] = { value: item.value, key: item.key };
-      // acc[item.name] = item.value;
+      const existingValue = acc[item.name]?.value ?? 0;
+      if (item.value > existingValue) {
+        acc[item.name] = { value: item.value, key: item.key };
+      }
       return acc;
     }, {} as Record<string, { value: number; key: string }>);
 
