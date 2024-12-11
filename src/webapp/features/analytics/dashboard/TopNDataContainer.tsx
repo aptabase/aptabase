@@ -1,22 +1,15 @@
 import { useApps } from "@features/apps";
-import { QueryObserverResult, RefetchOptions, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { useSearchParams } from "react-router-dom";
 import { dateFilterValuesAtom } from "../../../atoms/date-atoms";
-import { QueryParams, TopNItem } from "../query";
-
-type ChildrenProps = {
-  isLoading: boolean;
-  isError: boolean;
-  items: TopNItem[];
-  refetch?: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<TopNItem[], Error>>;
-};
+import { QueryParams, TopNItem, TopNQueryChildrenProps } from "../query";
 
 type Props = {
   appId: string;
   queryName: string;
   query: (params: QueryParams) => Promise<TopNItem[]>;
-  children: (props: ChildrenProps) => JSX.Element;
+  children: (props: TopNQueryChildrenProps) => JSX.Element;
 };
 
 export function TopNDataContainer(props: Props) {

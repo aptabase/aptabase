@@ -5,6 +5,8 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { QueryParams, historicalSessions } from "../query";
+import { EMPTY_DROPDOWN_VALUE } from "./filters/FilterDropdownQuery";
+import { UsersSessionsFilters } from "./UsersSessionsFilters";
 
 const SESSIONS_PAGE_SIZE = 10;
 
@@ -13,26 +15,39 @@ type Props = {
   buildMode: "release" | "debug";
 };
 
+type TopFilterValue = {
+  osName?: string;
+  country?: string;
+  appVersion?: string;
+};
+
 export function UserSessionsList(props: Props) {
   const location = useLocation();
   const locationStateFilters = location.state?.sessionFilters;
   const [dateFilters, setDateFilters] = useState<SessionStartEndDateFilters>(locationStateFilters || {});
+  const [topFilters, setTopFilters] = useState<TopFilterValue>({});
 
   const requestParams: QueryParams = useMemo(() => {
+    const countryCode = topFilters.country === EMPTY_DROPDOWN_VALUE || !topFilters.country ? "" : topFilters.country;
+    const appVersion =
+      topFilters.appVersion === EMPTY_DROPDOWN_VALUE || !topFilters.appVersion ? "" : topFilters.appVersion;
     const allParams: QueryParams = {
       appId: props.appId,
       buildMode: props.buildMode,
       startDate: dateFilters.startDate,
       endDate: dateFilters.endDate,
       sessionId: dateFilters.sessionId,
+      osName: topFilters.osName,
+      countryCode,
+      appVersion,
     };
 
     const params = Object.fromEntries(Object.entries(allParams).filter(([_, v]) => v != null));
     return params as QueryParams;
-  }, [props, dateFilters]);
+  }, [props, dateFilters, topFilters]);
 
   const { data, isSuccess, isPlaceholderData } = useQuery({
-    queryKey: ["historical-sessions", props.appId, props.buildMode, dateFilters],
+    queryKey: ["historical-sessions", props.appId, props.buildMode, dateFilters, topFilters],
     queryFn: () => historicalSessions(requestParams),
     placeholderData: keepPreviousData,
   });
@@ -70,6 +85,7 @@ export function UserSessionsList(props: Props) {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)]">
+      <UsersSessionsFilters appId={props.appId} onFiltersChange={setTopFilters} />
       <div className="mb-auto">
         <SessionsGridDisplay
           appId={props.appId}

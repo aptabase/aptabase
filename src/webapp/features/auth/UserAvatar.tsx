@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { UserAccount } from ".";
 
 type Props = {
@@ -5,6 +6,7 @@ type Props = {
 };
 
 export function UserAvatar(props: Props) {
+  const [errorRetryCount, setErrorRetryCount] = useState(0);
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const parts = props.user.name.split(" ");
     let first = parts.shift()?.charAt(0) ?? "";
@@ -12,7 +14,12 @@ export function UserAvatar(props: Props) {
 
     // If there is only one name, add a space at the start to make the second letter smaller
     const initials = last ? `${first}${last}` : ` ${first}`;
-    e.currentTarget.src = `https://avatar.vercel.sh/${props.user.id}.svg?text=${initials}`;
+    if (errorRetryCount <= 1) {
+      e.currentTarget.src = `https://avatar.vercel.sh/${props.user.id}.svg?text=${initials}`;
+    } else {
+      e.currentTarget.src = "";
+    }
+    setErrorRetryCount(errorRetryCount + 1);
   };
 
   return (
