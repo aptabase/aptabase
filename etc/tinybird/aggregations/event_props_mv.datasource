@@ -1,0 +1,23 @@
+# Data Source created from Pipe 'top_props_daily'
+
+SCHEMA >
+    `app_id` String,
+    `period` DateTime,
+    `country_code` LowCardinality(String),
+    `event_name` String,
+    `os_name` LowCardinality(String),
+    `device_model` String,
+    `app_version` String,
+    `string_key` String,
+    `string_value` String,
+    `numeric_key` String,
+    `events_count` AggregateFunction(count),
+    `numeric_value_state` AggregateFunction(quantile, Float32),
+    `min_value_state` AggregateFunction(min, Float32),
+    `max_value_state` AggregateFunction(max, Float32),
+    `sum_value_state` AggregateFunction(sum, Float32)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(period)"
+ENGINE_SORTING_KEY "app_id, period, event_name, string_key, string_value, numeric_key, country_code, os_name, app_version, device_model"
+ENGINE_TTL "period + toIntervalDay(1500)"

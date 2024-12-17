@@ -1,0 +1,22 @@
+# Data Source created from Pipe 'key_metrics_daily_v2'
+
+SCHEMA >
+    `app_id` String,
+    `period` DateTime,
+    `country_code` LowCardinality(String),
+    `region_name` LowCardinality(String),
+    `event_name` String,
+    `os_name` LowCardinality(String),
+    `os_version` String,
+    `device_model` String,
+    `app_version` String,
+    `user_id` String,
+    `session_id` String,
+    `min_ts` AggregateFunction(min, DateTime),
+    `max_ts` AggregateFunction(max, DateTime),
+    `events_count` AggregateFunction(count)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(period)"
+ENGINE_SORTING_KEY "app_id, period, event_name, country_code, region_name, os_name, os_version, app_version, device_model, user_id, session_id"
+ENGINE_TTL "period + toIntervalDay(1500)"

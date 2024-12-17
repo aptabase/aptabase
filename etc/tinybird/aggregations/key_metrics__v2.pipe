@@ -1,0 +1,46 @@
+TOKEN "aptabase-api" READ
+
+TOKEN "key_metrics__v2_endpoint_read_4996" READ
+
+NODE endpoint
+SQL >
+
+    %
+    WITH SessionStats AS (
+        SELECT 
+            period,
+            user_id,
+            session_id,
+            maxMerge(max_ts) - minMerge(min_ts) as duration,
+            countMerge(events_count) as session_count
+        FROM events_daily_v2_mv
+        PREWHERE app_id = {{String(app_id)}}
+        WHERE 1 = 1
+        {% if defined(date_from) and defined(date_to) %}
+        AND period BETWEEN {{String(date_from)}} AND {{String(date_to)}}
+        {% end %}
+        {% if defined(country_code) %}
+        AND country_code = {{String(country_code)}}
+        {% end %}
+        {% if defined(event_name) %}
+        AND event_name = {{String(event_name)}}
+        {% end %}
+        {% if defined(os_name) %}
+        AND os_name = {{String(os_name)}}
+        {% end %}
+        {% if defined(device_model) %}
+        AND device_model = {{String(device_model)}}
+        {% end %}
+        {% if defined(app_version) %}
+        AND app_version = {{String(app_version)}}
+        {% end %}
+        GROUP BY period, user_id, session_id
+    )
+    SELECT 
+        uniqExact(user_id) / (date_diff('day', min(period), max(period)) + if(date_diff('day', min(period), max(period)) = 0, 1, 0)) AS DailyUsers,
+        uniqExact(session_id) as Sessions,
+        if(isNaN(median(duration)), 0, median(duration)) as DurationSeconds,
+        sum(session_count) as Events
+    FROM SessionStats
+
+

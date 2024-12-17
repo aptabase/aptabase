@@ -1,0 +1,40 @@
+TOKEN "aptabase-api" READ
+
+TOKEN "top_n__v2_endpoint_read_6905" READ
+
+NODE endpoint
+SQL >
+
+    %
+    SELECT 
+        {{column(name_column, 'country_code')}} as Name,
+        {% if value_column == 'UniqueSessions' %}
+        uniqExact(session_id) as Value
+        {% else %}
+        countMerge(events_count) as Value
+        {% end %}
+    FROM events_daily_v2_mv
+    PREWHERE app_id = {{String(app_id)}}
+    WHERE 1 = 1
+    {% if defined(date_from) and defined(date_to) %}
+    AND period BETWEEN {{String(date_from)}} AND {{String(date_to)}}
+    {% end %}
+    {% if defined(country_code) %}
+    AND country_code = {{String(country_code)}}
+    {% end %}
+    {% if defined(event_name) %}
+    AND event_name = {{String(event_name)}}
+    {% end %}
+    {% if defined(os_name) %}
+    AND os_name = {{String(os_name)}}
+    {% end %}
+    {% if defined(device_model) %}
+    AND device_model = {{String(device_model)}}
+    {% end %}
+    {% if defined(app_version) %}
+    AND app_version = {{String(app_version)}}
+    {% end %}
+    GROUP BY Name
+    ORDER BY Value DESC
+
+
