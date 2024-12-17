@@ -1,0 +1,27 @@
+# Data Source created from Pipe 'sessions_live'
+
+SCHEMA >
+    `app_id` String,
+    `session_id` String,
+    `user_id` String,
+    `event_name` String,
+    `min_timestamp` SimpleAggregateFunction(min, DateTime),
+    `max_timestamp` SimpleAggregateFunction(max, DateTime),
+    `os_name` SimpleAggregateFunction(any, String),
+    `os_version` SimpleAggregateFunction(any, String),
+    `locale` SimpleAggregateFunction(any, String),
+    `app_version` SimpleAggregateFunction(any, String),
+    `app_build_number` SimpleAggregateFunction(any, String),
+    `engine_name` SimpleAggregateFunction(any, String),
+    `engine_version` SimpleAggregateFunction(any, String),
+    `sdk_version` SimpleAggregateFunction(any, String),
+    `country_code` SimpleAggregateFunction(any, String),
+    `region_name` SimpleAggregateFunction(any, String),
+    `events_count` AggregateFunction(count),
+    `events_timestamp` AggregateFunction(groupArray, DateTime),
+    `events_string_props` AggregateFunction(groupArray, String),
+    `events_numeric_props` AggregateFunction(groupArray, String)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_SORTING_KEY "app_id, session_id, user_id, event_name"
+ENGINE_TTL "min_timestamp + toIntervalDay(30)"
