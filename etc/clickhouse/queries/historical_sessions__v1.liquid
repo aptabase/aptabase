@@ -13,7 +13,7 @@ WHERE app_id = '{{app_id}}'
 AND country_code = '{{country_code}}'
 {% endif %}
 {% if event_name %}
-AND has(events_name, '{{event_name}}')
+AND has(groupArrayMerge(events_name), '{{event_name}}')
 {% endif %}
 {% if os_name %}
 AND os_name = '{{os_name}}'
