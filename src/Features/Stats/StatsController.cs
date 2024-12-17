@@ -218,49 +218,49 @@ public class StatsController : Controller
     [HttpGet("/api/_stats/top-countries")]
     public async Task<IActionResult> TopCountries([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        return await TopN("country_code", TopNValue.UniqueSessions, body, cancellationToken);
+        return await TopN("country_code", body.Granularity ?? GranularityEnum.Hour, TopNValue.UniqueSessions, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/top-osversions")]
     public async Task<IActionResult> TopOSVersions([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        return await TopN("os_version", TopNValue.UniqueSessions, body, cancellationToken);
+        return await TopN("os_version", body.Granularity ?? GranularityEnum.Hour, TopNValue.UniqueSessions, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/top-devices")]
     public async Task<IActionResult> TopDevices([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        return await TopN("device_model", TopNValue.UniqueSessions, body, cancellationToken);
+        return await TopN("device_model", body.Granularity ?? GranularityEnum.Hour, TopNValue.UniqueSessions, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/top-operatingsystems")]
     public async Task<IActionResult> TopOperatingSystems([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        return await TopN("os_name", TopNValue.UniqueSessions, body, cancellationToken);
+        return await TopN("os_name", body.Granularity ?? GranularityEnum.Hour, TopNValue.UniqueSessions, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/top-regions")]
     public async Task<IActionResult> TopRegions([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        return await TopN("region_name", TopNValue.UniqueSessions, body, cancellationToken);
+        return await TopN("region_name", body.Granularity ?? GranularityEnum.Hour, TopNValue.UniqueSessions, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/top-events")]
     public async Task<IActionResult> TopEvents([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        return await TopN("event_name", TopNValue.TotalEvents, body, cancellationToken);
+        return await TopN("event_name", body.Granularity ?? GranularityEnum.Hour, TopNValue.TotalEvents, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/top-appversions")]
     public async Task<IActionResult> TopAppVersions([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        return await TopN("app_version", TopNValue.UniqueSessions, body, cancellationToken);
+        return await TopN("app_version", body.Granularity ?? GranularityEnum.Hour, TopNValue.UniqueSessions, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/top-appbuildnumbers")]
     public async Task<IActionResult> TopAppBuildNumbers([FromQuery] QueryParams body, CancellationToken cancellationToken)
     {
-        return await TopN("app_build_number", TopNValue.UniqueSessions, body, cancellationToken);
+        return await TopN("app_build_number", body.Granularity ?? GranularityEnum.Hour, TopNValue.UniqueSessions, body, cancellationToken);
     }
 
     [HttpGet("/api/_stats/metrics")]
@@ -304,6 +304,7 @@ public class StatsController : Controller
         var rows = await _queryClient.NamedQueryAsync<EventPropsItem>("top_props__v2", new {
             date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
             date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
+            granularity = (body.Granularity ?? GranularityEnum.Hour).ToString(),
             app_id = query.AppId,
             event_name = query.EventName,
             os_name = query.OsName,
@@ -384,6 +385,7 @@ public class StatsController : Controller
         return await _queryClient.NamedQuerySingleAsync<KeyMetricsRow>("key_metrics__v2", new {
             date_from = args.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
             date_to = args.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
+            granularity = (args.Granularity ?? GranularityEnum.Hour).ToString(),
             app_id = args.AppId,
             event_name = args.EventName,
             os_name = args.OsName,
@@ -393,11 +395,12 @@ public class StatsController : Controller
         }, cancellationToken);
     }
 
-    private async Task<IActionResult> TopN(string nameColumn, TopNValue valueColumn, QueryParams body, CancellationToken cancellationToken)
+    private async Task<IActionResult> TopN(string nameColumn, GranularityEnum granularity, TopNValue valueColumn, QueryParams body, CancellationToken cancellationToken)
     {
         var query = body.Parse();
         var rows = await _queryClient.NamedQueryAsync<TopNItem>("top_n__v2", new {
             name_column = nameColumn,
+            granularity = granularity.ToString(),
             value_column = valueColumn.ToString(),
             date_from = query.DateFrom?.ToString("yyyy-MM-dd HH:mm:ss"),
             date_to = query.DateTo?.ToString("yyyy-MM-dd HH:mm:ss"),
