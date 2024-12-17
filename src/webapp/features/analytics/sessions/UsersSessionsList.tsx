@@ -5,7 +5,6 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { QueryParams, historicalSessions } from "../query";
-import { EMPTY_DROPDOWN_VALUE } from "./filters/FilterDropdownQuery";
 import { UsersSessionsFilters } from "./UsersSessionsFilters";
 
 const SESSIONS_PAGE_SIZE = 10;
@@ -16,6 +15,7 @@ type Props = {
 };
 
 type TopFilterValue = {
+  eventName?: string;
   osName?: string;
   country?: string;
   appVersion?: string;
@@ -28,15 +28,15 @@ export function UserSessionsList(props: Props) {
   const [topFilters, setTopFilters] = useState<TopFilterValue>({});
 
   const requestParams: QueryParams = useMemo(() => {
-    const countryCode = topFilters.country === EMPTY_DROPDOWN_VALUE || !topFilters.country ? "" : topFilters.country;
-    const appVersion =
-      topFilters.appVersion === EMPTY_DROPDOWN_VALUE || !topFilters.appVersion ? "" : topFilters.appVersion;
+    const countryCode = !topFilters.country ? "" : topFilters.country;
+    const appVersion = !topFilters.appVersion ? "" : topFilters.appVersion;
     const allParams: QueryParams = {
       appId: props.appId,
       buildMode: props.buildMode,
       startDate: dateFilters.startDate,
       endDate: dateFilters.endDate,
       sessionId: dateFilters.sessionId,
+      eventName: topFilters.eventName,
       osName: topFilters.osName,
       countryCode,
       appVersion,
