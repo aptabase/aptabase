@@ -1,7 +1,7 @@
 import { QueryParams, TopNItem, TopNQueryChildrenProps } from "@features/analytics/query";
 import { useApps } from "@features/apps";
 import { useQuery } from "@tanstack/react-query";
-import { startOfDay, subMonths, subWeeks } from "date-fns";
+import { endOfDay, startOfDay, subMonths, subWeeks } from "date-fns";
 
 type Props = {
   appId: string;
@@ -15,7 +15,7 @@ export function FilterDropdownQuery(props: Props) {
 
   const startDateIso = subWeeks(startOfDay(new Date()), 1).toISOString();
   const startDateOneMonthBefore = subMonths(startOfDay(new Date()), 1).toISOString();
-  const endDateIso = "";
+  const endDateIso = endOfDay(new Date()).toISOString();
 
   const { isLoading, isError, data, refetch } = useQuery({
     queryKey: [props.queryKey, buildMode, props.appId, startDateIso, endDateIso],
