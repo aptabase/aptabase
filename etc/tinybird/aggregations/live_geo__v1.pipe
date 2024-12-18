@@ -13,7 +13,7 @@ SQL >
                 any(user_id) AS user_id,
                 any(country_code) AS country_code,
                 any(region_name) AS region_name
-          FROM sessions_live_v2_mv
+          FROM sessions_live_v3_mv
           PREWHERE app_id = {{String(app_id)}}
           GROUP BY session_id
           HAVING timestamp >= now() - INTERVAL 1 HOUR

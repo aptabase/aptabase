@@ -16,7 +16,7 @@ SQL >
                any(region_name) as RegionName,
                any(os_name) as OsName,
                any(os_version) as OsVersion
-         FROM sessions_live_v2_mv
+         FROM sessions_live_v3_mv
          PREWHERE app_id = {{String(app_id)}}
          GROUP BY session_id
          HAVING StartedAt >= now() - interval 1 hour

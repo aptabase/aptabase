@@ -12,17 +12,16 @@ SQL >
         countMerge(events_count) as EventsCount,
         min(min_timestamp) as StartedAt,
         max(max_timestamp) - min(min_timestamp) as Duration,
-        countMerge(events_count) as EventsCount,
         any(app_version) as AppVersion,
         any(country_code) as CountryCode,
         any(region_name) as RegionName,
         any(os_name) as OsName,
         any(os_version) as OsVersion,
-        groupArray(event_name) as EventsName,
+        groupArrayMerge(event_names) as EventsName,
         groupArrayMerge(events_timestamp) as EventsTimestamp,
         groupArrayMerge(events_string_props) as EventsStringProps,
         groupArrayMerge(events_numeric_props) as EventsNumericProps
-    FROM sessions_live_v2_mv
+    FROM sessions_live_v3_mv
     PREWHERE app_id = {{String(app_id)}} 
     AND session_id = {{String(session_id)}}
     GROUP BY session_id

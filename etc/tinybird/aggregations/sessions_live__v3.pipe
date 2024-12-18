@@ -1,4 +1,4 @@
-NODE sessions_live_v2
+NODE sessions_live_v3
 SQL >
 
     SELECT
@@ -19,6 +19,7 @@ SQL >
         anySimpleState(country_code) AS country_code,
         anySimpleState(region_name) AS region_name,
         countState() AS events_count,
+        groupArrayState(event_name) AS event_names,
         groupArrayState(e.timestamp) AS events_timestamp,
         groupArrayState(string_props) AS events_string_props,
         groupArrayState(numeric_props) AS events_numeric_props
@@ -30,6 +31,6 @@ SQL >
         event_name
 
 TYPE materialized
-DATASOURCE sessions_live_v2_mv
+DATASOURCE sessions_live_v3_mv
 
 
