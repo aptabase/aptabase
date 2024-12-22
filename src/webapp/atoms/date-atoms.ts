@@ -14,9 +14,7 @@ import {
   sub,
 } from "date-fns";
 import { atom, Getter } from "jotai";
-import { atomWithLocation } from "jotai-location";
-
-const locationAtom = atomWithLocation();
+import { locationAtom } from "./location-atoms";
 
 export const periodAtom = atomWithLocalAndUrlPersistence("period", "24h");
 

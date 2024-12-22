@@ -1,5 +1,7 @@
 import { topCountries } from "@features/analytics/query";
-import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import { useEffect } from "react";
+import { atomWithSearchParam } from "../../../../atoms/location-atoms";
 import { FilterDropdownQuery } from "./FilterDropdownQuery";
 import { FilterDropdownSelect } from "./FilterDropdownSelect";
 
@@ -8,8 +10,10 @@ type Props = {
   onValueChange?: (value: string | undefined) => void;
 };
 
+const countryAtom = atomWithSearchParam("country");
+
 export function CountryFilterDropdown(props: Props) {
-  const [selectedCountry, setSelectedCountry] = useState<string | undefined>();
+  const [selectedCountry, setSelectedCountry] = useAtom(countryAtom);
 
   if (props.onValueChange) {
     useEffect(() => {

@@ -1,5 +1,7 @@
 import { topEvents } from "@features/analytics/query";
-import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import { useEffect } from "react";
+import { atomWithSearchParam } from "../../../../atoms/location-atoms";
 import { FilterDropdownQuery } from "./FilterDropdownQuery";
 import { FilterDropdownSelect } from "./FilterDropdownSelect";
 
@@ -8,8 +10,10 @@ type Props = {
   onValueChange?: (value: string | undefined) => void;
 };
 
+const eventNameAtom = atomWithSearchParam("eventName");
+
 export function EventNameFilterDropdown(props: Props) {
-  const [selectedEvent, setSelectedEvent] = useState<string | undefined>();
+  const [selectedEvent, setSelectedEvent] = useAtom(eventNameAtom);
 
   if (props.onValueChange) {
     useEffect(() => {

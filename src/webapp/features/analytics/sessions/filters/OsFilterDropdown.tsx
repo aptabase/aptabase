@@ -1,5 +1,7 @@
 import { topOperatingSystem } from "@features/analytics/query";
-import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import { useEffect } from "react";
+import { atomWithSearchParam } from "../../../../atoms/location-atoms";
 import { FilterDropdownQuery } from "./FilterDropdownQuery";
 import { FilterDropdownSelect } from "./FilterDropdownSelect";
 
@@ -8,8 +10,10 @@ type Props = {
   onValueChange?: (value: string | undefined) => void;
 };
 
+const osAtom = atomWithSearchParam("os");
+
 export function OsFilterDropdown(props: Props) {
-  const [selectedOs, setSelectedOs] = useState<string | undefined>();
+  const [selectedOs, setSelectedOs] = useAtom(osAtom);
 
   if (props.onValueChange) {
     useEffect(() => {
