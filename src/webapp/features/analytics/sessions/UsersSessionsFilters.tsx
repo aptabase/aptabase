@@ -26,9 +26,11 @@ export function UsersSessionsFilters({ appId, onFiltersChange }: Props) {
   const [topFilters, setTopFilters] = useState<TopFilterValue>({});
 
   const updateFilters = (newFilters: Partial<TopFilterValue>) => {
-    const updatedFilters = { ...topFilters, ...newFilters };
-    setTopFilters(updatedFilters);
-    onFiltersChange(updatedFilters);
+    setTopFilters((prevFilters) => {
+      const updatedFilters = { ...prevFilters, ...newFilters };
+      onFiltersChange(updatedFilters);
+      return updatedFilters;
+    });
   };
 
   return (

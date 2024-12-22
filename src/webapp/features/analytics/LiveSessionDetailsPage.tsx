@@ -33,27 +33,24 @@ export function Component() {
     trackEvent("liveview_session_viewed");
   }, []);
 
+  const handleBack = () => {
+    if (location.state?.returnTo) {
+      navigate(location.state.returnTo.pathname + location.state.returnTo.search, {
+        state: { sessionFilters: location.state.sessionFilters },
+      });
+    } else {
+      navigate(`/${app.id}/live/`);
+    }
+  };
+
   return (
     <Page title="Live View">
       <div className="flex flex-row justify-between items-center">
         <PageHeading title="Session Timeline" subtitle={sessionId} />
-        {location.state?.sessionFilters ? (
-          <Button
-            className="mb-5"
-            variant="ghost"
-            onClick={() =>
-              navigate(`/${app.id}/sessions/`, { state: { sessionFilters: location.state.sessionFilters } })
-            }
-          >
-            <IconArrowLeft />
-            Back to sessions
-          </Button>
-        ) : (
-          <Button className="mb-5" variant="ghost" onClick={() => navigate(`/${app.id}/live/`)}>
-            <IconArrowLeft />
-            Back to Live View
-          </Button>
-        )}
+        <Button className="mb-5" variant="ghost" onClick={handleBack}>
+          <IconArrowLeft />
+          {location.state?.sessionFilters ? "Back to sessions" : "Back to Live View"}
+        </Button>
       </div>
 
       {data && (

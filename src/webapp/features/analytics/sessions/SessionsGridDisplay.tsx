@@ -24,7 +24,18 @@ export function SessionsGridDisplay(props: Props) {
   const sessions = props.sessions;
 
   const handleClick = (session: LiveRecentSession) => () => {
-    navigate(`/${props.appId}/live/${session.id}`, { state: { sessionFilters: props.sessionFilters } });
+    // Get the current location to preserve search params
+    const currentLocation = window.location;
+
+    navigate(`/${props.appId}/live/${session.id}`, {
+      state: {
+        sessionFilters: props.sessionFilters,
+        returnTo: {
+          pathname: currentLocation.pathname,
+          search: currentLocation.search,
+        },
+      },
+    });
   };
 
   return (
