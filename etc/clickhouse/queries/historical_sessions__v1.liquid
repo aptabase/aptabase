@@ -26,8 +26,8 @@ AND (min_timestamp > '{{date_from}}' OR (min_timestamp = '{{date_from}}' AND ses
 {% endif %}
 GROUP BY session_id
 {% if event_name %}
-HAVING hasAny(groupArrayMerge(events_name), [{{event_name}}])
-{% end %}
+HAVING hasAny(groupArrayMerge(events_name), ['{{event_name}}'])
+{% endif %}
 {% if date_from %}
 ORDER BY StartedAt ASC, Id ASC
 {% else %}
