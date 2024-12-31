@@ -7,6 +7,9 @@ public static class HttpContextExtensions
         if (httpContext.Request.Headers.TryGetValue("X-Real-Ip", out var ip) && !string.IsNullOrEmpty(ip))
             return ip.ToString();
 
+        if (httpContext.Request.Headers.TryGetValue("X-Forwarded-For", out var forwardedIp) && !string.IsNullOrEmpty(forwardedIp))
+            return forwardedIp.ToString();
+
         var cfViewerAddress = httpContext.Request.Headers["CloudFront-Viewer-Address"];
         if (cfViewerAddress.Count > 0)
         {
