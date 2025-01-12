@@ -71,7 +71,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           tags: aptabase:latest
-          outputs: type=docker,dest=/tmp/aptabase.tar
+          outputs: type=image,dest=/tmp/aptabase.tar
 
       - name: Upload Image
         uses: actions/upload-artifact@v4
