@@ -14,7 +14,7 @@ COPY ./src /work/src
 RUN dotnet publish "Aptabase.csproj" -a $TARGETARCH -c Release -o /work/publish /p:UseAppHost=false
 
 # WebApp Build
-FROM node:18 as webapp
+FROM node:18 AS webapp
 WORKDIR /work
 
 COPY ./src/package.json ./src/package-lock.json ./
