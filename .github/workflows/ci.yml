@@ -54,16 +54,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container
-          driver-opts: |
-            image=moby/buildkit:v0.11.6
-          platforms: linux/amd64,linux/arm64
 
       - name: Build
         uses: docker/build-push-action@v5
@@ -88,16 +80,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container
-          driver-opts: |
-            image=moby/buildkit:v0.11.6
-          platforms: linux/amd64,linux/arm64
 
       - name: Download Image
         uses: actions/download-artifact@v4
@@ -132,16 +116,8 @@ jobs:
     environment: "Aptabase US"
     needs: [publish]
     steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container
-          driver-opts: |
-            image=moby/buildkit:v0.11.6
-          platforms: linux/amd64,linux/arm64
 
       - name: Download Image
         uses: actions/download-artifact@v4
@@ -179,16 +155,8 @@ jobs:
     environment: "Aptabase EU"
     needs: [publish]
     steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container
-          driver-opts: |
-            image=moby/buildkit:v0.11.6
-          platforms: linux/amd64,linux/arm64
 
       - name: Download Image
         uses: actions/download-artifact@v4
