@@ -4,9 +4,11 @@ import { atomWithStorage } from "jotai/utils";
 import { useState } from "react";
 import { AppVersionDropdown } from "./filters/AppVersionDropdown";
 import { CountryFilterDropdown } from "./filters/CountryFilterDropdown";
+import { EventNameFilterDropdown } from "./filters/EventNameFilterDropdown";
 import { OsFilterDropdown } from "./filters/OsFilterDropdown";
 
 type TopFilterValue = {
+  eventName?: string;
   osName?: string;
   country?: string;
   appVersion?: string;
@@ -24,9 +26,11 @@ export function UsersSessionsFilters({ appId, onFiltersChange }: Props) {
   const [topFilters, setTopFilters] = useState<TopFilterValue>({});
 
   const updateFilters = (newFilters: Partial<TopFilterValue>) => {
-    const updatedFilters = { ...topFilters, ...newFilters };
-    setTopFilters(updatedFilters);
-    onFiltersChange(updatedFilters);
+    setTopFilters((prevFilters) => {
+      const updatedFilters = { ...prevFilters, ...newFilters };
+      onFiltersChange(updatedFilters);
+      return updatedFilters;
+    });
   };
 
   return (
@@ -39,6 +43,7 @@ export function UsersSessionsFilters({ appId, onFiltersChange }: Props) {
         >
           <div className="overflow-hidden">
             <div className="flex flex-row items-center gap-4 mt-4">
+              <EventNameFilterDropdown appId={appId} onValueChange={(eventName) => updateFilters({ eventName })} />
               <OsFilterDropdown appId={appId} onValueChange={(osName) => updateFilters({ osName })} />
               <CountryFilterDropdown appId={appId} onValueChange={(country) => updateFilters({ country })} />
               <AppVersionDropdown appId={appId} onValueChange={(appVersion) => updateFilters({ appVersion })} />

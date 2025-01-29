@@ -1,19 +1,20 @@
 # Server Build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS server
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS server
 WORKDIR /work/src
 
 COPY ./src/Aptabase.csproj /work/src
 
-RUN dotnet restore "./Aptabase.csproj"
+ARG TARGETARCH
+RUN dotnet restore "./Aptabase.csproj" -a $TARGETARCH
 
 COPY ./etc/clickhouse /work/etc/clickhouse
 COPY ./etc/geoip /work/etc/geoip
 COPY ./src /work/src
 
-RUN dotnet publish "Aptabase.csproj" -c Release -o /work/publish /p:UseAppHost=false
+RUN dotnet publish "Aptabase.csproj" -a $TARGETARCH -c Release -o /work/publish /p:UseAppHost=false
 
 # WebApp Build
-FROM node:18 as webapp
+FROM node:18 AS webapp
 WORKDIR /work
 
 COPY ./src/package.json ./src/package-lock.json ./

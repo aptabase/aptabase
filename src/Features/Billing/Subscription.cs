@@ -81,5 +81,7 @@ public class SubscriptionPlan
         new SubscriptionPlan("50M Plan", 50_000_000, 450, 103481, null),
         new SubscriptionPlan("100M Plan", 100_000_000, 750, 614418, null),
         new SubscriptionPlan("200M Plan", 200_000_000, 1200, 614417, null),
+        new SubscriptionPlan("500M Plan", 500_000_000, 1500, 636430, null),
+
     ];
 }

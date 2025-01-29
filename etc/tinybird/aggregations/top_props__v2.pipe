@@ -1,0 +1,113 @@
+TOKEN "aptabase-api" READ
+
+TOKEN "top_props__v2_endpoint_read_4634" READ
+
+NODE endpoint
+SQL >
+
+    %
+    {% if granularity == 'Hour' %}
+       WITH RankedResults AS (
+           SELECT 
+               string_arr.1 AS StringKey,
+               string_arr.2 AS StringValue,
+               numeric_arr.1 AS NumericKey,
+               count() AS Events,
+               median(numeric_arr.2) AS Median,
+               min(numeric_arr.2) AS Min,
+               max(numeric_arr.2) AS Max,
+               sum(numeric_arr.2) AS Sum,
+               row_number() over (partition by string_arr.1 order by count() desc) as string_rank,
+               row_number() over (partition by numeric_arr.1 order by count() desc) as numeric_rank
+           FROM (
+               SELECT * FROM (
+                   SELECT JSONExtractKeysAndValues(string_props, 'String') AS string_arr,
+                          JSONExtractKeysAndValues(numeric_props, 'Float') AS numeric_arr
+                   FROM events
+                   PREWHERE app_id = {{String(app_id)}}
+                   WHERE 1 = 1
+                   {% if defined(date_from) and defined(date_to) %}
+                   AND timestamp BETWEEN {{String(date_from)}} AND {{String(date_to)}}
+                   {% end %}
+                   {% if defined(country_code) %}
+                   AND country_code = {{String(country_code)}}
+                   {% end %}
+                   {% if defined(event_name) %}
+                   AND event_name = {{String(event_name)}}
+                   {% end %}
+                   {% if defined(os_name) %}
+                   AND os_name = {{String(os_name)}}
+                   {% end %}
+                   {% if defined(device_model) %}
+                   AND device_model = {{String(device_model)}}
+                   {% end %}
+                   {% if defined(app_version) %}
+                   AND app_version = {{String(app_version)}}
+                   {% end %}
+               ) LEFT ARRAY JOIN string_arr
+           ) LEFT ARRAY JOIN numeric_arr
+           GROUP BY StringKey, StringValue, NumericKey
+       )
+       SELECT 
+           StringKey,
+           StringValue,
+           NumericKey,
+           Events,
+           Median,
+           Min,
+           Max,
+           Sum
+       FROM RankedResults
+       WHERE string_rank <= 100 OR numeric_rank <= 100
+       ORDER BY StringKey, Events DESC
+    {% else %}
+       WITH RankedResults AS (
+           SELECT 
+               string_key as StringKey,
+               string_value as StringValue,
+               numeric_key as NumericKey,
+               countMerge(events_count) as Events,
+               medianMerge(numeric_value_state) as Median,
+               minMerge(min_value_state) as Min,
+               maxMerge(max_value_state) as Max,
+               sumMerge(sum_value_state) as Sum,
+               row_number() over (partition by string_key order by countMerge(events_count) desc) as string_rank,
+               row_number() over (partition by numeric_key order by countMerge(events_count) desc) as numeric_rank
+           FROM event_props_mv 
+           PREWHERE app_id = {{String(app_id)}}
+           WHERE 1 = 1
+           {% if defined(date_from) and defined(date_to) %}
+           AND period BETWEEN {{String(date_from)}} AND {{String(date_to)}}
+           {% end %}
+           {% if defined(country_code) %}
+           AND country_code = {{String(country_code)}}
+           {% end %}
+           {% if defined(event_name) %}
+           AND event_name = {{String(event_name)}}
+           {% end %}
+           {% if defined(os_name) %}
+           AND os_name = {{String(os_name)}}
+           {% end %}
+           {% if defined(device_model) %}
+           AND device_model = {{String(device_model)}}
+           {% end %}
+           {% if defined(app_version) %}
+           AND app_version = {{String(app_version)}}
+           {% end %}
+           GROUP BY StringKey, StringValue, NumericKey
+       )
+       SELECT 
+           StringKey,
+           StringValue,
+           NumericKey,
+           Events,
+           Median,
+           Min,
+           Max,
+           Sum
+       FROM RankedResults
+       WHERE string_rank <= 100 OR numeric_rank <= 100
+       ORDER BY StringKey, Events DESC
+    {% end %}
+
+

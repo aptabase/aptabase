@@ -1,0 +1,103 @@
+TOKEN "aptabase-api" READ
+
+TOKEN "key_metrics_periodic__v2_endpoint_read_2953" READ
+
+NODE endpoint
+SQL >
+
+    %
+    {% if granularity == 'Hour' %}
+        SELECT
+            toStartOfHour(timestamp) AS Period,
+            uniqExact(user_id) AS Users,
+            uniqExact(session_id) AS Sessions,
+            count() AS Events
+        FROM events
+        PREWHERE app_id = {{String(app_id)}}
+        WHERE 1 = 1
+        {% if defined(date_from) and defined(date_to) %}
+        AND timestamp BETWEEN {{String(date_from)}} AND {{String(date_to)}}
+        {% end %}
+        {% if defined(country_code) %}
+        AND country_code = {{String(country_code)}}
+        {% end %}
+        {% if defined(event_name) %}
+        AND event_name = {{String(event_name)}}
+        {% end %}
+        {% if defined(os_name) %}
+        AND os_name = {{String(os_name)}}
+        {% end %}
+        {% if defined(device_model) %}
+        AND device_model = {{String(device_model)}}
+        {% end %}
+        {% if defined(app_version) %}
+        AND app_version = {{String(app_version)}}
+        {% end %}
+        GROUP BY Period
+    {% else %}
+        WITH PeriodStats AS (
+            SELECT
+                {% if granularity == 'Day' %}
+                period as Period
+                {% else %}
+                toStartOfMonth(period) as Period
+                {% end %},
+                user_id,
+                session_id,
+                countMerge(events_count) as period_count
+            FROM events_daily_v2_mv
+            PREWHERE app_id = {{String(app_id)}}
+            WHERE 1 = 1
+            {% if defined(date_from) and defined(date_to) %}
+            AND period BETWEEN {{String(date_from)}} AND {{String(date_to)}}
+            {% end %}
+            {% if defined(country_code) %}
+            AND country_code = {{String(country_code)}}
+            {% end %}
+            {% if defined(event_name) %}
+            AND event_name = {{String(event_name)}}
+            {% end %}
+            {% if defined(os_name) %}
+            AND os_name = {{String(os_name)}}
+            {% end %}
+            {% if defined(device_model) %}
+            AND device_model = {{String(device_model)}}
+            {% end %}
+            {% if defined(app_version) %}
+            AND app_version = {{String(app_version)}}
+            {% end %}
+            GROUP BY Period, user_id, session_id
+        )
+        SELECT
+            Period,
+            {% if granularity == 'Month' %}
+            uniqExact(user_id) / (date_diff('day', Period, toLastDayOfMonth(Period)) + 1)
+            {% else %}
+            uniqExact(user_id)
+            {% end %} AS Users,
+            uniqExact(session_id) AS Sessions,
+            sum(period_count) AS Events
+        FROM PeriodStats
+        GROUP BY Period
+    {% end %}
+    ORDER BY Period ASC
+    WITH FILL
+    {% if defined(date_from) and defined(date_to) %}
+    {% if granularity == 'Hour' %}
+    FROM toStartOfHour(toDateTime({{String(date_from)}})) TO toStartOfHour(toDateTime({{String(date_to)}}))
+    {% elif granularity == 'Day' %}
+    FROM toStartOfDay(toDateTime({{String(date_from)}})) TO toStartOfDay(toDateTime({{String(date_to)}}))
+    {% else %}
+    FROM toStartOfMonth(toDateTime({{String(date_from)}})) TO toStartOfMonth(toDateTime({{String(date_to)}}))
+    {% end %}
+    {% end %}
+    STEP
+    {% if granularity == 'Hour' %}
+    toIntervalHour(1)
+    {% elif granularity == 'Day' %}
+    toIntervalDay(1)
+    {% else %}
+    toIntervalMonth(1)
+    {% end %}
+
+

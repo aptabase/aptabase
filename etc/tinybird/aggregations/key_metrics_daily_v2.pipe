@@ -1,0 +1,36 @@
+NODE events_daily_v2
+SQL >
+
+    SELECT
+        app_id,
+        toStartOfDay(timestamp) as period,
+        country_code,
+        region_name,
+        event_name,
+        os_name,
+        os_version,
+        device_model,
+        app_version,
+        user_id,
+        session_id,
+        minState(timestamp) as min_ts,
+        maxState(timestamp) as max_ts,
+        countState() as events_count
+    FROM events 
+    GROUP BY
+        app_id,
+        toStartOfDay(timestamp),
+        event_name,
+        country_code,
+        region_name,
+        os_name,
+        os_version,
+        device_model,
+        app_version,
+        user_id,
+        session_id
+
+TYPE materialized
+DATASOURCE events_daily_v2_mv
+
+

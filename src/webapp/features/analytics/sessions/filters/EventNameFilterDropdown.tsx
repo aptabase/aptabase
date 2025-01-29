@@ -1,4 +1,4 @@
-import { topCountries } from "@features/analytics/query";
+import { topEvents } from "@features/analytics/query";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 import { atomWithSearchParam } from "../../../../atoms/location-atoms";
@@ -10,25 +10,25 @@ type Props = {
   onValueChange?: (value: string | undefined) => void;
 };
 
-const countryAtom = atomWithSearchParam("country");
+const eventNameAtom = atomWithSearchParam("eventName");
 
-export function CountryFilterDropdown(props: Props) {
-  const [selectedCountry, setSelectedCountry] = useAtom(countryAtom);
+export function EventNameFilterDropdown(props: Props) {
+  const [selectedEvent, setSelectedEvent] = useAtom(eventNameAtom);
 
   if (props.onValueChange) {
     useEffect(() => {
-      props.onValueChange?.(selectedCountry);
-    }, [selectedCountry]);
+      props.onValueChange?.(selectedEvent);
+    }, [selectedEvent]);
   }
 
   return (
-    <FilterDropdownQuery appId={props.appId} queryKey={"sessions-country-dropdown"} query={topCountries}>
+    <FilterDropdownQuery appId={props.appId} queryKey={"top-events"} query={topEvents}>
       {(data) => (
         <FilterDropdownSelect
-          value={selectedCountry}
-          onValueChange={setSelectedCountry}
+          value={selectedEvent}
+          onValueChange={setSelectedEvent}
           data={data}
-          placeholder="Select Country"
+          placeholder="Select Event"
         />
       )}
     </FilterDropdownQuery>

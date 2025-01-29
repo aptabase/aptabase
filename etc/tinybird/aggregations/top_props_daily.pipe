@@ -1,0 +1,50 @@
+NODE event_props
+SQL >
+
+    SELECT
+        app_id,
+        toStartOfDay(timestamp) as period,
+        country_code,
+        event_name,
+        os_name,
+        device_model,
+        app_version,
+        string_arr.1 as string_key,
+        string_arr.2 as string_value,
+        numeric_arr.1 as numeric_key,
+        countState() as events_count,
+        medianState(numeric_arr.2) as numeric_value_state,
+        minState(numeric_arr.2) as min_value_state,
+        maxState(numeric_arr.2) as max_value_state,
+        sumState(numeric_arr.2) as sum_value_state
+    FROM (
+        SELECT * FROM (
+            SELECT 
+                app_id,
+                timestamp,
+                country_code,
+                event_name,
+                os_name,
+                device_model,
+                app_version,
+                JSONExtractKeysAndValues(string_props, 'String') AS string_arr,
+                JSONExtractKeysAndValues(numeric_props, 'Float') AS numeric_arr
+            FROM events
+        ) LEFT ARRAY JOIN string_arr
+    ) LEFT ARRAY JOIN numeric_arr
+    GROUP BY
+        app_id,
+        toStartOfDay(timestamp),
+        country_code,
+        event_name,
+        os_name,
+        device_model,
+        app_version,
+        string_key,
+        string_value,
+        numeric_key
+
+TYPE materialized
+DATASOURCE event_props_mv
+
+

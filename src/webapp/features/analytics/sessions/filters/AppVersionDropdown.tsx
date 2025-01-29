@@ -1,5 +1,7 @@
 import { topAppVersions } from "@features/analytics/query";
-import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import { useEffect } from "react";
+import { atomWithSearchParam } from "../../../../atoms/location-atoms";
 import { FilterDropdownQuery } from "./FilterDropdownQuery";
 import { FilterDropdownSelect } from "./FilterDropdownSelect";
 
@@ -8,8 +10,10 @@ type Props = {
   onValueChange?: (value: string | undefined) => void;
 };
 
+const appVersionAtom = atomWithSearchParam("appVersion");
+
 export function AppVersionDropdown(props: Props) {
-  const [selectedAppVersion, setSelectedAppVersion] = useState<string | undefined>();
+  const [selectedAppVersion, setSelectedAppVersion] = useAtom(appVersionAtom);
 
   if (props.onValueChange) {
     useEffect(() => {

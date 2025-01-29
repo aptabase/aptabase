@@ -19,9 +19,6 @@ SQL >
 	{% if defined(country_code) %}
 	AND country_code = {{String(country_code)}}
 	{% end %}
-	{% if defined(event_name) %}
-	AND has(events_name, {{String(event_name)}})
-	{% end %}
 	{% if defined(os_name) %}
 	AND os_name = {{String(os_name)}}
 	{% end %}
@@ -35,6 +32,9 @@ SQL >
 	AND (min_timestamp > {{String(date_from)}} OR (min_timestamp = {{String(date_from)}} AND session_id > {{String(session_id)}}))
 	{% end %}
 	GROUP BY session_id
+    {% if defined(event_name) %}
+    HAVING hasAny(groupArrayMerge(events_name), [{{String(event_name)}}])
+    {% end %}
 	{% if defined(date_from) %}
 	ORDER BY StartedAt ASC, Id ASC
 	{% else %}

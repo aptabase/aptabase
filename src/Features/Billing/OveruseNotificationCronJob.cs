@@ -66,7 +66,7 @@ public class OveruseNotificationCronJob : BackgroundService
                                 await _billingQueries.LockUser(user.Id, "O");
                             }
 
-                            await _cache.Set(cacheKey, DateTime.UtcNow.ToString("o"), TimeSpan.FromDays(60));
+                            await _cache.Set(cacheKey, DateTime.UtcNow.ToString("o"), TimeSpan.FromDays(10));
                         }
                         catch (Exception ex)
                         {
