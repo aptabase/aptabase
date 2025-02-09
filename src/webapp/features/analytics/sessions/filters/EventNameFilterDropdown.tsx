@@ -2,8 +2,8 @@ import { topEvents } from "@features/analytics/query";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 import { atomWithSearchParam } from "../../../../atoms/location-atoms";
+import { FilterDropdownFancy } from "./FilterDropdownFancy";
 import { FilterDropdownQuery } from "./FilterDropdownQuery";
-import { FilterDropdownSelect } from "./FilterDropdownSelect";
 
 type Props = {
   appId: string;
@@ -24,7 +24,7 @@ export function EventNameFilterDropdown(props: Props) {
   return (
     <FilterDropdownQuery appId={props.appId} queryKey={"top-events"} query={topEvents}>
       {(data) => (
-        <FilterDropdownSelect
+        <FilterDropdownFancy
           value={selectedEvent}
           onValueChange={setSelectedEvent}
           data={data}
