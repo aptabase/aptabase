@@ -1,7 +1,7 @@
 import { IconChevronDown } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppVersionDropdown } from "./filters/AppVersionDropdown";
 import { CountryFilterDropdown } from "./filters/CountryFilterDropdown";
 import { EventNameFilterDropdown } from "./filters/EventNameFilterDropdown";
@@ -25,12 +25,16 @@ export function UsersSessionsFilters({ appId, onFiltersChange }: Props) {
   const [isFiltersExpanded, setIsFiltersExpanded] = useAtom(isFiltersExpandedAtom);
   const [topFilters, setTopFilters] = useState<TopFilterValue>({});
 
+  // notify parent of filter changes
+  useEffect(() => {
+    onFiltersChange(topFilters);
+  }, [topFilters, onFiltersChange]);
+
   const updateFilters = (newFilters: Partial<TopFilterValue>) => {
-    setTopFilters((prevFilters) => {
-      const updatedFilters = { ...prevFilters, ...newFilters };
-      onFiltersChange(updatedFilters);
-      return updatedFilters;
-    });
+    setTopFilters((prevFilters) => ({
+      ...prevFilters,
+      ...newFilters,
+    }));
   };
 
   return (
