@@ -9,7 +9,9 @@ type Props = {
   value: string | undefined;
   placeholder?: string;
   onValueChange: (value: string | undefined) => void;
+  onRemove?: () => void;
   data: TopNQueryChildrenProps;
+  className?: string;
 };
 
 export function FilterDropdownFancy(props: Props) {
@@ -40,10 +42,20 @@ export function FilterDropdownFancy(props: Props) {
     props.onValueChange(undefined);
   };
 
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    props.onRemove?.();
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open} className="w-48 justify-between">
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={`w-48 justify-between ${props.className ?? ""}`}
+        >
           <div className="flex flex-1 items-center gap-2 truncate">
             {props.value ? (
               <>
@@ -51,13 +63,18 @@ export function FilterDropdownFancy(props: Props) {
                 <IconX className="h-4 w-4 shrink-0 opacity-50 hover:opacity-100 ml-auto" onClick={handleClear} />
               </>
             ) : (
-              props.placeholder
+              <>
+                <span className="truncate">{props.placeholder}</span>
+                {props.onRemove && (
+                  <IconX className="h-4 w-4 shrink-0 opacity-50 hover:opacity-100 ml-auto" onClick={handleRemove} />
+                )}
+              </>
             )}
           </div>
           <IconChevronDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-48 p-0" align="start">
+      <PopoverContent className={`w-48 p-0 ${props.className ?? ""}`} align="start">
         <Command className="rounded-lg border shadow-md [&_[cmdk-input-wrapper]_svg]:!hidden">
           <div className="flex items-center px-1 border-b">
             <IconPlus className="h-4 w-4 shrink-0 opacity-50" />

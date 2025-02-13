@@ -9,8 +9,8 @@ import { OSWidget } from "./dashboard/OSWidget";
 import { OnboardingDashboard } from "./dashboard/OnboardingDashboard";
 import { TeaserDashboardContainer } from "./dashboard/TeaserDashboardContainer";
 import { VersionWidget } from "./dashboard/VersionWidget";
+import { EventsChartWidget } from "./dashboard/custom-widgets/EventsChartWidget";
 import { DateFilterContainer } from "./date-filters/DateFilterContainer";
-import { MainChartWidget } from "./key_metrics/MainChartWidget";
 import { AppLockedContent } from "./locked/AppLockedContent";
 import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
@@ -50,7 +50,8 @@ export function Component() {
         <div className="flex w-full justify-end">
           <CurrentFilters />
         </div>
-        <MainChartWidget appId={app.id} appName={app.name} />
+        <EventsChartWidget appId={app.id} appName={app.name} />
+        {/* <MainChartWidget appId={app.id} appName={app.name} /> */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] pt-[1px] bg-accent">
           <LazyLoad className={containerClassName}>
             <CountryWidget appId={app.id} />
