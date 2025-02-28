@@ -27,6 +27,7 @@ public class EventsController : Controller
     }
 
     [HttpPost("/api/v0/event")]
+    [HttpOptions("/api/v0/event")]
     [EnableCors("AllowAny")]
     [EnableRateLimiting("EventIngestion")]
     public async Task<IActionResult> Single(
@@ -81,6 +82,7 @@ public class EventsController : Controller
     }
 
     [HttpPost("/api/v0/events")]
+    [HttpOptions("/api/v0/events")]
     [EnableRateLimiting("EventIngestion")]
     public async Task<IActionResult> Multiple(
         [FromHeader(Name = "App-Key")] string? appKey,
