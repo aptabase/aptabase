@@ -60,7 +60,7 @@ public partial class Program
             {
                 policy.AllowAnyOrigin()
                     .WithHeaders("content-type", "app-key")
-                    .WithMethods("POST")
+                    .WithMethods("POST", "OPTIONS")
                     .SetPreflightMaxAge(TimeSpan.FromHours(1));
             });
         });
