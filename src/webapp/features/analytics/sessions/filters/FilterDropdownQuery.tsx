@@ -14,7 +14,7 @@ export function FilterDropdownQuery(props: Props) {
   const { buildMode } = useApps();
 
   const startDateIso = subWeeks(startOfDay(new Date()), 1).toISOString();
-  const startDateOneMonthBefore = subMonths(startOfDay(new Date()), 1).toISOString();
+  const startDateOneMonthBefore = subMonths(startOfDay(new Date()), 6).toISOString();
   const endDateIso = endOfDay(new Date()).toISOString();
 
   const { isLoading, isError, data, refetch } = useQuery({

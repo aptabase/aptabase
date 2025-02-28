@@ -1,6 +1,6 @@
 import { Chart } from "@components/Chart";
-import { ChartConfigurationCustomTypesPerDataset } from "chart.js";
 import { useChartColors } from "@features/theme";
+import { ChartConfigurationCustomTypesPerDataset } from "chart.js";
 
 type Props = {
   values: number[];
@@ -43,6 +43,9 @@ export function DailyUsersChart(props: Props) {
       plugins: {
         tooltip: {
           enabled: false,
+        },
+        legend: {
+          display: false,
         },
       },
       animation: false,
