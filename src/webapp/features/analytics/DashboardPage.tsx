@@ -40,13 +40,13 @@ export function Component() {
     () => widgetsConfig.toSorted((wa, wb) => wa.orderIndex - wb.orderIndex).map((w) => w.id),
     [widgetsConfig]
   );
-  const minimizedWidgets = useMemo(
-    () =>
-      widgetsConfig
-        .filter((w) => w.isMinimized)
-        .reduce((acc, w) => ({ ...acc, [w.id]: true }), {} as Record<string, boolean>),
-    [widgetsConfig]
-  );
+  // const minimizedWidgets = useMemo(
+  //   () =>
+  //     widgetsConfig
+  //       .filter((w) => w.isMinimized)
+  //       .reduce((acc, w) => ({ ...acc, [w.id]: true }), {} as Record<string, boolean>),
+  //   [widgetsConfig]
+  // );
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
   if (!app) return <Navigate to="/" />;
@@ -85,19 +85,26 @@ export function Component() {
     }
   };
 
+  const removeWidget = (widgetId: string) => {
+    setWidgetsConfig({
+      type: "toggle-is-defined",
+      widgetId,
+    });
+  };
+
   const renderWidget = (widgetId: string) => {
     const props = { appId: app.id, appName: app.name };
-    const widget = widgetsConfig.find((w) => w.id === widgetId);
+    const widget = widgetsConfig.find((w) => w.id === widgetId)!;
 
     switch (widgetId) {
       case "events-chart":
         return (
           <WidgetContainer
-            id={widgetId}
+            widgetConfig={widget}
             widgetName={widget?.title ?? "Custom Chart"}
             className="col-span-2"
-            isMinimized={minimizedWidgets[widgetId]}
             onToggleMinimize={() => toggleMinimize(widgetId)}
+            onRemove={() => removeWidget(widgetId)}
           >
             <EventsChartWidget {...props} />
           </WidgetContainer>
@@ -105,10 +112,9 @@ export function Component() {
       case "main-chart":
         return (
           <WidgetContainer
-            id={widgetId}
+            widgetConfig={widget}
             widgetName={widget?.title ?? "Events Chart"}
             className="col-span-2"
-            isMinimized={minimizedWidgets[widgetId]}
             onToggleMinimize={() => toggleMinimize(widgetId)}
           >
             <MainChartWidget {...props} />
@@ -118,9 +124,8 @@ export function Component() {
         return (
           <LazyLoad>
             <WidgetContainer
-              id={widgetId}
+              widgetConfig={widget}
               widgetName={widget?.title ?? "Countries"}
-              isMinimized={minimizedWidgets[widgetId]}
               onToggleMinimize={() => toggleMinimize(widgetId)}
               className="h-full"
             >
@@ -132,9 +137,8 @@ export function Component() {
         return (
           <LazyLoad>
             <WidgetContainer
-              id={widgetId}
+              widgetConfig={widget}
               widgetName={widget?.title ?? "Operating Systems"}
-              isMinimized={minimizedWidgets[widgetId]}
               onToggleMinimize={() => toggleMinimize(widgetId)}
               className="h-full"
             >
@@ -146,9 +150,8 @@ export function Component() {
         return (
           <LazyLoad>
             <WidgetContainer
-              id={widgetId}
+              widgetConfig={widget}
               widgetName={widget?.title ?? "Events"}
-              isMinimized={minimizedWidgets[widgetId]}
               onToggleMinimize={() => toggleMinimize(widgetId)}
               className="h-full"
             >
@@ -160,9 +163,8 @@ export function Component() {
         return (
           <LazyLoad>
             <WidgetContainer
-              id={widgetId}
+              widgetConfig={widget}
               widgetName={widget?.title ?? "App Versions"}
-              isMinimized={minimizedWidgets[widgetId]}
               onToggleMinimize={() => toggleMinimize(widgetId)}
               className="h-full"
             >

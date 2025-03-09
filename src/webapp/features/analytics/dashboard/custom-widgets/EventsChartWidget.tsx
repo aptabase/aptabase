@@ -4,13 +4,23 @@ import { EventNameFilterDropdown } from "@features/analytics/sessions/filters/Ev
 import { useApps } from "@features/apps";
 import { formatPeriod } from "@fns/format-date";
 import { formatNumber } from "@fns/format-number";
+import { IconWand } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 import { dateFilterValuesAtom } from "../../../../atoms/date-atoms";
-import { dashboardWidgetsAtom, EventsChartWidgetConfig, SingleWidgetConfig } from "../../../../atoms/widgets-atoms";
+import {
+  dashboardWidgetsAtom,
+  DEFAULT_WIDGETS_CONFIG,
+  EventsChartWidgetConfig,
+  SingleWidgetConfig,
+} from "../../../../atoms/widgets-atoms";
 import { Granularity, periodicStats } from "../../query";
 import { EventsChart, EventSeries } from "./EventsChart";
+
+type WidgetConfigPropsType = {
+  selectedEventNames: string[];
+};
 
 type Props = {
   appId: string;
@@ -38,25 +48,21 @@ function TooltipContent(props: {
   );
 }
 
-const emptyDefaultEventsChartWidgetConfig: SingleWidgetConfig<EventsChartWidgetConfig> = {
-  id: "events-chart",
-  isMinimized: false,
-  orderIndex: 0,
-  properties: {
-    selectedEventNames: [],
-  },
-};
+const emptyDefaultEventsChartWidgetConfig: SingleWidgetConfig<EventsChartWidgetConfig> = DEFAULT_WIDGETS_CONFIG.find(
+  (w) => w.id === "events-chart"
+)!;
 
 export function EventsChartWidget(props: Props) {
   const { buildMode } = useApps();
   const [widgetsConfig, setWidgetsConfig] = useAtom(dashboardWidgetsAtom);
-  const eventsChartWidgetConfig = useMemo(
+  const eventsChartWidgetConfig: SingleWidgetConfig<WidgetConfigPropsType> = useMemo(
     () => widgetsConfig.find((w) => w.id === "events-chart") ?? emptyDefaultEventsChartWidgetConfig,
     [widgetsConfig]
   );
   const [dropdownsApplied, setDropdownsApplied] = useState<number>(
     (eventsChartWidgetConfig.properties?.selectedEventNames?.filter(Boolean).length ?? 0) + 1
   );
+
   const eventsChartSeriesConfig: string[] = eventsChartWidgetConfig.properties?.selectedEventNames ?? [];
   const { startDateIso, endDateIso, granularity } = useAtomValue(dateFilterValuesAtom);
 
@@ -74,7 +80,15 @@ export function EventsChartWidget(props: Props) {
       type: "update-properties",
       properties: {
         selectedEventNames: eventsChart,
+        isConfigured: true,
       },
+    });
+  };
+
+  const defineChartClick = () => {
+    setWidgetsConfig({
+      widgetId: eventsChartWidgetConfig.id,
+      type: "toggle-is-defined",
     });
   };
 
@@ -156,6 +170,17 @@ export function EventsChartWidget(props: Props) {
   );
 
   const labels = useMemo(() => (visibleData?.[0] ?? []).map((x) => x.period), [visibleData]);
+
+  if (!eventsChartWidgetConfig.isDefined) {
+    return (
+      <div className="flex flex-col gap-2">
+        <Button variant="outline" className="w-full" onClick={defineChartClick}>
+          <IconWand className="mr-2 h-4 w-4" />
+          Create a custom chart
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <>

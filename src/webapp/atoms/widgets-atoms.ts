@@ -10,51 +10,63 @@ export type SingleWidgetConfig<T = any> = {
   isMinimized: boolean;
   title: string;
   orderIndex: number;
+  isDefined: boolean;
   properties?: T;
+  supportsRemove?: boolean;
 };
 
 export type WidgetsConfig = SingleWidgetConfig[];
-const defaultWidgetsConfig: WidgetsConfig = [
+export const DEFAULT_WIDGETS_CONFIG: WidgetsConfig = [
   {
     id: "events-chart",
     title: "Custom Chart",
     isMinimized: false,
     orderIndex: 0,
+    isDefined: false,
+    properties: {
+      selectedEventNames: [],
+    },
+    supportsRemove: true,
   },
   {
     id: "main-chart",
     title: "Events Chart",
     isMinimized: false,
     orderIndex: 1,
+    isDefined: true,
   },
   {
     id: "country",
     title: "Countries",
     isMinimized: false,
     orderIndex: 2,
+    isDefined: true,
   },
   {
     id: "os",
     title: "Operating Systems",
     isMinimized: false,
     orderIndex: 3,
+    isDefined: true,
   },
   {
     id: "event",
     title: "Events",
     isMinimized: false,
     orderIndex: 4,
+    isDefined: true,
   },
   {
     id: "version",
     title: "App Versions",
     isMinimized: false,
     orderIndex: 5,
+    isDefined: true,
   },
 ];
 
 const getDashboardWidgetAtom = atom(
-  JSON.parse(localStorage.getItem("dashboard_widgets") ?? JSON.stringify(defaultWidgetsConfig))
+  JSON.parse(localStorage.getItem("dashboard_widgets") ?? JSON.stringify(DEFAULT_WIDGETS_CONFIG))
 );
 
 // export const dashboardWidgetsAtom = atom<WidgetsConfig, [SetStateAction<WidgetsConfig>], void>(
@@ -81,12 +93,16 @@ export type UpdateDashboardWidgetsAction<T = any> =
   | {
       widgetId: string;
       type: "toggle-minimized";
+    }
+  | {
+      widgetId: string;
+      type: "toggle-is-defined";
     };
 
 export const dashboardWidgetsAtom = atom<WidgetsConfig, [UpdateDashboardWidgetsAction], void>(
   (get) => get(getDashboardWidgetAtom),
   (get, set, action) => {
-    const widgetsConfigArray: WidgetsConfig = [...(get(getDashboardWidgetAtom) ?? defaultWidgetsConfig)];
+    const widgetsConfigArray: WidgetsConfig = [...(get(getDashboardWidgetAtom) ?? DEFAULT_WIDGETS_CONFIG)];
     const result = produce(widgetsConfigArray, (draft) => {
       let widgetIndex = draft.findIndex((w) => w.id === action.widgetId);
       if (widgetIndex === -1) {
@@ -95,6 +111,7 @@ export const dashboardWidgetsAtom = atom<WidgetsConfig, [UpdateDashboardWidgetsA
           title: action.widgetId,
           isMinimized: false,
           orderIndex: draft.length,
+          isDefined: true,
         });
         widgetIndex = draft.length - 1;
       }
@@ -112,6 +129,8 @@ export const dashboardWidgetsAtom = atom<WidgetsConfig, [UpdateDashboardWidgetsA
         }
       } else if (action.type === "toggle-minimized") {
         draft[widgetIndex].isMinimized = !draft[widgetIndex].isMinimized;
+      } else if (action.type === "toggle-is-defined") {
+        draft[widgetIndex].isDefined = !draft[widgetIndex].isDefined;
       }
     });
     set(getDashboardWidgetAtom, result);
