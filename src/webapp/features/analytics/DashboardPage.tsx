@@ -9,10 +9,12 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { arraySwap, rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
+import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { useApps, useCurrentApp } from "@features/apps";
-import { useState } from "react";
+import { useAtom } from "jotai/react";
+import { useMemo } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
+import { dashboardWidgetsAtom } from "../../atoms/widgets-atoms";
 import { CurrentFilters } from "./CurrentFilters";
 import { CountryWidget } from "./dashboard/CountryWidget";
 import { EventWidget } from "./dashboard/EventWidget";
@@ -27,35 +29,25 @@ import { MainChartWidget } from "./key_metrics/MainChartWidget";
 import { AppLockedContent } from "./locked/AppLockedContent";
 import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
-
 Component.displayName = "DashboardPage";
 
 export function Component() {
   const { buildMode } = useApps();
   const app = useCurrentApp();
   const navigate = useNavigate();
-  const [minimizedWidgets, setMinimizedWidgets] = useState<Record<string, boolean>>({});
-  const [widgetOrder, setWidgetOrder] = useState(["events-chart", "main-chart", "country", "os", "event", "version"]);
+  const [widgetsConfig, setWidgetsConfig] = useAtom(dashboardWidgetsAtom);
+  const widgetsOrder = useMemo(
+    () => widgetsConfig.toSorted((wa, wb) => wa.orderIndex - wb.orderIndex).map((w) => w.id),
+    [widgetsConfig]
+  );
+  const minimizedWidgets = useMemo(
+    () =>
+      widgetsConfig
+        .filter((w) => w.isMinimized)
+        .reduce((acc, w) => ({ ...acc, [w.id]: true }), {} as Record<string, boolean>),
+    [widgetsConfig]
+  );
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
-
-  const toggleMinimize = (widgetId: string) => {
-    setMinimizedWidgets((prev) => ({
-      ...prev,
-      [widgetId]: !prev[widgetId],
-    }));
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      setWidgetOrder((items) => {
-        const oldIndex = items.indexOf(active.id.toString());
-        const newIndex = items.indexOf(over.id.toString());
-        return arraySwap(items, oldIndex, newIndex);
-      });
-    }
-  };
 
   if (!app) return <Navigate to="/" />;
   if (app.lockReason) {
@@ -70,15 +62,39 @@ export function Component() {
 
   const resetFilters = () => navigate(`/${app.id}/`);
 
+  const toggleMinimize = (widgetId: string) => {
+    setWidgetsConfig({
+      type: "toggle-minimized",
+      widgetId,
+    });
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const newOverIndex = widgetsOrder.indexOf(active.id.toString());
+      const newActiveIndex = widgetsOrder.indexOf(over.id.toString());
+
+      setWidgetsConfig({
+        type: "update-order",
+        widgetId: active.id.toString(),
+        active: { widgetId: active.id.toString(), newIndex: newActiveIndex },
+        over: { widgetId: over.id.toString(), newIndex: newOverIndex },
+      });
+    }
+  };
+
   const renderWidget = (widgetId: string) => {
     const props = { appId: app.id, appName: app.name };
+    const widget = widgetsConfig.find((w) => w.id === widgetId);
 
     switch (widgetId) {
       case "events-chart":
         return (
           <WidgetContainer
             id={widgetId}
-            widgetName="Custom Chart"
+            widgetName={widget?.title ?? "Custom Chart"}
             className="col-span-2"
             isMinimized={minimizedWidgets[widgetId]}
             onToggleMinimize={() => toggleMinimize(widgetId)}
@@ -90,7 +106,7 @@ export function Component() {
         return (
           <WidgetContainer
             id={widgetId}
-            widgetName="Events Chart"
+            widgetName={widget?.title ?? "Events Chart"}
             className="col-span-2"
             isMinimized={minimizedWidgets[widgetId]}
             onToggleMinimize={() => toggleMinimize(widgetId)}
@@ -103,7 +119,7 @@ export function Component() {
           <LazyLoad>
             <WidgetContainer
               id={widgetId}
-              widgetName="Countries"
+              widgetName={widget?.title ?? "Countries"}
               isMinimized={minimizedWidgets[widgetId]}
               onToggleMinimize={() => toggleMinimize(widgetId)}
               className="h-full"
@@ -117,7 +133,7 @@ export function Component() {
           <LazyLoad>
             <WidgetContainer
               id={widgetId}
-              widgetName="Operating Systems"
+              widgetName={widget?.title ?? "Operating Systems"}
               isMinimized={minimizedWidgets[widgetId]}
               onToggleMinimize={() => toggleMinimize(widgetId)}
               className="h-full"
@@ -131,7 +147,7 @@ export function Component() {
           <LazyLoad>
             <WidgetContainer
               id={widgetId}
-              widgetName="Events"
+              widgetName={widget?.title ?? "Events"}
               isMinimized={minimizedWidgets[widgetId]}
               onToggleMinimize={() => toggleMinimize(widgetId)}
               className="h-full"
@@ -145,7 +161,7 @@ export function Component() {
           <LazyLoad>
             <WidgetContainer
               id={widgetId}
-              widgetName="App Versions"
+              widgetName={widget?.title ?? "App Versions"}
               isMinimized={minimizedWidgets[widgetId]}
               onToggleMinimize={() => toggleMinimize(widgetId)}
               className="h-full"
@@ -174,9 +190,9 @@ export function Component() {
           <CurrentFilters />
         </div>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={widgetOrder} strategy={rectSortingStrategy}>
+          <SortableContext items={widgetsOrder} strategy={rectSortingStrategy}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {widgetOrder.map((widgetId) => renderWidget(widgetId))}
+              {widgetsOrder.map((widgetId) => renderWidget(widgetId))}
             </div>
           </SortableContext>
         </DndContext>
