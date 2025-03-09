@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 import { dateFilterValuesAtom } from "../../../../atoms/date-atoms";
-import { dashboardWidgetsAtom, WidgetConfig } from "../../../../atoms/widgets-atoms";
+import { dashboardWidgetsAtom, EventsChartWidgetConfig, SingleWidgetConfig } from "../../../../atoms/widgets-atoms";
 import { Granularity, periodicStats } from "../../query";
 import { EventsChart, EventSeries } from "./EventsChart";
 
@@ -38,26 +38,43 @@ function TooltipContent(props: {
   );
 }
 
+const emptyDefaultEventsChartWidgetConfig: SingleWidgetConfig<EventsChartWidgetConfig> = {
+  id: "events-chart",
+  isMinimized: false,
+  orderIndex: 0,
+  properties: {
+    selectedEventNames: [],
+  },
+};
+
 export function EventsChartWidget(props: Props) {
   const { buildMode } = useApps();
   const [widgetsConfig, setWidgetsConfig] = useAtom(dashboardWidgetsAtom);
-  const [dropdownsApplied, setDropdownsApplied] = useState<number>(
-    (widgetsConfig.eventsChart?.filter(Boolean).length ?? 0) + 1
+  const eventsChartWidgetConfig = useMemo(
+    () => widgetsConfig.find((w) => w.id === "events-chart") ?? emptyDefaultEventsChartWidgetConfig,
+    [widgetsConfig]
   );
-  const eventsChartSeriesConfig: string[] = widgetsConfig.eventsChart ?? [];
+  const [dropdownsApplied, setDropdownsApplied] = useState<number>(
+    (eventsChartWidgetConfig.properties?.selectedEventNames?.filter(Boolean).length ?? 0) + 1
+  );
+  const eventsChartSeriesConfig: string[] = eventsChartWidgetConfig.properties?.selectedEventNames ?? [];
   const { startDateIso, endDateIso, granularity } = useAtomValue(dateFilterValuesAtom);
 
   const [eventSeries, setEventSeries] = useState<EventSeries[]>([]);
 
   const addEventLine = (eventName: string | undefined, eventNameIndex: number) => {
-    setWidgetsConfig((prev: WidgetConfig) => {
-      const eventsChart = [...(prev.eventsChart ?? [])];
-      if (eventName) {
-        eventsChart[eventNameIndex] = eventName;
-      } else {
-        eventsChart.splice(eventNameIndex, 1);
-      }
-      return { ...prev, eventsChart };
+    const eventsChart = [...(eventsChartWidgetConfig.properties?.selectedEventNames ?? [])];
+    if (eventName) {
+      eventsChart[eventNameIndex] = eventName;
+    } else {
+      eventsChart.splice(eventNameIndex, 1);
+    }
+    setWidgetsConfig({
+      widgetId: eventsChartWidgetConfig.id,
+      type: "update-properties",
+      properties: {
+        selectedEventNames: eventsChart,
+      },
     });
   };
 
@@ -142,7 +159,7 @@ export function EventsChartWidget(props: Props) {
 
   return (
     <>
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap gap-2 items-center pb-5">
         {Array.from({ length: dropdownsApplied }).map((_, index) => (
           <EventNameFilterDropdown
             key={index}
