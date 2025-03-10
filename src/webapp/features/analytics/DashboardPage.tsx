@@ -96,8 +96,8 @@ export function Component() {
     const props = { appId: app.id, appName: app.name };
     const widget = widgetsConfig.find((w) => w.id === widgetId)!;
 
-    switch (widgetId) {
-      case "events-chart":
+    switch (widget.type) {
+      case "custom-events-chart":
         return (
           <WidgetContainer
             widgetConfig={widget}
@@ -106,10 +106,10 @@ export function Component() {
             onToggleMinimize={() => toggleMinimize(widgetId)}
             onRemove={() => removeWidget(widgetId)}
           >
-            <EventsChartWidget {...props} />
+            <EventsChartWidget {...props} widgetConfig={widget} />
           </WidgetContainer>
         );
-      case "main-chart":
+      case "events-chart":
         return (
           <WidgetContainer
             widgetConfig={widget}
@@ -120,7 +120,7 @@ export function Component() {
             <MainChartWidget {...props} />
           </WidgetContainer>
         );
-      case "country":
+      case "countries":
         return (
           <LazyLoad>
             <WidgetContainer
@@ -133,7 +133,7 @@ export function Component() {
             </WidgetContainer>
           </LazyLoad>
         );
-      case "os":
+      case "operating-systems":
         return (
           <LazyLoad>
             <WidgetContainer
@@ -146,7 +146,7 @@ export function Component() {
             </WidgetContainer>
           </LazyLoad>
         );
-      case "event":
+      case "events":
         return (
           <LazyLoad>
             <WidgetContainer
@@ -159,7 +159,7 @@ export function Component() {
             </WidgetContainer>
           </LazyLoad>
         );
-      case "version":
+      case "app-versions":
         return (
           <LazyLoad>
             <WidgetContainer

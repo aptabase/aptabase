@@ -25,6 +25,7 @@ type WidgetConfigPropsType = {
 type Props = {
   appId: string;
   appName: string;
+  widgetConfig: SingleWidgetConfig<EventsChartWidgetConfig>;
 };
 
 function TooltipContent(props: {
@@ -54,10 +55,10 @@ const emptyDefaultEventsChartWidgetConfig: SingleWidgetConfig<EventsChartWidgetC
 
 export function EventsChartWidget(props: Props) {
   const { buildMode } = useApps();
-  const [widgetsConfig, setWidgetsConfig] = useAtom(dashboardWidgetsAtom);
+  const [, setWidgetsConfig] = useAtom(dashboardWidgetsAtom);
   const eventsChartWidgetConfig: SingleWidgetConfig<WidgetConfigPropsType> = useMemo(
-    () => widgetsConfig.find((w) => w.id === "events-chart") ?? emptyDefaultEventsChartWidgetConfig,
-    [widgetsConfig]
+    () => props.widgetConfig ?? emptyDefaultEventsChartWidgetConfig,
+    [props.widgetConfig]
   );
   const [dropdownsApplied, setDropdownsApplied] = useState<number>(
     (eventsChartWidgetConfig.properties?.selectedEventNames?.filter(Boolean).length ?? 0) + 1

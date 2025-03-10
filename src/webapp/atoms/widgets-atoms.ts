@@ -5,12 +5,22 @@ export type EventsChartWidgetConfig = {
   selectedEventNames: string[];
 };
 
+type WidgetType =
+  | "custom-events-chart"
+  | "events-chart"
+  | "countries"
+  | "operating-systems"
+  | "events"
+  | "app-versions";
+const userDefinedWidgetTypes: WidgetType[] = ["custom-events-chart"];
+
 export type SingleWidgetConfig<T = any> = {
   id: string;
-  isMinimized: boolean;
   title: string;
-  orderIndex: number;
+  type: WidgetType;
   isDefined: boolean;
+  isMinimized: boolean;
+  orderIndex: number;
   properties?: T;
   supportsRemove?: boolean;
 };
@@ -20,6 +30,7 @@ export const DEFAULT_WIDGETS_CONFIG: WidgetsConfig = [
   {
     id: "events-chart",
     title: "Custom Chart",
+    type: "custom-events-chart",
     isMinimized: false,
     orderIndex: 0,
     isDefined: false,
@@ -31,6 +42,7 @@ export const DEFAULT_WIDGETS_CONFIG: WidgetsConfig = [
   {
     id: "main-chart",
     title: "Events Chart",
+    type: "events-chart",
     isMinimized: false,
     orderIndex: 1,
     isDefined: true,
@@ -38,6 +50,7 @@ export const DEFAULT_WIDGETS_CONFIG: WidgetsConfig = [
   {
     id: "country",
     title: "Countries",
+    type: "countries",
     isMinimized: false,
     orderIndex: 2,
     isDefined: true,
@@ -45,6 +58,7 @@ export const DEFAULT_WIDGETS_CONFIG: WidgetsConfig = [
   {
     id: "os",
     title: "Operating Systems",
+    type: "operating-systems",
     isMinimized: false,
     orderIndex: 3,
     isDefined: true,
@@ -52,6 +66,7 @@ export const DEFAULT_WIDGETS_CONFIG: WidgetsConfig = [
   {
     id: "event",
     title: "Events",
+    type: "events",
     isMinimized: false,
     orderIndex: 4,
     isDefined: true,
@@ -59,11 +74,25 @@ export const DEFAULT_WIDGETS_CONFIG: WidgetsConfig = [
   {
     id: "version",
     title: "App Versions",
+    type: "app-versions",
     isMinimized: false,
     orderIndex: 5,
     isDefined: true,
   },
 ];
+
+const EMPTY_CUSTOM_EVENTS_CHART_WIDGET: SingleWidgetConfig<EventsChartWidgetConfig> = {
+  id: "events-chart",
+  title: "Custom Chart",
+  type: "custom-events-chart",
+  isMinimized: false,
+  orderIndex: 0,
+  isDefined: false,
+  properties: {
+    selectedEventNames: [],
+  },
+  supportsRemove: true,
+};
 
 const getDashboardWidgetAtom = atom(
   JSON.parse(localStorage.getItem("dashboard_widgets") ?? JSON.stringify(DEFAULT_WIDGETS_CONFIG))
@@ -109,6 +138,7 @@ export const dashboardWidgetsAtom = atom<WidgetsConfig, [UpdateDashboardWidgetsA
         draft.push({
           id: action.widgetId,
           title: action.widgetId,
+          type: "custom-events-chart",
           isMinimized: false,
           orderIndex: draft.length,
           isDefined: true,
@@ -131,6 +161,28 @@ export const dashboardWidgetsAtom = atom<WidgetsConfig, [UpdateDashboardWidgetsA
         draft[widgetIndex].isMinimized = !draft[widgetIndex].isMinimized;
       } else if (action.type === "toggle-is-defined") {
         draft[widgetIndex].isDefined = !draft[widgetIndex].isDefined;
+
+        if (draft[widgetIndex].isDefined) {
+          const areAllUserDefinedWidgetsDefined = draft
+            .filter((w) => userDefinedWidgetTypes.includes(w.type))
+            .every((w) => w.isDefined);
+          if (areAllUserDefinedWidgetsDefined) {
+            draft.push(
+              produce(EMPTY_CUSTOM_EVENTS_CHART_WIDGET, (customEventsDraft) => {
+                customEventsDraft.id = `${customEventsDraft.id}-${widgetsConfigArray.length}`;
+                customEventsDraft.orderIndex = widgetsConfigArray.length;
+              })
+            );
+          }
+        } else {
+          const widgetsToRemoveIds = draft
+            .filter((w) => userDefinedWidgetTypes.includes(w.type) && !w.isDefined && w.id !== action.widgetId)
+            .map((w) => w.id);
+          const widgetsToRemoveIndexes = widgetsToRemoveIds.map((id) => draft.findIndex((w) => w.id === id));
+          widgetsToRemoveIndexes.forEach((toRemoveIndex) => {
+            draft.splice(toRemoveIndex, 1);
+          });
+        }
       }
     });
     set(getDashboardWidgetAtom, result);
