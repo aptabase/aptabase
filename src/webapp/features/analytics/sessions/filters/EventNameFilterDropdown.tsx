@@ -1,19 +1,28 @@
 import { topEvents } from "@features/analytics/query";
-import { useAtom } from "jotai";
-import { useEffect } from "react";
+import { atom, useAtom } from "jotai";
+import { useEffect, useMemo } from "react";
 import { atomWithSearchParam } from "../../../../atoms/location-atoms";
+import { FilterDropdownFancy } from "./FilterDropdownFancy";
 import { FilterDropdownQuery } from "./FilterDropdownQuery";
-import { FilterDropdownSelect } from "./FilterDropdownSelect";
 
 type Props = {
   appId: string;
   onValueChange?: (value: string | undefined) => void;
+  onRemove?: () => void;
+  localValue?: string;
+  localPersistence?: boolean;
+  className?: string;
 };
 
 const eventNameAtom = atomWithSearchParam("eventName");
 
 export function EventNameFilterDropdown(props: Props) {
-  const [selectedEvent, setSelectedEvent] = useAtom(eventNameAtom);
+  const localAtom = useMemo(
+    () => (props.localPersistence ? atom<string | undefined>(props.localValue) : null),
+    [props.localValue, props.localPersistence]
+  );
+
+  const [selectedEvent, setSelectedEvent] = useAtom(localAtom ?? eventNameAtom);
 
   if (props.onValueChange) {
     useEffect(() => {
@@ -24,11 +33,13 @@ export function EventNameFilterDropdown(props: Props) {
   return (
     <FilterDropdownQuery appId={props.appId} queryKey={"top-events"} query={topEvents}>
       {(data) => (
-        <FilterDropdownSelect
+        <FilterDropdownFancy
           value={selectedEvent}
           onValueChange={setSelectedEvent}
+          onRemove={props.onRemove}
           data={data}
           placeholder="Select Event"
+          className={props.className}
         />
       )}
     </FilterDropdownQuery>
