@@ -6,7 +6,7 @@ import { formatPeriod } from "@fns/format-date";
 import { formatNumber } from "@fns/format-number";
 import { IconWand } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 import { dateFilterValuesAtom } from "../../../../atoms/date-atoms";
 import {
@@ -55,7 +55,7 @@ const emptyDefaultEventsChartWidgetConfig: SingleWidgetConfig<EventsChartWidgetC
 
 export function EventsChartWidget(props: Props) {
   const { buildMode } = useApps();
-  const [, setWidgetsConfig] = useAtom(dashboardWidgetsAtom);
+  const setWidgetsConfig = useSetAtom(dashboardWidgetsAtom);
   const eventsChartWidgetConfig: SingleWidgetConfig<WidgetConfigPropsType> = useMemo(
     () => props.widgetConfig ?? emptyDefaultEventsChartWidgetConfig,
     [props.widgetConfig]
@@ -83,6 +83,7 @@ export function EventsChartWidget(props: Props) {
         selectedEventNames: eventsChart,
         isConfigured: true,
       },
+      appId: props.appId,
     });
   };
 
@@ -90,6 +91,7 @@ export function EventsChartWidget(props: Props) {
     setWidgetsConfig({
       widgetId: eventsChartWidgetConfig.id,
       type: "toggle-is-defined",
+      appId: props.appId,
     });
   };
 

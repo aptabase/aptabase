@@ -11,10 +11,10 @@ import {
 } from "@dnd-kit/core";
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { useApps, useCurrentApp } from "@features/apps";
-import { useAtom } from "jotai/react";
+import { useAtomValue, useSetAtom } from "jotai/react";
 import { useMemo } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { dashboardWidgetsAtom } from "../../atoms/widgets-atoms";
+import { dashboardWidgetsAtom, getDashboardWidgetsForAppAtom, SingleWidgetConfig } from "../../atoms/widgets-atoms";
 import { CurrentFilters } from "./CurrentFilters";
 import { CountryWidget } from "./dashboard/CountryWidget";
 import { EventWidget } from "./dashboard/EventWidget";
@@ -35,18 +35,6 @@ export function Component() {
   const { buildMode } = useApps();
   const app = useCurrentApp();
   const navigate = useNavigate();
-  const [widgetsConfig, setWidgetsConfig] = useAtom(dashboardWidgetsAtom);
-  const widgetsOrder = useMemo(
-    () => widgetsConfig.toSorted((wa, wb) => wa.orderIndex - wb.orderIndex).map((w) => w.id),
-    [widgetsConfig]
-  );
-  // const minimizedWidgets = useMemo(
-  //   () =>
-  //     widgetsConfig
-  //       .filter((w) => w.isMinimized)
-  //       .reduce((acc, w) => ({ ...acc, [w.id]: true }), {} as Record<string, boolean>),
-  //   [widgetsConfig]
-  // );
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
   if (!app) return <Navigate to="/" />;
@@ -60,12 +48,21 @@ export function Component() {
 
   if (!app.hasEvents) return <OnboardingDashboard app={app} />;
 
+  const getWidgetsForApp = useAtomValue(getDashboardWidgetsForAppAtom);
+  const widgetsConfig = getWidgetsForApp(app.id);
+  const setWidgetsConfig = useSetAtom(dashboardWidgetsAtom);
+  const widgetsOrder = useMemo(
+    () => widgetsConfig.toSorted((wa, wb) => wa.orderIndex - wb.orderIndex).map((w) => w.id),
+    [widgetsConfig]
+  );
+
   const resetFilters = () => navigate(`/${app.id}/`);
 
   const toggleMinimize = (widgetId: string) => {
     setWidgetsConfig({
       type: "toggle-minimized",
       widgetId,
+      appId: app.id,
     });
   };
 
@@ -81,6 +78,7 @@ export function Component() {
         widgetId: active.id.toString(),
         active: { widgetId: active.id.toString(), newIndex: newActiveIndex },
         over: { widgetId: over.id.toString(), newIndex: newOverIndex },
+        appId: app.id,
       });
     }
   };
@@ -89,17 +87,19 @@ export function Component() {
     setWidgetsConfig({
       type: "toggle-is-defined",
       widgetId,
+      appId: app.id,
     });
   };
 
   const renderWidget = (widgetId: string) => {
     const props = { appId: app.id, appName: app.name };
-    const widget = widgetsConfig.find((w) => w.id === widgetId)!;
+    const widget = widgetsConfig.find((w: SingleWidgetConfig) => w.id === widgetId)!;
 
     switch (widget.type) {
       case "custom-events-chart":
         return (
           <WidgetContainer
+            key={widgetId}
             widgetConfig={widget}
             widgetName={widget?.title ?? "Custom Chart"}
             className="col-span-2"
@@ -112,6 +112,7 @@ export function Component() {
       case "events-chart":
         return (
           <WidgetContainer
+            key={widgetId}
             widgetConfig={widget}
             widgetName={widget?.title ?? "Events Chart"}
             className="col-span-2"
@@ -122,7 +123,7 @@ export function Component() {
         );
       case "countries":
         return (
-          <LazyLoad>
+          <LazyLoad key={widgetId}>
             <WidgetContainer
               widgetConfig={widget}
               widgetName={widget?.title ?? "Countries"}
@@ -135,7 +136,7 @@ export function Component() {
         );
       case "operating-systems":
         return (
-          <LazyLoad>
+          <LazyLoad key={widgetId}>
             <WidgetContainer
               widgetConfig={widget}
               widgetName={widget?.title ?? "Operating Systems"}
@@ -148,7 +149,7 @@ export function Component() {
         );
       case "events":
         return (
-          <LazyLoad>
+          <LazyLoad key={widgetId}>
             <WidgetContainer
               widgetConfig={widget}
               widgetName={widget?.title ?? "Events"}
@@ -161,7 +162,7 @@ export function Component() {
         );
       case "app-versions":
         return (
-          <LazyLoad>
+          <LazyLoad key={widgetId}>
             <WidgetContainer
               widgetConfig={widget}
               widgetName={widget?.title ?? "App Versions"}
@@ -194,7 +195,7 @@ export function Component() {
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={widgetsOrder} strategy={rectSortingStrategy}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {widgetsOrder.map((widgetId) => renderWidget(widgetId))}
+              {widgetsOrder.map((widgetId: string) => renderWidget(widgetId))}
             </div>
           </SortableContext>
         </DndContext>
