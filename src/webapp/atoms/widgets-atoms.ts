@@ -1,5 +1,5 @@
 import { produce } from "immer";
-import { atom } from "jotai";
+import { atom, WritableAtom } from "jotai";
 
 export type EventsChartWidgetConfig = {
   selectedEventNames: string[];
@@ -25,8 +25,10 @@ export type SingleWidgetConfig<T = any> = {
   supportsRemove?: boolean;
 };
 
-export type WidgetsConfig = SingleWidgetConfig[];
-export const DEFAULT_WIDGETS_CONFIG: WidgetsConfig = [
+export type WidgetsConfig = {
+  [key: string]: SingleWidgetConfig[];
+};
+export const DEFAULT_WIDGETS_CONFIG: SingleWidgetConfig[] = [
   {
     id: "events-chart",
     title: "Custom Chart",
@@ -94,44 +96,52 @@ const EMPTY_CUSTOM_EVENTS_CHART_WIDGET: SingleWidgetConfig<EventsChartWidgetConf
   supportsRemove: true,
 };
 
-const getDashboardWidgetAtom = atom(
-  JSON.parse(localStorage.getItem("dashboard_widgets") ?? JSON.stringify(DEFAULT_WIDGETS_CONFIG))
-);
+localStorage.removeItem("dashboard_widgets");
 
-// export const dashboardWidgetsAtom = atom<WidgetsConfig, [SetStateAction<WidgetsConfig>], void>(
-//   (get) => get(getDashboardWidgetAtom),
-//   (get, set, update) => {
-//     const nextValue = typeof update === "function" ? update(get(getDashboardWidgetAtom)) : update;
-//     set(getDashboardWidgetAtom, nextValue);
-//     localStorage.setItem("dashboard_widgets", JSON.stringify(nextValue || {}));
-//   }
-// );
+const initialWidgetsValue = JSON.parse(localStorage.getItem("dashboard_widgets_map") ?? "null");
+const getDashboardWidgetAtom: WritableAtom<WidgetsConfig, WidgetsConfig[], void> = atom(initialWidgetsValue);
+
+export const getDashboardWidgetsForAppAtom = atom((get) => {
+  const widgets = get(getDashboardWidgetAtom);
+  const getWidgetsForApp = (appId: string) => {
+    const widgetWithAppId = widgets?.[appId];
+    return widgetWithAppId ?? DEFAULT_WIDGETS_CONFIG;
+  };
+  return getWidgetsForApp;
+});
 
 export type UpdateDashboardWidgetsAction<T = any> =
   | {
       widgetId: string;
+      appId: string;
       type: "update-properties";
       properties?: T;
     }
   | {
       widgetId: string;
+      appId: string;
       type: "update-order";
       active: { widgetId: string; newIndex: number };
       over: { widgetId: string; newIndex: number };
     }
   | {
       widgetId: string;
+      appId: string;
       type: "toggle-minimized";
     }
   | {
       widgetId: string;
+      appId: string;
       type: "toggle-is-defined";
     };
 
-export const dashboardWidgetsAtom = atom<WidgetsConfig, [UpdateDashboardWidgetsAction], void>(
-  (get) => get(getDashboardWidgetAtom),
+export const dashboardWidgetsAtom = atom<null, [UpdateDashboardWidgetsAction], void>(
+  (get) => null,
   (get, set, action) => {
-    const widgetsConfigArray: WidgetsConfig = [...(get(getDashboardWidgetAtom) ?? DEFAULT_WIDGETS_CONFIG)];
+    const widgetsConfig = get(getDashboardWidgetAtom);
+    const mapResult = widgetsConfig ?? {};
+    const widgetsConfigArray: SingleWidgetConfig[] = mapResult[action.appId] ?? DEFAULT_WIDGETS_CONFIG;
+
     const result = produce(widgetsConfigArray, (draft) => {
       let widgetIndex = draft.findIndex((w) => w.id === action.widgetId);
       if (widgetIndex === -1) {
@@ -185,8 +195,12 @@ export const dashboardWidgetsAtom = atom<WidgetsConfig, [UpdateDashboardWidgetsA
         }
       }
     });
-    set(getDashboardWidgetAtom, result);
 
-    localStorage.setItem("dashboard_widgets", JSON.stringify(result));
+    const allConfigs = produce(mapResult, (draftResult: any) => {
+      draftResult[action.appId] = result;
+    });
+    set(getDashboardWidgetAtom, allConfigs);
+
+    localStorage.setItem("dashboard_widgets_map", JSON.stringify(allConfigs));
   }
 );
