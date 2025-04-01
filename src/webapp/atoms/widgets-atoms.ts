@@ -171,6 +171,7 @@ export const dashboardWidgetsAtom = atom<null, [UpdateDashboardWidgetsAction], v
         draft[widgetIndex].isMinimized = !draft[widgetIndex].isMinimized;
       } else if (action.type === "toggle-is-defined") {
         draft[widgetIndex].isDefined = !draft[widgetIndex].isDefined;
+        draft[widgetIndex].isMinimized = false;
 
         if (draft[widgetIndex].isDefined) {
           const areAllUserDefinedWidgetsDefined = draft

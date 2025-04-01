@@ -63,7 +63,7 @@ export const WidgetContainer = ({
           </Button>
         )}
       </div>
-      <div className={`p-4 ${widgetConfig.isMinimized ? "hidden" : ""}`}>{children}</div>
+      <div className={`p-4 ${widgetConfig.isMinimized && widgetConfig.isDefined ? "hidden" : ""}`}>{children}</div>
     </div>
   );
 };
