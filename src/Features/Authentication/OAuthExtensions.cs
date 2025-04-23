@@ -20,7 +20,7 @@ public static class OAuthExtensions
         [JsonPropertyName("email")]
         public string Email { get; set; } = "";
     }
-    
+
     public class GitHubEmail
     {
         [JsonPropertyName("email")]
@@ -41,6 +41,18 @@ public static class OAuthExtensions
         public string Email { get; set; } = "";
         [JsonPropertyName("email_verified")]
         public bool EmailVerified { get; set; }
+    }
+
+    public class AuthentikUser
+    {
+        [JsonPropertyName("sub")]
+        public string Id { get; set; } = "";
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = "";
+        [JsonPropertyName("email")]
+        public string Email { get; set; } = "";
+        [JsonPropertyName("groups")]
+        public string[] Groups { get; set; } = Array.Empty<string>();
     }
 
     public static AuthenticationBuilder AddGitHub(this AuthenticationBuilder builder, EnvSettings env)
@@ -95,6 +107,73 @@ public static class OAuthExtensions
             };
         });
     }
+
+    public static AuthenticationBuilder AddAuthentik(this AuthenticationBuilder builder, EnvSettings env)
+    {
+        return builder.AddOAuth("authentik", o =>
+        {
+            o.ClientId = env.OAuthAuthentikClientId;
+            o.ClientSecret = env.OAuthAuthentikClientSecret;
+            o.Scope.Add("openid");
+            o.Scope.Add("profile");
+            o.Scope.Add("email");
+            o.AuthorizationEndpoint = env.OAuthAuthentikAuthorizeURL;
+            o.TokenEndpoint = env.OAuthAuthentikTokenURL;
+            o.UserInformationEndpoint = env.OAuthAuthentikUserinfoURL;
+            o.CallbackPath = new PathString("/api/_auth/authentik/callback");
+
+            o.CorrelationCookie.SameSite = env.IsDevelopment ? SameSiteMode.Unspecified : SameSiteMode.None;
+            o.CorrelationCookie.HttpOnly = true;
+            o.CorrelationCookie.IsEssential = true;
+            o.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+            o.ClaimActions.MapJsonKey("id", "id");
+            o.ClaimActions.MapJsonKey("name", "name");
+            o.ClaimActions.MapJsonKey("email", "email");
+
+            o.Events = new OAuthEvents
+            {
+                OnAccessDenied = context =>
+                {
+                    context.HandleResponse();
+                    context.HttpContext.Response.Redirect($"{env.SelfBaseUrl}/auth");
+                    return Task.CompletedTask;
+                },
+                OnCreatingTicket = async context =>
+                {
+                    var authentikUser = await MakeOAuthRequest<AuthentikUser>(context, env.OAuthAuthentikUserinfoURL);
+                    if (authentikUser is null)
+                    {
+                        throw new Exception("Failed to retrieve Authentik user information.");
+                    }
+
+                    //if (!authentikUser.Groups.Contains("Aptabase"))
+                    //{
+                        // Redirect to login page if the user is not in the Aptabasee group
+                        //context.HttpContext.Response.StatusCode = 302;
+                        //context.HttpContext.Response.Headers["Location"] = $"{env.SelfBaseUrl}/auth";
+                        //await context.HttpContext.Response.CompleteAsync();
+                        //return;
+                    //}
+
+                    // authenik user id is too long for the database, this is a temporary fix
+                    if (authentikUser.Id.Length > 40)
+                    {
+                        authentikUser.Id = authentikUser.Id.Substring(0, 40);
+                    }
+
+                    var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+                    var user = await authService.FindOrCreateAccountWithOAuthAsync(authentikUser.Name, authentikUser.Email, "authentik", authentikUser.Id, context.HttpContext.RequestAborted);
+
+                    context.RunClaimActions(JsonSerializer.SerializeToElement(new { id = user.Id, name = user.Name, email = user.Email }));
+                },
+            };
+
+
+        });
+    }
+
+
 
     public static AuthenticationBuilder AddGoogle(this AuthenticationBuilder builder, EnvSettings env)
     {

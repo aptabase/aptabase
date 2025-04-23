@@ -75,6 +75,26 @@ public class EnvSettings
     // Variable Name: OAUTH_GOOGLE_CLIENT_SECRET
     public string OAuthGoogleClientSecret { get; private set; } = "";
 
+    // The Authentik Client ID for OAuth
+    // Variable Name: OAUTH_AUTHENTIK_CLIENT_ID
+    public string OAuthAuthentikClientId { get; private set; } = "";
+
+    // The Authentik Client Secret for OAuth
+    // Variable Name: OAUTH_AUTHENTIK_CLIENT_SECRET
+    public string OAuthAuthentikClientSecret { get; private set; } = "";
+
+    // The Authentik Authorize URL for OAuth
+    // Variable Name: OAUTH_AUTHENTIK_AUTHORIZE_URL
+    public string OAuthAuthentikAuthorizeURL { get; private set; } = "";
+
+    // The Authentik Token URL for OAuth
+    // Variable Name: OAUTH_AUTHENTIK_TOKEN_URL
+    public string OAuthAuthentikTokenURL { get; private set; } = "";
+
+     // The Authentik Userinfo URL for OAuth
+    // Variable Name: OAUTH_AUTHENTIK_USERINFO_URL
+    public string OAuthAuthentikUserinfoURL { get; private set; } = "";
+
     //  The following properties are derived from the other settings
     public bool IsManagedCloud => Region == "EU" || Region == "US";
     public bool IsBillingEnabled => IsManagedCloud || IsDevelopment;
@@ -116,6 +136,11 @@ public class EnvSettings
             OAuthGitHubClientSecret = Get("OAUTH_GITHUB_CLIENT_SECRET"),
             OAuthGoogleClientId = Get("OAUTH_GOOGLE_CLIENT_ID"),
             OAuthGoogleClientSecret = Get("OAUTH_GOOGLE_CLIENT_SECRET"),
+            OAuthAuthentikClientId = Get("OAUTH_AUTHENTIK_CLIENT_ID"),
+            OAuthAuthentikClientSecret = Get("OAUTH_AUTHENTIK_CLIENT_SECRET"),
+            OAuthAuthentikAuthorizeURL = Get("OAUTH_AUTHENTIK_AUTHORIZE_URL"),
+            OAuthAuthentikTokenURL = Get("OAUTH_AUTHENTIK_TOKEN_URL"),
+            OAuthAuthentikUserinfoURL = Get("OAUTH_AUTHENTIK_USERINFO_URL"),
 
             // On the container, the etc directory is mounted at ./etc
             // But during development, it's at ../etc

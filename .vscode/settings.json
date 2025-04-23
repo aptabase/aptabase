@@ -14,7 +14,8 @@
   "coverage-gutters.showRulerCoverage": true,
   "coverage-gutters.showGutterCoverage": true,
   "[csharp]": {
-    "editor.tabSize": 4
+    "editor.tabSize": 4,
+    "editor.defaultFormatter": "ms-dotnettools.csharp"
   },
   "files.exclude": {
     "**/.git": true,

@@ -125,7 +125,7 @@ public class AuthService : IAuthService
 
         var authProperties = new AuthenticationProperties
         {
-            ExpiresUtc = DateTime.UtcNow.AddDays(365),
+            ExpiresUtc = DateTime.UtcNow.AddDays(7),
             IsPersistent = true,
         };
 
