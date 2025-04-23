@@ -117,9 +117,9 @@ public static class OAuthExtensions
             o.Scope.Add("openid");
             o.Scope.Add("profile");
             o.Scope.Add("email");
-            o.AuthorizationEndpoint = "https://sso.informatik.sexy/application/o/authorize/";
-            o.TokenEndpoint = "https://sso.informatik.sexy/application/o/token/";
-            o.UserInformationEndpoint = "https://sso.informatik.sexy/application/o/userinfo/";
+            o.AuthorizationEndpoint = env.OAuthAuthentikAuthorizeURL;
+            o.TokenEndpoint = env.OAuthAuthentikTokenURL;
+            o.UserInformationEndpoint = env.OAuthAuthentikUserinfoURL;
             o.CallbackPath = new PathString("/api/_auth/authentik/callback");
 
             o.CorrelationCookie.SameSite = env.IsDevelopment ? SameSiteMode.Unspecified : SameSiteMode.None;
@@ -141,20 +141,20 @@ public static class OAuthExtensions
                 },
                 OnCreatingTicket = async context =>
                 {
-                    var authentikUser = await MakeOAuthRequest<AuthentikUser>(context, "https://sso.informatik.sexy/application/o/userinfo/");
+                    var authentikUser = await MakeOAuthRequest<AuthentikUser>(context, env.OAuthAuthentikUserinfoURL);
                     if (authentikUser is null)
                     {
                         throw new Exception("Failed to retrieve Authentik user information.");
                     }
 
-                    if (!authentikUser.Groups.Contains("Aptabase"))
-                    {
+                    //if (!authentikUser.Groups.Contains("Aptabase"))
+                    //{
                         // Redirect to login page if the user is not in the Aptabasee group
-                        context.HttpContext.Response.StatusCode = 302;
-                        context.HttpContext.Response.Headers["Location"] = $"{env.SelfBaseUrl}/auth";
-                        await context.HttpContext.Response.CompleteAsync();
-                        return;
-                    }
+                        //context.HttpContext.Response.StatusCode = 302;
+                        //context.HttpContext.Response.Headers["Location"] = $"{env.SelfBaseUrl}/auth";
+                        //await context.HttpContext.Response.CompleteAsync();
+                        //return;
+                    //}
 
                     // authenik user id is too long for the database, this is a temporary fix
                     if (authentikUser.Id.Length > 40)
@@ -163,7 +163,7 @@ public static class OAuthExtensions
                     }
 
                     var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
-                    var user = await authService.FindOrCreateAccountWithOAuth(authentikUser.Name, authentikUser.Email, "authentik", authentikUser.Id, context.HttpContext.RequestAborted);
+                    var user = await authService.FindOrCreateAccountWithOAuthAsync(authentikUser.Name, authentikUser.Email, "authentik", authentikUser.Id, context.HttpContext.RequestAborted);
 
                     context.RunClaimActions(JsonSerializer.SerializeToElement(new { id = user.Id, name = user.Name, email = user.Email }));
                 },
