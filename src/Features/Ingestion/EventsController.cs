@@ -80,7 +80,15 @@ public class EventsController : Controller
         return Ok(new { });
     }
 
+    [HttpOptions("/api/v0/event")]
+    [EnableCors("AllowAny")]
+    public IActionResult OptionsSingle()
+    {
+        return Ok();
+    }
+
     [HttpPost("/api/v0/events")]
+    [EnableCors("AllowAny")]
     [EnableRateLimiting("EventIngestion")]
     public async Task<IActionResult> Multiple(
         [FromHeader(Name = "App-Key")] string? appKey,
@@ -118,6 +126,14 @@ public class EventsController : Controller
         _buffer.AddRange(ref trackingEvents);
 
         return Ok(new { });
+    }
+
+
+    [HttpOptions("/api/v0/events")]
+    [EnableCors("AllowAny")]
+    public IActionResult OptionsMultiple()
+    {
+        return Ok();
     }
 
     private IActionResult AppNotFound(string appKey)

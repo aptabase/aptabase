@@ -1,11 +1,12 @@
 import { trackEvent } from "@aptabase/web";
 import { Tooltip } from "@components/Tooltip";
+import { DateSuggestion } from "@datepicker-suggest/core";
 import { DatePickerSuggest } from "@datepicker-suggest/react";
 import { useTheme } from "@features/theme";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
 import { IconX } from "@tabler/icons-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   clearEndDatePersistentAtom,
   clearStartDatePersistentAtom,
@@ -29,6 +30,13 @@ const startOptionsSuggestions = [
 
 const endOptionsSuggestions = ["Now"];
 
+type UnappliedDate = {
+  end?: DateSuggestion | null;
+  start?: DateSuggestion | null;
+  startError?: boolean;
+  endError?: boolean;
+};
+
 export function DatePickerSuggestPeriod() {
   const [startDate, setStartDate] = useAtom(startDateAtom);
   const startDatePersistentLabel = useAtomValue(startDatePersistentLabelAtom);
@@ -36,6 +44,7 @@ export function DatePickerSuggestPeriod() {
   const endDatePersistentLabel = useAtomValue(endDatePersistentLabelAtom);
   const clearStartPersistence = useSetAtom(clearStartDatePersistentAtom);
   const clearEndPersistence = useSetAtom(clearEndDatePersistentAtom);
+  const [unappliedDate, setUnappliedDate] = useState<UnappliedDate>({});
 
   const setPeriod = useSetAtom(periodAtom);
   const close = () => {
@@ -47,51 +56,69 @@ export function DatePickerSuggestPeriod() {
 
   const panelColors = usePanelColors();
 
+  const applyEndDate = (newEndDate: DateSuggestion | null) => {
+    if (!newEndDate) {
+      return;
+    }
+
+    if (!startDate || newEndDate.date.getTime() > startDate.date.getTime()) {
+      setEndDate(newEndDate);
+
+      if (unappliedDate.start) {
+        setStartDate(unappliedDate.start);
+        setUnappliedDate({});
+      }
+    } else {
+      setUnappliedDate({ end: newEndDate, startError: true });
+    }
+  };
+
+  const applyStartDate = (newStartDate: DateSuggestion | null) => {
+    if (!newStartDate) {
+      return;
+    }
+
+    if (!endDate || newStartDate.date.getTime() < endDate.date.getTime()) {
+      setStartDate(newStartDate);
+
+      if (unappliedDate.end) {
+        setEndDate(unappliedDate.end);
+        setUnappliedDate({});
+      }
+    } else {
+      setUnappliedDate({ start: newStartDate, endError: true });
+    }
+  };
+
   useEffect(() => {
     trackEvent("date_custom_used");
   }, []);
-
-  useEffect(() => {
-    if (!endDate || !startDate) {
-      return;
-    }
-    if (endDate.date.getTime() < startDate.date.getTime()) {
-      setStartDate(endDate);
-    }
-  }, [endDate]);
-
-  useEffect(() => {
-    if (!startDate || !endDate) {
-      return;
-    }
-    if (startDate.date.getTime() > endDate.date.getTime()) {
-      setEndDate(startDate);
-    }
-  }, [startDate]);
 
   return (
     <>
       <div className="flex flex-col md:flex-row gap-2 mt-0.5">
         <div className="flex flex-col">
           <DatePickerSuggest
-            panelClassName={panelColors + " w-72"}
+            className={panelColors + " w-72"}
             onSuggestionChange={(dateSuggestion) => {
               const newStartDate = dateSuggestion ?? startDate;
-              setStartDate(newStartDate);
+              applyStartDate(newStartDate);
             }}
             initialSuggestion={startDatePersistentLabel}
             optionsSuggestions={startOptionsSuggestions}
+            isError={unappliedDate.startError}
           />
         </div>
         <div className="flex flex-col">
           <DatePickerSuggest
-            panelClassName={panelColors + " w-72"}
+            className={panelColors + " w-72"}
             onSuggestionChange={(dateSuggestion) => {
               const newEndDate = dateSuggestion ?? endDate;
-              setEndDate(newEndDate);
+              applyEndDate(newEndDate);
             }}
             initialSuggestion={endDatePersistentLabel}
             optionsSuggestions={endOptionsSuggestions}
+            isError={unappliedDate.endError}
           />
         </div>
 

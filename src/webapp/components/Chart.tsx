@@ -1,20 +1,21 @@
 import {
-  Chart as ChartJS,
+  BarController,
+  BarElement,
+  CategoryScale,
   ChartConfiguration,
   ChartConfigurationCustomTypesPerDataset,
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LinearScale,
   LineController,
   LineElement,
   PointElement,
-  CategoryScale,
-  LinearScale,
   Tooltip,
-  Filler,
-  BarController,
-  BarElement,
 } from "chart.js";
 import Annotation from "chartjs-plugin-annotation";
 
-import { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export { type ChartConfigurationCustomTypesPerDataset, type ScriptableContext } from "chart.js";
 export { type LineAnnotationOptions } from "chartjs-plugin-annotation";
@@ -31,7 +32,8 @@ ChartJS.register(
   LinearScale,
   Tooltip,
   Filler,
-  Annotation
+  Annotation,
+  Legend
 );
 
 type Props = {
