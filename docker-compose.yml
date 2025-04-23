@@ -1,7 +1,7 @@
 services:
   aptabase:
     container_name: aptabase_app
-    image: ghcr.io/robert27/aptabase:authentik
+    image: ghcr.io/arunabh-hazarika/aptabase:authentik
      
     restart: always
     depends_on:
@@ -16,10 +16,13 @@ services:
       CLICKHOUSE_URL: Host=aptabase_events_db;Port=8123;Username=aptabase;Password=sTr0NGp4ssw0rd
       OAUTH_AUTHENTIK_CLIENT_ID: abcdefghijklmnopqrstuvwxyz # replace with your client id
       OAUTH_AUTHENTIK_CLIENT_SECRET: abcdefghijklmnopqrstuvwxyz # replace with your client secret
+      OAUTH_AUTHENTIK_AUTHORIZE_URL: https://authentik.example.com/application/o/authorize/ # replace with your Authorize URL
+      OAUTH_AUTHENTIK_TOKEN_URL: https://authentik.example.com/application/o/token/ # replace with your Token URL
+      OAUTH_AUTHENTIK_USERINFO_URL: https://authentik.example.com/application/o/userinfo/ # replace with your Userinfo URL
 
   aptabase_db:
     container_name: aptabase_db
-    image: postgres:15-alpine
+    image: postgres:16
     restart: always
     volumes:
       - db-data:/var/lib/postgresql/data
@@ -29,7 +32,7 @@ services:
 
   aptabase_events_db:
     container_name: aptabase_events_db
-    image: clickhouse/clickhouse-server:23.8.4.69-alpine
+    image: clickhouse/clickhouse-server:23.10.4.25
     restart: always
     volumes:
       - events-db-data:/var/lib/clickhouse
