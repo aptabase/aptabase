@@ -25,6 +25,7 @@ export function MonthlyUsageChart(props: Props) {
         },
         {
           type: "line",
+          label: "Limit",
           data: props.events.map(() => props.quota),
           borderColor: props.state === "OK" ? colors.success : colors.destructive,
           borderWidth: 2,
@@ -37,6 +38,9 @@ export function MonthlyUsageChart(props: Props) {
       plugins: {
         tooltip: {
           enabled: false,
+        },
+        legend: {
+          display: false,
         },
       },
       animation: false,
