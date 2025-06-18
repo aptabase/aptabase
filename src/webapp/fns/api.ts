@@ -43,14 +43,14 @@ async function _fetch(method: string, path: string, body?: any): Promise<[number
   return [response.status, response];
 }
 
-async function get<T>(path: string, params?: Record<string, any>): Promise<T> {
+async function get<T>(path: string, params?: Record<string, any>): Promise<T | null> {
   const paramsStr = params ? new URLSearchParams(params).toString() : "";
   const pathWithParams = paramsStr ? `${path}?${paramsStr}` : path;
 
   const [status, response] = await _fetch("GET", pathWithParams);
 
   await handleError(status, response);
-  return response.json() as Promise<T>;
+  return response.status === 204 ? null : ((await response.json()) as Promise<T>);
 }
 
 async function post<T>(path: string, body?: any): Promise<T> {
