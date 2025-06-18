@@ -1,10 +1,11 @@
-import { PageHeading, Page } from "@components/Page";
-import { Tabs, TabsList, TabsContent, TabsTrigger } from "@components/Tabs";
-import { DangerZone } from "./DangerZone";
-import { AppSharing } from "./AppSharing";
-import { GeneralSettings } from "./GeneralSettings";
-import { Navigate } from "react-router-dom";
+import { Page, PageHeading } from "@components/Page";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/Tabs";
 import { useCurrentApp } from "@features/apps";
+import { Navigate } from "react-router-dom";
+import { AppSharing } from "./AppSharing";
+import { DangerZone } from "./DangerZone";
+import { GeneralSettings } from "./GeneralSettings";
+import { OwnershipTransfer } from "./OwnershipTransfer";
 
 Component.displayName = "SettingsPage";
 export function Component() {
@@ -20,6 +21,7 @@ export function Component() {
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="sharing">Sharing</TabsTrigger>
+          <TabsTrigger value="ownership">Ownership Transfer</TabsTrigger>
           <TabsTrigger value="danger">Danger Zone</TabsTrigger>
         </TabsList>
         <TabsContent value="general">
@@ -27,6 +29,9 @@ export function Component() {
         </TabsContent>
         <TabsContent value="sharing">
           <AppSharing app={app} />
+        </TabsContent>
+        <TabsContent value="ownership">
+          <OwnershipTransfer app={app} />
         </TabsContent>
         <TabsContent value="danger">
           <DangerZone app={app} />

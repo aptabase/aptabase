@@ -1,11 +1,12 @@
+import { ErrorState } from "@components/ErrorState";
+import { LoadingState } from "@components/LoadingState";
+import { useLocalStorage } from "@hooks/use-localstorage";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
 import { Navigate, useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Application, createApp, deleteApp, listApps, updateApp } from "./apps";
-import { ErrorState } from "@components/ErrorState";
-import { LoadingState } from "@components/LoadingState";
-import { useLocalStorage } from "@hooks/use-localstorage";
+import { OwnershipTransferStartupCheck } from "./OwnershipTransferStartupCheck";
 
 type Props = {
   children: React.ReactNode;
@@ -68,6 +69,7 @@ export function AppsProvider(props: Props) {
       }}
     >
       {props.children}
+      <OwnershipTransferStartupCheck />
     </AppsContext.Provider>
   );
 }
