@@ -8,13 +8,7 @@ import { IconCheck, IconCrown, IconX } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Fragment } from "react";
 import { toast } from "sonner";
-
-type IncomingTransferRequest = {
-  appId: string;
-  appName: string;
-  currentOwnerEmail: string;
-  requestedAt: string;
-};
+import { AppRequestPurpose, IncomingAppRequest } from "./app-requests";
 
 type Props = {
   open: boolean;
@@ -28,13 +22,14 @@ export function OwnershipTransferRequestsModal(props: Props) {
     data: requests,
     refetch,
   } = useQuery({
-    queryKey: ["ownershipTransferRequests"],
-    queryFn: () => api.get<IncomingTransferRequest[]>("/_ownership-transfer-requests"),
+    queryKey: ["appRequests", AppRequestPurpose.AppOwnership],
+    queryFn: () => api.get<IncomingAppRequest[]>(`/_app-requests?purpose=${AppRequestPurpose.AppOwnership}`),
     enabled: props.open, // only fetch when modal is open
   });
 
   const acceptMutation = useMutation({
-    mutationFn: (appId: string) => api.post(`/_apps/${appId}/ownership-transfer/accept`),
+    mutationFn: (appId: string) =>
+      api.post(`/_apps/${appId}/requests/accept?purpose=${AppRequestPurpose.AppOwnership}`),
     onSuccess: () => {
       toast.success("Ownership transfer accepted");
       refetch();
@@ -45,7 +40,8 @@ export function OwnershipTransferRequestsModal(props: Props) {
   });
 
   const rejectMutation = useMutation({
-    mutationFn: (appId: string) => api.post(`/_apps/${appId}/ownership-transfer/reject`),
+    mutationFn: (appId: string) =>
+      api.post(`/_apps/${appId}/requests/reject?purpose=${AppRequestPurpose.AppOwnership}`),
     onSuccess: () => {
       toast.success("Ownership transfer rejected");
       refetch();
@@ -116,8 +112,8 @@ export function OwnershipTransferRequestsModal(props: Props) {
                           <div className="flex-1">
                             <h4 className="font-semibold">{request.appName}</h4>
                             <p className="text-sm mt-1">
-                              <span className="font-medium">{request.currentOwnerEmail}</span> wants to transfer
-                              ownership to you
+                              <span className="font-medium">{request.requesterEmail}</span> wants to transfer ownership
+                              to you
                             </p>
                             <p className="text-xs text-foreground/80 mt-1">
                               Requested {formatDate(request.requestedAt)}

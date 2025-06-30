@@ -4,8 +4,16 @@ using Aptabase.Features.Blob;
 using Microsoft.AspNetCore.Mvc;
 using Aptabase.Features.Authentication;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Aptabase.Features.Apps;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum AppRequestPurpose
+{
+    AppOwnership,
+    AppShare
+}
 
 public class ApplicationShare
 {
@@ -13,19 +21,21 @@ public class ApplicationShare
     public DateTime CreatedAt { get; set; }
 }
 
-public class OwnershipTransferRequest
+public class AppRequest
 {
-    public string NewOwnerEmail { get; set; } = "";
+    public string TargetUserEmail { get; set; } = "";
     public DateTime RequestedAt { get; set; }
     public string Status { get; set; } = "";
+    public AppRequestPurpose Purpose { get; set; }
 }
 
-public class IncomingTransferRequest
+public class IncomingAppRequest
 {
     public string AppId { get; set; } = "";
     public string AppName { get; set; } = "";
-    public string CurrentOwnerEmail { get; set; } = "";
+    public string RequesterEmail { get; set; } = "";
     public DateTime RequestedAt { get; set; }
+    public AppRequestPurpose Purpose { get; set; }
 }
 
 public class CreateAppRequestBody
@@ -44,11 +54,14 @@ public class UpdateAppRequestBody
     public string Name { get; set; } = "";
 }
 
-public class InitiateOwnershipTransferRequestBody
+public class InitiateAppRequestBody
 {
     [Required]
     [EmailAddress]
-    public string NewOwnerEmail { get; set; } = "";
+    public string TargetUserEmail { get; set; } = "";
+    
+    [Required]
+    public AppRequestPurpose Purpose { get; set; }
 }
 
 [ApiController, IsAuthenticated]
@@ -226,25 +239,25 @@ public class AppsController : Controller
         return Ok(new { });
     }
 
-    // ownership transfer endpoints
-    [HttpGet("/api/_apps/{appId}/ownership-transfer")]
-    public async Task<IActionResult> GetOwnershipTransferStatus(string appId)
+    // app request endpoints
+    [HttpGet("/api/_apps/{appId}/requests")]
+    public async Task<IActionResult> GetAppRequestStatus(string appId, [FromQuery] AppRequestPurpose purpose)
     {
         var app = await GetOwnedApp(appId);
         if (app == null)
             return NotFound();
 
-        var transfer = await _db.Connection.QueryFirstOrDefaultAsync<OwnershipTransferRequest?>(
-            @"SELECT new_owner_email, requested_at, status
-              FROM app_ownership_transfers
-              WHERE app_id = @appId AND status = 'pending'",
-            new { appId });
+        var request = await _db.Connection.QueryFirstOrDefaultAsync<AppRequest?>(
+            @"SELECT target_user_email, requested_at, status, purpose
+              FROM app_requests
+              WHERE app_id = @appId AND purpose = @purpose AND status = 'pending'",
+            new { appId, purpose = purpose.ToString() });
 
-        return Ok(transfer);
+        return Ok(request);
     }
 
-    [HttpPost("/api/_apps/{appId}/ownership-transfer")]
-    public async Task<IActionResult> InitiateOwnershipTransfer(string appId, [FromBody] InitiateOwnershipTransferRequestBody body)
+    [HttpPost("/api/_apps/{appId}/requests")]
+    public async Task<IActionResult> InitiateAppRequest(string appId, [FromBody] InitiateAppRequestBody body)
     {
         var app = await GetOwnedApp(appId);
         if (app == null)
@@ -252,87 +265,91 @@ public class AppsController : Controller
 
         var user = this.GetCurrentUserIdentity();
 
-        // check if user is trying to transfer to themselves
-        if (body.NewOwnerEmail.ToLower() == user.Email.ToLower())
-            return BadRequest(new { errors = new { newOwnerEmail = "Cannot transfer ownership to yourself" } });
+        // check if user is trying to request to themselves
+        if (body.TargetUserEmail.ToLower() == user.Email.ToLower())
+            return BadRequest(new { errors = new { targetUserEmail = "Cannot create request to yourself" } });
 
-        // check if there's already a pending transfer
-        var existingTransfer = await _db.Connection.QueryFirstOrDefaultAsync<int>(
-            @"SELECT COUNT(*) FROM app_ownership_transfers 
-              WHERE app_id = @appId AND status = 'pending'",
-            new { appId });
+        // check if there's already a pending request
+        var existingRequest = await _db.Connection.QueryFirstOrDefaultAsync<int>(
+            @"SELECT COUNT(*) FROM app_requests 
+              WHERE app_id = @appId AND purpose = @purpose AND status = 'pending'",
+            new { appId, purpose = body.Purpose.ToString() });
 
-        if (existingTransfer > 0)
-            return BadRequest(new { errors = new { newOwnerEmail = "There is already a pending ownership transfer for this app" } });
+        if (existingRequest > 0)
+            return BadRequest(new { errors = new { targetUserEmail = "There is already a pending request for this app" } });
 
-        // create the ownership transfer request
+        // create the app request
         await _db.Connection.ExecuteAsync(@"
-            INSERT INTO app_ownership_transfers (app_id, current_owner_id, new_owner_email, requested_at, status)
-            VALUES (@appId, @currentOwnerId, @newOwnerEmail, @requestedAt, 'pending')",
+            INSERT INTO app_requests (app_id, current_owner_id, target_user_email, purpose, requested_at, status)
+            VALUES (@appId, @requesterUserId, @targetUserEmail, @purpose, @requestedAt, 'pending')",
             new
             {
                 appId,
-                currentOwnerId = user.Id,
-                newOwnerEmail = body.NewOwnerEmail.ToLower(),
+                requesterUserId = user.Id,
+                targetUserEmail = body.TargetUserEmail.ToLower(),
+                purpose = body.Purpose.ToString(),
                 requestedAt = DateTime.UtcNow
             });
 
         return Ok(new { });
     }
 
-    [HttpDelete("/api/_apps/{appId}/ownership-transfer")]
-    public async Task<IActionResult> CancelOwnershipTransfer(string appId)
+    [HttpDelete("/api/_apps/{appId}/requests")]
+    public async Task<IActionResult> CancelAppRequest(string appId, [FromQuery] AppRequestPurpose purpose)
     {
         var app = await GetOwnedApp(appId);
         if (app == null)
             return NotFound();
 
         await _db.Connection.ExecuteAsync(@"
-            DELETE FROM app_ownership_transfers 
-            WHERE app_id = @appId AND status = 'pending'",
-            new { appId });
+            DELETE FROM app_requests 
+            WHERE app_id = @appId AND purpose = @purpose AND status = 'pending'",
+            new { appId, purpose = purpose.ToString() });
 
         return Ok(new { });
     }
 
-    [HttpGet("/api/_ownership-transfer-requests")]
-    public async Task<IActionResult> GetIncomingOwnershipTransferRequests()
+    [HttpGet("/api/_app-requests")]
+    public async Task<IActionResult> GetIncomingAppRequests([FromQuery] AppRequestPurpose? purpose = null)
     {
         var user = this.GetCurrentUserIdentity();
 
-        var requests = await _db.Connection.QueryAsync<IncomingTransferRequest>(
-            @"SELECT t.app_id, a.name as app_name, u.email as current_owner_email, t.requested_at
-              FROM app_ownership_transfers t
-              INNER JOIN apps a ON a.id = t.app_id
-              INNER JOIN users u ON u.id = t.current_owner_id
-              WHERE t.new_owner_email = @userEmail 
-              AND t.status = 'pending'
+        var purposeFilter = purpose.HasValue ? "AND r.purpose = @purpose" : "";
+        var requests = await _db.Connection.QueryAsync<IncomingAppRequest>(
+            $@"SELECT r.app_id, a.name as app_name, u.email as requester_email, r.requested_at, r.purpose
+              FROM app_requests r
+              INNER JOIN apps a ON a.id = r.app_id
+              INNER JOIN users u ON u.id = r.current_owner_id
+              WHERE r.target_user_email = @userEmail 
+              AND r.status = 'pending'
               AND a.deleted_at IS NULL
-              ORDER BY t.requested_at DESC",
-            new { userEmail = user.Email.ToLower() });
+              {purposeFilter}
+              ORDER BY r.requested_at DESC",
+            new { userEmail = user.Email.ToLower(), purpose = purpose?.ToString() });
 
         return Ok(requests);
     }
 
-    [HttpPost("/api/_apps/{appId}/ownership-transfer/accept")]
-    public async Task<IActionResult> AcceptOwnershipTransfer(string appId)
+    [HttpPost("/api/_apps/{appId}/requests/accept")]
+    public async Task<IActionResult> AcceptAppRequest(string appId, [FromQuery] AppRequestPurpose purpose)
     {
         var user = this.GetCurrentUserIdentity();
 
-        // get the pending transfer request
-        var transfer = await _db.Connection.QueryFirstOrDefaultAsync<dynamic>(
-            @"SELECT t.current_owner_id, u.email as current_owner_email, a.name as app_name
-              FROM app_ownership_transfers t
-              INNER JOIN apps a ON a.id = t.app_id
-              INNER JOIN users u ON u.id = t.current_owner_id
-              WHERE t.app_id = @appId 
-              AND t.new_owner_email = @userEmail 
-              AND t.status = 'pending'
+        // get the pending request
+        var request = await _db.Connection.QueryFirstOrDefaultAsync<dynamic>(
+            @"SELECT r.current_owner_id, u.email as requester_email, a.name as app_name, r.purpose
+              FROM app_requests r
+              INNER JOIN apps a ON a.id = r.app_id
+              INNER JOIN users u ON u.id = r.current_owner_id
+              WHERE r.app_id = @appId 
+              AND r.target_user_email = @userEmail 
+              AND r.purpose = @purpose
+              AND r.status = 'pending'
               AND a.deleted_at IS NULL",
-            new { appId, userEmail = user.Email.ToLower() });
+            new { appId, userEmail = user.Email.ToLower(), purpose = purpose.ToString() });
 
-        if (transfer == null)
-            return NotFound("No pending ownership transfer found");
+        if (request == null)
+            return NotFound("No pending app request found");
 
         using (var cn = _db.Connection) {
             cn.Open();
@@ -341,29 +358,46 @@ public class AppsController : Controller
             {
                 try
                 {
-                    // transfer ownership
-                    await cn.ExecuteAsync(@"
-                        UPDATE apps SET owner_id = @newOwnerId WHERE id = @appId",
-                        new { appId, newOwnerId = user.Id }, transaction);
+                    if (purpose == AppRequestPurpose.AppOwnership)
+                    {
+                        // transfer ownership
+                        await cn.ExecuteAsync(@"
+                            UPDATE apps SET owner_id = @newOwnerId WHERE id = @appId",
+                            new { appId, newOwnerId = user.Id }, transaction);
 
-                    // add previous owner to shares
-                    await cn.ExecuteAsync(@"
-                        INSERT INTO app_shares (app_id, email, created_at)
-                        VALUES (@appId, @email, @createdAt)
-                        ON CONFLICT DO NOTHING",
-                        new 
-                        { 
-                            appId, 
-                            email = transfer.current_owner_email,
-                            createdAt = DateTime.UtcNow
-                        }, transaction);
+                        // add previous owner to shares
+                        await cn.ExecuteAsync(@"
+                            INSERT INTO app_shares (app_id, email, created_at)
+                            VALUES (@appId, @email, @createdAt)
+                            ON CONFLICT DO NOTHING",
+                            new 
+                            { 
+                                appId, 
+                                email = request.requester_email,
+                                createdAt = DateTime.UtcNow
+                            }, transaction);
+                    }
+                    else if (purpose == AppRequestPurpose.AppShare)
+                    {
+                        // add user to shares
+                        await cn.ExecuteAsync(@"
+                            INSERT INTO app_shares (app_id, email, created_at)
+                            VALUES (@appId, @email, @createdAt)
+                            ON CONFLICT DO NOTHING",
+                            new 
+                            { 
+                                appId, 
+                                email = user.Email.ToLower(),
+                                createdAt = DateTime.UtcNow
+                            }, transaction);
+                    }
 
-                    // mark transfer as accepted
+                    // mark request as accepted
                     await cn.ExecuteAsync(@"
-                        UPDATE app_ownership_transfers 
+                        UPDATE app_requests 
                         SET status = 'accepted', completed_at = @completedAt
-                        WHERE app_id = @appId AND status = 'pending'",
-                        new { appId, completedAt = DateTime.UtcNow }, transaction);
+                        WHERE app_id = @appId AND purpose = @purpose AND status = 'pending'",
+                        new { appId, purpose = purpose.ToString(), completedAt = DateTime.UtcNow }, transaction);
 
                     transaction.Commit();
                 }
@@ -378,32 +412,34 @@ public class AppsController : Controller
         return Ok(new { });
     }
 
-    [HttpPost("/api/_apps/{appId}/ownership-transfer/reject")]
-    public async Task<IActionResult> RejectOwnershipTransfer(string appId)
+    [HttpPost("/api/_apps/{appId}/requests/reject")]
+    public async Task<IActionResult> RejectAppRequest(string appId, [FromQuery] AppRequestPurpose purpose)
     {
         var user = this.GetCurrentUserIdentity();
 
-        // check if there's a pending transfer for this user
-        var existingTransfer = await _db.Connection.QueryFirstOrDefaultAsync<int>(
-            @"SELECT COUNT(*) FROM app_ownership_transfers t
-              INNER JOIN apps a ON a.id = t.app_id
-              WHERE t.app_id = @appId 
-              AND t.new_owner_email = @userEmail 
-              AND t.status = 'pending'
+        // check if there's a pending request for this user
+        var existingRequest = await _db.Connection.QueryFirstOrDefaultAsync<int>(
+            @"SELECT COUNT(*) FROM app_requests r
+              INNER JOIN apps a ON a.id = r.app_id
+              WHERE r.app_id = @appId 
+              AND r.target_user_email = @userEmail 
+              AND r.purpose = @purpose
+              AND r.status = 'pending'
               AND a.deleted_at IS NULL",
-            new { appId, userEmail = user.Email.ToLower() });
+            new { appId, userEmail = user.Email.ToLower(), purpose = purpose.ToString() });
 
-        if (existingTransfer == 0)
-            return NotFound("No pending ownership transfer found");
+        if (existingRequest == 0)
+            return NotFound("No pending app request found");
 
-        // mark transfer as rejected
+        // mark request as rejected
         await _db.Connection.ExecuteAsync(@"
-            UPDATE app_ownership_transfers 
+            UPDATE app_requests 
             SET status = 'rejected', completed_at = @completedAt
             WHERE app_id = @appId 
-            AND new_owner_email = @userEmail
+            AND target_user_email = @userEmail
+            AND purpose = @purpose
             AND status = 'pending'",
-            new { appId, userEmail = user.Email.ToLower(), completedAt = DateTime.UtcNow });
+            new { appId, userEmail = user.Email.ToLower(), purpose = purpose.ToString(), completedAt = DateTime.UtcNow });
 
         return Ok(new { });
     }

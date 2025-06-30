@@ -9,12 +9,7 @@ import { IconClock, IconCrown, IconHelp } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { OwnershipTransferModal } from "./OwnershipTransferModal";
-
-type OwnershipTransferRequest = {
-  newOwnerEmail: string;
-  requestedAt: string;
-  status: "pending" | "accepted" | "rejected";
-};
+import { AppRequest, AppRequestPurpose } from "./app-requests";
 
 type Props = {
   app: Application;
@@ -30,17 +25,11 @@ export function OwnershipTransfer(props: Props) {
     data: ownershipTransfer,
     refetch: refetchTransfer,
   } = useQuery({
-    queryKey: ["ownership-transfer", props.app.id],
+    queryKey: ["app-request", props.app.id, AppRequestPurpose.AppOwnership],
     queryFn: async () => {
-      try {
-        return await api.get<OwnershipTransferRequest | null>(`/_apps/${props.app.id}/ownership-transfer`);
-      } catch (error: any) {
-        // treat 204 No Content as successful null response
-        if (error.response?.status === 204) {
-          return null;
-        }
-        throw error;
-      }
+      return await api.getEmpty<AppRequest | null>(
+        `/_apps/${props.app.id}/requests?purpose=${AppRequestPurpose.AppOwnership}`
+      );
     },
   });
 
@@ -50,7 +39,7 @@ export function OwnershipTransfer(props: Props) {
   };
 
   const handleCancelTransfer = async () => {
-    await api.delete(`/_apps/${props.app.id}/ownership-transfer`);
+    await api.delete(`/_apps/${props.app.id}/requests?purpose=${AppRequestPurpose.AppOwnership}`);
     refetchTransfer();
   };
 
@@ -80,8 +69,8 @@ export function OwnershipTransfer(props: Props) {
               <p className="font-medium text-warning-foreground">Transfer Pending</p>
             </div>
             <p className="text-sm text-warning-foreground mb-3">
-              Ownership transfer to <span className="font-semibold">{ownershipTransfer.newOwnerEmail}</span> is pending
-              approval.
+              Ownership transfer to <span className="font-semibold">{ownershipTransfer.targetUserEmail}</span> is
+              pending approval.
             </p>
             <Button variant="outline" size="sm" onClick={handleCancelTransfer}>
               Cancel Transfer

@@ -5,6 +5,7 @@ import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@
 import { IconAlertTriangle, IconX } from "@tabler/icons-react";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
+import { AppRequestPurpose } from "./app-requests";
 
 type Props = {
   open: boolean;
@@ -27,8 +28,9 @@ export function OwnershipTransferModal(props: Props) {
     setIsProcessing(true);
 
     try {
-      await api.post(`/_apps/${props.app.id}/ownership-transfer`, {
-        newOwnerEmail: props.newOwnerEmail.trim(),
+      await api.post(`/_apps/${props.app.id}/requests`, {
+        targetUserEmail: props.newOwnerEmail.trim(),
+        purpose: AppRequestPurpose.AppOwnership,
       });
       props.onTransferInitiated();
       close();

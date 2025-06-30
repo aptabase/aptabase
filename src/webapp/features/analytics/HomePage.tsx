@@ -4,6 +4,7 @@ import { Button } from "@components/Button";
 import { LazyLoad } from "@components/LazyLoad";
 import { Page, PageHeading } from "@components/Page";
 import { useApps } from "@features/apps";
+import { AppRequestPurpose, IncomingAppRequest } from "@features/apps/app-requests";
 import { OwnershipTransferRequestsModal } from "@features/apps/OwnershipTransferRequestsModal";
 import { api } from "@fns/api";
 import { IconCrown } from "@tabler/icons-react";
@@ -18,13 +19,6 @@ import { DebugModeBanner } from "./mode/DebugModeBanner";
 import { AppSummaryWidget } from "./summary/AppSummaryWidget";
 import { NewAppWidget } from "./summary/NewAppWidget";
 
-type IncomingTransferRequest = {
-  appId: string;
-  appName: string;
-  currentOwnerEmail: string;
-  requestedAt: string;
-};
-
 Component.displayName = "HomePage";
 export function Component() {
   const { apps, buildMode } = useApps();
@@ -32,8 +26,8 @@ export function Component() {
   const [showTransferModal, setShowTransferModal] = useState(false);
 
   const { data: transferRequests } = useQuery({
-    queryKey: ["ownershipTransferRequestsHomePage"],
-    queryFn: () => api.get<IncomingTransferRequest[]>("/_ownership-transfer-requests"),
+    queryKey: ["appRequestsHomePage", AppRequestPurpose.AppOwnership],
+    queryFn: () => api.get<IncomingAppRequest[]>(`/_app-requests?purpose=${AppRequestPurpose.AppOwnership}`),
     refetchInterval: 30000, // check every 30 seconds
     refetchOnWindowFocus: true,
   });
