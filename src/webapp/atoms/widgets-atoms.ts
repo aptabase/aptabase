@@ -180,7 +180,7 @@ export const dashboardWidgetsAtom = atom<null, [UpdateDashboardWidgetsAction], v
           if (areAllUserDefinedWidgetsDefined) {
             draft.push(
               produce(EMPTY_CUSTOM_EVENTS_CHART_WIDGET, (customEventsDraft) => {
-                customEventsDraft.id = `${customEventsDraft.id}-${widgetsConfigArray.length}`;
+                customEventsDraft.id = getNextWidgetId(widgetsConfigArray, customEventsDraft.id);
                 customEventsDraft.orderIndex = widgetsConfigArray.length;
               })
             );
@@ -205,3 +205,16 @@ export const dashboardWidgetsAtom = atom<null, [UpdateDashboardWidgetsAction], v
     localStorage.setItem("dashboard_widgets_map", JSON.stringify(allConfigs));
   }
 );
+
+const getNextWidgetId = (existingWidgets: SingleWidgetConfig[], baseId: string): string => {
+  const pattern = new RegExp(`^${baseId}-(\\d+)$`);
+  const existingNumbers = existingWidgets
+    .map((widget) => {
+      const match = widget.id.match(pattern);
+      return match ? parseInt(match[1], 10) : null;
+    })
+    .filter((num): num is number => num !== null);
+
+  const maxNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) : 0;
+  return `${baseId}-${maxNumber + 1}`;
+};

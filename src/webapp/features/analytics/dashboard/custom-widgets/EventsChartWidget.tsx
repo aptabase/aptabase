@@ -166,7 +166,7 @@ export function EventsChartWidget(props: Props) {
   const total = useMemo(
     () =>
       (visibleData ?? []).reduce(
-        (sum, dataArray) => sum + dataArray.reduce((innerSum, item) => innerSum + item.events, 0),
+        (sum, dataArray) => sum + (dataArray ?? []).reduce((innerSum, item) => innerSum + (item.events ?? 0), 0),
         0
       ),
     [visibleData]
