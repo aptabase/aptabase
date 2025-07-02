@@ -67,6 +67,16 @@ public static class OAuthExtensions
             o.ClaimActions.MapJsonKey("email", "email");
             o.Events = new OAuthEvents
             {
+                OnRedirectToAuthorizationEndpoint = context =>
+                {
+                    // Force HTTPS in the redirect URI
+                    if (context.RedirectUri.StartsWith("http://"))
+                    {
+                        context.RedirectUri = context.RedirectUri.Replace("http://", "https://");
+                    }
+                    context.Response.Redirect(context.RedirectUri);
+                    return Task.CompletedTask;
+                },
                 OnAccessDenied = context =>
                 {
                     context.HandleResponse();
@@ -121,6 +131,16 @@ public static class OAuthExtensions
             o.ClaimActions.MapJsonKey("email", "email");
             o.Events = new OAuthEvents
             {
+                OnRedirectToAuthorizationEndpoint = context =>
+                {
+                    // Force HTTPS in the redirect URI
+                    if (context.RedirectUri.StartsWith("http://"))
+                    {
+                        context.RedirectUri = context.RedirectUri.Replace("http://", "https://");
+                    }
+                    context.Response.Redirect(context.RedirectUri);
+                    return Task.CompletedTask;
+                },
                 OnAccessDenied = context =>
                 {
                     context.HandleResponse();
