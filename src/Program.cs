@@ -202,7 +202,7 @@ public partial class Program
         {
             // App may be running on HTTP behind a HTTPS proxy/load balancer
             // So we need to use the X-Forwarded-Proto forwarded header
-            ForwardedHeaders = ForwardedHeaders.XForwardedProto
+            ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedFor
         });
 
         app.MapHealthChecks("/healthz");
