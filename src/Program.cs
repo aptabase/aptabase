@@ -205,6 +205,12 @@ public partial class Program
             ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedFor
         });
 
+        app.Use(async (context, next) =>
+        {
+            context.Request.Scheme = "https";
+            await next();
+        });
+
         app.MapHealthChecks("/healthz");
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseRateLimiter();
