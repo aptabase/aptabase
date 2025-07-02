@@ -69,10 +69,10 @@ public static class OAuthExtensions
             {
                 OnRedirectToAuthorizationEndpoint = context =>
                 {
-                    // Force HTTPS in the redirect URI
-                    if (context.RedirectUri.StartsWith("http://"))
+                    // Force HTTPS in the callback URI
+                    if (context.RedirectUri.Contains("redirect_uri=http%"))
                     {
-                        context.RedirectUri = context.RedirectUri.Replace("http://", "https://");
+                        context.RedirectUri = context.RedirectUri.Replace("redirect_uri=http%", "redirect_uri=https%");
                     }
                     context.Response.Redirect(context.RedirectUri);
                     return Task.CompletedTask;
@@ -133,10 +133,10 @@ public static class OAuthExtensions
             {
                 OnRedirectToAuthorizationEndpoint = context =>
                 {
-                    // Force HTTPS in the redirect URI
-                    if (context.RedirectUri.StartsWith("http://"))
+                    // Force HTTPS in the callback URI
+                    if (context.RedirectUri.Contains("redirect_uri=http%"))
                     {
-                        context.RedirectUri = context.RedirectUri.Replace("http://", "https://");
+                        context.RedirectUri = context.RedirectUri.Replace("redirect_uri=http%", "redirect_uri=https%");
                     }
                     context.Response.Redirect(context.RedirectUri);
                     return Task.CompletedTask;
