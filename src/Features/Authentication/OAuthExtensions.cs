@@ -1,9 +1,9 @@
-using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Aptabase.Features;
 using Aptabase.Features.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.AspNetCore.Authentication;
 
@@ -87,22 +87,38 @@ public static class OAuthExtensions
                 },
                 OnCreatingTicket = async context =>
                 {
-                    var ghUser = await MakeOAuthRequest<GitHubUser>(context, context.Options.UserInformationEndpoint);
-                    if (ghUser is null)
-                        throw new Exception("Failed to retrieve GitHub user information.");
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<OAuthHandler<OAuthOptions>>>();
 
-                    if (string.IsNullOrWhiteSpace(ghUser.Name))
-                        ghUser.Name = ghUser.Login;
+                    try
+                    {
+                        var ghUser = await MakeOAuthRequest<GitHubUser>(context, context.Options.UserInformationEndpoint) ?? throw new Exception("Failed to retrieve GitHub user information.");
+                        if (string.IsNullOrWhiteSpace(ghUser.Name))
+                            ghUser.Name = ghUser.Login;
 
-                    if (string.IsNullOrWhiteSpace(ghUser.Email))
-                        ghUser.Email = await GetGitHubPreferredEmail(context);
+                        if (string.IsNullOrWhiteSpace(ghUser.Email))
+                            ghUser.Email = await GetGitHubPreferredEmail(context);
 
-                    if (string.IsNullOrWhiteSpace(ghUser.Email))
-                        throw new Exception("Could not find a verified email, can't login with GitHub.");
+                        if (string.IsNullOrWhiteSpace(ghUser.Email))
+                            throw new Exception("Could not find a verified email, can't login with GitHub.");
 
-                    var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
-                    var user = await authService.FindOrCreateAccountWithOAuthAsync(ghUser.Name, ghUser.Email, "github", ghUser.Id.ToString(), context.HttpContext.RequestAborted);
-                    context.RunClaimActions(JsonSerializer.SerializeToElement(new { id = user.Id, name = user.Name, email = user.Email }));
+                        var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+                        var user = await authService.FindOrCreateAccountWithOAuthAsync(ghUser.Name, ghUser.Email, "github", ghUser.Id.ToString(), context.HttpContext.RequestAborted);
+                        context.RunClaimActions(JsonSerializer.SerializeToElement(new { id = user.Id, name = user.Name, email = user.Email }));
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to create OAuth ticket for Google user");
+                        throw;
+                    }
+                },
+                OnRemoteFailure = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<OAuthHandler<OAuthOptions>>>();
+
+                    logger.LogError("OAuth Remote Failure: {message}", context.Failure?.Message);
+                    context.Response.Redirect($"{env.SelfBaseUrl}/auth?error=oauth_failed");
+                    context.HandleResponse();
+                    return Task.CompletedTask;
                 }
             };
         });
@@ -153,16 +169,32 @@ public static class OAuthExtensions
                 },
                 OnCreatingTicket = async context =>
                 {
-                    var googleUser = await MakeOAuthRequest<GoogleUser>(context, context.Options.UserInformationEndpoint);
-                    if (googleUser is null)
-                        throw new Exception("Failed to retrieve Google user information.");
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<OAuthHandler<OAuthOptions>>>();
 
-                    if (!googleUser.EmailVerified)
-                        throw new Exception("Email not verified, can't login with Google.");
+                    try
+                    {
+                        var googleUser = await MakeOAuthRequest<GoogleUser>(context, context.Options.UserInformationEndpoint) ?? throw new Exception("Failed to retrieve Google user information.");
+                        if (!googleUser.EmailVerified)
+                            throw new Exception("Email not verified, can't login with Google.");
 
-                    var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
-                    var user = await authService.FindOrCreateAccountWithOAuthAsync(googleUser.Name, googleUser.Email, "google", googleUser.Id, context.HttpContext.RequestAborted);
-                    context.RunClaimActions(JsonSerializer.SerializeToElement(new { id = user.Id, name = user.Name, email = user.Email }));
+                        var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+                        var user = await authService.FindOrCreateAccountWithOAuthAsync(googleUser.Name, googleUser.Email, "google", googleUser.Id, context.HttpContext.RequestAborted);
+                        context.RunClaimActions(JsonSerializer.SerializeToElement(new { id = user.Id, name = user.Name, email = user.Email }));
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to create OAuth ticket for Google user");
+                        throw;
+                    }
+                },
+                OnRemoteFailure = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<OAuthHandler<OAuthOptions>>>();
+
+                    logger.LogError("OAuth Remote Failure: {message}", context.Failure?.Message);
+                    context.Response.Redirect($"{env.SelfBaseUrl}/auth?error=oauth_failed");
+                    context.HandleResponse();
+                    return Task.CompletedTask;
                 }
             };
         });
