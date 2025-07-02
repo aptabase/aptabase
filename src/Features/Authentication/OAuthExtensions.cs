@@ -58,7 +58,9 @@ public static class OAuthExtensions
             o.CorrelationCookie.SameSite = env.IsDevelopment ? SameSiteMode.Unspecified : SameSiteMode.None;
             o.CorrelationCookie.HttpOnly = true;
             o.CorrelationCookie.IsEssential = true;
-            o.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            o.CorrelationCookie.SecurePolicy = env.IsDevelopment
+                ? CookieSecurePolicy.SameAsRequest
+                : CookieSecurePolicy.Always;
             o.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
             o.TokenEndpoint = "https://github.com/login/oauth/access_token";
             o.UserInformationEndpoint = "https://api.github.com/user";
@@ -122,7 +124,9 @@ public static class OAuthExtensions
             o.CorrelationCookie.SameSite = env.IsDevelopment ? SameSiteMode.Unspecified : SameSiteMode.None;
             o.CorrelationCookie.HttpOnly = true;
             o.CorrelationCookie.IsEssential = true;
-            o.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            o.CorrelationCookie.SecurePolicy = env.IsDevelopment
+                ? CookieSecurePolicy.SameAsRequest
+                : CookieSecurePolicy.Always;
             o.AuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
             o.TokenEndpoint = "https://oauth2.googleapis.com/token";
             o.UserInformationEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo";
