@@ -7,6 +7,9 @@ async function handleError(status: number, response: Response): Promise<void> {
     // TODO: show error toast
   } else if (status === 403) {
     // TODO: show error toast
+  } else if (status === 429) {
+    toast.error("Too many requests. Please wait a moment before trying again.");
+    throw new Error("Rate limited");
   } else if (status === 400) {
     const errors = (await response.json()) as ValidationError;
     const message = Object.values(errors.errors).flat().join("\n");
