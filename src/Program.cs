@@ -86,7 +86,7 @@ public partial class Program
                             options.Cookie.IsEssential = true;
                             options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                             options.Cookie.MaxAge = TimeSpan.FromDays(365);
-                        }).AddGitHub(appEnv).AddGoogle(appEnv);
+                        }).AddGitHub(appEnv).AddGoogle(appEnv).AddAuthentik(appEnv);
 
         builder.Services.AddRateLimiter(c =>
         {

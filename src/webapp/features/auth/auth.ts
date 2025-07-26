@@ -8,6 +8,13 @@ export type UserAccount = {
   avatarUrl: string;
 };
 
+export const DEFAULT_OAUTH_STATUS = {
+  github: false,
+  google: false,
+  authentik: false,
+  emailAuthDisabled: false,
+};
+
 export async function requestSignInLink(email: string): Promise<boolean> {
   const [status, response] = await api.fetch("POST", "/_auth/signin", {
     email,
