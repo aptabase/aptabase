@@ -59,7 +59,7 @@ public class EventBody
         var stringValues = new JsonObject();
         var numericValues = new JsonObject();
 
-        if (Props != null)
+        if (Props != null && Props.RootElement.ValueKind != JsonValueKind.Null)
         {
             // Sort by key to ensure consistent order might be useful in future!
             foreach (var property in Props.RootElement.EnumerateObject().OrderBy(x => x.Name))
@@ -152,6 +152,9 @@ public class EventBody
     {
         if (Props is not null)
         {
+            if (Props.RootElement.ValueKind == JsonValueKind.Null)
+                return (true, string.Empty); // null is allowed
+
             if (Props.RootElement.ValueKind == JsonValueKind.String)
             {
                 var valueAsString = Props.RootElement.GetString() ?? "";
