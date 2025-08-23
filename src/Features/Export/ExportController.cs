@@ -25,10 +25,11 @@ public class MonthlyUsage
 
 [ApiController, IsAuthenticated, HasReadAccessToApp]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-public partial class ExportController(IQueryClient queryClient, ILogger<ExportController> logger) : Controller
+public partial class ExportController(IQueryClient queryClient, IExportQueries exportQueries, ILogger<ExportController> logger) : Controller
 {
     private readonly IQueryClient _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));
     private readonly ILogger<ExportController> _logger = logger;
+    private readonly IExportQueries _exportQueries = exportQueries;
 
     [HttpGet("/api/_export/usage")]
     public async Task<IActionResult> MonthlyUsage([FromQuery] string buildMode, [FromQuery] string appId, CancellationToken cancellationToken)
@@ -43,6 +44,32 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
         }
 
         return Ok(rows);
+    }
+
+    [HttpGet("/api/_export/start")]
+    public async Task<IActionResult> StartExport([FromQuery] DownloadRequest body)
+    {
+        if (!body.StartDate.HasValue || !body.EndDate.HasValue)
+        {
+            return BadRequest();
+        }
+
+        var startDate = body.StartDate.Value;
+        var endDate = body.EndDate.Value;
+
+        var (formatName, contentType, fileExtension) = GetFormat(body.Format);
+        var appName = UnsafeCharacters().Replace(body.AppName, "").ToLower();
+        var fileName = $"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}-{appName}-{body.BuildMode.ToLower()}-{startDate:yyyy-MM-dd}.{fileExtension}";
+
+        var exportId = await _exportQueries.StartExportAsync(
+            body.AppId,
+            startDate,
+            endDate,
+            "exports",
+            fileName,
+            fileExtension);
+
+        return Ok(new { exportId });
     }
 
     [HttpGet("/api/_export/download")]
