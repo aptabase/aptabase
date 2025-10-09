@@ -35,7 +35,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
 
     try {
-      const [status, config] = await api.fetch('GET', '/config');
+      const [status, config] = await api.fetch('GET', '/_config');
       setConfig(await config.json());
     }
     catch (ex) {
