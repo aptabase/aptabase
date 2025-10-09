@@ -6,12 +6,18 @@ export type Config = {
 };
 
 export type ConfigContextType = {
-  isLoading: boolean;
+  configIsLoading: boolean;
   config: Config;
   refresh: () => Promise<void>;
 };
 
-const ConfigContext = createContext<ConfigContextType>();
+const ConfigContext = createContext<ConfigContextType>({
+  configIsLoading: false,
+  config: {
+    disableSignup: false
+  },
+  refresh: () => Promise.resolve()
+});
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<Config>({
@@ -23,7 +29,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     refresh();
   }, []);
 
-  return <ConfigContext.Provider value={{ config, configIsLoading, refresh }}>{children}</ConfigContext.Provider>;
+  return <ConfigContext.Provider value={{ configIsLoading, config, refresh }}>{children}</ConfigContext.Provider>;
   
   async function refresh() {
     setIsLoading(true);

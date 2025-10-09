@@ -20,9 +20,9 @@ type StatusMessageProps = {
 };
 
 const SignUpMessage = () => {
-  const { config, configIsLoading } = useConfig();
+  const { configIsLoading, config } = useConfig();
   
-  if (configIsLoading || config.DisableSignup)
+  if (configIsLoading || config.disableSignup)
     return null;
 
   return (
