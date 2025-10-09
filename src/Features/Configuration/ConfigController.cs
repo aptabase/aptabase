@@ -20,7 +20,7 @@ public class ConfigController : Controller
     }
 
     [HttpGet("/api/_config")]
-    public async Task<IActionResult> Get(CancellationToken cancellationToken)
+    public IActionResult Get(CancellationToken cancellationToken)
     {
         return Ok(new {
             disableSignup = _env.DisableSignup

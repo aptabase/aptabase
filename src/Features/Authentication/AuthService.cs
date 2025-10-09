@@ -89,7 +89,7 @@ public class AuthService : IAuthService
     public async Task<UserAccount> CreateAccountAsync(string name, string email, CancellationToken cancellationToken)
     {
         if (_env.DisableSignup) // If we get this low-level it means that oauth failed, so we actually need to throw SOMETHING
-            throw new System.InvalidOperation("Signup disabled");
+            throw new System.InvalidOperationException("Signup disabled");
 
         var userId = NanoId.New();
         var cmd = new CommandDefinition(

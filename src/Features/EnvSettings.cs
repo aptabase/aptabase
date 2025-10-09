@@ -108,7 +108,7 @@ public class EnvSettings
             LemonSqueezyApiKey = Get("LEMONSQUEEZY_API_KEY"),
             LemonSqueezySigningSecret = Get("LEMONSQUEEZY_SIGNING_SECRET"),
 
-            DisableSignup = Get("DISABLE_SIGNUP", false),
+            DisableSignup = GetBool("DISABLE_SIGNUP", false),
             SmtpHost = Get("SMTP_HOST"),
             SmtpPort = GetInt("SMTP_PORT"),
             SmtpUsername = Get("SMTP_USERNAME"),
