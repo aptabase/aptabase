@@ -11,6 +11,7 @@ import { isOAuthEnabled } from "@features/env";
 import { Logo } from "./Logo";
 import { Button } from "@components/Button";
 import { TextInput } from "@components/TextInput";
+import { useConfig } from "@root/config";
 
 type FormStatus = "idle" | "loading" | "success" | "notfound";
 
@@ -18,15 +19,22 @@ type StatusMessageProps = {
   status: FormStatus;
 };
 
-const SignUpMessage = () => (
-  <span className="block">
-    Don't have an account?{" "}
-    <Link className="font-semibold text-foreground" to="/auth/register">
-      Sign up
-    </Link>{" "}
-    for free.
-  </span>
-);
+const SignUpMessage = () => {
+  const { config, configIsLoading } = useConfig();
+  
+  if (configIsLoading || config.DisableSignup)
+    return null;
+
+  return (
+    <span className="block">
+      Don't have an account?{" "}
+      <Link className="font-semibold text-foreground" to="/auth/register">
+        Sign up
+      </Link>{" "}
+      for free.
+    </span>
+  );
+};
 
 const StatusMessage = (props: StatusMessageProps) => {
   if (props.status === "success") {

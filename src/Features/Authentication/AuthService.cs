@@ -67,6 +67,9 @@ public class AuthService : IAuthService
 
     public async Task SendRegisterEmailAsync(string name, string email, CancellationToken cancellationToken)
     {
+        if (_env.DisableSignup) // Not throwing if someone just bypassed the ui to try to register, make them question if it worked or not
+            return;
+
         var user = await FindUserByEmailAsync(email, cancellationToken);
         if (user != null)
         {
@@ -85,6 +88,9 @@ public class AuthService : IAuthService
 
     public async Task<UserAccount> CreateAccountAsync(string name, string email, CancellationToken cancellationToken)
     {
+        if (_env.DisableSignup) // If we get this low-level it means that oauth failed, so we actually need to throw SOMETHING
+            throw new System.InvalidOperation("Signup disabled");
+
         var userId = NanoId.New();
         var cmd = new CommandDefinition(
             "INSERT INTO users (id, name, email, free_quota) VALUES (@userId, @name, @email, 20000)",
