@@ -204,6 +204,45 @@ public class AppsController : Controller
         return Ok(shares);
     }
 
+    [HttpGet("/api/_apps/{appId}/shares/info")]
+    public async Task<IActionResult> GetAppShareInfo(string appId)
+    {
+        var user = this.GetCurrentUserIdentity();
+        var appShareInfo = await _db.Connection.QueryAsync(
+            @"SELECT u.email as owner_email, s.email as shared_with_email, a.owner_id = @userId as has_ownership
+              FROM apps a
+              INNER JOIN users u
+              ON u.id = a.owner_id
+              LEFT JOIN app_shares s
+              ON s.app_id = a.id AND s.email != u.email
+              WHERE a.id = @appId
+              AND a.deleted_at IS NULL
+              AND (
+                a.owner_id = @userId 
+                OR EXISTS (
+                  SELECT 1 FROM app_shares s2 
+                  WHERE s2.app_id = a.id AND s2.email = @userEmail
+                )
+              )
+              GROUP BY a.id, a.name, a.icon_path, a.app_key, u.lock_reason, u.email, s.email
+              ORDER by a.name",
+            new { appId, userId = user.Id, userEmail = user.Email }
+        );
+
+
+        var ownerEmail = appShareInfo.FirstOrDefault()?.owner_email;
+        var hasOwnership = appShareInfo.FirstOrDefault()?.has_ownership ?? false;
+        
+        var sharedWithEmails = appShareInfo
+                                .Select(x => x.shared_with_email)
+                                .ToList();
+
+        var sharedWithCurrentUser = sharedWithEmails.Any(e => e == user.Email);
+        var numberOfOtherShares = sharedWithEmails.Count - (sharedWithCurrentUser ? 1 : 0);
+
+        return Ok(new { ownerEmail, hasOwnership, sharedWithCurrentUser, numberOfOtherShares});
+    }
+
     [HttpPut("/api/_apps/{appId}/shares/{email}")]
     public async Task<IActionResult> ShareApp(string appId, string email)
     {

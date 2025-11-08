@@ -3,11 +3,12 @@ import { Alert, AlertDescription } from "@components/Alert";
 import { Button } from "@components/Button";
 import { LazyLoad } from "@components/LazyLoad";
 import { Page, PageHeading } from "@components/Page";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/Tooltip";
 import { useApps } from "@features/apps";
 import { AppRequestPurpose, IncomingAppRequest } from "@features/apps/app-requests";
 import { OwnershipTransferRequestsModal } from "@features/apps/OwnershipTransferRequestsModal";
 import { api } from "@fns/api";
-import { IconCrown } from "@tabler/icons-react";
+import { IconCrown, IconInfoCircle } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
@@ -92,7 +93,17 @@ export function Component() {
         <div className="space-y-8 mt-8">
           {/* Owned Apps Section - Always visible when there's a split */}
           <div>
-            <h2 className="text-lg font-semibold mb-4">Owned by me</h2>
+            <div className="flex items-center space-x-2 mb-4">
+              <h2 className="text-lg font-semibold">Owned by me</h2>
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipContent>The billing plan only applies to apps owned by you</TooltipContent>
+                  <TooltipTrigger>
+                    <IconInfoCircle className="h-4 w-4 text-muted-foreground" />
+                  </TooltipTrigger>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
               {ownedApps.map((app) => (
                 <LazyLoad className="h-36" key={app.id}>
