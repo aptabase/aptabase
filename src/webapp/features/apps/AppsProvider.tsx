@@ -20,6 +20,7 @@ type AppsContextType = {
   createApp: (name: string) => Promise<Application>;
   deleteApp: (appId: string) => Promise<void>;
   updateApp: (appId: string, name: string, icon: string) => Promise<Application>;
+  refetchApps: () => Promise<void>;
   switchBuildMode: (mode: BuildMode) => void;
 };
 
@@ -50,6 +51,10 @@ export function AppsProvider(props: Props) {
     return app;
   };
 
+  const refetchApps = async () => {
+    await refetch();
+  };
+
   if (isLoading) return <LoadingState size="lg" color="primary" delay={0} />;
   if (isError) return <ErrorState />;
 
@@ -66,6 +71,7 @@ export function AppsProvider(props: Props) {
         createApp: createAppAndRefresh,
         deleteApp: deleteAppAndRefresh,
         updateApp: updateAppAndRefresh,
+        refetchApps,
       }}
     >
       {props.children}

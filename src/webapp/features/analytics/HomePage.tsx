@@ -22,12 +22,12 @@ import { NewAppWidget } from "./summary/NewAppWidget";
 
 Component.displayName = "HomePage";
 export function Component() {
-  const { apps, buildMode } = useApps();
+  const { apps, buildMode, refetchApps } = useApps();
   const { startDateIso, endDateIso } = useAtomValue(dateFilterValuesAtom);
   const [showTransferModal, setShowTransferModal] = useState(false);
 
   const { data: transferRequests } = useQuery({
-    queryKey: ["appRequestsHomePage", AppRequestPurpose.AppOwnership],
+    queryKey: ["appRequests", AppRequestPurpose.AppOwnership],
     queryFn: () => api.get<IncomingAppRequest[]>(`/_app-requests?purpose=${AppRequestPurpose.AppOwnership}`),
     refetchInterval: 30000, // check every 30 seconds
     refetchOnWindowFocus: true,
@@ -143,7 +143,13 @@ export function Component() {
         </div>
       )}
 
-      <OwnershipTransferRequestsModal open={showTransferModal} onClose={() => setShowTransferModal(false)} />
+      <OwnershipTransferRequestsModal
+        open={showTransferModal}
+        onClose={() => {
+          setShowTransferModal(false);
+          refetchApps();
+        }}
+      />
     </Page>
   );
 }
