@@ -1,5 +1,6 @@
 import { LazyLoad } from "@components/LazyLoad";
 import { Page, PageHeading } from "@components/Page";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/Tooltip";
 import {
   closestCenter,
   DndContext,
@@ -11,11 +12,13 @@ import {
 } from "@dnd-kit/core";
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { useApps, useCurrentApp } from "@features/apps";
+import { IconShare } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai/react";
 import { useMemo } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { dashboardWidgetsAtom, getDashboardWidgetsForAppAtom, SingleWidgetConfig } from "../../atoms/widgets-atoms";
 import { CurrentFilters } from "./CurrentFilters";
+import { AppShareInfo } from "./dashboard/AppShareInfo";
 import { CountryWidget } from "./dashboard/CountryWidget";
 import { EventWidget } from "./dashboard/EventWidget";
 import { OSWidget } from "./dashboard/OSWidget";
@@ -178,12 +181,30 @@ export function Component() {
     }
   };
 
+  const aside = () => {
+    if (app.hasOwnership) return null;
+    return (
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger>
+            <IconShare className="h-4 w-4 text-muted-foreground" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <LazyLoad key="shared-with-me">
+              <AppShareInfo appId={app.id} />
+            </LazyLoad>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
+
   return (
     <Page title={app.name}>
       {buildMode === "debug" && <DebugModeBanner />}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <PageHeading title="Dashboard" onClick={resetFilters} />
+          <PageHeading title="Dashboard" aside={aside()} onClick={resetFilters} />
           <div className="flex items-end space-x-2">
             <BuildModeSelector />
             <DateFilterContainer />

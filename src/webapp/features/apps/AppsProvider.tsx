@@ -1,11 +1,12 @@
+import { ErrorState } from "@components/ErrorState";
+import { LoadingState } from "@components/LoadingState";
+import { useLocalStorage } from "@hooks/use-localstorage";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
 import { Navigate, useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Application, createApp, deleteApp, listApps, updateApp } from "./apps";
-import { ErrorState } from "@components/ErrorState";
-import { LoadingState } from "@components/LoadingState";
-import { useLocalStorage } from "@hooks/use-localstorage";
+import { OwnershipTransferStartupCheck } from "./OwnershipTransferStartupCheck";
 
 type Props = {
   children: React.ReactNode;
@@ -19,6 +20,7 @@ type AppsContextType = {
   createApp: (name: string) => Promise<Application>;
   deleteApp: (appId: string) => Promise<void>;
   updateApp: (appId: string, name: string, icon: string) => Promise<Application>;
+  refetchApps: () => Promise<void>;
   switchBuildMode: (mode: BuildMode) => void;
 };
 
@@ -49,6 +51,10 @@ export function AppsProvider(props: Props) {
     return app;
   };
 
+  const refetchApps = async () => {
+    await refetch();
+  };
+
   if (isLoading) return <LoadingState size="lg" color="primary" delay={0} />;
   if (isError) return <ErrorState />;
 
@@ -65,9 +71,11 @@ export function AppsProvider(props: Props) {
         createApp: createAppAndRefresh,
         deleteApp: deleteAppAndRefresh,
         updateApp: updateAppAndRefresh,
+        refetchApps,
       }}
     >
       {props.children}
+      <OwnershipTransferStartupCheck />
     </AppsContext.Provider>
   );
 }
