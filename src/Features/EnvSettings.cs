@@ -34,6 +34,9 @@ public class EnvSettings
     // Variable Name: AUTH_SECRET
     public byte[] AuthSecret { get; private set; } = [];
 
+    // Explicitly disable any kind of sign up, only allowing already registered users to login
+    public bool DisableSignup { get; private set; } = false;
+
     public string? MailCatcherConnectionString { get; private set; }
 
     // The host of the SMTP server
@@ -105,6 +108,7 @@ public class EnvSettings
             LemonSqueezyApiKey = Get("LEMONSQUEEZY_API_KEY"),
             LemonSqueezySigningSecret = Get("LEMONSQUEEZY_SIGNING_SECRET"),
 
+            DisableSignup = GetBool("DISABLE_SIGNUP", false),
             SmtpHost = Get("SMTP_HOST"),
             SmtpPort = GetInt("SMTP_PORT"),
             SmtpUsername = Get("SMTP_USERNAME"),
@@ -133,17 +137,25 @@ public class EnvSettings
         return Environment.GetEnvironmentVariable(name);
     }
 
-    private static string Get(string name)
+    private static string Get(string name, string defaultValue = "")
     {
-        return Environment.GetEnvironmentVariable(name) ?? "";
+        return Environment.GetEnvironmentVariable(name) ?? defaultValue;
     }
 
-    private static int GetInt(string name)
+    private static int GetInt(string name, int defaultValue = 0)
     {
         var value = Environment.GetEnvironmentVariable(name) ?? "";
         if (int.TryParse(value, out var result))
             return result;
-        return 0;
+        return defaultValue;
+    }
+
+    private static bool GetBool(string name, bool defaultValue = false) 
+    {
+        var value = Environment.GetEnvironmentVariable(name) ?? "";
+        if (bool.TryParse(value, out var result))
+            return result;
+        return defaultValue;
     }
 
     private static string MustGet(string name)
