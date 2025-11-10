@@ -55,7 +55,7 @@ export function AppShareInfo(props: Props) {
       </div>
       {!requests?.hasOwnership && (
         <div className="mt-2 text-xs italic text-muted-foreground">
-          This app is only shared with you. Your billing plan will not apply it.
+          This app is shared with you. Your billing plan will not apply to it.
         </div>
       )}
     </>
