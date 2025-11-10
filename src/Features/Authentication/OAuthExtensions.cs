@@ -43,9 +43,21 @@ public static class OAuthExtensions
         public bool EmailVerified { get; set; }
     }
 
+    public class AuthentikUser
+    {
+        [JsonPropertyName("sub")]
+        public string Id { get; set; } = "";
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = "";
+        [JsonPropertyName("email")]
+        public string Email { get; set; } = "";
+        [JsonPropertyName("email_verified")]
+        public bool EmailVerified { get; set; }
+    }
+
     public static AuthenticationBuilder AddGitHub(this AuthenticationBuilder builder, EnvSettings env)
     {
-        if (string.IsNullOrWhiteSpace(env.OAuthGitHubClientId))
+        if (string.IsNullOrWhiteSpace(env.OAuthGitHubClientId) || string.IsNullOrWhiteSpace(env.OAuthGitHubClientSecret))
             return builder;
 
         return builder.AddOAuth("github", o =>
@@ -116,7 +128,7 @@ public static class OAuthExtensions
 
     public static AuthenticationBuilder AddGoogle(this AuthenticationBuilder builder, EnvSettings env)
     {
-        if (string.IsNullOrWhiteSpace(env.OAuthGoogleClientId))
+        if (string.IsNullOrWhiteSpace(env.OAuthGoogleClientId) || string.IsNullOrWhiteSpace(env.OAuthGoogleClientSecret))
             return builder;
 
         return builder.AddOAuth("google", o =>
@@ -164,6 +176,77 @@ public static class OAuthExtensions
                     catch (Exception ex)
                     {
                         logger.LogError(ex, "Failed to create OAuth ticket for Google user");
+                        throw;
+                    }
+                },
+                OnRemoteFailure = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<OAuthHandler<OAuthOptions>>>();
+
+                    logger.LogError("OAuth Remote Failure: {message}", context.Failure?.Message);
+                    context.Response.Redirect($"{env.SelfBaseUrl}/auth?error=oauth_failed");
+                    context.HandleResponse();
+                    return Task.CompletedTask;
+                }
+            };
+        });
+    }
+
+    public static AuthenticationBuilder AddAuthentik(this AuthenticationBuilder builder, EnvSettings env)
+    {
+        if (string.IsNullOrWhiteSpace(env.OAuthAuthentikClientId) || 
+            string.IsNullOrWhiteSpace(env.OAuthAuthentikClientSecret) ||
+            string.IsNullOrWhiteSpace(env.OAuthAuthentikAuthorizeUrl) ||
+            string.IsNullOrWhiteSpace(env.OAuthAuthentikTokenUrl) ||
+            string.IsNullOrWhiteSpace(env.OAuthAuthentikUserinfoUrl))
+            return builder;
+
+        return builder.AddOAuth("authentik", o =>
+        {
+            o.ClientId = env.OAuthAuthentikClientId;
+            o.ClientSecret = env.OAuthAuthentikClientSecret;
+            o.Scope.Add("openid");
+            o.Scope.Add("profile");
+            o.Scope.Add("email");
+            o.CallbackPath = new PathString("/api/_auth/authentik/callback");
+            o.CorrelationCookie.SameSite = env.IsDevelopment ? SameSiteMode.Unspecified : SameSiteMode.None;
+            o.CorrelationCookie.HttpOnly = true;
+            o.CorrelationCookie.IsEssential = true;
+            o.CorrelationCookie.SecurePolicy = env.IsDevelopment
+                ? CookieSecurePolicy.SameAsRequest
+                : CookieSecurePolicy.Always;
+            o.AuthorizationEndpoint = env.OAuthAuthentikAuthorizeUrl;
+            o.TokenEndpoint = env.OAuthAuthentikTokenUrl;
+            o.UserInformationEndpoint = env.OAuthAuthentikUserinfoUrl;
+            o.ClaimActions.MapJsonKey("id", "id");
+            o.ClaimActions.MapJsonKey("name", "name");
+            o.ClaimActions.MapJsonKey("email", "email");
+            o.Events = new OAuthEvents
+            {
+                OnAccessDenied = context =>
+                {
+                    context.HandleResponse();
+                    context.HttpContext.Response.Redirect($"{env.SelfBaseUrl}/auth");
+                    return Task.CompletedTask;
+                },
+                OnCreatingTicket = async context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<OAuthHandler<OAuthOptions>>>();
+
+                    try
+                    {
+                        var authentikUser = await MakeOAuthRequest<AuthentikUser>(context, context.Options.UserInformationEndpoint) ?? throw new Exception("Failed to retrieve Authentik user information.");
+                        if (!authentikUser.EmailVerified)
+                            throw new Exception("Email not verified, can't login with Authentik.");
+
+                        var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+                        logger.LogWarning("Authentik user: {Name}, {Email}, {Id}", authentikUser.Name, authentikUser.Email, authentikUser.Id);
+                        var user = await authService.FindOrCreateAccountWithOAuthAsync(authentikUser.Name, authentikUser.Email, "authentik", authentikUser.Id, context.HttpContext.RequestAborted);
+                        context.RunClaimActions(JsonSerializer.SerializeToElement(new { id = user.Id, name = user.Name, email = user.Email }));
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to create OAuth ticket for Authentik user");
                         throw;
                     }
                 },

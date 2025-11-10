@@ -6,9 +6,7 @@ const regions: { [host: string]: "eu" | "us" } = {
 function getUserHourCycle(): "h12" | "h24" {
   try {
     const localeCode =
-      navigator.languages && navigator.languages.length
-        ? navigator.languages[0]
-        : navigator.language || "en-US";
+      navigator.languages && navigator.languages.length ? navigator.languages[0] : navigator.language || "en-US";
     const locale = new Intl.Locale(localeCode);
 
     // TypeScript doesn't know about hourCycles yet
