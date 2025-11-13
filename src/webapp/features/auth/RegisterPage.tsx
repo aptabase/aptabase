@@ -1,37 +1,56 @@
-import { requestRegisterLink } from "@features/auth";
+import { Button } from "@components/Button";
 import { Page } from "@components/Page";
+import { TextInput } from "@components/TextInput";
+import { requestRegisterLink } from "@features/auth";
+import { isOAuthEnabled } from "@features/env";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { DataResidency } from "./DataResidency";
 import { LegalNotice } from "./LegalNotice";
+import { Logo } from "./Logo";
 import { RegionSwitch } from "./RegionSwitch";
 import { SignInWithGitHub } from "./SignInWithGitHub";
 import { SignInWithGoogle } from "./SignInWithGoogle";
-import { isOAuthEnabled } from "@features/env";
-import { Logo } from "./Logo";
-import { Button } from "@components/Button";
-import { TextInput } from "@components/TextInput";
 
-type FormStatus = "idle" | "loading" | "success";
+type FormStatus = "idle" | "loading" | "success" | "error";
 
 type StatusMessageProps = {
   status: FormStatus;
+  error?: string | null;
 };
+
+const SignInMessage = () => (
+  <>
+    Already registered?{" "}
+    <Link className="font-medium text-foreground" to="/auth">
+      Sign in
+    </Link>{" "}
+    to your account.
+  </>
+);
 
 const StatusMessage = (props: StatusMessageProps) => {
   if (props.status === "success") {
-    return <span className="text-success">Woo-hoo! Email sent, go check your inbox!</span>;
+    return (
+      <>
+        <span className="text-success">Woo-hoo! Email sent, go check your inbox!</span>
+        <br />
+        <SignInMessage />
+      </>
+    );
   }
 
-  return (
-    <>
-      Already registered?{" "}
-      <Link className="font-medium text-foreground" to="/auth">
-        Sign in
-      </Link>{" "}
-      to your account.
-    </>
-  );
+  if (props.status === "error" && props.error) {
+    return (
+      <>
+        <span className="text-destructive">{props.error}</span>
+        <br />
+        <SignInMessage />
+      </>
+    );
+  }
+
+  return <SignInMessage />;
 };
 
 Component.displayName = "RegisterPage";
@@ -39,19 +58,33 @@ export function Component() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<FormStatus>("idle");
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setStatus("loading");
+    setEmailError(null);
 
-    await requestRegisterLink(name, email);
-
+    const result: any = await requestRegisterLink(name, email);
+    if (typeof result === "string") {
+      setEmailError(result);
+      setStatus("error");
+      return;
+    }
+    if (result && typeof result === "object" && result.errors) {
+      const firstError = Object.values(result.errors).flat()[0];
+      if (firstError) {
+        setEmailError(firstError as string);
+        setStatus("error");
+        return;
+      }
+    }
     setStatus("success");
   };
 
   return (
     <Page title="Sign up">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Logo className="mx-auto h-12 w-auto text-primary" />
         <h2 className="text-center text-3xl font-bold">Sign up for an account</h2>
         <DataResidency />
@@ -96,7 +129,7 @@ export function Component() {
             />
             <Button loading={status === "loading"}>Send magic link</Button>
             <p className="text-center text-sm h-10 text-muted-foreground">
-              <StatusMessage status={status} />
+              <StatusMessage status={status} error={emailError} />
             </p>
           </form>
         </div>
