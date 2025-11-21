@@ -75,6 +75,12 @@ public class EnvSettings
     // Variable Name: OAUTH_GOOGLE_CLIENT_SECRET
     public string OAuthGoogleClientSecret { get; private set; } = "";
 
+    // S3 Configuration
+    public string? AwsAccessKeyId { get; private set; } = "";
+    public string? AwsSecretAccessKey { get; private set; } = "";
+    public string AwsRegion { get; private set; } = "";
+    public string S3BucketName { get; private set; } = "";
+
     //  The following properties are derived from the other settings
     public bool IsManagedCloud => Region == "EU" || Region == "US";
     public bool IsBillingEnabled => IsManagedCloud || IsDevelopment;
@@ -116,6 +122,11 @@ public class EnvSettings
             OAuthGitHubClientSecret = Get("OAUTH_GITHUB_CLIENT_SECRET"),
             OAuthGoogleClientId = Get("OAUTH_GOOGLE_CLIENT_ID"),
             OAuthGoogleClientSecret = Get("OAUTH_GOOGLE_CLIENT_SECRET"),
+
+            AwsAccessKeyId = Get("AWS_ACCESS_KEY_ID"),
+            AwsSecretAccessKey = Get("AWS_SECRET_ACCESS_KEY"),
+            AwsRegion = Get("AWS_REGION"),
+            S3BucketName = Get("S3_EXPORT_BUCKET"),
 
             // On the container, the etc directory is mounted at ./etc
             // But during development, it's at ../etc
