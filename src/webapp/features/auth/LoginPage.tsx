@@ -1,18 +1,23 @@
-import { requestSignInLink } from "@features/auth";
+import { Button } from "@components/Button";
 import { Page } from "@components/Page";
-import { useState } from "react";
+import { TextInput } from "@components/TextInput";
+import { DEFAULT_OAUTH_STATUS, requestSignInLink } from "@features/auth";
+import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { DataResidency } from "./DataResidency";
 import { LegalNotice } from "./LegalNotice";
-import { RegionSwitch } from "./RegionSwitch";
-import { SignInWithGitHub } from "./SignInWithGitHub";
-import { SignInWithGoogle } from "./SignInWithGoogle";
-import { isOAuthEnabled } from "@features/env";
 import { Logo } from "./Logo";
-import { Button } from "@components/Button";
-import { TextInput } from "@components/TextInput";
+import { OAuthButtons } from "./OAuthButtons";
+import { RegionSwitch } from "./RegionSwitch";
 
 type FormStatus = "idle" | "loading" | "success" | "notfound";
+
+type OAuthStatus = {
+  github: boolean;
+  google: boolean;
+  authentik: boolean;
+  emailAuthDisabled: boolean;
+};
 
 type StatusMessageProps = {
   status: FormStatus;
@@ -54,17 +59,35 @@ const RedirectErrorMessage = () => {
   }
   const message = error === "expired" ? "This link has expired." : "This link is invalid.";
 
-  return (
-    <p className="mx-auto text-center mb-10 text-destructive text-sm">
-      {message} Please request a new one.
-    </p>
-  );
+  return <p className="mx-auto text-center mb-10 text-destructive text-sm">{message} Please request a new one.</p>;
 };
 
 Component.displayName = "LoginPage";
 export function Component() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<FormStatus>("idle");
+  const [oauthStatus, setOauthStatus] = useState<OAuthStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkOAuthStatus = async () => {
+      try {
+        const response = await fetch("/api/_auth/oauth-status");
+        if (response.ok) {
+          const status = await response.json();
+          setOauthStatus(status);
+        } else {
+          setOauthStatus(DEFAULT_OAUTH_STATUS);
+        }
+      } catch {
+        setOauthStatus(DEFAULT_OAUTH_STATUS);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkOAuthStatus();
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -73,6 +96,45 @@ export function Component() {
     const found = await requestSignInLink(email);
     setStatus(found ? "success" : "notfound");
   };
+
+  // Show loading state while checking OAuth status
+  if (loading) {
+    return (
+      <Page title="Login">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+          <Logo className="mx-auto h-12 w-auto text-primary" />
+          <h2 className="text-center text-3xl text-foreground font-bold">Sign in to your account</h2>
+          <DataResidency />
+        </div>
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="py-8 px-4 sm:rounded-lg sm:px-10">
+            <div className="text-center text-muted-foreground">Loading...</div>
+          </div>
+        </div>
+      </Page>
+    );
+  }
+
+  // If email auth is disabled and no OAuth providers are available, show a message
+  if (oauthStatus?.emailAuthDisabled && !oauthStatus?.github && !oauthStatus?.google && !oauthStatus?.authentik) {
+    return (
+      <Page title="Login">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+          <Logo className="mx-auto h-12 w-auto text-primary" />
+          <h2 className="text-center text-3xl text-foreground font-bold">Sign in to your account</h2>
+          <DataResidency />
+        </div>
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="py-8 px-4 sm:rounded-lg sm:px-10">
+            <div className="text-center text-muted-foreground">
+              <p>No authentication methods are currently available.</p>
+              <p className="mt-2 text-sm">Please contact your administrator to configure authentication.</p>
+            </div>
+          </div>
+        </div>
+      </Page>
+    );
+  }
 
   return (
     <Page title="Login">
@@ -87,40 +149,26 @@ export function Component() {
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="py-8 px-4 sm:rounded-lg sm:px-10">
-          {isOAuthEnabled && (
-            <>
-              <div className="space-y-2">
-                <SignInWithGitHub />
-                <SignInWithGoogle />
-              </div>
+          <OAuthButtons />
 
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-muted">OR</span>
-                </div>
-              </div>
-            </>
+          {!oauthStatus?.emailAuthDisabled && (
+            <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+              <TextInput
+                label="Enter your email address"
+                name="email"
+                type="email"
+                placeholder="peter.parker@corp.com"
+                autoComplete="email"
+                value={email}
+                required={true}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Button loading={status === "loading"}>Send magic link</Button>
+              <p className="text-center text-sm h-10 text-muted-foreground">
+                <StatusMessage status={status} />
+              </p>
+            </form>
           )}
-
-          <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-            <TextInput
-              label="Enter your email address"
-              name="email"
-              type="email"
-              placeholder="peter.parker@corp.com"
-              autoComplete="email"
-              value={email}
-              required={true}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <Button loading={status === "loading"}>Send magic link</Button>
-            <p className="text-center text-sm h-10 text-muted-foreground">
-              <StatusMessage status={status} />
-            </p>
-          </form>
         </div>
         <LegalNotice operation="signin" />
         <RegionSwitch />
