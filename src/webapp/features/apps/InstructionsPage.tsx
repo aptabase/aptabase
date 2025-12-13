@@ -1,16 +1,16 @@
-import { useCurrentApp } from "@features/apps";
-import { PageHeading, Page } from "@components/Page";
 import { trackEvent } from "@aptabase/web";
+import { ErrorState } from "@components/ErrorState";
+import { LoadingState } from "@components/LoadingState";
+import { Markdown } from "@components/Markdown";
+import { Page, PageHeading } from "@components/Page";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@components/Select";
+import { useCurrentApp } from "@features/apps";
+import { IconCopy } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 import frameworks, { type FrameworkInstructions } from "./frameworks";
-import { Markdown } from "@components/Markdown";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "@components/Select";
-import { ErrorState } from "@components/ErrorState";
-import { LoadingState } from "@components/LoadingState";
-import { IconCopy } from "@tabler/icons-react";
 
 const fetchInstructions = async (id: string): Promise<[FrameworkInstructions, string]> => {
   const fw = frameworks[id];
@@ -72,7 +72,7 @@ export function Component() {
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select a framework" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[400px]">
                 <SelectGroup>
                   {Object.entries(frameworks).map(([id, fw]) => (
                     <SelectItem key={fw.name} value={id}>

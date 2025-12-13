@@ -20,12 +20,6 @@ const frameworks: Record<string, FrameworkInstructions> = {
     icon: "https://aptabase.com/tools/apple.svg",
     invert: true,
   },
-  browser: {
-    name: "Browser Extension",
-    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-js/main/packages/browser/",
-    repository: "https://github.com/aptabase/aptabase-js/tree/main/packages/browser",
-    icon: "https://aptabase.com/tools/chrome.svg",
-  },
   electron: {
     name: "Electron",
     baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-electron/main/",
@@ -55,6 +49,12 @@ const frameworks: Record<string, FrameworkInstructions> = {
     baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-maui/main/",
     repository: "https://github.com/aptabase/aptabase-maui",
     icon: "https://aptabase.com/tools/dotnet.svg",
+  },
+  python: {
+    name: "Python",
+    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-python/main/",
+    repository: "https://github.com/aptabase/aptabase-python",
+    icon: "https://aptabase.com/tools/python.svg",
   },
   unity: {
     name: "Unity Engine",
@@ -100,6 +100,12 @@ const frameworks: Record<string, FrameworkInstructions> = {
     baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-js/main/packages/web/",
     repository: "https://github.com/aptabase/aptabase-js/tree/main/packages/web",
     icon: "https://aptabase.com/tools/javascript.svg",
+  },
+  browser: {
+    name: "Browser Extension",
+    baseURL: "https://raw.githubusercontent.com/aptabase/aptabase-js/main/packages/browser/",
+    repository: "https://github.com/aptabase/aptabase-js/tree/main/packages/browser",
+    icon: "https://aptabase.com/tools/chrome.svg",
   },
 };
 
