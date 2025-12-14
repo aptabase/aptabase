@@ -32,12 +32,12 @@ jobs:
           - 1080:1080
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Setup .NET Core SDK 8.x
-        uses: actions/setup-dotnet@v4
+      - name: Setup .NET Core SDK 10.x
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 8.x
+          dotnet-version: 10.x
 
       - name: Run Unit Tests
         run: dotnet test
@@ -59,13 +59,13 @@ jobs:
             platform: arm64
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/${{ matrix.platform }}
@@ -73,7 +73,7 @@ jobs:
           outputs: type=docker,dest=/tmp/aptabase-${{ matrix.platform }}.tar
 
       - name: Upload Image
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: aptabase-${{ matrix.platform }}
           path: /tmp/aptabase-${{ matrix.platform }}.tar
@@ -85,7 +85,7 @@ jobs:
     needs: [build, test]
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -163,7 +163,7 @@ jobs:
         run: docker load --input /tmp/aptabase-arm64.tar
 
       - name: Configure AWS credentials (US)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: arn:aws:iam::907052285437:role/github-action
           aws-region: us-east-1
@@ -220,7 +220,7 @@ jobs:
         run: docker load --input /tmp/aptabase-arm64.tar
 
       - name: Configure AWS credentials (EU)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: arn:aws:iam::907052285437:role/github-action
           aws-region: eu-central-1
