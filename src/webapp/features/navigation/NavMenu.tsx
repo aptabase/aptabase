@@ -61,6 +61,9 @@ export function NavMenu(props: { onNavigation?: VoidFunction }) {
           <NavItem
             label="Settings"
             disabled={!currentApp || !currentApp.hasOwnership}
+            disabledReason={
+              currentApp && !currentApp.hasOwnership ? "Settings are available only to application owners" : undefined
+            }
             href={`/${currentApp?.id}/settings`}
             icon={IconSettings}
             onNavigation={props.onNavigation}

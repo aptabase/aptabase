@@ -1,7 +1,7 @@
 import * as SelectPrimitive from "@radix-ui/react-select";
 import * as React from "react";
 
-import { IconCheck, IconChevronDown, IconX } from "@tabler/icons-react";
+import { IconCheck, IconChevronDown, IconChevronUp, IconX } from "@tabler/icons-react";
 import { twMerge } from "tailwind-merge";
 
 const Select = SelectPrimitive.Root;
@@ -56,6 +56,9 @@ const SelectContent = React.forwardRef<
       position={position}
       {...props}
     >
+      <SelectPrimitive.ScrollUpButton className="flex cursor-default items-center justify-center py-1">
+        <IconChevronUp className="h-4 w-4" />
+      </SelectPrimitive.ScrollUpButton>
       <SelectPrimitive.Viewport
         className={twMerge(
           "p-1",
@@ -65,6 +68,9 @@ const SelectContent = React.forwardRef<
       >
         {children}
       </SelectPrimitive.Viewport>
+      <SelectPrimitive.ScrollDownButton className="flex cursor-default items-center justify-center py-1">
+        <IconChevronDown className="h-4 w-4" />
+      </SelectPrimitive.ScrollDownButton>
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
 ));

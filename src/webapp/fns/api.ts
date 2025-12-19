@@ -50,7 +50,7 @@ async function get<T>(path: string, params?: Record<string, any>): Promise<T> {
   const [status, response] = await _fetch("GET", pathWithParams);
 
   await handleError(status, response);
-  return response.json() as Promise<T>;
+  return await response?.json();
 }
 
 async function post<T>(path: string, body?: any): Promise<T> {
@@ -74,6 +74,16 @@ async function _delete<T>(path: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+async function getEmpty<T>(path: string, params?: Record<string, any>): Promise<T | null> {
+  const paramsStr = params ? new URLSearchParams(params).toString() : "";
+  const pathWithParams = paramsStr ? `${path}?${paramsStr}` : path;
+
+  const [status, response] = await _fetch("GET", pathWithParams);
+
+  await handleError(status, response);
+  return response.status === 204 ? null : ((await response?.json()) as Promise<T>);
+}
+
 export const api = {
   fetch: _fetch,
   post,
@@ -81,4 +91,5 @@ export const api = {
   delete: _delete,
   get,
   handleError,
+  getEmpty,
 };
