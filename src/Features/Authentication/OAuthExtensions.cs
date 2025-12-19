@@ -51,8 +51,6 @@ public static class OAuthExtensions
         public string Name { get; set; } = "";
         [JsonPropertyName("email")]
         public string Email { get; set; } = "";
-        [JsonPropertyName("email_verified")]
-        public bool EmailVerified { get; set; }
     }
 
     public static AuthenticationBuilder AddGitHub(this AuthenticationBuilder builder, EnvSettings env)
@@ -236,9 +234,6 @@ public static class OAuthExtensions
                     try
                     {
                         var authentikUser = await MakeOAuthRequest<AuthentikUser>(context, context.Options.UserInformationEndpoint) ?? throw new Exception("Failed to retrieve Authentik user information.");
-                        if (!authentikUser.EmailVerified)
-                            throw new Exception("Email not verified, can't login with Authentik.");
-
                         var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
                         logger.LogWarning("Authentik user: {Name}, {Email}, {Id}", authentikUser.Name, authentikUser.Email, authentikUser.Id);
                         var user = await authService.FindOrCreateAccountWithOAuthAsync(authentikUser.Name, authentikUser.Email, "authentik", authentikUser.Id, context.HttpContext.RequestAborted);
