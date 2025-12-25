@@ -6,6 +6,7 @@ using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing;
 using Aptabase.Features.Billing.LemonSqueezy;
 using Aptabase.Features.Blob;
+using Aptabase.Features.Export;
 using Aptabase.Features.GeoIP;
 using Aptabase.Features.Ingestion;
 using Aptabase.Features.Ingestion.Buffer;
@@ -19,7 +20,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Hosting;
 using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
 
@@ -138,6 +138,7 @@ public partial class Program
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddSingleton<ICache, DatabaseCache>();
         builder.Services.AddSingleton<IAppQueries, AppQueries>();
+        builder.Services.AddSingleton<IExportQueries, ExportQueries>();
         builder.Services.AddSingleton<IBillingQueries, BillingQueries>();
         builder.Services.AddSingleton<IPrivacyQueries, PrivacyQueries>();
         builder.Services.AddSingleton<IUserHasher, DailyUserHasher>();
@@ -147,6 +148,9 @@ public partial class Program
         builder.Services.AddSingleton<IEventBuffer, InMemoryEventBuffer>();
         builder.Services.AddHostedService<EventBackgroundWritter>();
         builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
+
+        // TODO add AWS S3 SDK
+        builder.Services.AddHostedService<ExportCronJob>();
 
         if (appEnv.IsBillingEnabled)
         {
