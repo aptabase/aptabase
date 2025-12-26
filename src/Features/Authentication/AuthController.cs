@@ -46,7 +46,12 @@ public class AuthController : Controller
     [HttpPost("/api/_auth/signin")]
     public async Task<IActionResult> SignIn([FromBody] SignInBodyRequest body, CancellationToken cancellationToken)
     {
-        var found = await _authService.SendSignInEmailAsync(body.Email.Trim(), cancellationToken);
+        var email = body.Email.Trim();
+        if (!System.Text.RegularExpressions.Regex.IsMatch(email, _env.EmailRegexPattern))
+        {
+            return BadRequest(new { errors = new { email = new[] { "Sign in is not available for this email address." } } });
+        }
+        var found = await _authService.SendSignInEmailAsync(email, cancellationToken);
 
         if (!found)
             return NotFound(new { });
@@ -58,7 +63,12 @@ public class AuthController : Controller
     [EnableRateLimiting("SignUp")]
     public async Task<IActionResult> Register([FromBody] RegisterBodyRequest body, CancellationToken cancellationToken)
     {
-        await _authService.SendRegisterEmailAsync(body.Name.Trim(), body.Email.Trim(), cancellationToken);
+        var email = body.Email.Trim();
+        if (!System.Text.RegularExpressions.Regex.IsMatch(email, _env.EmailRegexPattern))
+        {
+            return BadRequest(new { errors = new { email = new[] { "Sign up is not available for this email address." } } });
+        }
+        await _authService.SendRegisterEmailAsync(body.Name.Trim(), email, cancellationToken);
         return Ok(new { });
     }
 

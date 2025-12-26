@@ -75,6 +75,10 @@ public class EnvSettings
     // Variable Name: OAUTH_GOOGLE_CLIENT_SECRET
     public string OAuthGoogleClientSecret { get; private set; } = "";
 
+    // The regex pattern for allowed email addresses during login/registration
+    // Variable Name: EMAIL_REGEX
+    public string EmailRegexPattern { get; private set; } = "";
+
     //  The following properties are derived from the other settings
     public bool IsManagedCloud => Region == "EU" || Region == "US";
     public bool IsBillingEnabled => IsManagedCloud || IsDevelopment;
@@ -119,7 +123,10 @@ public class EnvSettings
 
             // On the container, the etc directory is mounted at ./etc
             // But during development, it's at ../etc
-            EtcDirectoryPath = Directory.Exists("./etc") ? "./etc" : "../etc"
+            EtcDirectoryPath = Directory.Exists("./etc") ? "./etc" : "../etc",
+
+            // Load email regex pattern, fallback to a standard email regex if not set
+            EmailRegexPattern = Get("EMAIL_REGEX") != "" ? Get("EMAIL_REGEX") : @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-\w]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$"
         };
     }
 
