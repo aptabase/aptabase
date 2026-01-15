@@ -22,7 +22,7 @@ var api = builder.AddProject<Projects.Aptabase>("api")
        .WithReference(mailcatcher)
        .WithExternalHttpEndpoints();
 
-builder.AddNpmApp("frontend", "../../src", scriptName: "dev")
+builder.AddJavaScriptApp("frontend", "../../src", runScriptName: "dev")
     .WithReference(api)
     .WithHttpsEndpoint(port: 3000, isProxied: false)
     .WithExternalHttpEndpoints();

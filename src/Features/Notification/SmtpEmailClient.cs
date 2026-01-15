@@ -16,7 +16,7 @@ public class SmtpEmailClient : IEmailClient
     public async Task SendEmailAsync(string to, string subject, string templateName, Dictionary<string, string>? properties, CancellationToken cancellationToken)
     {
         using var smtp = new SmtpClient();
-        await smtp.ConnectAsync(_env.SmtpHost, _env.SmtpPort, IsTLSPort(_env.SmtpPort), cancellationToken);
+        await smtp.ConnectAsync(_env.SmtpHost, _env.SmtpPort, IsTLSPort(_env.SmtpPort) ? MailKit.Security.SecureSocketOptions.Auto : MailKit.Security.SecureSocketOptions.None, cancellationToken);
 
         if (!string.IsNullOrEmpty(_env.SmtpUsername))
             await smtp.AuthenticateAsync(_env.SmtpUsername, _env.SmtpPassword, cancellationToken);
