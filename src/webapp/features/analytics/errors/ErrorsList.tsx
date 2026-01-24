@@ -17,6 +17,7 @@ import {
   IconFilter,
 } from "@tabler/icons-react";
 import { DateFilterContainer } from "../date-filters/DateFilterContainer";
+import { ErrorDetailModal } from "./ErrorDetailModal";
 
 interface ErrorItem {
   errorId: string;
@@ -81,6 +82,7 @@ export function ErrorsList({ appId }: ErrorsListProps) {
   const limit = 50;
   const [searchParams, setSearchParams] = useSearchParams();
   const dateFilters = useAtomValue(dateFilterValuesAtom);
+  const [selectedErrorId, setSelectedErrorId] = useState<string | null>(null);
 
   // Get filter values from URL params
   const platform = searchParams.get("platform") || "all";
@@ -244,6 +246,7 @@ export function ErrorsList({ appId }: ErrorsListProps) {
                   <tr
                     key={error.errorId}
                     className="hover:bg-accent cursor-pointer"
+                    onClick={() => setSelectedErrorId(error.errorId)}
                   >
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm">
                       {new Date(error.timestamp).toLocaleString()}
@@ -289,6 +292,13 @@ export function ErrorsList({ appId }: ErrorsListProps) {
           </Button>
         </div>
       </div>
+
+      <ErrorDetailModal
+        appId={appId}
+        errorId={selectedErrorId}
+        open={!!selectedErrorId}
+        onClose={() => setSelectedErrorId(null)}
+      />
     </div>
   );
 }
