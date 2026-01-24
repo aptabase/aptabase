@@ -448,3 +448,60 @@
 
 ---
 
+## 2026-01-24 - US-007
+
+### What was implemented
+- Created GET /api/v0/apps/{appId}/errors/{errorId} endpoint for individual error details
+  - File: `src/Features/ErrorReporting/ErrorsController.cs` (modified)
+  - Route: `/api/v0/apps/{appId}/errors/{errorId}`
+  - Requires authentication via `[IsAuthenticated]` attribute
+  - Applied Stats rate limiting (1000 req/hour per IP)
+  - Returns full error details including sanitized stack trace
+
+- Implemented authorization checks
+  - Reuses existing `HasReadAccessToApp()` extension method from ErrorReportingQueries.cs
+  - Returns 403 Forbidden if user doesn't have access to app
+  - Returns 404 Not Found if error doesn't exist or doesn't belong to app
+
+- Return full error details
+  - Uses IErrorQueryClient.GetErrorByIdAsync() to fetch error
+  - Returns ErrorDto with all fields: errorId, appId, timestamp, errorMessage, errorType, stackTrace, platform, osName, osVersion, appVersion, sdkVersion, sessionId
+  - Stack trace is already sanitized (sanitization happens at ingestion time)
+
+- Created test script
+  - File: `scripts/ralph/test-error-detail-endpoint.sh`
+  - Documents how to test authenticated endpoint (requires session cookie)
+  - Includes expected response formats for success and error cases
+
+### Files changed
+- `src/Features/ErrorReporting/ErrorsController.cs` (modified - added GetErrorById endpoint)
+- `scripts/ralph/test-error-detail-endpoint.sh` (new - test documentation)
+
+### Quality checks
+- ✅ `dotnet build` passes with 0 warnings, 0 errors
+
+### Learnings for future iterations
+
+**API patterns discovered:**
+- Detail endpoints follow RESTful pattern: `/apps/{appId}/errors/{errorId}` (not `/errors/{errorId}?appId=...`)
+- Authorization check comes first, then query the resource, then return 404 if null
+- This ensures we don't leak information about whether an error exists if user doesn't have access
+
+**Key gotchas:**
+- GetErrorByIdAsync already filters by appId, so error won't be returned if it doesn't belong to the app
+- This is correct behavior - prevents users from accessing errors from other apps even if they know the error ID
+- Must return 404 for both "error doesn't exist" and "error exists but belongs to different app" (security best practice)
+
+**Useful context:**
+- Stack traces are already sanitized at ingestion time (US-003), so no need to re-sanitize on read
+- ErrorDto includes all fields needed for the error detail modal (US-010)
+- Same rate limiting as error list endpoint (Stats policy)
+- Simple implementation - just fetch and return, no complex logic needed
+
+**REST API design:**
+- List endpoint: GET /apps/{appId}/errors (with filters)
+- Detail endpoint: GET /apps/{appId}/errors/{errorId}
+- Both follow RESTful conventions and use appId in path for clear resource hierarchy
+
+---
+
