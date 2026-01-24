@@ -6,6 +6,7 @@ using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing;
 using Aptabase.Features.Billing.LemonSqueezy;
 using Aptabase.Features.Blob;
+using Aptabase.Features.ErrorReporting.Buffer;
 using Aptabase.Features.GeoIP;
 using Aptabase.Features.Ingestion;
 using Aptabase.Features.Ingestion.Buffer;
@@ -145,6 +146,7 @@ public partial class Program
         builder.Services.AddSingleton<IIngestionCache, IngestionCache>();
         builder.Services.AddSingleton<IBlobService, DatabaseBlobService>();
         builder.Services.AddSingleton<IEventBuffer, InMemoryEventBuffer>();
+        builder.Services.AddSingleton<IErrorBuffer, InMemoryErrorBuffer>();
         builder.Services.AddHostedService<EventBackgroundWritter>();
         builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
 
