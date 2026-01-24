@@ -12,12 +12,14 @@ public class ErrorsController : ControllerBase
 {
     private readonly IErrorBuffer _buffer;
     private readonly IIngestionCache _cache;
+    private readonly IPiiSanitizer _piiSanitizer;
     private readonly ILogger<ErrorsController> _logger;
 
-    public ErrorsController(IErrorBuffer buffer, IIngestionCache cache, ILogger<ErrorsController> logger)
+    public ErrorsController(IErrorBuffer buffer, IIngestionCache cache, IPiiSanitizer piiSanitizer, ILogger<ErrorsController> logger)
     {
         _buffer = buffer;
         _cache = cache;
+        _piiSanitizer = piiSanitizer;
         _logger = logger;
     }
 
@@ -61,15 +63,19 @@ public class ErrorsController : ControllerBase
         // Generate error ID
         var errorId = Guid.NewGuid().ToString();
 
+        // Sanitize PII from error message and stack trace
+        var sanitizedErrorMessage = _piiSanitizer.Sanitize(body.ErrorMessage);
+        var sanitizedStackTrace = _piiSanitizer.Sanitize(body.StackTrace);
+
         // Create tracking error
         var trackingError = new TrackingError
         {
             ErrorId = errorId,
             AppId = app.Id,
             Timestamp = body.Timestamp!.Value,
-            ErrorMessage = body.ErrorMessage!,
+            ErrorMessage = sanitizedErrorMessage,
             ErrorType = body.ErrorType!,
-            StackTrace = body.StackTrace,
+            StackTrace = sanitizedStackTrace,
             Platform = body.Platform,
             OsName = body.OsName,
             OsVersion = body.OsVersion,
