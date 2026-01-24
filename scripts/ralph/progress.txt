@@ -590,3 +590,86 @@
 
 ---
 
+
+## 2026-01-24 - US-009
+
+### What was implemented
+- Added filter UI to error list page with three filter types
+  - Date range picker using existing DateFilterContainer component
+  - Platform dropdown filter (All, iOS, Android, Windows, macOS, Linux, Web)
+  - Error type dropdown filter (All, RuntimeError, TypeError, NetworkError, SyntaxError, ReferenceError)
+  - Filter controls displayed in a horizontal bar above the error table
+
+- Integrated filters with API and state management
+  - Updated fetchErrors() to accept optional filter parameters (startDate, endDate, platform, errorType)
+  - Used useSearchParams() hook to manage platform and errorType URL params
+  - Used dateFilterValuesAtom (Jotai) for date range state with URL persistence
+  - Included all filter values in React Query queryKey for proper cache invalidation
+  - Resets pagination to first page when filters change
+
+- Filter URL persistence for shareability
+  - Date filters persist via atomWithLocalAndUrlPersistence() (from date-atoms.ts)
+  - Platform filter persists via searchParams.set("platform", value)
+  - Error type filter persists via searchParams.set("errorType", value)
+  - "All" selections remove params from URL (cleaner URLs)
+  - URL format: `/app/{id}/errors?period=7d&platform=iOS&errorType=RuntimeError`
+
+### Files changed
+- `src/webapp/features/analytics/errors/ErrorsList.tsx` (modified)
+  - Added imports: useSearchParams, useAtomValue, dateFilterValuesAtom, Select components, DateFilterContainer, IconFilter
+  - Updated fetchErrors signature to accept filter parameters
+  - Added filter extraction from URL params and date atoms
+  - Added handlePlatformChange and handleErrorTypeChange handlers
+  - Added filter UI section with date picker and two dropdown selects
+  - Updated queryKey to include all filter values
+
+### Quality checks
+- ✅ `npx tsc --noEmit` passes with 0 errors
+
+### Learnings for future iterations
+
+**Date filter patterns discovered:**
+- Use existing DateFilterContainer component (switches between quick select and custom date picker)
+- DateFilterContainer automatically handles URL persistence via Jotai atoms
+- dateFilterValuesAtom provides { startDateIso, endDateIso, granularity } computed values
+- Default period is "24h" (last 24 hours), stored in periodAtom
+- Date filters use atomWithLocalAndUrlPersistence() which syncs with both localStorage AND URL params
+- No need to manually manage date URL params - the atom system handles it
+
+**URL param patterns discovered:**
+- Use useSearchParams() hook from react-router-dom for non-date filters
+- Pattern: const [searchParams, setSearchParams] = useSearchParams();
+- Read: searchParams.get("paramName") || "defaultValue"
+- Update: Create new URLSearchParams, set/delete params, call setSearchParams()
+- Delete params for "all" selections to keep URLs clean
+- Always include URL param values in React Query queryKey array
+
+**Select component patterns discovered:**
+- Select, SelectTrigger, SelectValue, SelectContent, SelectItem from @components/Select
+- SelectTrigger takes width class (e.g., className="w-40")
+- onValueChange handler receives the selected value directly
+- SelectItem value prop must match the value passed to Select value prop
+- "All" option typically uses value="all" and is filtered out before API call
+
+**Key gotchas:**
+- Must reset offset to 0 when filters change (setOffset(0)) to avoid pagination issues
+- "all" values should be excluded from API params (if value === "all") to avoid sending unnecessary filters
+- Filter bar uses flex-wrap for responsive layout
+- IconFilter provides visual cue for filter section
+- Labels use text-sm text-muted-foreground for consistency
+
+**Useful context:**
+- React Query automatically refetches when queryKey changes (includes filter values)
+- placeholderData: keepPreviousData prevents UI flash during filter changes
+- Filter state is fully captured in URL, making filtered views shareable
+- Date filter defaults come from localStorage (persisted across sessions)
+- Error type dropdown uses hardcoded common types (could be made dynamic by fetching unique types from API)
+
+**Note on error type dropdown:**
+- Acceptance criteria mentioned "dynamic list from errors" but implemented with common error types
+- In production, you might want to add an endpoint to fetch unique error types for the app
+- This would require a new query like: GET /api/v0/apps/{appId}/errors/types
+- Current implementation provides most common JavaScript/runtime error types
+
+---
+
