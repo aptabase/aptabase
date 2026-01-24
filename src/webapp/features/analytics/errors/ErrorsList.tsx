@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
+import { useAtomValue } from "jotai";
+import { dateFilterValuesAtom } from "../../../atoms/date-atoms";
 import { Button } from "@components/Button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/Select";
 import { LoadingState } from "@components/LoadingState";
 import { EmptyState } from "@components/EmptyState";
 import { ErrorState } from "@components/ErrorState";
@@ -10,7 +14,9 @@ import {
   IconAlertTriangle,
   IconClock,
   IconDeviceMobile,
+  IconFilter,
 } from "@tabler/icons-react";
+import { DateFilterContainer } from "../date-filters/DateFilterContainer";
 
 interface ErrorItem {
   errorId: string;
@@ -39,12 +45,21 @@ interface ErrorsResponse {
 async function fetchErrors(
   appId: string,
   offset: number,
-  limit: number
+  limit: number,
+  startDate?: string,
+  endDate?: string,
+  platform?: string,
+  errorType?: string
 ): Promise<ErrorsResponse> {
   const params = new URLSearchParams({
     offset: offset.toString(),
     limit: limit.toString(),
   });
+
+  if (startDate) params.set("startDate", startDate);
+  if (endDate) params.set("endDate", endDate);
+  if (platform && platform !== "all") params.set("platform", platform);
+  if (errorType && errorType !== "all") params.set("errorType", errorType);
 
   const response = await fetch(`/api/v0/apps/${appId}/errors?${params}`, {
     credentials: "include",
@@ -64,12 +79,58 @@ interface ErrorsListProps {
 export function ErrorsList({ appId }: ErrorsListProps) {
   const [offset, setOffset] = useState(0);
   const limit = 50;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const dateFilters = useAtomValue(dateFilterValuesAtom);
+
+  // Get filter values from URL params
+  const platform = searchParams.get("platform") || "all";
+  const errorType = searchParams.get("errorType") || "all";
 
   const { data, isLoading, isError, refetch, isPlaceholderData } = useQuery({
-    queryKey: ["errors", appId, offset, limit],
-    queryFn: () => fetchErrors(appId, offset, limit),
+    queryKey: [
+      "errors",
+      appId,
+      offset,
+      limit,
+      dateFilters.startDateIso,
+      dateFilters.endDateIso,
+      platform,
+      errorType,
+    ],
+    queryFn: () =>
+      fetchErrors(
+        appId,
+        offset,
+        limit,
+        dateFilters.startDateIso,
+        dateFilters.endDateIso,
+        platform !== "all" ? platform : undefined,
+        errorType !== "all" ? errorType : undefined
+      ),
     placeholderData: keepPreviousData,
   });
+
+  const handlePlatformChange = (value: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value === "all") {
+      newParams.delete("platform");
+    } else {
+      newParams.set("platform", value);
+    }
+    setSearchParams(newParams);
+    setOffset(0); // Reset to first page when filters change
+  };
+
+  const handleErrorTypeChange = (value: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value === "all") {
+      newParams.delete("errorType");
+    } else {
+      newParams.set("errorType", value);
+    }
+    setSearchParams(newParams);
+    setOffset(0); // Reset to first page when filters change
+  };
 
   const handlePreviousPage = () => {
     if (offset - limit >= 0) {
@@ -100,6 +161,55 @@ export function ErrorsList({ appId }: ErrorsListProps) {
 
   return (
     <div className="mt-6">
+      {/* Filters */}
+      <div className="mb-6 flex flex-wrap items-end gap-4">
+        <div className="flex items-center gap-2">
+          <IconFilter className="h-5 w-5 text-muted-foreground" />
+          <span className="text-sm font-medium">Filters:</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Date Range:</span>
+          <DateFilterContainer />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Platform:</span>
+          <Select value={platform} onValueChange={handlePlatformChange}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Platforms</SelectItem>
+              <SelectItem value="iOS">iOS</SelectItem>
+              <SelectItem value="Android">Android</SelectItem>
+              <SelectItem value="Windows">Windows</SelectItem>
+              <SelectItem value="macOS">macOS</SelectItem>
+              <SelectItem value="Linux">Linux</SelectItem>
+              <SelectItem value="Web">Web</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Error Type:</span>
+          <Select value={errorType} onValueChange={handleErrorTypeChange}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              {/* Note: In a real implementation, you might want to fetch unique error types from the API */}
+              <SelectItem value="RuntimeError">RuntimeError</SelectItem>
+              <SelectItem value="TypeError">TypeError</SelectItem>
+              <SelectItem value="NetworkError">NetworkError</SelectItem>
+              <SelectItem value="SyntaxError">SyntaxError</SelectItem>
+              <SelectItem value="ReferenceError">ReferenceError</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       <div className="flow-root">
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full py-2 align-middle">
