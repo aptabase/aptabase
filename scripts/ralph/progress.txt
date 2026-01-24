@@ -673,3 +673,96 @@
 
 ---
 
+
+## 2026-01-24 - US-010
+
+### What was implemented
+- Created ErrorDetailModal component for displaying full error details
+  - File: `src/webapp/features/analytics/errors/ErrorDetailModal.tsx` (new)
+  - Uses Radix UI Dialog component (@components/Dialog)
+  - Fetches error details via GET /api/v0/apps/{appId}/errors/{errorId} endpoint
+  - Uses React Query (useQuery) for data fetching with enabled flag
+  - Shows loading state while fetching error details
+
+- Error information section
+  - Displays timestamp with locale-formatted date/time
+  - Shows error type prominently in dialog description
+  - Shows full error message (not truncated)
+  - Uses grid layout (4 columns) for label/value pairs
+
+- Device & Platform information section
+  - Shows platform (iOS, Android, Web, etc.)
+  - Shows OS name and version
+  - Shows app version
+  - Shows SDK version
+  - Shows session ID (if available) in monospace font
+
+- Stack trace section with copy functionality
+  - Displays stack trace in monospace font (<pre> element)
+  - Background color (bg-muted) for better readability
+  - Text wrapping enabled (whitespace-pre-wrap break-words)
+  - Copy button with icon toggle (IconCopy → IconCheck)
+  - Uses navigator.clipboard.writeText() for copy operation
+  - 2-second confirmation feedback ("Copied!")
+
+- Modal integration in ErrorsList
+  - File: `src/webapp/features/analytics/errors/ErrorsList.tsx` (modified)
+  - Added selectedErrorId state (string | null)
+  - Added onClick handler to table rows: setSelectedErrorId(error.errorId)
+  - Modal opens when selectedErrorId is not null
+  - Modal closes via onClose callback: setSelectedErrorId(null)
+
+### Files changed
+- `src/webapp/features/analytics/errors/ErrorDetailModal.tsx` (new)
+- `src/webapp/features/analytics/errors/ErrorsList.tsx` (modified - added modal import, state, and integration)
+
+### Quality checks
+- ✅ `npx tsc --noEmit` passes with 0 errors
+
+### Learnings for future iterations
+
+**Radix UI Dialog patterns discovered:**
+- Use Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription from @components/Dialog
+- Dialog takes `open` boolean prop and `onOpenChange` callback
+- DialogContent automatically includes close button (X) in top-right corner
+- ESC key closes dialog automatically (built-in Radix UI behavior)
+- Use max-w-4xl for wider modals, max-h-[90vh] for scrollable content
+- overflow-y-auto on DialogContent for scrolling within modal
+
+**Copy-to-clipboard pattern discovered:**
+- Use navigator.clipboard.writeText() (native browser API, no library needed)
+- Pattern: const [justCopied, setJustCopied] = useState(false)
+- On click: set true, setTimeout to reset after 2 seconds
+- Toggle between IconCopy and IconCheck for visual feedback
+- Button styling: text-sm text-muted-foreground hover:text-foreground transition-colors
+
+**React Query with enabled flag:**
+- useQuery takes `enabled` prop to conditionally fetch
+- Pattern: enabled: !!errorId && open
+- Prevents unnecessary API calls when modal is closed
+- Refetches automatically when errorId or open changes
+
+**Key gotchas:**
+- Must use !!selectedErrorId to convert string | null to boolean for `open` prop
+- Grid layout uses grid-cols-4 with label in col-1, value in col-span-3
+- Stack trace uses <pre> tag with whitespace-pre-wrap to preserve formatting but allow wrapping
+- Text truncation (max-w-md truncate) is removed in modal to show full message
+- Modal state is local to ErrorsList component (not global state)
+
+**Useful context:**
+- Dialog component is already configured with animations (fade-in, zoom effect)
+- DialogOverlay provides backdrop with blur effect
+- Modal fetches fresh data from API (not reusing list data) to ensure accuracy
+- Copy button works without toast notifications - inline feedback is sufficient
+- Session ID shown in monospace (font-mono) for technical data consistency
+- Error detail API was already implemented in US-007
+
+**Layout patterns discovered:**
+- Section headers use text-sm font-semibold mb-3
+- Section content uses space-y-2 for vertical spacing
+- Label/value pairs use text-muted-foreground for labels
+- Pre-formatted code uses bg-muted p-4 rounded-md text-xs font-mono
+- Responsive modal width: max-w-4xl (wider than default for code/stack traces)
+
+---
+
