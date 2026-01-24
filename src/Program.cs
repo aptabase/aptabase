@@ -150,6 +150,7 @@ public partial class Program
         builder.Services.AddSingleton<IErrorBuffer, InMemoryErrorBuffer>();
         builder.Services.AddSingleton<IPiiSanitizer, PiiSanitizer>();
         builder.Services.AddHostedService<EventBackgroundWritter>();
+        builder.Services.AddHostedService<ErrorBackgroundWritter>();
         builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
 
         if (appEnv.IsBillingEnabled)
@@ -170,11 +171,13 @@ public partial class Program
             builder.Services.AddSingleton<IClickHouseMigrationRunner, ClickHouseMigrationRunner>();
             builder.Services.AddSingleton<IQueryClient, ClickHouseQueryClient>();
             builder.Services.AddSingleton<IIngestionClient, ClickHouseIngestionClient>();
+            builder.Services.AddSingleton<IErrorIngestionClient, ClickHouseErrorIngestionClient>();
         }
         else
         {
             builder.Services.AddSingleton<IQueryClient, TinybirdQueryClient>();
             builder.Services.AddSingleton<IIngestionClient, TinybirdIngestionClient>();
+            builder.Services.AddSingleton<IErrorIngestionClient, TinybirdErrorIngestionClient>();
             builder.Services.AddHttpClient("Tinybird", client =>
             {
                 client.BaseAddress = new Uri(appEnv.TinybirdBaseUrl);
