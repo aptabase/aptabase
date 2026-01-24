@@ -505,3 +505,88 @@
 
 ---
 
+
+## 2026-01-24 - US-008
+
+### What was implemented
+- Created error dashboard page with table display
+  - File: `src/webapp/features/analytics/ErrorsPage.tsx` - Main page component with navigation guard
+  - File: `src/webapp/features/analytics/errors/ErrorsList.tsx` - Error list table with pagination
+  - Added route `/:id/errors` in router.tsx using lazy loading pattern
+  - Displays errors in table format with columns: timestamp, error type, message (truncated), platform
+  - Implements offset-based pagination (50 errors per page)
+  - Shows loading state while fetching using LoadingState component
+  - Shows empty state when no errors exist using EmptyState component
+  - Shows error state with refetch option if API call fails
+
+- Added navigation item to app sidebar
+  - File: `src/webapp/features/navigation/NavMenu.tsx` (modified)
+  - Added "Errors" navigation item with IconAlertTriangle icon
+  - Positioned after "User Sessions" in the Application section
+  - Disabled when no app selected or account is locked
+  - Links to `/${currentApp?.id}/errors` route
+
+- Implemented pagination controls
+  - Previous/Next buttons with disabled states
+  - Shows count: "Showing X to Y of Z errors"
+  - Uses keepPreviousData for smooth page transitions
+  - Disables buttons when placeholder data is loading
+
+### Files changed
+- `src/webapp/features/analytics/ErrorsPage.tsx` (new)
+- `src/webapp/features/analytics/errors/ErrorsList.tsx` (new)
+- `src/webapp/router.tsx` (modified - added errors route)
+- `src/webapp/features/navigation/NavMenu.tsx` (modified - added nav item and icon import)
+
+### Quality checks
+- ✅ `npx tsc --noEmit` passes with 0 errors
+
+### Learnings for future iterations
+
+**React Router patterns discovered:**
+- Routes use lazy loading: `lazy: () => import("./path/to/Component")`
+- Component must export `Component` named export (not default export)
+- Component must set `Component.displayName = "ComponentName"` for React DevTools
+- App-specific routes follow pattern `/:id/path` where `:id` is the app ID
+- Use `useCurrentApp()` hook to get current app and check if null before rendering
+
+**Navigation patterns discovered:**
+- NavMenu.tsx contains all navigation items organized by NavCategory
+- NavItem props: label, href, icon (Tabler icon), disabled, disabledReason, onNavigation
+- Icons imported from `@tabler/icons-react` - use Icon prefix (e.g., IconAlertTriangle)
+- Disabled state uses `!currentApp || !!currentApp.lockReason` pattern
+- Navigation items check both app existence and lock status
+
+**Table and pagination patterns discovered:**
+- Table structure uses flow-root → overflow-x-auto → inline-block min-w-full pattern
+- TailwindCSS classes: `divide-y divide-gray-300` for header/body separator, `divide-gray-600` for row separators
+- Row hover state: `hover:bg-accent cursor-pointer`
+- Column headers use `py-3.5 pl-4 pr-3` for first column, `px-3 py-3.5` for others
+- Icons in headers: wrap in flex container with gap-2 and text-muted-foreground color
+- Pagination uses offset-based approach with limit of 50
+- keepPreviousData prevents UI flashing between page transitions
+- Disable pagination buttons when isPlaceholderData is true
+
+**Key gotchas:**
+- Must use `Component.displayName` for lazy-loaded routes (React Router requirement)
+- Must export `Component` named export, not default export
+- useQuery's placeholderData uses `keepPreviousData` (imported from @tanstack/react-query)
+- Timestamp formatting uses `new Date(timestamp).toLocaleString()` for user's locale
+- Message truncation uses `max-w-md truncate` TailwindCSS classes
+- Must include credentials: "include" in fetch for authenticated requests
+
+**Useful context:**
+- Page component wraps content with title for browser tab
+- PageHeading shows title and subtitle at top of page
+- LoadingState, EmptyState, ErrorState are pre-built components in @components
+- @tanstack/react-query handles caching and refetching automatically
+- Table rows are currently not clickable (will be added in US-010 for detail modal)
+- API returns { errors: [], pagination: { offset, limit, total } } format
+
+**Note on browser testing:**
+- Acceptance criteria mentions verifying in browser using dev-browser skill
+- Manual browser verification would be needed to see the UI working in practice
+- All TypeScript types are correct and compile successfully
+
+---
+
