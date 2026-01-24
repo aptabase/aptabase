@@ -1,0 +1,170 @@
+{
+  "project": "Aptabase",
+  "branchName": "feature/error-reporting",
+  "description": "Error Reporting - Add crash and error tracking capabilities to Aptabase for all platforms (Web, Mobile, Desktop) with PII sanitization and dedicated dashboard",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Database schema for error storage",
+      "description": "As a developer, I need a database schema to store error events separately from analytics events.",
+      "acceptanceCriteria": [
+        "Create new ClickHouse/Tinybird table for error events with fields: error_id, app_id, timestamp, error_message, error_type, stack_trace, platform, os_name, os_version, app_version, sdk_version, session_id",
+        "Set TTL to 180 days for error data retention",
+        "Add migration for PostgreSQL to track error quotas/limits per app",
+        "Migration runs successfully on both ClickHouse and Tinybird backends",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Completed - Created ClickHouse migration 0005-error_events.sql and PostgreSQL migration 0013_AddErrorTracking.cs"
+    },
+    {
+      "id": "US-002",
+      "title": "Error ingestion API endpoint",
+      "description": "As an SDK developer, I need an API endpoint to send error/crash data from client applications.",
+      "acceptanceCriteria": [
+        "Create POST /api/v0/error endpoint that accepts error payloads",
+        "Validate required fields (app_id, timestamp, error_message, error_type)",
+        "Store errors in in-memory buffer similar to event ingestion pattern",
+        "Return 202 Accepted on successful ingestion",
+        "Apply rate limiting (use existing EventIngestion policy: 20 req/sec per IP)",
+        "Typecheck passes",
+        "Test with curl/Postman to verify ingestion works"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Completed - Created ErrorsController with POST /api/v0/error endpoint, ErrorBody validation, InMemoryErrorBuffer, and test script"
+    },
+    {
+      "id": "US-003",
+      "title": "PII sanitization for errors",
+      "description": "As a privacy-conscious platform, I need to automatically sanitize PII from error messages and stack traces.",
+      "acceptanceCriteria": [
+        "Implement sanitization function that redacts: emails, IP addresses, API keys/tokens, credit card numbers, phone numbers",
+        "Apply sanitization to error_message and stack_trace before storage",
+        "Use regex patterns for common PII formats",
+        "Preserve stack trace structure while redacting values",
+        "Add unit tests for sanitization function",
+        "All tests pass"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Completed - Created IPiiSanitizer and PiiSanitizer with comprehensive regex patterns, applied in ErrorsController, added 34 unit tests"
+    },
+    {
+      "id": "US-004",
+      "title": "Background worker for error persistence",
+      "description": "As a system, I need to flush buffered errors to the database periodically to ensure data persistence.",
+      "acceptanceCriteria": [
+        "Create ErrorBackgroundWriter similar to EventBackgroundWriter",
+        "Flush errors every 5 seconds or when buffer reaches 1000 errors",
+        "Write to ClickHouse or Tinybird based on configuration",
+        "Log errors if write fails but don't crash the service",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Completed - Created ErrorBackgroundWritter, ErrorRow, IErrorIngestionClient with ClickHouse and Tinybird implementations"
+    },
+    {
+      "id": "US-005",
+      "title": "Query service for retrieving errors",
+      "description": "As a backend developer, I need a query service to retrieve errors from the database for API endpoints.",
+      "acceptanceCriteria": [
+        "Create IErrorQueryClient interface with methods: GetErrors, GetErrorById, GetErrorCount",
+        "Implement for both ClickHouse and Tinybird",
+        "Support filtering by: app_id, date range, error_type, platform",
+        "Support pagination (offset/limit)",
+        "Return errors ordered by timestamp DESC",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Error list API endpoint",
+      "description": "As a frontend developer, I need an API endpoint to fetch error lists for display in the dashboard.",
+      "acceptanceCriteria": [
+        "Create GET /api/v0/apps/{appId}/errors endpoint",
+        "Accept query params: startDate, endDate, errorType, platform, offset, limit",
+        "Require authentication (user must own the app)",
+        "Return paginated list of errors with metadata",
+        "Apply rate limiting (same as Stats: 1000 req/hour per IP)",
+        "Typecheck passes",
+        "Test with curl to verify response format"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Error detail API endpoint",
+      "description": "As a frontend developer, I need an API endpoint to fetch individual error details including full stack trace.",
+      "acceptanceCriteria": [
+        "Create GET /api/v0/apps/{appId}/errors/{errorId} endpoint",
+        "Require authentication (user must own the app)",
+        "Return full error details including sanitized stack trace",
+        "Return 404 if error not found or doesn't belong to app",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Error dashboard page (UI)",
+      "description": "As a user, I want to view a list of errors for my app in a dedicated dashboard page.",
+      "acceptanceCriteria": [
+        "Create new route /apps/{appId}/errors in React Router",
+        "Add 'Errors' navigation item in app sidebar",
+        "Display error list in table format with columns: timestamp, error_type, error_message (truncated), platform",
+        "Show loading state while fetching",
+        "Show empty state if no errors",
+        "Implement pagination controls",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Error filtering UI",
+      "description": "As a user, I want to filter errors by date range, error type, and platform to find specific issues.",
+      "acceptanceCriteria": [
+        "Add date range picker (default: last 7 days)",
+        "Add platform filter dropdown (All, iOS, Android, Windows, macOS, Linux, Web)",
+        "Add error type filter dropdown (All, plus dynamic list from errors)",
+        "Filters update URL params for shareability",
+        "Apply filters button triggers new API request",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Error detail modal",
+      "description": "As a user, I want to click on an error in the list to see full details including stack trace.",
+      "acceptanceCriteria": [
+        "Clicking error row opens modal with full error details",
+        "Display: timestamp, error_type, error_message, platform, OS info, app_version, SDK version",
+        "Display stack trace in monospace font with copy button",
+        "Show device/browser info section",
+        "Modal has close button and ESC key closes it",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

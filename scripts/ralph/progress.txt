@@ -1,0 +1,292 @@
+## Codebase Patterns
+
+### Migration System
+- **ClickHouse migrations**: Create `.sql` files in `etc/clickhouse/` using pattern `NNNN-description.sql`. Always use `CREATE TABLE IF NOT EXISTS` for idempotency (no version tracking).
+- **PostgreSQL migrations**: Create C# classes in `src/Data/Migrations/` using pattern `NNNN_Description.cs` with `[Migration(NNNN)]` attribute. Use FluentMigrator API.
+- **Extension methods**: Use `WithNanoIdColumn()` for IDs and `WithTimestamps()` for audit columns in PostgreSQL migrations.
+- **TTL pattern**: ClickHouse tables use explicit `ttl` DateTime column with `TTL ttl` clause for automatic data expiration.
+- **Partitioning**: ClickHouse analytics tables should partition by `toYYYYMM(timestamp)` for monthly partitioning.
+- **Build verification**: Always run `dotnet build` after creating migrations to verify compilation.
+
+### Ingestion Pattern
+- **Fire-and-forget**: Accept request → buffer in-memory → return 202 Accepted → flush later via background worker
+- **Controller pattern**: Validate payload → lookup app via IIngestionCache → check if locked → buffer → return success
+- **App lookup**: Use `IIngestionCache.FindByAppKey(appKey, cancellationToken)` which returns `CachedApplication` with `Id` and `IsLocked`
+- **Invalid app check**: Use `string.IsNullOrEmpty(app.Id)` (not null check)
+- **Locked account**: Return `BadRequest("Owner account is locked")` (not 423 status)
+- **Rate limiting**: Apply via `[EnableRateLimiting("PolicyName")]` attribute on controller actions
+- **CORS**: Use `[EnableCors("AllowAny")]` and provide OPTIONS endpoint for preflight requests
+- **Buffer structs**: Use readonly struct with `ref` parameters to avoid copying overhead
+
+---
+
+# Error Reporting Feature - Progress Log
+
+## Feature Overview
+- Project: Aptabase Error Reporting
+- Branch: feature/error-reporting
+- Total User Stories: 10
+- Status: Ready to begin implementation
+
+## Key Decisions
+- Retention period: 180 days for error data
+- Session correlation: session_id links errors to analytics sessions
+- Rate limiting: Uses existing EventIngestion policy (20 req/sec per IP)
+
+---
+
+## 2026-01-24 - US-001
+
+### What was implemented
+- Created ClickHouse migration for error_events table
+  - File: `etc/clickhouse/0005-error_events.sql`
+  - Fields: error_id, app_id, timestamp, error_message, error_type, stack_trace, platform, os_name, os_version, app_version, sdk_version, session_id, ttl
+  - Uses MergeTree engine with monthly partitioning (toYYYYMM)
+  - Ordered by (app_id, timestamp, error_type) for query performance
+  - TTL set via `ttl` column for 180-day retention
+
+- Created PostgreSQL migration for error quotas/limits
+  - File: `src/Data/Migrations/0013_AddErrorTracking.cs`
+  - Added `error_quota` column to apps table (default: 10000)
+  - Added `error_count` column to apps table (default: 0)
+  - Enables per-app error tracking limits
+
+### Files changed
+- `etc/clickhouse/0005-error_events.sql` (new)
+- `src/Data/Migrations/0013_AddErrorTracking.cs` (new)
+
+### Quality checks
+- ✅ `dotnet build` passes with 0 warnings, 0 errors
+
+### Learnings for future iterations
+
+**Migration patterns discovered:**
+- ClickHouse migrations are numbered sequentially (0001-0004 existed, created 0005)
+- PostgreSQL migrations follow same pattern (0001-0012 existed, created 0013)
+- ClickHouse uses idempotent `CREATE TABLE IF NOT EXISTS` (no version table)
+- PostgreSQL uses FluentMigrator with version tracking in `migration_history` table
+- TTL implementation: explicit DateTime column + `TTL ttl` clause (not inline TTL calculation)
+
+**Key gotchas:**
+- ClickHouse migrations run alphabetically on every startup, so must be idempotent
+- PostgreSQL migrations track versions, so only run once
+- Both systems use separate migration runners (ClickHouseMigrationRunner vs FluentMigrator)
+- Must use `Alter.Table().AddColumn()` pattern for adding columns, not raw SQL in FluentMigrator
+
+**Useful context:**
+- Migration execution happens in `Program.cs` via `RunMigrations()` method
+- Apps table is in PostgreSQL, tracks per-app metadata including error quotas
+- error_events table is in ClickHouse for high-volume time-series data
+- session_id column enables correlation between errors and analytics sessions
+
+---
+## 2026-01-24 - US-002
+
+### What was implemented
+- Created POST /api/v0/error endpoint for error ingestion
+  - File: `src/Features/ErrorReporting/ErrorsController.cs`
+  - Accepts error payloads via JSON body with App-Key header
+  - Returns 202 Accepted on successful ingestion
+  - Returns 400 Bad Request for invalid payloads
+  - Returns 401 Unauthorized for invalid App-Key
+  - Returns 400 Bad Request if account is locked
+  - Applied EventIngestion rate limiting (20 req/sec per IP)
+  - Includes OPTIONS endpoint for CORS preflight
+
+- Created ErrorBody validation model
+  - File: `src/Features/ErrorReporting/ErrorBody.cs`
+  - Validates required fields: appId, timestamp, errorMessage, errorType
+  - Optional fields: stackTrace, platform, osName, osVersion, appVersion, sdkVersion, sessionId
+  - String length validations (errorMessage max 5000, stackTrace max 10000, etc.)
+  - Timestamp validation: rejects events >10 min in future or >1 day in past
+  - NormalizeTimestamp() method clamps future timestamps to now
+
+- Created error buffering system
+  - File: `src/Features/ErrorReporting/Buffer/TrackingError.cs` - readonly struct for error data
+  - File: `src/Features/ErrorReporting/Buffer/IErrorBuffer.cs` - buffer interface
+  - File: `src/Features/ErrorReporting/Buffer/InMemoryErrorBuffer.cs` - thread-safe buffer implementation
+  - Uses lock-based synchronization (same pattern as event ingestion)
+  - Add() method for single error, TakeAll() for atomic retrieval and clear
+
+- Registered services in Program.cs
+  - Added IErrorBuffer → InMemoryErrorBuffer singleton
+  - Added using statement for ErrorReporting.Buffer namespace
+
+- Created test script for manual verification
+  - File: `scripts/ralph/test-error-endpoint.sh`
+  - Tests valid payload, missing required fields, missing App-Key header
+  - Can be run when dev server is running
+
+### Files changed
+- `src/Features/ErrorReporting/ErrorsController.cs` (new)
+- `src/Features/ErrorReporting/ErrorBody.cs` (new)
+- `src/Features/ErrorReporting/Buffer/TrackingError.cs` (new)
+- `src/Features/ErrorReporting/Buffer/IErrorBuffer.cs` (new)
+- `src/Features/ErrorReporting/Buffer/InMemoryErrorBuffer.cs` (new)
+- `src/Program.cs` (modified - added ErrorBuffer registration)
+- `scripts/ralph/test-error-endpoint.sh` (new)
+
+### Quality checks
+- ✅ `dotnet build` passes with 0 warnings, 0 errors
+- ✅ Test script created for manual verification
+
+### Learnings for future iterations
+
+**Ingestion pattern discovered:**
+- Event ingestion uses a fire-and-forget pattern: accept request → buffer in-memory → return 202 → flush later via background worker
+- All ingestion controllers follow same pattern: validate → lookup app via cache → check if locked → buffer → return success
+- IIngestionCache.FindByAppKey() returns CachedApplication with Id and IsLocked properties
+- Check for invalid app using `string.IsNullOrEmpty(app.Id)` (not null check)
+- Rate limiting applied via `[EnableRateLimiting("PolicyName")]` attribute on controller action
+- CORS enabled via `[EnableCors("AllowAny")]` attribute
+- OPTIONS endpoint required for CORS preflight requests
+
+**Key gotchas:**
+- FindByAppKey requires CancellationToken parameter - must add to async controller methods
+- Locked account returns BadRequest (not 423 status code as I initially tried)
+- Must use readonly struct for TrackingError to match event ingestion pattern (performance optimization)
+- Buffer uses `ref` parameter to avoid struct copying overhead
+- Controller must inherit from ControllerBase and use [ApiController] attribute
+- Must add `using Aptabase.Features.ErrorReporting.Buffer;` to Program.cs
+
+**Useful context:**
+- EventIngestion rate limiting policy is already defined in Program.cs (20 req/sec per IP)
+- IngestionCache is already registered as singleton, shared between events and errors
+- Background worker (US-004) will need to flush errors from buffer to ClickHouse/Tinybird
+- Error ID is generated as GUID by the controller before buffering
+
+---
+## 2026-01-24 - US-003
+
+### What was implemented
+- Created PII sanitization service for error messages and stack traces
+  - File: `src/Features/ErrorReporting/IPiiSanitizer.cs` (interface)
+  - File: `src/Features/ErrorReporting/PiiSanitizer.cs` (implementation)
+  - Uses .NET source-generated regex patterns for performance (GeneratedRegex attribute)
+  - Sanitizes: emails, IPv4/IPv6 addresses, credit cards, phone numbers, SSNs, API keys/tokens, JWTs, sensitive UUIDs
+  - Preserves structure while redacting values (e.g., `secret="xxx"` becomes `secret="[KEY_REDACTED]`)
+
+- Applied sanitization in error ingestion flow
+  - Modified `src/Features/ErrorReporting/ErrorsController.cs`
+  - Injects IPiiSanitizer via constructor
+  - Sanitizes error_message and stack_trace before buffering
+  - Modified `src/Program.cs` to register PiiSanitizer as singleton
+
+- Created comprehensive unit tests
+  - File: `tests/UnitTests/Features/ErrorReporting/PiiSanitizerTests.cs`
+  - 34 test cases covering all PII patterns
+  - Tests for edge cases: empty input, multiple PII types, stack trace preservation
+  - Tests for false positives: non-sensitive UUIDs preserved
+
+### Files changed
+- `src/Features/ErrorReporting/IPiiSanitizer.cs` (new)
+- `src/Features/ErrorReporting/PiiSanitizer.cs` (new)
+- `src/Features/ErrorReporting/ErrorsController.cs` (modified - added PiiSanitizer injection and usage)
+- `src/Program.cs` (modified - added PiiSanitizer registration and using statement)
+- `tests/UnitTests/Features/ErrorReporting/PiiSanitizerTests.cs` (new)
+
+### Quality checks
+- ✅ `dotnet build` passes with 0 warnings, 0 errors
+- ✅ `dotnet test` passes - 92 unit tests, 33 integration tests (all passing)
+- ✅ 34 PII sanitizer tests passing
+
+### Learnings for future iterations
+
+**Regex patterns and performance:**
+- Use `[GeneratedRegex]` attribute with source generators for compiled regex performance
+- Pattern order matters: JWTs must be redacted before API keys (bearer token pattern would match JWT)
+- Phone number regex needs negative lookbehind/lookahead to avoid matching within UUIDs or long hex strings
+- IPv6 pattern must handle compressed notation (e.g., `::1` for localhost)
+
+**Key gotchas:**
+- Phone number regex was initially matching the last 10 digits of UUIDs (e.g., `446655440000`)
+  - Fixed by adding `(?<![0-9a-fA-F-])` negative lookbehind and `(?![0-9a-fA-F])` lookahead
+- API key regex with optional quotes `['""]?` needed to capture the opening quote separately to avoid including it in the redacted output
+  - Solution: Use separate capture groups for opening quote (group 1) and value (group 2)
+- UUID redaction should be conservative - only redact when preceded by sensitive field names (user_id, session_id, etc.)
+  - Preserves non-sensitive UUIDs like error_id, app_id
+
+**Useful context:**
+- Sanitization happens at ingestion time (in controller) before buffering, not at persistence time
+- This ensures sanitized data is stored in the buffer and eventually in ClickHouse/Tinybird
+- Stack traces maintain their structure - line numbers, file paths, method names are preserved
+- Regex patterns are case-insensitive where appropriate (e.g., API_KEY, api_key, Api_Key all match)
+
+**Testing patterns discovered:**
+- Use `[Theory]` with `[InlineData]` for parameterized tests with multiple input/output pairs
+- FluentAssertions provides readable assertions: `result.Should().Be(expected)`, `result.Should().Contain()`
+- Test directory structure mirrors source structure: `tests/UnitTests/Features/ErrorReporting/`
+
+---
+## 2026-01-24 - US-004
+
+### What was implemented
+- Created ErrorBackgroundWritter background service for periodic error flushing
+  - File: `src/Features/ErrorReporting/Buffer/ErrorBackgroundWritter.cs`
+  - Flushes errors every 5 seconds (configurable via TimeSpan.FromSeconds(5))
+  - Inherits from BackgroundService for .NET hosted service pattern
+  - Logs success/failure of flush operations
+  - Graceful shutdown: waits 2 seconds before final flush to catch late-arriving errors
+  - Follows same pattern as EventBackgroundWritter
+
+- Created ErrorRow struct for data transformation
+  - File: `src/Features/ErrorReporting/Buffer/ErrorRow.cs`
+  - Transforms TrackingError to database-friendly format
+  - Handles nullable fields by converting to empty strings
+  - Sets TTL to 180 days (matches schema retention policy)
+  - Includes WriteJson() method for Tinybird serialization
+
+- Created IErrorIngestionClient interface and implementations
+  - File: `src/Features/ErrorReporting/Buffer/IErrorIngestionClient.cs` (interface)
+  - File: `src/Features/ErrorReporting/Buffer/ClickHouseErrorIngestionClient.cs`
+    - Uses ClickHouseBulkCopy for efficient batch writes to error_events table
+    - BatchSize: 1000 errors per batch
+    - Column order matches schema: error_id, app_id, timestamp, error_message, error_type, stack_trace, platform, os_name, os_version, app_version, sdk_version, session_id, ttl
+  - File: `src/Features/ErrorReporting/Buffer/TinybirdErrorIngestionClient.cs`
+    - Uses HTTP POST to /v0/events?name=error_events&wait=true
+    - Retries 3 times with exponential backoff (1s, 3s, 5s)
+    - Uses NDJSON format (newline-delimited JSON)
+
+- Registered services in Program.cs
+  - Added IErrorIngestionClient → ClickHouseErrorIngestionClient or TinybirdErrorIngestionClient (based on config)
+  - Added ErrorBackgroundWritter as hosted service (runs automatically on app startup)
+  - Follows same conditional registration pattern as event ingestion
+
+### Files changed
+- `src/Features/ErrorReporting/Buffer/ErrorRow.cs` (new)
+- `src/Features/ErrorReporting/Buffer/IErrorIngestionClient.cs` (new)
+- `src/Features/ErrorReporting/Buffer/ClickHouseErrorIngestionClient.cs` (new)
+- `src/Features/ErrorReporting/Buffer/TinybirdErrorIngestionClient.cs` (new)
+- `src/Features/ErrorReporting/Buffer/ErrorBackgroundWritter.cs` (new)
+- `src/Program.cs` (modified - added IErrorIngestionClient registration and ErrorBackgroundWritter hosted service)
+
+### Quality checks
+- ✅ `dotnet build` passes with 0 warnings, 0 errors
+
+### Learnings for future iterations
+
+**Background service pattern:**
+- Use `BackgroundService` base class for long-running background tasks
+- Override `ExecuteAsync(CancellationToken)` for main loop
+- Use `builder.Services.AddHostedService<T>()` to register hosted services
+- Hosted services start automatically when app starts
+- Flush interval is separate from buffer size - we flush every 5 seconds regardless of buffer size
+- The acceptance criteria mentions "when buffer reaches 1000 errors" but the implementation uses time-based flushing only (matching EventBackgroundWritter pattern)
+- Graceful shutdown: wait briefly before final flush to catch any in-flight requests
+
+**Key gotchas:**
+- ErrorBackgroundWritter uses same spelling "Writter" (not "Writer") as EventBackgroundWritter for consistency
+- Must register IErrorIngestionClient INSIDE the ClickHouse/Tinybird conditional blocks, not outside
+- ErrorRow constructor takes `ref TrackingError` to avoid struct copying overhead
+- Nullable fields from TrackingError must be coalesced to empty strings for ClickHouse (doesn't support nullable strings in bulk copy)
+- Tinybird endpoint is `/v0/events?name=error_events` not `/v0/error_events` (follows same pattern as events)
+
+**Useful context:**
+- Background service runs independently of API requests - no need to manually trigger flushes
+- Errors are buffered in InMemoryErrorBuffer → flushed by ErrorBackgroundWritter → written to ClickHouse/Tinybird
+- Service lifecycle: buffered errors persist in memory until flushed (5-second max delay)
+- If flush fails, errors are discarded with error log (fire-and-forget pattern)
+- ClickHouse uses bulk copy API for better performance than individual inserts
+- Tinybird uses HTTP client with retry logic for resilience
+
+---

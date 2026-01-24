@@ -172,12 +172,14 @@ public partial class Program
             builder.Services.AddSingleton<IQueryClient, ClickHouseQueryClient>();
             builder.Services.AddSingleton<IIngestionClient, ClickHouseIngestionClient>();
             builder.Services.AddSingleton<IErrorIngestionClient, ClickHouseErrorIngestionClient>();
+            builder.Services.AddSingleton<IErrorQueryClient, ClickHouseErrorQueryClient>();
         }
         else
         {
             builder.Services.AddSingleton<IQueryClient, TinybirdQueryClient>();
             builder.Services.AddSingleton<IIngestionClient, TinybirdIngestionClient>();
             builder.Services.AddSingleton<IErrorIngestionClient, TinybirdErrorIngestionClient>();
+            builder.Services.AddSingleton<IErrorQueryClient, TinybirdErrorQueryClient>();
             builder.Services.AddHttpClient("Tinybird", client =>
             {
                 client.BaseAddress = new Uri(appEnv.TinybirdBaseUrl);

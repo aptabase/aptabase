@@ -1,0 +1,26 @@
+TOKEN aptabase-api READ
+
+VERSION 1
+NODE endpoint
+SQL >
+    %
+    SELECT error_id as ErrorId,
+           app_id as AppId,
+           timestamp as Timestamp,
+           error_message as ErrorMessage,
+           error_type as ErrorType,
+           stack_trace as StackTrace,
+           platform as Platform,
+           os_name as OsName,
+           os_version as OsVersion,
+           app_version as AppVersion,
+           sdk_version as SdkVersion,
+           session_id as SessionId
+    FROM error_events
+    PREWHERE app_id = {{String(app_id)}}
+    AND timestamp >= {{DateTime(start_date)}}
+    AND timestamp <= {{DateTime(end_date)}}
+    {% if defined(error_type) %}AND error_type = {{String(error_type)}}{% end %}
+    {% if defined(platform) %}AND platform = {{String(platform)}}{% end %}
+    ORDER BY timestamp DESC
+    LIMIT {{Int32(limit)}} OFFSET {{Int32(offset)}}

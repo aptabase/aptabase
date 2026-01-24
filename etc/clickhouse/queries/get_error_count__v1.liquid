@@ -1,0 +1,7 @@
+SELECT count(*) as Count
+FROM error_events
+WHERE app_id = '{{app_id}}'
+AND timestamp >= toDateTime('{{start_date}}')
+AND timestamp <= toDateTime('{{end_date}}')
+{% if error_type %}AND error_type = '{{error_type}}'{% endif %}
+{% if platform %}AND platform = '{{platform}}'{% endif %}

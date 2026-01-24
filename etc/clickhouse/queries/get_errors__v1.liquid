@@ -1,0 +1,20 @@
+SELECT error_id as ErrorId,
+       app_id as AppId,
+       timestamp as Timestamp,
+       error_message as ErrorMessage,
+       error_type as ErrorType,
+       stack_trace as StackTrace,
+       platform as Platform,
+       os_name as OsName,
+       os_version as OsVersion,
+       app_version as AppVersion,
+       sdk_version as SdkVersion,
+       session_id as SessionId
+FROM error_events
+WHERE app_id = '{{app_id}}'
+AND timestamp >= toDateTime('{{start_date}}')
+AND timestamp <= toDateTime('{{end_date}}')
+{% if error_type %}AND error_type = '{{error_type}}'{% endif %}
+{% if platform %}AND platform = '{{platform}}'{% endif %}
+ORDER BY timestamp DESC
+LIMIT {{limit}} OFFSET {{offset}}

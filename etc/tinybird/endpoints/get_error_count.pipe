@@ -1,0 +1,13 @@
+TOKEN aptabase-api READ
+
+VERSION 1
+NODE endpoint
+SQL >
+    %
+    SELECT count(*) as Count
+    FROM error_events
+    PREWHERE app_id = {{String(app_id)}}
+    AND timestamp >= {{DateTime(start_date)}}
+    AND timestamp <= {{DateTime(end_date)}}
+    {% if defined(error_type) %}AND error_type = {{String(error_type)}}{% end %}
+    {% if defined(platform) %}AND platform = {{String(platform)}}{% end %}
