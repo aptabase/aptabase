@@ -174,6 +174,35 @@ public class ErrorsController : ControllerBase
         });
     }
 
+    [HttpGet]
+    [IsAuthenticated]
+    [EnableRateLimiting("Stats")]
+    [Route("/api/v0/apps/{appId}/errors/{errorId}")]
+    public async Task<IActionResult> GetErrorById(
+        string appId,
+        string errorId,
+        CancellationToken cancellationToken = default)
+    {
+        // Check if user has access to the app
+        var user = HttpContext.GetCurrentUserIdentity();
+        var hasAccess = await _db.HasReadAccessToApp(appId, user, cancellationToken);
+        if (!hasAccess)
+        {
+            return StatusCode(403);
+        }
+
+        // Query error by ID
+        var error = await _errorQueryClient.GetErrorByIdAsync(appId, errorId, cancellationToken);
+
+        // Return 404 if error not found or doesn't belong to app
+        if (error == null)
+        {
+            return NotFound(new { error = "Error not found" });
+        }
+
+        return Ok(error);
+    }
+
     [HttpOptions]
     [EnableCors("AllowAny")]
     [Route("/api/v0/error")]
