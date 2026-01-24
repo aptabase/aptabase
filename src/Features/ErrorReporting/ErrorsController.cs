@@ -1,5 +1,8 @@
+using Aptabase.Data;
+using Aptabase.Features.Authentication;
 using Aptabase.Features.ErrorReporting.Buffer;
 using Aptabase.Features.Ingestion;
+using Aptabase.Features.Stats;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -13,13 +16,23 @@ public class ErrorsController : ControllerBase
     private readonly IErrorBuffer _buffer;
     private readonly IIngestionCache _cache;
     private readonly IPiiSanitizer _piiSanitizer;
+    private readonly IErrorQueryClient _errorQueryClient;
+    private readonly IDbContext _db;
     private readonly ILogger<ErrorsController> _logger;
 
-    public ErrorsController(IErrorBuffer buffer, IIngestionCache cache, IPiiSanitizer piiSanitizer, ILogger<ErrorsController> logger)
+    public ErrorsController(
+        IErrorBuffer buffer,
+        IIngestionCache cache,
+        IPiiSanitizer piiSanitizer,
+        IErrorQueryClient errorQueryClient,
+        IDbContext db,
+        ILogger<ErrorsController> logger)
     {
         _buffer = buffer;
         _cache = cache;
         _piiSanitizer = piiSanitizer;
+        _errorQueryClient = errorQueryClient;
+        _db = db;
         _logger = logger;
     }
 
@@ -89,6 +102,76 @@ public class ErrorsController : ControllerBase
 
         // Return 202 Accepted
         return Accepted();
+    }
+
+    [HttpGet]
+    [IsAuthenticated]
+    [EnableRateLimiting("Stats")]
+    [Route("/api/v0/apps/{appId}/errors")]
+    public async Task<IActionResult> GetErrors(
+        string appId,
+        [FromQuery] DateTime? startDate,
+        [FromQuery] DateTime? endDate,
+        [FromQuery] string? errorType,
+        [FromQuery] string? platform,
+        [FromQuery] int offset = 0,
+        [FromQuery] int limit = 50,
+        CancellationToken cancellationToken = default)
+    {
+        // Check if user has access to the app
+        var user = HttpContext.GetCurrentUserIdentity();
+        var hasAccess = await _db.HasReadAccessToApp(appId, user, cancellationToken);
+        if (!hasAccess)
+        {
+            return StatusCode(403);
+        }
+
+        // Set default date range if not provided (last 7 days)
+        var end = endDate ?? DateTime.UtcNow;
+        var start = startDate ?? end.AddDays(-7);
+
+        // Validate limit
+        if (limit < 1 || limit > 100)
+        {
+            limit = 50;
+        }
+
+        // Validate offset
+        if (offset < 0)
+        {
+            offset = 0;
+        }
+
+        // Query errors
+        var errors = await _errorQueryClient.GetErrorsAsync(
+            appId,
+            start,
+            end,
+            errorType,
+            platform,
+            offset,
+            limit,
+            cancellationToken);
+
+        // Get total count for pagination
+        var totalCount = await _errorQueryClient.GetErrorCountAsync(
+            appId,
+            start,
+            end,
+            errorType,
+            platform,
+            cancellationToken);
+
+        return Ok(new
+        {
+            errors = errors,
+            pagination = new
+            {
+                offset = offset,
+                limit = limit,
+                total = totalCount
+            }
+        });
     }
 
     [HttpOptions]
