@@ -290,3 +290,161 @@
 - Tinybird uses HTTP client with retry logic for resilience
 
 ---
+## 2026-01-24 - US-005
+
+### What was implemented
+- Created IErrorQueryClient interface with query methods
+  - File: `src/Features/ErrorReporting/IErrorQueryClient.cs`
+  - Methods: GetErrorsAsync, GetErrorByIdAsync, GetErrorCountAsync
+  - DTOs: ErrorDto (full error details) and ErrorCountDto (count results)
+  - Supports filtering by app_id, date range, error_type, platform
+  - Supports pagination via offset/limit parameters
+
+- Created ClickHouse query templates
+  - File: `etc/clickhouse/queries/get_errors__v1.liquid` - List errors with filters and pagination
+  - File: `etc/clickhouse/queries/get_error_by_id__v1.liquid` - Single error by ID
+  - File: `etc/clickhouse/queries/get_error_count__v1.liquid` - Count errors with filters
+  - Uses Liquid template syntax with conditional filters ({% if error_type %})
+  - Returns results ordered by timestamp DESC
+
+- Created Tinybird endpoint files
+  - File: `etc/tinybird/endpoints/get_errors.pipe` - List errors with filters and pagination
+  - File: `etc/tinybird/endpoints/get_error_by_id.pipe` - Single error by ID
+  - File: `etc/tinybird/endpoints/get_error_count.pipe` - Count errors with filters
+  - Uses Tinybird syntax with conditional filters ({% if defined(error_type) %})
+  - Uses PREWHERE for better query performance
+
+- Implemented ClickHouseErrorQueryClient
+  - File: `src/Features/ErrorReporting/ClickHouseErrorQueryClient.cs`
+  - Wraps IQueryClient (Stats feature) to execute named queries
+  - Delegates to NamedQueryAsync/NamedQuerySingleAsync methods
+  - Returns ErrorDto objects or count
+
+- Implemented TinybirdErrorQueryClient
+  - File: `src/Features/ErrorReporting/TinybirdErrorQueryClient.cs`
+  - Wraps IQueryClient (Stats feature) to execute named pipes
+  - Delegates to NamedQueryAsync/NamedQuerySingleAsync methods
+  - Query names don't include __v1 suffix (just "get_errors", not "get_errors__v1")
+
+- Registered services in Program.cs
+  - Added IErrorQueryClient → ClickHouseErrorQueryClient (if ClickHouse configured)
+  - Added IErrorQueryClient → TinybirdErrorQueryClient (if Tinybird configured)
+  - Follows same conditional registration pattern as Stats query client
+
+### Files changed
+- `src/Features/ErrorReporting/IErrorQueryClient.cs` (new)
+- `src/Features/ErrorReporting/ClickHouseErrorQueryClient.cs` (new)
+- `src/Features/ErrorReporting/TinybirdErrorQueryClient.cs` (new)
+- `etc/clickhouse/queries/get_errors__v1.liquid` (new)
+- `etc/clickhouse/queries/get_error_by_id__v1.liquid` (new)
+- `etc/clickhouse/queries/get_error_count__v1.liquid` (new)
+- `etc/tinybird/endpoints/get_errors.pipe` (new)
+- `etc/tinybird/endpoints/get_error_by_id.pipe` (new)
+- `etc/tinybird/endpoints/get_error_count.pipe` (new)
+- `src/Program.cs` (modified - added IErrorQueryClient registration)
+
+### Quality checks
+- ✅ `dotnet build` passes with 0 warnings, 0 errors
+
+### Learnings for future iterations
+
+**Query client pattern discovered:**
+- Error query services follow the same pattern as Stats feature
+- IQueryClient interface (Stats) is used as the underlying query engine
+- Query clients are thin wrappers that call NamedQueryAsync/NamedQuerySingleAsync
+- ClickHouse uses Liquid templates in `etc/clickhouse/queries/` with __v1 suffix in filenames
+- Tinybird uses pipes in `etc/tinybird/endpoints/` with .pipe extension (no version suffix in C# code)
+
+**Key gotchas:**
+- ClickHouse query template filenames use `__v1` suffix (e.g., `get_errors__v1.liquid`)
+- Tinybird query names in C# code DON'T use version suffix (e.g., just "get_errors", not "get_errors__v1")
+- Liquid syntax differs between ClickHouse and Tinybird:
+  - ClickHouse: `{% if error_type %}` (checks if variable exists/is truthy)
+  - Tinybird: `{% if defined(error_type) %}` (explicit defined() function)
+- Tinybird uses PREWHERE clause for better performance (ClickHouse optimization)
+- Tinybird uses typed parameters: `{{String(app_id)}}`, `{{DateTime(start_date)}}`, `{{Int32(limit)}}`
+- ClickHouse templates use untyped parameters: `{{app_id}}`, `{{start_date}}`, `{{limit}}`
+- GetErrorByIdAsync returns `ErrorDto?` (nullable) since error might not exist
+- GetErrorCountAsync returns `int` directly, not nullable (count is always 0 or more)
+
+**Useful context:**
+- IQueryClient is already registered in Program.cs based on ClickHouse/Tinybird configuration
+- IErrorQueryClient reuses the existing IQueryClient infrastructure
+- Query templates are loaded lazily and cached by ClickHouseQueryClient
+- TinybirdQueryClient builds query strings and calls HTTP endpoints
+- Conditional filters allow optional parameters without breaking the query
+- This query service will be used by API endpoints (US-006, US-007) to retrieve errors for the dashboard
+
+---
+
+## 2026-01-24 - US-006
+
+### What was implemented
+- Created GET /api/v0/apps/{appId}/errors endpoint for error list retrieval
+  - File: `src/Features/ErrorReporting/ErrorsController.cs` (modified)
+  - Route: `/api/v0/apps/{appId}/errors`
+  - Requires authentication via `[IsAuthenticated]` attribute
+  - Applied Stats rate limiting (1000 req/hour per IP)
+  - Returns paginated list of errors with metadata
+
+- Created authorization extension method
+  - File: `src/Features/ErrorReporting/ErrorReportingQueries.cs` (new)
+  - Added `HasReadAccessToApp()` extension method (same pattern as Stats feature)
+  - Checks if user owns app OR has app share access
+  - Checks if owner account is not locked
+
+- Implemented query parameter handling
+  - Optional: startDate, endDate (defaults to last 7 days)
+  - Optional: errorType, platform (for filtering)
+  - Optional: offset (default 0), limit (default 50, max 100)
+  - Parameter validation with sensible defaults
+
+- Response format includes pagination metadata
+  - Returns errors array from IErrorQueryClient.GetErrorsAsync()
+  - Returns pagination object with offset, limit, total count
+  - Total count from IErrorQueryClient.GetErrorCountAsync()
+
+- Created test script
+  - File: `scripts/ralph/test-error-list-endpoint.sh`
+  - Documents how to test authenticated endpoint (requires session cookie)
+  - Includes expected response format
+
+### Files changed
+- `src/Features/ErrorReporting/ErrorsController.cs` (modified - added GET endpoint, injected IErrorQueryClient and IDbContext)
+- `src/Features/ErrorReporting/ErrorReportingQueries.cs` (new - authorization extension method)
+- `scripts/ralph/test-error-list-endpoint.sh` (new - test documentation)
+
+### Quality checks
+- ✅ `dotnet build` passes with 0 warnings, 0 errors
+
+### Learnings for future iterations
+
+**Authentication/Authorization patterns discovered:**
+- ControllerBase (not Controller) must use `HttpContext.GetCurrentUserIdentity()` instead of `this.GetCurrentUserIdentity()`
+- Authorization extension methods follow a consistent pattern: check app ownership OR app share, AND owner not locked
+- Stats endpoints use query parameter `AppId`, but REST best practice is route parameter `/apps/{appId}/...`
+- IsAuthenticated attribute returns 401, manual authorization check returns 403 (Forbidden)
+
+**Key gotchas:**
+- AuthExtensions.GetCurrentUserIdentity() has two overloads: one for Controller, one for HttpContext
+- ControllerBase doesn't inherit from Controller, so must use HttpContext version
+- Default date range is last 7 days (end = now, start = now - 7 days)
+- Limit validation: min 1, max 100, default 50
+- Offset validation: min 0
+
+**Useful context:**
+- IErrorQueryClient is already registered in Program.cs (from US-005)
+- IDbContext is available for authorization queries
+- ErrorReportingQueries.cs follows same pattern as StatsQueries.cs
+- Rate limiting policy "Stats" is already defined in Program.cs (1000 req/hour per IP)
+- Response includes both data and pagination metadata for client-side pagination UI
+
+**API design decisions:**
+- Used REST-style route `/api/v0/apps/{appId}/errors` (not query param like Stats)
+- Applied Stats rate limiting policy (appropriate for dashboard queries)
+- Default limit of 50 provides balance between performance and UX
+- Max limit of 100 prevents excessive data transfer
+- Pagination metadata includes total count for UI page indicators
+
+---
+

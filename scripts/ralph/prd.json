@@ -79,8 +79,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - Created IErrorQueryClient interface with GetErrorsAsync, GetErrorByIdAsync, and GetErrorCountAsync methods. Implemented ClickHouseErrorQueryClient and TinybirdErrorQueryClient with support for filtering by app_id, date range, error_type, platform, and pagination."
     },
     {
       "id": "US-006",
@@ -96,8 +96,8 @@
         "Test with curl to verify response format"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - Created GET /api/v0/apps/{appId}/errors endpoint with authentication, authorization, query parameter filtering, pagination, and rate limiting"
     },
     {
       "id": "US-007",
