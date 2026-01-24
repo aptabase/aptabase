@@ -3,6 +3,7 @@ import { isSupportEnabled } from "@features/env";
 import { SupportNavCategory } from "@features/support";
 import {
   IconActivityHeartbeat,
+  IconAlertTriangle,
   IconCloudDownload,
   IconCode,
   IconGraph,
@@ -42,6 +43,13 @@ export function NavMenu(props: { onNavigation?: VoidFunction }) {
             disabled={!currentApp || !!currentApp.lockReason}
             href={`/${currentApp?.id}/sessions`}
             icon={IconUsers}
+            onNavigation={props.onNavigation}
+          />
+          <NavItem
+            label="Errors"
+            disabled={!currentApp || !!currentApp.lockReason}
+            href={`/${currentApp?.id}/errors`}
+            icon={IconAlertTriangle}
             onNavigation={props.onNavigation}
           />
           <NavItem
