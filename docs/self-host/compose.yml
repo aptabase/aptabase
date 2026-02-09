@@ -1,0 +1,58 @@
+services:
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - CADDY_DOMAIN=${CADDY_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - aptabase
+
+  aptabase_db:
+    image: postgres:15-alpine
+    container_name: aptabase_db
+    restart: always
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+  aptabase_events_db:
+    image: clickhouse/clickhouse-server:23.8.4.69-alpine
+    container_name: aptabase_events_db
+    restart: always
+    volumes:
+      - ./data/clickhouse:/var/lib/clickhouse
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
+  aptabase:
+    image: ghcr.io/aptabase/aptabase:main
+    container_name: aptabase_app
+    restart: always
+    depends_on:
+      - aptabase_db
+      - aptabase_events_db
+    environment:
+      BASE_URL: ${BASE_URL}
+      AUTH_SECRET: ${AUTH_SECRET}
+      DATABASE_URL: Server=aptabase_db;Port=5432;User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB}
+      CLICKHOUSE_URL: Host=aptabase_events_db;Port=8123;Username=${CLICKHOUSE_USER};Password=${CLICKHOUSE_PASSWORD}
+
+volumes:
+  caddy_data:
+  caddy_config:

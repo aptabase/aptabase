@@ -42,7 +42,7 @@ The easiest and quickest way to get started. A fully managed service by the crea
 
 You can also host Aptabase on your servers. It's free, but you are responsible for maintenance and updates.
 
-[Learn how →](https://github.com/aptabase/self-hosting).
+[Learn how →](./docs/self-host/README.md).
 
 ## 🛠️ Contributing
 

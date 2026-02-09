@@ -1,0 +1,20 @@
+{$CADDY_DOMAIN} {
+    encode gzip
+
+    # Prefer Cloudflare real client IP if present,
+    # otherwise fall back to direct client IP
+    map {http.request.header.CF-Connecting-IP} {real_client_ip} {
+        ""      {remote_host}                     # non-Cloudflare / direct traffic
+        default {http.request.header.CF-Connecting-IP}  # Cloudflare traffic
+    }
+
+    reverse_proxy aptabase:8080 {
+        # Forward a single clean client IP (no port, no duplicates)
+        header_up X-Forwarded-For {real_client_ip}
+        header_up X-Real-IP {real_client_ip}
+
+        # Required for correct HTTPS + cookies
+        header_up X-Forwarded-Proto https
+        header_up Host {host}
+    }
+}
