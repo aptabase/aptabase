@@ -1,14 +1,9 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@components/Dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@components/Dialog";
 import { LoadingState } from "@components/LoadingState";
-import { IconCopy, IconCheck } from "@tabler/icons-react";
+import { IconCheck, IconCopy } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface ErrorDetail {
   errorId: string;
@@ -32,10 +27,7 @@ interface ErrorDetailModalProps {
   onClose: () => void;
 }
 
-async function fetchErrorDetail(
-  appId: string,
-  errorId: string
-): Promise<ErrorDetail> {
+async function fetchErrorDetail(appId: string, errorId: string): Promise<ErrorDetail> {
   const response = await fetch(`/api/v0/apps/${appId}/errors/${errorId}`, {
     credentials: "include",
   });
@@ -47,13 +39,9 @@ async function fetchErrorDetail(
   return response.json();
 }
 
-export function ErrorDetailModal({
-  appId,
-  errorId,
-  open,
-  onClose,
-}: ErrorDetailModalProps) {
+export function ErrorDetailModal({ appId, errorId, open, onClose }: ErrorDetailModalProps) {
   const [justCopied, setJustCopied] = useState(false);
+  const navigate = useNavigate();
 
   const { data: error, isLoading } = useQuery({
     queryKey: ["error-detail", appId, errorId],
@@ -67,6 +55,20 @@ export function ErrorDetailModal({
       setJustCopied(true);
       setTimeout(() => setJustCopied(false), 2000);
     }
+  };
+
+  const handleClickSessionId = (sessionId: string) => () => {
+    // Get the current location to preserve search params
+    const currentLocation = window.location;
+
+    navigate(`/${appId}/live/${sessionId}`, {
+      state: {
+        returnTo: {
+          pathname: currentLocation.pathname,
+          search: currentLocation.search,
+        },
+      },
+    });
   };
 
   return (
@@ -90,15 +92,11 @@ export function ErrorDetailModal({
                 <div className="space-y-2 text-sm">
                   <div className="grid grid-cols-4 gap-2">
                     <span className="text-muted-foreground">Timestamp:</span>
-                    <span className="col-span-3">
-                      {new Date(error.timestamp).toLocaleString()}
-                    </span>
+                    <span className="col-span-3">{new Date(error.timestamp).toLocaleString()}</span>
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                     <span className="text-muted-foreground">Error Type:</span>
-                    <span className="col-span-3 font-medium">
-                      {error.errorType}
-                    </span>
+                    <span className="col-span-3 font-medium">{error.errorType}</span>
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                     <span className="text-muted-foreground">Message:</span>
@@ -109,9 +107,7 @@ export function ErrorDetailModal({
 
               {/* Device/Platform Section */}
               <div>
-                <h3 className="text-sm font-semibold mb-3">
-                  Device & Platform Information
-                </h3>
+                <h3 className="text-sm font-semibold mb-3">Device & Platform Information</h3>
                 <div className="space-y-2 text-sm">
                   <div className="grid grid-cols-4 gap-2">
                     <span className="text-muted-foreground">Platform:</span>
@@ -134,9 +130,12 @@ export function ErrorDetailModal({
                   {error.sessionId && (
                     <div className="grid grid-cols-4 gap-2">
                       <span className="text-muted-foreground">Session ID:</span>
-                      <span className="col-span-3 font-mono text-xs">
+                      <button
+                        className="col-span-3 font-mono text-xs text-left"
+                        onClick={handleClickSessionId(error.sessionId)}
+                      >
                         {error.sessionId}
-                      </span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -172,9 +171,7 @@ export function ErrorDetailModal({
             </div>
           </>
         ) : (
-          <div className="py-8 text-center text-muted-foreground">
-            Error not found
-          </div>
+          <div className="py-8 text-center text-muted-foreground">Error not found</div>
         )}
       </DialogContent>
     </Dialog>

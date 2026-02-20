@@ -48,8 +48,7 @@ export function Component() {
       <div className="flex flex-row justify-between items-center">
         <PageHeading title="Session Timeline" subtitle={sessionId} />
         <Button className="mb-5" variant="ghost" onClick={handleBack}>
-          <IconArrowLeft />
-          {location.state?.sessionFilters ? "Back to sessions" : "Back to Live View"}
+          <IconArrowLeft /> Back
         </Button>
       </div>
 

@@ -5,3 +5,4 @@ AND timestamp >= toDateTime('{{start_date}}')
 AND timestamp <= toDateTime('{{end_date}}')
 {% if error_type %}AND error_type = '{{error_type}}'{% endif %}
 {% if platform %}AND platform = '{{platform}}'{% endif %}
+{% if os_name %}AND os_name='{{os_name}}'{% endif %}

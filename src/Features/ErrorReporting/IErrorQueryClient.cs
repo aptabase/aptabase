@@ -42,7 +42,7 @@ public class ErrorCountDto
 
 public interface IErrorQueryClient
 {
-    Task<IEnumerable<ErrorDto>> GetErrorsAsync(string appId, DateTime startDate, DateTime endDate, string? errorType, string? platform, int offset, int limit, CancellationToken cancellationToken);
+    Task<IEnumerable<ErrorDto>> GetErrorsAsync(string appId, DateTime startDate, DateTime endDate, string? errorType, string? osName, int offset, int limit, CancellationToken cancellationToken);
     Task<ErrorDto?> GetErrorByIdAsync(string appId, string errorId, CancellationToken cancellationToken);
-    Task<int> GetErrorCountAsync(string appId, DateTime startDate, DateTime endDate, string? errorType, string? platform, CancellationToken cancellationToken);
+    Task<int> GetErrorCountAsync(string appId, DateTime startDate, DateTime endDate, string? errorType, string? osName, CancellationToken cancellationToken);
 }

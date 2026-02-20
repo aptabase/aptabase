@@ -113,7 +113,7 @@ public class ErrorsController : ControllerBase
         [FromQuery] DateTime? startDate,
         [FromQuery] DateTime? endDate,
         [FromQuery] string? errorType,
-        [FromQuery] string? platform,
+        [FromQuery] string? osName,
         [FromQuery] int offset = 0,
         [FromQuery] int limit = 50,
         CancellationToken cancellationToken = default)
@@ -148,7 +148,7 @@ public class ErrorsController : ControllerBase
             start,
             end,
             errorType,
-            platform,
+            osName,
             offset,
             limit,
             cancellationToken);
@@ -159,7 +159,7 @@ public class ErrorsController : ControllerBase
             start,
             end,
             errorType,
-            platform,
+            osName,
             cancellationToken);
 
         return Ok(new

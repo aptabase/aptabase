@@ -22,5 +22,6 @@ SQL >
     AND timestamp <= {{DateTime(end_date)}}
     {% if defined(error_type) %}AND error_type = {{String(error_type)}}{% end %}
     {% if defined(platform) %}AND platform = {{String(platform)}}{% end %}
+    {% if defined(os_name) %}AND os_name = {{String(os_name)}}{% end %}
     ORDER BY timestamp DESC
     LIMIT {{Int32(limit)}} OFFSET {{Int32(offset)}}

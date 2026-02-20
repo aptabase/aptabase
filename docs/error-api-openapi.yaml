@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: Aptabase Error Reporting API
+  description: Error ingestion endpoint for the Aptabase error reporting feature.
+  version: 0.1.0
+
+servers:
+  - url: https://localhost:3000
+    description: Local .NET backend (development)
+
+paths:
+  /api/v0/error:
+    post:
+      operationId: postError
+      summary: Ingest an application error
+      description: |
+        Accepts an error report from an application SDK and buffers it for
+        storage in ClickHouse. The endpoint is CORS-enabled (AllowAny) and
+        rate-limited to 20 requests/second per IP (`EventIngestion` policy).
+
+        Returns **202 Accepted** on success (the error is buffered, not yet
+        persisted).
+      parameters:
+        - name: App-Key
+          in: header
+          required: true
+          description: |
+            The application API key. Identifies which app the error belongs to.
+            The key is normalised to uppercase on the server side.
+          schema:
+            type: string
+          example: "A-1234567890"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ErrorBody"
+            example:
+              errorMessage: "NullReferenceException: Object reference not set to an instance of an object"
+              errorType: "NullReferenceException"
+              stackTrace: "at MyApp.Services.UserService.GetUser(Int32 id) in /src/Services/UserService.cs:line 42"
+              timestamp: "2026-02-17T12:00:00Z"
+              platform: "Android"
+              osName: "Android"
+              osVersion: "14"
+              appVersion: "1.2.3"
+              sdkVersion: "aptabase-flutter@0.1.0"
+              sessionId: "abc-123-def"
+      responses:
+        "202":
+          description: Accepted – error has been buffered for processing.
+        "400":
+          description: Bad request – invalid payload or missing App-Key header.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidPayload:
+                  value:
+                    error: "Invalid error payload"
+                missingAppKey:
+                  value:
+                    error: "Missing App-Key header"
+                lockedAccount:
+                  value:
+                    error: "Owner account is locked"
+        "401":
+          description: Unauthorized – the App-Key does not match any registered app.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Invalid App-Key"
+        "429":
+          description: Too Many Requests – rate limit exceeded (20 req/s per IP).
+
+    options:
+      operationId: optionsError
+      summary: CORS preflight for error ingestion
+      description: Returns 200 to satisfy browser CORS preflight checks.
+      responses:
+        "200":
+          description: OK
+
+components:
+  schemas:
+    ErrorBody:
+      type: object
+      required:
+        - errorMessage
+        - errorType
+      properties:
+        errorMessage:
+          type: string
+          maxLength: 5000
+          description: Human-readable error message.
+        errorType:
+          type: string
+          maxLength: 100
+          description: Error class/type name (e.g. "NullReferenceException", "TypeError").
+        stackTrace:
+          type: string
+          maxLength: 10000
+          description: Full stack trace. Optional.
+        timestamp:
+          type: string
+          format: date-time
+          description: |
+            When the error occurred (ISO 8601 / UTC). If omitted or in the
+            future, the server clamps it to the current time.
+        platform:
+          type: string
+          maxLength: 30
+          description: Platform identifier (e.g. "Android", "iOS", "Windows", "Web").
+        osName:
+          type: string
+          maxLength: 30
+          description: Operating system name.
+        osVersion:
+          type: string
+          maxLength: 100
+          description: Operating system version.
+        appVersion:
+          type: string
+          maxLength: 50
+          description: Application version string.
+        sdkVersion:
+          type: string
+          maxLength: 40
+          description: SDK identifier and version (e.g. "aptabase-flutter@0.1.0").
+        sessionId:
+          type: string
+          maxLength: 100
+          description: Client session identifier.
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Human-readable error message.
