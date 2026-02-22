@@ -98,7 +98,7 @@
         "Includes cross-discovery link back to https://aptabase.com/llms.txt"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-electron"
     },
     {
