@@ -65,3 +65,16 @@ Started: Sun Feb 22 06:31:30 EET 2026
   - Footer links are data-driven arrays in the Astro frontmatter — just append to the appropriate array (`product`, `resources`, `blog`, `company`)
   - Browser MCP may not always be available — verify via build output HTML as fallback
 ---
+
+## 2026-02-22 - US-005
+- Created `tasks/templates/sdk-llms-txt-template.md` with standardized template for SDK llms.txt files
+- Template sections: Overview, Installation, Initialization, Track Events, Track Events with Properties, Configuration, Platform Notes, Cross-Discovery
+- Uses `{{PLACEHOLDER}}` variables for SDK-specific values (SDK_DISPLAY_NAME, PACKAGE_NAME, INSTALL_COMMAND, REPO_URL, PLATFORM_NAME, LANG, etc.)
+- Follows llms.txt spec format: H1 heading with SDK name, blockquote summary, H2-delimited sections
+- Includes cross-discovery link back to `https://aptabase.com/llms.txt`
+- Files changed: `tasks/templates/sdk-llms-txt-template.md` (new file)
+- **Learnings for future iterations:**
+  - Template uses double-brace `{{VAR}}` placeholders — when filling in, replace entire placeholder including braces
+  - The `{{LANG}}` placeholder sets the code fence language (e.g., `js`, `swift`, `kotlin`, `dart`, `csharp`, `python`, `cpp`, `rust`)
+  - Configuration and Platform Notes sections are free-form text — adapt to each SDK's specific needs
+---

@@ -81,7 +81,7 @@
         "Template stored in tasks/templates/sdk-llms-txt-template.md"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "This template will be used to create llms.txt for each of the 12 SDK repos."
     },
     {
