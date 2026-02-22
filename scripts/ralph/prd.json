@@ -115,7 +115,7 @@
         "Includes cross-discovery link back to https://aptabase.com/llms.txt"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/tauri-plugin-aptabase"
     },
     {
@@ -131,7 +131,7 @@
         "Includes cross-discovery link back to https://aptabase.com/llms.txt"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-swift"
     },
     {
@@ -147,7 +147,7 @@
         "Includes cross-discovery link back to https://aptabase.com/llms.txt"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-kotlin"
     },
     {
@@ -163,7 +163,7 @@
         "Includes cross-discovery link back to https://aptabase.com/llms.txt"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase_flutter"
     },
     {
@@ -178,7 +178,7 @@
         "Includes cross-discovery link back to https://aptabase.com/llms.txt"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-react-native"
     },
     {
@@ -194,7 +194,7 @@
         "Includes cross-discovery link back to https://aptabase.com/llms.txt"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-maui"
     },
     {
@@ -210,7 +210,7 @@
         "Includes cross-discovery link back to https://aptabase.com/llms.txt"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-js. This is a Turborepo monorepo with 4 packages."
     },
     {
@@ -225,7 +225,7 @@
         "Includes cross-discovery link back to https://aptabase.com/llms.txt"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-python"
     },
     {
@@ -240,7 +240,7 @@
         "Includes cross-discovery link back to https://aptabase.com/llms.txt"
       ],
       "priority": 15,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-unity"
     },
     {
@@ -255,7 +255,7 @@
         "Includes cross-discovery link back to https://aptabase.com/llms.txt"
       ],
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-unreal"
     },
     {
@@ -270,7 +270,7 @@
         "Includes cross-discovery link back to https://aptabase.com/llms.txt"
       ],
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-cpp"
     },
     {
@@ -284,7 +284,7 @@
         "NativeScript excluded (community-maintained, different org)"
       ],
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "notes": "Repos: aptabase-electron, tauri-plugin-aptabase, aptabase-swift, aptabase-kotlin, aptabase_flutter, aptabase-react-native, aptabase-maui, aptabase-js, aptabase-python, aptabase-unity, aptabase-unreal, aptabase-cpp"
     },
     {

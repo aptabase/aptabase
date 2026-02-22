@@ -97,3 +97,222 @@ Started: Sun Feb 22 06:31:30 EET 2026
   - Sessions auto-rotate after 1 hour of inactivity (SESSION_TIMEOUT = 3600s)
   - The template is a good starting point but Electron needs a custom "Main vs Renderer Process" section not in the template
 ---
+
+## 2026-02-22 - US-008
+- Created `llms.txt` at root of `aptabase-swift` repo
+- Documents SPM install (with both Package.swift and Xcode), CocoaPods install
+- Covers: initialization (SwiftUI and UIKit), trackEvent, trackEvent with properties, InitOptions configuration
+- Documents all supported platforms: iOS, macOS, watchOS (7.0+), tvOS, visionOS
+- Configuration section covers `host` (self-hosted), `flushInterval`, and `trackingMode` (.readFromEnvironment, .asDebug, .asRelease)
+- Includes macOS App Sandbox note and Apple App Privacy link
+- File size: 3,959 bytes
+- Files changed: `aptabase-swift/llms.txt` (new file)
+- Committed on branch `ralph/llms-txt-agent-discovery` in aptabase-swift repo
+- **Learnings for future iterations:**
+  - Swift SDK supports `Value` protocol for property values — accepts String, Int, Double, Float, and Bool
+  - `InitOptions` has three fields: `host` (String?), `flushInterval` (NSNumber? → Double?), and `trackingMode` (TrackingMode)
+  - TrackingMode is a custom class (not an enum) with static values: `.asDebug`, `.asRelease`, `.readFromEnvironment`
+  - The SDK uses NotificationCenter to observe app lifecycle (foreground/background) for session management
+  - visionOS is supported alongside iOS, macOS, watchOS, tvOS
+  - Both SwiftUI and UIKit init patterns are worth documenting — many agents may use either
+---
+
+## 2026-02-22 - US-007
+- Created `llms.txt` at root of `tauri-plugin-aptabase` repo
+- Documents dual API: Rust (`EventTracker` trait on App/AppHandle/Window) and JavaScript (`trackEvent` from `@aptabase/tauri`)
+- Covers: plugin registration via `Builder::new().build()`, ACL permission (`aptabase:allow-track-event`), Rust tracking with `serde_json::json!()`, JS tracking, configuration (`InitOptions` with `host` and `flush_interval`)
+- Platform notes: Tauri v2, MSRV 1.70, panic hook support
+- File size: 4,688 bytes
+- Files changed: `tauri-plugin-aptabase/llms.txt` (new file)
+- Committed on branch `ralph/llms-txt-agent-discovery` in tauri-plugin-aptabase repo
+- **Learnings for future iterations:**
+  - Tauri v2 uses a `Builder` pattern: `tauri_plugin_aptabase::Builder::new(key).build()` — the README also shows a legacy `init()` function but `Builder` is the canonical API
+  - ACL permissions for Tauri v2 plugins go in `src-tauri/capabilities/*.json` — the permission identifier is `aptabase:allow-track-event`
+  - `InitOptions` has two fields: `host` (for self-hosted) and `flush_interval` (defaults to 60s release / 2s debug)
+  - Rust `track_event` takes `Option<serde_json::Value>` for properties, not a HashMap
+  - `flush_events_blocking()` is used at app exit to ensure pending events are sent
+---
+
+## 2026-02-22 - US-009
+- Created `llms.txt` at root of `aptabase-kotlin` repo
+- Documents JitPack repository setup in `settings.gradle.kts` and Gradle dependency
+- Covers: initialization in Application class, trackEvent, trackEvent with properties, self-hosted InitOptions
+- Configuration section covers `InitOptions(host)`, session timeout, background thread pool
+- Platform notes: Android-only, requires Application subclass, uses HttpURLConnection, auto debug detection
+- File size: 2,875 bytes
+- Files changed: `aptabase-kotlin/llms.txt` (new file)
+- Committed on branch `ralph/llms-txt-agent-discovery` in aptabase-kotlin repo
+- **Learnings for future iterations:**
+  - Kotlin SDK uses `Aptabase.instance` singleton pattern (companion object with `@JvmStatic`)
+  - `InitOptions` is a data class with single field: `host: String?` — only needed for self-hosted (`A-SH-*`) app keys
+  - Property values support only `String` and `Int` (via `Map<String, Any>`)
+  - SDK uses `HttpURLConnection` directly — no OkHttp or Retrofit dependency
+  - Debug mode comes from `ApplicationInfo.FLAG_DEBUGGABLE` in `EnvironmentInfo`
+  - Background execution uses `Executors.newFixedThreadPool(5)` with shutdown hook
+---
+
+## 2026-02-22 - US-010
+- Created `llms.txt` at root of `aptabase_flutter` repo
+- Documents installation (`flutter pub add aptabase_flutter`) with Android INTERNET permission note
+- Covers: async initialization in main.dart, trackEvent, trackEvent with properties, InitOptions configuration
+- Configuration section covers `host` (self-hosted), `tickDuration` (flush interval, default 30s), `batchLength` (max 25), `printDebugMessages`
+- Platform notes: all 6 platforms (Android, iOS, macOS, Web, Linux, Windows), session timeout, batch queuing, auto debug detection
+- File size: 3,464 bytes
+- Files changed: `aptabase_flutter/llms.txt` (new file)
+- Committed on branch `ralph/llms-txt-agent-discovery` in aptabase_flutter repo
+- **Learnings for future iterations:**
+  - Flutter SDK uses `Aptabase.instance` singleton pattern (similar to Kotlin SDK)
+  - `InitOptions` is a const constructor class with 4 fields: `host`, `tickDuration`, `batchLength`, `printDebugMessages`
+  - `batchLength` has a hard max of 25 enforced via assertion
+  - Flutter SDK uses `StorageManager` abstraction (SharedPrefs by default) for event persistence — events survive app restarts
+  - `WidgetsFlutterBinding.ensureInitialized()` is required before `Aptabase.init` — this is a common Flutter gotcha worth highlighting
+  - `AppLifecycleListener` is used for session management (flush on inactive, restart timer on resume)
+---
+
+## 2026-02-22 - US-011
+- Created `llms.txt` at root of `aptabase-react-native` repo
+- Documents npm install and Android INTERNET permission requirement
+- Covers: init (direct and AptabaseProvider context), trackEvent, trackEvent with properties, useAptabase hook, dispose
+- Configuration section covers `host` (self-hosted), `appVersion` (Expo Go workaround), `flushInterval` (override flush interval)
+- Platform notes: iOS/Android, Expo Go app version limitation, session timeout, background flush behavior
+- File size: 2,652 bytes
+- Files changed: `aptabase-react-native/llms.txt` (new file)
+- Committed on branch `ralph/llms-txt-agent-discovery` in aptabase-react-native repo
+- **Learnings for future iterations:**
+  - React Native SDK exports both direct functions (`init`, `trackEvent`, `dispose`) and React Context (`AptabaseProvider`, `useAptabase`)
+  - `AptabaseOptions` has 3 fields: `host` (self-hosted), `appVersion` (override), `flushInterval` (ms)
+  - Property values accept `string | number | boolean` — broader than Kotlin (string | int only)
+  - `__DEV__` global controls flush interval: 2s dev, 60s prod
+  - Expo Go lacks native modules so `appVersion` is unavailable — the `appVersion` init option is a documented workaround
+  - `dispose()` stops polling and sets client to undefined — can be called to fully deinitialize the SDK
+---
+
+## 2026-02-22 - US-012
+- Created `llms.txt` at root of `aptabase-maui` repo
+- Documents NuGet install (`dotnet add package Aptabase.Maui`) and .csproj reference
+- Covers: `UseAptabase` extension on `MauiAppBuilder`, DI-based `IAptabaseClient` injection, `TrackEvent`, properties, full `AptabaseOptions` config table
+- Configuration section covers `Host` (self-hosted), `IsDebugMode`, `EnablePersistence`, `EnableCrashReporting`
+- Platform notes: all MAUI platforms (Android, iOS, macOS, Windows), non-blocking TrackEvent, IAsyncDisposable
+- File size: 3,207 bytes
+- Files changed: `aptabase-maui/llms.txt` (new file)
+- Committed on branch `ralph/llms-txt-agent-discovery` in aptabase-maui repo
+- **Learnings for future iterations:**
+  - MAUI SDK uses DI pattern — `UseAptabase` registers `IAptabaseClient` as singleton, pages inject it via constructor
+  - `AptabaseOptions` has 4 fields: `Host`, `IsDebugMode`, `EnablePersistence`, `EnableCrashReporting` (all nullable)
+  - `EnablePersistence` switches implementation from `AptabaseClient` to `AptabasePersistentClient` — persists events to disk
+  - `EnableCrashReporting` creates an `AptabaseCrashReporter` that logs unhandled exceptions as events with stack frames
+  - `IAptabaseClient` implements `IAsyncDisposable` — TrackEvent signature is `Task TrackEvent(string, Dictionary<string, object>?)`
+  - Property values support only strings and numbers (via `Dictionary<string, object>`)
+  - Pages that use DI injection must be registered in `builder.Services.AddSingleton<PageType>()` — common MAUI pattern worth documenting
+---
+
+## 2026-02-22 - US-013
+- Created `llms.txt` at root of `aptabase-js` repo documenting all 4 packages
+- **@aptabase/web**: init/trackEvent functions, AptabaseOptions config, SPA-focused notes
+- **@aptabase/react**: AptabaseProvider/useAptabase pattern, setup examples for Next.js App Router, Pages Router, Remix, CRA/Vite
+- **@aptabase/angular**: Both standalone API (provideAptabaseAnalytics) and NgModule (AptabaseAnalyticsModule.forRoot) setup, AptabaseAnalyticsService injection
+- **@aptabase/browser**: Background script init, cross-context tracking via chrome.runtime.sendMessage, chrome.storage.local session persistence
+- All packages share the same `AptabaseOptions` type: `host`, `apiUrl`, `appVersion`, `isDebug`
+- File size: 6,524 bytes
+- Files changed: `aptabase-js/llms.txt` (new file)
+- Committed on branch `ralph/llms-txt-agent-discovery` in aptabase-js repo
+- **Learnings for future iterations:**
+  - All 4 JS SDK packages share a common `shared.ts` at `packages/shared.ts` — `AptabaseOptions` type and `sendEvent`/`sendError` functions are defined there
+  - `AptabaseOptions` has 4 fields across all packages: `host`, `apiUrl`, `appVersion`, `isDebug`
+  - Browser extension SDK must init in background script — events from popup/content scripts relay via `chrome.runtime.sendMessage`
+  - Browser SDK persists session ID in `chrome.storage.local` (unlike web/react which use in-memory session)
+  - React SDK queues events fired before init completes via `_eventsBeforeInit` map — then flushes on init
+  - Angular SDK supports both standalone API (`provideAptabaseAnalytics`) and legacy NgModule (`AptabaseAnalyticsModule.forRoot`)
+  - Property values accept `string | number | boolean` across all JS packages
+---
+
+## 2026-02-22 - US-014
+- Created `llms.txt` at root of `aptabase-python` repo
+- Documents fully async API: context manager (`async with`) and manual lifecycle (`start`/`stop`)
+- Covers: installation (pip/uv), track/track with properties, full configuration table, error handling
+- Configuration section covers all 7 init parameters: `app_key`, `app_version`, `is_debug`, `max_batch_size`, `flush_interval`, `timeout`, `base_url`
+- Platform notes: Python 3.11+, httpx, auto-batching, session rotation, region-based endpoints
+- File size: 3,307 bytes
+- Files changed: `aptabase-python/llms.txt` (new file)
+- Committed on branch `ralph/llms-txt-agent-discovery` in aptabase-python repo
+- **Learnings for future iterations:**
+  - Python SDK is fully async — all tracking is `await client.track()`, not synchronous
+  - Constructor parameter is `base_url` (not `host` like other SDKs) — used for self-hosted instances with `A-SH-*` keys
+  - SDK uses `httpx.AsyncClient` for HTTP — no sync fallback available
+  - Error hierarchy: `AptabaseError` → `ConfigurationError`, `NetworkError`, `ValidationError`
+  - `NetworkError` has a `status_code` attribute for HTTP error inspection
+  - Session IDs are generated from epoch seconds + random number (not UUID like Event default)
+---
+
+## 2026-02-22 - US-015
+- Created `llms.txt` at root of `aptabase-unity` repo
+- Documents Unity Package Manager install via git URL
+- Covers: auto-initialization via `[RuntimeInitializeOnLoadMethod]`, `TrackEvent` static API, properties, `Flush()`, full `AptabaseSettings` config table
+- Configuration section covers `AppKey`, `SelfHostURL`, `AppBuildNumber`, `EnableOverride`, `AppVersion`, `FlushInterval`
+- Platform notes: all 6 platforms (Android, iOS/iPadOS, macOS, Windows, Linux, WebGL), WebGL single-event dispatch, session timeout, offline resilience
+- File size: 3,164 bytes
+- Files changed: `aptabase-unity/llms.txt` (new file)
+- Committed on branch `ralph/llms-txt-agent-discovery` in aptabase-unity repo
+- **Learnings for future iterations:**
+  - Unity SDK uses `[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)]` for auto-init — no MonoBehaviour setup needed by the user
+  - Configuration is via a ScriptableObject at `Assets/Aptabase/Resources/AptabaseSettings` — not code-based init like other SDKs
+  - `EnableOverride` boolean gates `AppVersion` and `FlushInterval` fields — both are ignored unless toggle is on
+  - WebGL uses a separate `WebGLDispatcher` that sends events individually (no batching) via `/api/v0/event` (singular)
+  - Non-WebGL uses `/api/v0/events` (plural) with max batch size of 25
+  - SDK embeds TinyJSON for serialization — no external dependencies
+  - `AptabaseService` MonoBehaviour is created internally and marked `DontDestroyOnLoad` for lifecycle hooks (focus/blur)
+  - Namespace is `AptabaseSDK`, not `Aptabase` — the static class `Aptabase` is inside the `AptabaseSDK` namespace
+---
+
+## 2026-02-22 - US-016
+- Created `llms.txt` at root of `aptabase-unreal` repo
+- Documents plugin installation (clone into Plugins folder), enabling in Editor, DefaultEngine.ini config
+- Documents C++ tracking via `FAnalytics` provider-agnostic API with `RecordEvent` and `FAnalyticsEventAttribute`
+- Documents Blueprint tracking via Blueprint Analytics Plugin nodes
+- Configuration table covers `AppKey`, `Host` (auto-detected EU/US/DEV/SH), `CustomHost`, `SendInterval`, `DebugSendInterval`
+- Platform notes: UE 5.x, batched events, non-blocking, auto session management
+- File size: 3,197 bytes
+- Files changed: `aptabase-unreal/llms.txt` (new file)
+- Committed on branch `ralph/llms-txt-agent-discovery` in aptabase-unreal repo
+- **Learnings for future iterations:**
+  - Unreal SDK uses UE's built-in `IAnalyticsProvider` interface — it's provider-agnostic, not Aptabase-specific API
+  - Configuration is via `UDeveloperSettings` subclass (`UAptabaseSettings`) stored in `Config/DefaultAptabase.ini` at runtime
+  - `EAptabaseHost` enum auto-detects from AppKey prefix: `A-EU-*` → EU, `A-US-*` → US, `A-DEV-*` → DEV, `A-SH-*` → SH (self-hosted)
+  - `FAnalyticsEventAttribute` is UE's built-in type — it wraps key-value pairs (strings and numbers)
+  - The Multicast Analytics Provider plugin lets you run Aptabase alongside other analytics providers
+  - Blueprint Analytics Plugin provides provider-agnostic nodes like `Record Event with Attributes`
+---
+
+## 2026-02-22 - US-017
+- Created `llms.txt` at root of `aptabase-cpp` repo
+- Documents CMake integration with both cpp-httplib and Boost.Asio backends
+- Covers: initialization with HttpClient + app key + URL + debug flag, session management (StartSession/EndSession), RecordEvent, properties
+- Documents all 3 Provider strategies: AutoProvider (immediate), ManualProvider (explicit Flush), WorkerProvider (background thread)
+- Configuration section covers runtime setters: SetAppVersion, SetLocale, SetOsName, SetOsVersion, SetDebug, SetLog
+- Platform notes: C++17, pluggable HTTP backend, max 25 events/request, EventAttribute values are variant<string, float, double>
+- File size: 4,369 bytes
+- Files changed: `aptabase-cpp/llms.txt` (new file)
+- Committed on branch `ralph/llms-txt-agent-discovery` in aptabase-cpp repo
+- **Learnings for future iterations:**
+  - C++ SDK has explicit session management (StartSession/EndSession) — unlike other SDKs that auto-manage sessions
+  - Three Provider strategies control dispatch: AutoProvider (immediate, default), ManualProvider (explicit Flush), WorkerProvider (background thread)
+  - EventAttribute values are `std::variant<std::string, float, double>` — no int or bool support (narrower than most SDKs)
+  - No built-in platform detection — OS name, version, locale must be set manually via setter methods
+  - The SDK requires users to supply their own HTTP backend dependencies (cpp-httplib or Boost) — CMake flags `CMAKE_APTABASE_USE_HTTPLIB` or `CMAKE_APTABASE_USE_BOOST` control compilation
+  - Custom HTTP backends can be created by implementing the `Aptabase::HttpClient` abstract interface
+---
+
+## 2026-02-22 - US-018
+- Updated README.md in all 12 Aptabase-owned SDK repos to reference llms.txt
+- Added line at the bottom of each README: `For AI/LLM integration instructions, see [llms.txt](./llms.txt)`
+- NativeScript excluded (community-maintained, different org)
+- Repos updated: aptabase-electron, tauri-plugin-aptabase, aptabase-swift, aptabase-kotlin, aptabase_flutter, aptabase-react-native, aptabase-maui, aptabase-js, aptabase-python, aptabase-unity, aptabase-unreal, aptabase-cpp
+- Files changed: `README.md` in each of the 12 repos (modified)
+- All committed on branch `ralph/llms-txt-agent-discovery` in their respective repos
+- **Learnings for future iterations:**
+  - All 12 SDK repos were already cloned and on the correct feature branch from previous iterations
+  - READMEs have varied structures — some end with "Apple App Store" section, some with code examples, some with License section. Adding the llms.txt reference at the very end works consistently regardless of structure
+  - aptabase-kotlin README had no trailing newline — edit tool handled this gracefully
+  - aptabase-python README also had no trailing newline at EOF
+  - Batch operations across 12 repos can be done efficiently via shell loops for verification and commits
+---
