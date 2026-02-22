@@ -52,7 +52,7 @@
         "Added line: # AI agent documentation: https://aptabase.com/llms.txt"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-com. Current robots.txt has: User-agent: * / Allow: / / Sitemap: https://aptabase.com/sitemap-index.xml"
     },
     {
@@ -66,7 +66,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-com. Footer component is at src/components/Footer.astro."
     },
     {

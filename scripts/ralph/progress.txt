@@ -12,6 +12,7 @@ Started: Sun Feb 22 06:31:30 EET 2026
 - Docs pages are at `src/pages/docs/` as `.md` files (currently: build-modes.md, apple-app-privacy.md)
 - Footer component is at `aptabase-com/src/components/Footer.astro`
 - robots.txt is at `aptabase-com/public/robots.txt`
+- Footer links are data-driven arrays in Astro frontmatter (`product`, `resources`, `blog`, `company`) — append to add new links
 
 ## 2026-02-22 - US-001
 - Created `public/llms.txt` in aptabase-com repo with full SDK catalog
@@ -42,4 +43,25 @@ Started: Sun Feb 22 06:31:30 EET 2026
   - Python SDK is fully async (httpx + asyncio, Python 3.11+) — different pattern from other SDKs
   - C++ SDK has pluggable HTTP backends (cpp-httplib or Boost) and requires explicit session management (StartSession/EndSession)
   - aptabase-com needs `npm install` before `npx astro build` if node_modules is missing
+---
+
+## 2026-02-22 - US-003
+- Updated `public/robots.txt` in aptabase-com repo to reference llms.txt
+- Added comment line: `# AI agent documentation: https://aptabase.com/llms.txt`
+- All existing directives preserved unchanged (User-agent, Allow, Sitemap)
+- Files changed: `aptabase-com/public/robots.txt` (modified)
+- astro build passes successfully
+- **Learnings for future iterations:**
+  - robots.txt changes are trivial — just add/modify lines in `aptabase-com/public/robots.txt`
+  - The llms.txt reference in robots.txt is a comment (# prefix), not a directive — this is the convention from the llms.txt spec
+---
+
+## 2026-02-22 - US-004
+- Added `llms.txt` link to the aptabase.com footer in the Resources section
+- Link renders as `<a href="/llms.txt">llms.txt</a>` with existing footer styling
+- Verified via `astro build` — link appears in all built pages
+- Files changed: `aptabase-com/src/components/Footer.astro` (modified)
+- **Learnings for future iterations:**
+  - Footer links are data-driven arrays in the Astro frontmatter — just append to the appropriate array (`product`, `resources`, `blog`, `company`)
+  - Browser MCP may not always be available — verify via build output HTML as fallback
 ---
