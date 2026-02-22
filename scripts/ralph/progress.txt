@@ -316,3 +316,21 @@ Started: Sun Feb 22 06:31:30 EET 2026
   - aptabase-python README also had no trailing newline at EOF
   - Batch operations across 12 repos can be done efficiently via shell loops for verification and commits
 ---
+
+## 2026-02-22 - US-019
+- Submitted aptabase.com/llms.txt to llms.txt directories and listings
+- **llmstxthub.com**: PR submitted via GitHub — https://github.com/thedaviddias/llms-txt-hub/pull/599 (category: data-analytics)
+- **llmstxt.site**: Form-based submission documented (https://llmstxt.site/submit) — pending deployment
+- **directory.llmstxt.cloud**: Tally form submission documented (https://tally.so/r/wAydjB) — pending deployment
+- **llms-text.com**: Investigated — no public submission form found, needs further investigation
+- **llmstxt.org**: Does not maintain its own directory — refers to llmstxt.site and directory.llmstxt.cloud
+- Created tracking issue with all submission details: https://github.com/aptabase/aptabase-com/issues/11
+- Files changed: `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - llmstxthub.com accepts submissions via GitHub PRs to `thedaviddias/llms-txt-hub` repo — add entry to `data/websites.json` alphabetically
+  - Entry format: `{ name, domain, description, llmsTxtUrl, llmsFullTxtUrl, category, favicon, publishedAt }`
+  - Valid categories: ai-ml, developer-tools, data-analytics, integration-automation, infrastructure-cloud, security-identity, personal, agency, e-commerce, education, media, international, other
+  - llmstxt.site and directory.llmstxt.cloud use web forms — need browser interaction (can't be automated via CLI)
+  - aptabase.com/llms.txt returns 404 until deployed — form-based directories may validate the URL on submission
+  - Creating a GitHub issue to track submission status across multiple directories is a good practice for manual follow-up tasks
+---

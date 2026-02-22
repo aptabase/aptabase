@@ -298,7 +298,7 @@
         "Document all submissions and their status in a comment or issue"
       ],
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "notes": "Do this after US-001 is deployed and aptabase.com/llms.txt returns 200. This is a manual task — submit via web forms or GitHub PRs depending on each directory's process."
     }
   ]
