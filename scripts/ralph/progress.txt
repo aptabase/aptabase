@@ -1,0 +1,27 @@
+# Ralph Progress Log
+Started: Sun Feb 22 06:31:30 EET 2026
+---
+
+## Codebase Patterns
+- Target repos are separate: `aptabase-com` (Astro marketing site) vs `aptabase` (main app). Clone repos as needed.
+- Astro serves `public/` directory at URL root — static files like `llms.txt` go in `public/`
+- SDK framework list is defined in `aptabase-com/src/lib/frameworks.ts` with slugs, URLs, and code examples
+- aptabase-com has no lint/test setup — only `astro build` for validation
+- There are 16 SDKs across 12 repos (aptabase-js is a monorepo with 4 packages: web, react, angular, browser)
+- NativeScript SDK is community-maintained at `nstudio/nativescript-plugins`, not under `aptabase/` org
+- Docs pages are at `src/pages/docs/` as `.md` files (currently: build-modes.md, apple-app-privacy.md)
+- Footer component is at `aptabase-com/src/components/Footer.astro`
+- robots.txt is at `aptabase-com/public/robots.txt`
+
+## 2026-02-22 - US-001
+- Created `public/llms.txt` in aptabase-com repo with full SDK catalog
+- File follows llms.txt spec: H1 heading, blockquote summary, Documentation section, SDKs section (16 SDKs organized by Desktop/Mobile/Web/Games/Other), Optional section
+- File size: 3,242 bytes (under 4KB limit)
+- Files changed: `aptabase-com/public/llms.txt` (new file)
+- Committed on branch `ralph/llms-txt-agent-discovery` in aptabase-com repo
+- **Learnings for future iterations:**
+  - aptabase-com needs to be cloned separately — it's at `github.com/aptabase/aptabase-com`
+  - The llms.txt spec (llmstxt.org) requires: H1 (required), blockquote (optional), body sections, H2-delimited file lists with `[name](url): description` format
+  - The "## Optional" H2 section in llms.txt spec indicates content that can be skipped for shorter context
+  - SDK READMEs on GitHub are the source of truth for install commands and API details — use `gh api repos/aptabase/REPO/readme` to fetch them
+---

@@ -1,0 +1,305 @@
+{
+  "project": "Aptabase",
+  "branchName": "ralph/llms-txt-agent-discovery",
+  "description": "Add llms.txt and llms-full.txt to aptabase.com and all SDK repos so AI coding agents can discover and integrate Aptabase SDKs",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create llms.txt for aptabase.com with SDK catalog",
+      "description": "As an AI coding agent, I need a structured overview of Aptabase at aptabase.com/llms.txt so I can discover it as an analytics solution and identify the correct SDK for any platform.",
+      "acceptanceCriteria": [
+        "File created at public/llms.txt in the aptabase-com repo",
+        "H1 heading with 'Aptabase'",
+        "Blockquote summary: privacy-first, open source, GDPR-compliant, supported platforms",
+        "Lists all 16 SDKs with package name, registry, and install command",
+        "## Documentation section with links to key docs pages in format: - [Name](URL): Description",
+        "Where .md versions of pages exist and add clarity, link to those instead of HTML (e.g. aptabase.com/docs/getting-started.md)",
+        "## SDKs section with links to each SDK GitHub repo",
+        "## Optional section with self-hosting, changelog, legal links",
+        "File follows llms.txt spec (llmstxt.org)",
+        "File is under 4KB"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Target repo: aptabase/aptabase-com. File goes in public/llms.txt. Astro serves public/ at URL root."
+    },
+    {
+      "id": "US-002",
+      "title": "Create llms-full.txt with inlined SDK integration guides",
+      "description": "As an AI coding agent, I need a comprehensive document at aptabase.com/llms-full.txt containing complete integration instructions for all SDKs inline, so I can integrate any SDK without fetching additional URLs.",
+      "acceptanceCriteria": [
+        "File created at public/llms-full.txt in the aptabase-com repo",
+        "Same H1 and summary as llms.txt",
+        "For each of the 16 SDKs: platform name, package name, install command, initialization code, trackEvent usage with and without properties, platform-specific notes",
+        "Content sourced from each SDK's GitHub README (not invented)",
+        "File is self-contained — agent does not need to fetch any other URL",
+        "Tauri section covers both Rust and JavaScript APIs",
+        "Electron section covers main/renderer process split",
+        "React section covers Next.js App Router and Pages Router",
+        "aptabase-js section covers all 4 packages: web, react, angular, browser"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-com. Expect ~20-40KB. Source content from SDK READMEs on GitHub. Manually maintained — no auto-generation."
+    },
+    {
+      "id": "US-003",
+      "title": "Add llms.txt reference to robots.txt",
+      "description": "As a site operator, I want robots.txt to reference llms.txt so AI crawlers and agents can discover it.",
+      "acceptanceCriteria": [
+        "public/robots.txt in aptabase-com repo updated",
+        "Existing User-agent, Allow, and Sitemap directives preserved unchanged",
+        "Added line: # AI agent documentation: https://aptabase.com/llms.txt"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-com. Current robots.txt has: User-agent: * / Allow: / / Sitemap: https://aptabase.com/sitemap-index.xml"
+    },
+    {
+      "id": "US-004",
+      "title": "Add llms.txt link to site footer",
+      "description": "As a developer browsing aptabase.com, I want to find the llms.txt file so I can point my AI coding agent to it.",
+      "acceptanceCriteria": [
+        "Link to /llms.txt added to the aptabase.com footer component",
+        "Link text is 'llms.txt' or 'AI/LLM Docs'",
+        "Link renders correctly on all pages",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-com. Footer component is at src/components/Footer.astro."
+    },
+    {
+      "id": "US-005",
+      "title": "Create llms.txt template for SDK repos",
+      "description": "As a maintainer, I need a standardized llms.txt template so all SDK repos have consistent, agent-friendly documentation.",
+      "acceptanceCriteria": [
+        "Template markdown file created with sections: Overview, Installation, Initialization, Track Events, Track Events with Properties, Configuration, Platform Notes",
+        "Template includes placeholder variables for SDK-specific values",
+        "Template includes a cross-discovery link back to https://aptabase.com/llms.txt",
+        "Template follows llms.txt spec format",
+        "Template stored in tasks/templates/sdk-llms-txt-template.md"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "This template will be used to create llms.txt for each of the 12 SDK repos."
+    },
+    {
+      "id": "US-006",
+      "title": "Add llms.txt to aptabase-electron",
+      "description": "As an AI coding agent, I need llms.txt in the aptabase-electron repo so I can integrate Aptabase into an Electron app.",
+      "acceptanceCriteria": [
+        "llms.txt created at repo root of aptabase/aptabase-electron",
+        "Contains package name (@aptabase/electron) and npm install command",
+        "Documents main process init: initialize('<APP_KEY>') from @aptabase/electron/main",
+        "Documents renderer tracking: trackEvent(name, props?) from @aptabase/electron/renderer",
+        "Includes code examples for both main and renderer process",
+        "Mentions the main/renderer process split clearly",
+        "Includes cross-discovery link back to https://aptabase.com/llms.txt"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-electron"
+    },
+    {
+      "id": "US-007",
+      "title": "Add llms.txt to tauri-plugin-aptabase",
+      "description": "As an AI coding agent, I need llms.txt in the tauri-plugin-aptabase repo so I can integrate Aptabase into a Tauri app.",
+      "acceptanceCriteria": [
+        "llms.txt created at repo root of aptabase/tauri-plugin-aptabase",
+        "Documents dual install: Rust crate (cargo add tauri-plugin-aptabase) AND npm (@aptabase/tauri)",
+        "Documents Rust API: EventTracker trait, track_event() on App/AppHandle/Window",
+        "Documents JavaScript API: trackEvent() from @aptabase/tauri",
+        "Mentions ACL permission: aptabase:allow-track-event",
+        "Includes code examples for both Rust and JS",
+        "Includes cross-discovery link back to https://aptabase.com/llms.txt"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Target repo: aptabase/tauri-plugin-aptabase"
+    },
+    {
+      "id": "US-008",
+      "title": "Add llms.txt to aptabase-swift",
+      "description": "As an AI coding agent, I need llms.txt in the aptabase-swift repo so I can integrate Aptabase into a Swift/iOS/macOS app.",
+      "acceptanceCriteria": [
+        "llms.txt created at repo root of aptabase/aptabase-swift",
+        "Documents SPM install with package URL",
+        "Documents initialization: Aptabase.shared.initialize(appKey:)",
+        "Documents tracking: Aptabase.shared.trackEvent(name:, with:)",
+        "Lists supported platforms: iOS, macOS, watchOS, tvOS",
+        "Includes cross-discovery link back to https://aptabase.com/llms.txt"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-swift"
+    },
+    {
+      "id": "US-009",
+      "title": "Add llms.txt to aptabase-kotlin",
+      "description": "As an AI coding agent, I need llms.txt in the aptabase-kotlin repo so I can integrate Aptabase into an Android/Kotlin app.",
+      "acceptanceCriteria": [
+        "llms.txt created at repo root of aptabase/aptabase-kotlin",
+        "Documents JitPack repository setup in settings.gradle.kts",
+        "Documents Gradle dependency with implementation line",
+        "Documents initialization and trackEvent() API",
+        "Includes code example",
+        "Includes cross-discovery link back to https://aptabase.com/llms.txt"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-kotlin"
+    },
+    {
+      "id": "US-010",
+      "title": "Add llms.txt to aptabase_flutter",
+      "description": "As an AI coding agent, I need llms.txt in the aptabase_flutter repo so I can integrate Aptabase into a Flutter app.",
+      "acceptanceCriteria": [
+        "llms.txt created at repo root of aptabase/aptabase_flutter",
+        "Documents install: flutter pub add aptabase_flutter",
+        "Documents initialization: Aptabase.init('<APP_KEY>')",
+        "Documents tracking: Aptabase.instance.trackEvent(name, props?)",
+        "Lists supported platforms: iOS, Android, Desktop, Web",
+        "Includes cross-discovery link back to https://aptabase.com/llms.txt"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase_flutter"
+    },
+    {
+      "id": "US-011",
+      "title": "Add llms.txt to aptabase-react-native",
+      "description": "As an AI coding agent, I need llms.txt in the aptabase-react-native repo so I can integrate Aptabase into a React Native app.",
+      "acceptanceCriteria": [
+        "llms.txt created at repo root of aptabase/aptabase-react-native",
+        "Documents install: npm add @aptabase/react-native",
+        "Documents initialization and trackEvent() usage",
+        "Includes code example",
+        "Includes cross-discovery link back to https://aptabase.com/llms.txt"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-react-native"
+    },
+    {
+      "id": "US-012",
+      "title": "Add llms.txt to aptabase-maui",
+      "description": "As an AI coding agent, I need llms.txt in the aptabase-maui repo so I can integrate Aptabase into a .NET MAUI app.",
+      "acceptanceCriteria": [
+        "llms.txt created at repo root of aptabase/aptabase-maui",
+        "Documents install: dotnet add package Aptabase.Maui",
+        "Documents MauiProgram.cs setup with UseAptabase('<APP_KEY>')",
+        "Documents tracking API",
+        "Includes code example",
+        "Includes cross-discovery link back to https://aptabase.com/llms.txt"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-maui"
+    },
+    {
+      "id": "US-013",
+      "title": "Add llms.txt to aptabase-js (web, react, angular, browser)",
+      "description": "As an AI coding agent, I need llms.txt in the aptabase-js monorepo so I can integrate Aptabase into Web, React/Next.js, Angular, or Browser Extension projects.",
+      "acceptanceCriteria": [
+        "llms.txt created at repo root of aptabase/aptabase-js",
+        "Documents all 4 packages: @aptabase/web, @aptabase/react, @aptabase/angular, @aptabase/browser",
+        "Each package has its own section with install, init, and tracking example",
+        "@aptabase/react section includes Next.js App Router and Pages Router setup",
+        "@aptabase/angular section includes module/service setup",
+        "Includes cross-discovery link back to https://aptabase.com/llms.txt"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-js. This is a Turborepo monorepo with 4 packages."
+    },
+    {
+      "id": "US-014",
+      "title": "Add llms.txt to aptabase-python",
+      "description": "As an AI coding agent, I need llms.txt in the aptabase-python repo so I can integrate Aptabase into a Python app.",
+      "acceptanceCriteria": [
+        "llms.txt created at repo root of aptabase/aptabase-python",
+        "Documents install: pip install aptabase",
+        "Documents initialization and track_event() usage",
+        "Includes code example",
+        "Includes cross-discovery link back to https://aptabase.com/llms.txt"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-python"
+    },
+    {
+      "id": "US-015",
+      "title": "Add llms.txt to aptabase-unity",
+      "description": "As an AI coding agent, I need llms.txt in the aptabase-unity repo so I can integrate Aptabase into a Unity project.",
+      "acceptanceCriteria": [
+        "llms.txt created at repo root of aptabase/aptabase-unity",
+        "Documents Unity Package Manager install via git URL",
+        "Documents C# initialization and tracking API",
+        "Includes MonoBehaviour code example",
+        "Includes cross-discovery link back to https://aptabase.com/llms.txt"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-unity"
+    },
+    {
+      "id": "US-016",
+      "title": "Add llms.txt to aptabase-unreal",
+      "description": "As an AI coding agent, I need llms.txt in the aptabase-unreal repo so I can integrate Aptabase into an Unreal Engine 5 project.",
+      "acceptanceCriteria": [
+        "llms.txt created at repo root of aptabase/aptabase-unreal",
+        "Documents plugin install (clone into Plugins folder)",
+        "Documents C++ and/or Blueprint tracking API",
+        "Includes code example",
+        "Includes cross-discovery link back to https://aptabase.com/llms.txt"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-unreal"
+    },
+    {
+      "id": "US-017",
+      "title": "Add llms.txt to aptabase-cpp",
+      "description": "As an AI coding agent, I need llms.txt in the aptabase-cpp repo so I can integrate Aptabase into a C++ project.",
+      "acceptanceCriteria": [
+        "llms.txt created at repo root of aptabase/aptabase-cpp",
+        "Documents CMake integration (add_subdirectory)",
+        "Documents networking backend options (cpp-httplib vs Boost.Asio)",
+        "Includes initialization and tracking code example",
+        "Includes cross-discovery link back to https://aptabase.com/llms.txt"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "Target repo: aptabase/aptabase-cpp"
+    },
+    {
+      "id": "US-018",
+      "title": "Update SDK READMEs to reference llms.txt",
+      "description": "As a developer or agent browsing an SDK repo, I want the README to mention llms.txt so I know there is an agent-optimized guide available.",
+      "acceptanceCriteria": [
+        "Each of the 12 Aptabase-owned SDK repos has a line in README referencing llms.txt",
+        "Text: 'For AI/LLM integration instructions, see [llms.txt](./llms.txt)'",
+        "Added near the top or bottom of each README",
+        "NativeScript excluded (community-maintained, different org)"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": "Repos: aptabase-electron, tauri-plugin-aptabase, aptabase-swift, aptabase-kotlin, aptabase_flutter, aptabase-react-native, aptabase-maui, aptabase-js, aptabase-python, aptabase-unity, aptabase-unreal, aptabase-cpp"
+    },
+    {
+      "id": "US-019",
+      "title": "Submit aptabase.com to llms.txt directories and listings",
+      "description": "As the Aptabase team, I want to submit aptabase.com/llms.txt to llms.txt directories and listings so that agents and developers can discover Aptabase through these catalogs.",
+      "acceptanceCriteria": [
+        "Submit to llms-text.com (https://www.llms-text.com/)",
+        "Submit to llmstxt.org directory if they maintain one",
+        "Search for and submit to any other active llms.txt aggregator sites",
+        "Document all submissions and their status in a comment or issue"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "Do this after US-001 is deployed and aptabase.com/llms.txt returns 200. This is a manual task — submit via web forms or GitHub PRs depending on each directory's process."
+    }
+  ]
+}
