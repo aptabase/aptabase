@@ -39,7 +39,7 @@
         "aptabase-js section covers all 4 packages: web, react, angular, browser"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Target repo: aptabase/aptabase-com. Expect ~20-40KB. Source content from SDK READMEs on GitHub. Manually maintained — no auto-generation."
     },
     {

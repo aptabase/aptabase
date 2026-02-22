@@ -25,3 +25,21 @@ Started: Sun Feb 22 06:31:30 EET 2026
   - The "## Optional" H2 section in llms.txt spec indicates content that can be skipped for shorter context
   - SDK READMEs on GitHub are the source of truth for install commands and API details — use `gh api repos/aptabase/REPO/readme` to fetch them
 ---
+
+## 2026-02-22 - US-002
+- Created `public/llms-full.txt` in aptabase-com repo with complete inlined integration guides for all 16 SDKs
+- File size: 14,340 bytes (~14KB) — self-contained, no external URL fetching needed
+- Covers all 16 SDKs across 12 repos with install, init, and trackEvent code examples
+- Tauri section: covers both Rust (EventTracker trait) and JavaScript APIs
+- Electron section: documents main/renderer process split with separate import paths
+- React section: covers Next.js App Router, Pages Router, Remix, CRA, and Vite
+- aptabase-js: covered as 4 separate sections (Web, React, Angular, Browser Extensions)
+- Files changed: `aptabase-com/public/llms-full.txt` (new file)
+- astro build passes successfully
+- **Learnings for future iterations:**
+  - aptabase-js is a Turborepo monorepo — main README just lists sub-packages, real content is in `packages/*/README.md`
+  - To fetch sub-package READMEs: `gh api repos/aptabase/aptabase-js/contents/packages` then fetch each `README.md`
+  - Python SDK is fully async (httpx + asyncio, Python 3.11+) — different pattern from other SDKs
+  - C++ SDK has pluggable HTTP backends (cpp-httplib or Boost) and requires explicit session management (StartSession/EndSession)
+  - aptabase-com needs `npm install` before `npx astro build` if node_modules is missing
+---
