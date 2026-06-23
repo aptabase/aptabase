@@ -18,6 +18,8 @@ interface ErrorDetail {
   appVersion: string;
   sdkVersion: string;
   sessionId: string;
+  severity: string;
+  kind: string;
 }
 
 interface ErrorDetailModalProps {
@@ -98,6 +100,18 @@ export function ErrorDetailModal({ appId, errorId, open, onClose }: ErrorDetailM
                     <span className="text-muted-foreground">Error Type:</span>
                     <span className="col-span-3 font-medium">{error.errorType}</span>
                   </div>
+                  {error.severity && (
+                    <div className="grid grid-cols-4 gap-2">
+                      <span className="text-muted-foreground">Severity:</span>
+                      <span className="col-span-3 font-medium capitalize">{error.severity}</span>
+                    </div>
+                  )}
+                  {error.kind && (
+                    <div className="grid grid-cols-4 gap-2">
+                      <span className="text-muted-foreground">Kind:</span>
+                      <span className="col-span-3 capitalize">{error.kind}</span>
+                    </div>
+                  )}
                   <div className="grid grid-cols-4 gap-2">
                     <span className="text-muted-foreground">Message:</span>
                     <span className="col-span-3">{error.errorMessage}</span>

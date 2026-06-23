@@ -34,6 +34,8 @@ interface ErrorItem {
   appVersion: string;
   sdkVersion: string;
   sessionId: string;
+  severity: string;
+  kind: string;
 }
 
 interface ErrorsResponse {
@@ -53,6 +55,7 @@ async function fetchErrors(
   endDate?: string,
   osName?: string,
   errorType?: string,
+  severity?: string,
 ): Promise<ErrorsResponse> {
   const params = new URLSearchParams({
     offset: offset.toString(),
@@ -63,6 +66,7 @@ async function fetchErrors(
   if (endDate) params.set("endDate", endDate);
   if (osName && osName !== "all") params.set("osName", osName);
   if (errorType && errorType !== "all") params.set("errorType", errorType);
+  if (severity && severity !== "all") params.set("severity", severity);
 
   const response = await fetch(`/api/v0/apps/${appId}/errors?${params}`, {
     credentials: "include",
@@ -73,6 +77,24 @@ async function fetchErrors(
   }
 
   return response.json();
+}
+
+function SeverityBadge({ severity }: { severity: string }) {
+  if (!severity) {
+    return <span className="text-muted-foreground text-xs">—</span>;
+  }
+
+  const styles: Record<string, string> = {
+    fatal: "bg-red-500/15 text-red-600 dark:text-red-400",
+    error: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+  };
+  const cls = styles[severity] ?? "bg-muted text-muted-foreground";
+
+  return (
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${cls}`}>
+      {severity}
+    </span>
+  );
 }
 
 interface ErrorsListProps {
@@ -89,9 +111,20 @@ export function ErrorsList({ appId }: ErrorsListProps) {
   // Get filter values from URL params
   const osName = searchParams.get("osName") || "all";
   const errorType = searchParams.get("errorType") || "all";
+  const severity = searchParams.get("severity") || "all";
 
   const { data, isLoading, isError, refetch, isPlaceholderData } = useQuery({
-    queryKey: ["errors", appId, offset, limit, dateFilters.startDateIso, dateFilters.endDateIso, osName, errorType],
+    queryKey: [
+      "errors",
+      appId,
+      offset,
+      limit,
+      dateFilters.startDateIso,
+      dateFilters.endDateIso,
+      osName,
+      errorType,
+      severity,
+    ],
     queryFn: () =>
       fetchErrors(
         appId,
@@ -101,6 +134,7 @@ export function ErrorsList({ appId }: ErrorsListProps) {
         dateFilters.endDateIso,
         osName !== "all" ? osName : undefined,
         errorType !== "all" ? errorType : undefined,
+        severity !== "all" ? severity : undefined,
       ),
     placeholderData: keepPreviousData,
   });
@@ -127,6 +161,17 @@ export function ErrorsList({ appId }: ErrorsListProps) {
     setOffset(0); // Reset to first page when filters change
   };
 
+  const handleSeverityChange = (value: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value === "all") {
+      newParams.delete("severity");
+    } else {
+      newParams.set("severity", value);
+    }
+    setSearchParams(newParams);
+    setOffset(0); // Reset to first page when filters change
+  };
+
   const handlePreviousPage = () => {
     if (offset - limit >= 0) {
       setOffset(offset - limit);
@@ -148,6 +193,10 @@ export function ErrorsList({ appId }: ErrorsListProps) {
 
   if (isError) {
     return <ErrorState refetch={refetch} />;
+  }
+
+  if (!data) {
+    return <EmptyState />;
   }
 
   return (
@@ -186,11 +235,25 @@ export function ErrorsList({ appId }: ErrorsListProps) {
             </SelectContent>
           </Select>
         </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Severity:</span>
+          <Select value={severity} onValueChange={handleSeverityChange}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="fatal">Fatal</SelectItem>
+              <SelectItem value="error">Error</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {(!data || data.errors.length === 0) && <EmptyState />}
+      {data.errors.length === 0 && <EmptyState />}
 
-      {data && data.errors.length > 0 && (
+      {data.errors.length > 0 && (
         <div className="flow-root">
           <div className="overflow-x-auto">
             <div className="inline-block min-w-full py-2 align-middle">
@@ -209,6 +272,7 @@ export function ErrorsList({ appId }: ErrorsListProps) {
                         Error Type
                       </div>
                     </th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold">Severity</th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold">Message</th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold">
                       <div className="flex items-center gap-2">
@@ -229,6 +293,9 @@ export function ErrorsList({ appId }: ErrorsListProps) {
                         {new Date(error.timestamp).toLocaleString()}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm">{error.errorType}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm">
+                        <SeverityBadge severity={error.severity} />
+                      </td>
                       <td className="px-3 py-4 text-sm max-w-md truncate">{error.errorMessage}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm">
                         <div className="flex items-center gap-2">
