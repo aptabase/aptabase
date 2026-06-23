@@ -22,4 +22,12 @@ public class InMemoryErrorBuffer : IErrorBuffer
             return all;
         }
     }
+
+    public int Count()
+    {
+        lock (_lock)
+        {
+            return _buffer.Count;
+        }
+    }
 }

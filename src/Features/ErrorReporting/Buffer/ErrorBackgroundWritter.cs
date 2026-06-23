@@ -39,7 +39,7 @@ public class ErrorBackgroundWritter : BackgroundService
         _logger.LogInformation("ErrorBackgroundWritter stopped.");
     }
 
-    public int Count() => _buffer.TakeAll().Length;
+    public int Count() => _buffer.Count();
 
     public async Task FlushErrors()
     {

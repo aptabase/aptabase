@@ -4,4 +4,5 @@ public interface IErrorBuffer
 {
     void Add(ref TrackingError error);
     TrackingError[] TakeAll();
+    int Count();
 }
