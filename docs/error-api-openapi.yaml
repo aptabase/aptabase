@@ -74,8 +74,25 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: "Invalid App-Key"
+        "403":
+          description: |
+            Forbidden – the app has exhausted its monthly error quota.
+            Clients should NOT retry: the quota only resets on the 1st of
+            each month, so the report should be dropped. (403 is used
+            deliberately instead of 429, because SDKs treat 429 as
+            retryable.)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Error quota exceeded"
         "429":
-          description: Too Many Requests – rate limit exceeded (20 req/s per IP).
+          description: |
+            Too Many Requests – returned ONLY by the per-IP rate limiter
+            (20 req/s per IP, `EventIngestion` policy). Retrying after a
+            short delay is appropriate. Quota exhaustion is reported as
+            403, never 429.
 
     options:
       operationId: optionsError

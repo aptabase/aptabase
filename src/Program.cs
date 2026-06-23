@@ -151,6 +151,8 @@ public partial class Program
         builder.Services.AddSingleton<IPiiSanitizer, PiiSanitizer>();
         builder.Services.AddHostedService<EventBackgroundWritter>();
         builder.Services.AddHostedService<ErrorBackgroundWritter>();
+        if (appEnv.ErrorQuotaEnabled)
+            builder.Services.AddHostedService<ResetErrorCountCronJob>();
         builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
 
         if (appEnv.IsBillingEnabled)
