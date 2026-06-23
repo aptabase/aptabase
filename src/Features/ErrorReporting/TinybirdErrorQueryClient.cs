@@ -39,7 +39,7 @@ public class TinybirdErrorQueryClient : IErrorQueryClient
         return result.FirstOrDefault();
     }
 
-    public async Task<int> GetErrorCountAsync(string appId, DateTime startDate, DateTime endDate, string? errorType, string? platform, CancellationToken cancellationToken)
+    public async Task<int> GetErrorCountAsync(string appId, DateTime startDate, DateTime endDate, string? errorType, string? osName, CancellationToken cancellationToken)
     {
         var args = new
         {
@@ -47,7 +47,7 @@ public class TinybirdErrorQueryClient : IErrorQueryClient
             start_date = startDate,
             end_date = endDate,
             error_type = errorType,
-            platform = platform
+            os_name = osName
         };
 
         var result = await _queryClient.NamedQuerySingleAsync<ErrorCountDto>("get_error_count", args, cancellationToken);
