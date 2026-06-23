@@ -202,7 +202,7 @@ export function ErrorsList({ appId }: ErrorsListProps) {
   return (
     <div className="mt-6">
       {/* Filters */}
-      <div className="mb-6 flex flex-wrap items-end gap-4">
+      <div className="mb-6 flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
           <IconFilter className="h-5 w-5 text-muted-foreground" />
           <span className="text-sm font-medium">Filters:</span>
