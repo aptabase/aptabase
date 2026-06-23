@@ -8,32 +8,36 @@ namespace Aptabase.Features.ErrorReporting;
 public partial class PiiSanitizer : IPiiSanitizer
 {
     // Email pattern: matches standard email addresses
-    [GeneratedRegex(@"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", RegexOptions.Compiled)]
+    [GeneratedRegex(@"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b", RegexOptions.Compiled)]
     private static partial Regex EmailRegex();
 
-    // IPv4 pattern: matches standard IPv4 addresses
-    [GeneratedRegex(@"\b(?:\d{1,3}\.){3}\d{1,3}\b", RegexOptions.Compiled)]
+    // IPv4 pattern: matches standard IPv4 addresses with valid octet ranges (0-255).
+    // Lookbehind/lookahead prevent matching inside a longer dotted-number sequence.
+    [GeneratedRegex(@"(?<!\d\.)\b(?:(?:25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])\b(?!\.\d)", RegexOptions.Compiled)]
     private static partial Regex IPv4Regex();
 
-    // IPv6 pattern: matches standard IPv6 addresses (including compressed forms like ::1)
-    [GeneratedRegex(@"(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|::1)", RegexOptions.Compiled)]
+    // IPv6 pattern: matches standard IPv6 addresses (including compressed forms like ::1).
+    // Lookbehind/lookahead forbid adjacent identifier characters so C++/Rust scope
+    // operators (e.g. std::vector) are not mistaken for IPv6 addresses.
+    [GeneratedRegex(@"(?<![0-9A-Za-z:])(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|::(?:[0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}|::1)(?![0-9A-Za-z:])", RegexOptions.Compiled)]
     private static partial Regex IPv6Regex();
 
-    // Credit card pattern: matches common credit card formats (with or without spaces/dashes)
-    // Matches 13-19 digit sequences that may be grouped by spaces or dashes
-    [GeneratedRegex(@"\b(?:\d{4}[-\s]?){3}\d{1,7}\b", RegexOptions.Compiled)]
+    // Credit card pattern: matches real 16-digit cards (grouped 4-4-4-4 or contiguous)
+    // plus 15-digit American Express (4-6-5). Avoids matching arbitrary digit runs.
+    [GeneratedRegex(@"\b(?:(?:\d{4}[-\s]?){3}\d{4}|3[47]\d{2}[-\s]?\d{6}[-\s]?\d{5})\b", RegexOptions.Compiled)]
     private static partial Regex CreditCardRegex();
 
-    // Phone number pattern: matches various phone number formats
-    // Matches: +1-234-567-8900, (123) 456-7890, 123-456-7890, 1234567890, etc.
-    // Negative lookbehind to avoid matching within longer hex/alphanumeric strings
-    [GeneratedRegex(@"(?<![0-9a-fA-F-])(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})(?![0-9a-fA-F])", RegexOptions.Compiled)]
+    // Phone number pattern: matches various phone number formats.
+    // Matches: +1-234-567-8900, (123) 456-7890, 123-456-7890, 123.456.7890, etc.
+    // Separators between groups are MANDATORY so a bare run of 10 digits is not matched.
+    // Negative lookbehind/lookahead avoid matching within longer hex/alphanumeric strings.
+    [GeneratedRegex(@"(?<![0-9a-fA-F-])(?:\+?1[-.\s])?\(?([0-9]{3})\)?[-.\s]([0-9]{3})[-.\s]([0-9]{4})(?![0-9a-fA-F])", RegexOptions.Compiled)]
     private static partial Regex PhoneRegex();
 
     // API key/token patterns: matches common patterns for API keys, tokens, and secrets
     // Looks for key=value, token=value, bearer tokens, etc.
-    // Group 1: opening quote (optional), Group 2: the actual key value
-    [GeneratedRegex(@"\b(?:api[_-]?key|token|bearer|secret|password|auth)[=:\s]+(['""]?)([A-Za-z0-9_\-]{20,})['""]?", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
+    // Group 1: opening quote (optional), Group 2: the actual key value, Group 3: closing quote (optional)
+    [GeneratedRegex(@"\b(?:api[_-]?key|token|bearer|secret|password|auth)[=:\s]+(['""]?)([A-Za-z0-9_\-]{20,})(['""]?)", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
     private static partial Regex ApiKeyRegex();
 
     // JWT pattern: matches JSON Web Tokens (three base64 segments separated by dots)
@@ -78,11 +82,12 @@ public partial class PiiSanitizer : IPiiSanitizer
         // Redact API keys/tokens/secrets
         sanitized = ApiKeyRegex().Replace(sanitized, m =>
         {
-            // Preserve the key name but redact the value
-            // Group 1 is the opening quote (if any), Group 2 is the actual key value
-            // Extract prefix before group 2 (the key value)
+            // Preserve the key name (and surrounding quotes) but redact the value.
+            // Group 1 is the opening quote (if any), Group 2 is the actual key value,
+            // Group 3 is the closing quote (if any). Extract the prefix before group 2
+            // and re-append the captured closing quote so balanced quotes are preserved.
             var prefix = m.Value.Substring(0, m.Groups[2].Index - m.Index);
-            return prefix + "[KEY_REDACTED]";
+            return prefix + "[KEY_REDACTED]" + m.Groups[3].Value;
         });
 
         // Redact UUIDs (be conservative - only if they appear in sensitive contexts)

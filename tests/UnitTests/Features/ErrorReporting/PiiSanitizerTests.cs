@@ -31,6 +31,9 @@ public class PiiSanitizerTests
     [InlineData("Contact me at john.doe@example.com for details", "Contact me at [EMAIL_REDACTED] for details")]
     [InlineData("Email: test.user+tag@sub.domain.co.uk", "Email: [EMAIL_REDACTED]")]
     [InlineData("Multiple emails: alice@test.com and bob@example.org", "Multiple emails: [EMAIL_REDACTED] and [EMAIL_REDACTED]")]
+    // ITEM 10: the TLD char class used to contain a literal '|' ([A-Z|a-z]); these still redact.
+    [InlineData("user@example.com", "[EMAIL_REDACTED]")]
+    [InlineData("john.doe@company.co.uk", "[EMAIL_REDACTED]")]
     public void Sanitize_Should_Redact_Email_Addresses(string input, string expected)
     {
         var result = _sanitizer.Sanitize(input);
@@ -41,6 +44,10 @@ public class PiiSanitizerTests
     [InlineData("Server IP: 192.168.1.1", "Server IP: [IP_REDACTED]")]
     [InlineData("Connected from 10.0.0.5 to 172.16.0.1", "Connected from [IP_REDACTED] to [IP_REDACTED]")]
     [InlineData("Public IP: 8.8.8.8", "Public IP: [IP_REDACTED]")]
+    // ITEM 8: valid octets at sentence boundaries; trailing period preserved.
+    [InlineData("192.168.1.1", "[IP_REDACTED]")]
+    [InlineData("Server 10.0.0.255 down", "Server [IP_REDACTED] down")]
+    [InlineData("Connection to 10.0.0.1.", "Connection to [IP_REDACTED].")]
     public void Sanitize_Should_Redact_IPv4_Addresses(string input, string expected)
     {
         var result = _sanitizer.Sanitize(input);
@@ -48,8 +55,22 @@ public class PiiSanitizerTests
     }
 
     [Theory]
+    // ITEM 8: invalid octets (>255) and longer dotted runs must NOT be redacted.
+    [InlineData("999.999.999.999")]
+    [InlineData("1.2.3.4.5")]
+    public void Sanitize_Should_Not_Redact_Invalid_IPv4_Addresses(string input)
+    {
+        var result = _sanitizer.Sanitize(input);
+        result.Should().Be(input);
+    }
+
+    [Theory]
     [InlineData("IPv6: 2001:0db8:85a3:0000:0000:8a2e:0370:7334", "IPv6: [IP_REDACTED]")]
     [InlineData("Localhost: ::1", "Localhost: [IP_REDACTED]")]
+    // ITEM 5: additional compressed/full IPv6 forms.
+    [InlineData("fe80::1", "[IP_REDACTED]")]
+    [InlineData("2001:0db8:85a3:0000:0000:8a2e:0370:7334", "[IP_REDACTED]")]
+    [InlineData("::1", "[IP_REDACTED]")]
     public void Sanitize_Should_Redact_IPv6_Addresses(string input, string expected)
     {
         var result = _sanitizer.Sanitize(input);
@@ -57,9 +78,25 @@ public class PiiSanitizerTests
     }
 
     [Theory]
+    // ITEM 5: C++/Rust scope operator (::) inside identifiers must NOT be treated as IPv6.
+    [InlineData("at std::vector<int>::push_back()")]
+    [InlineData("MyNamespace::MyClass::Method")]
+    public void Sanitize_Should_Not_Redact_Cpp_Scope_Operator_As_IPv6(string input)
+    {
+        var result = _sanitizer.Sanitize(input);
+        result.Should().Be(input);
+        result.Should().NotContain("[IP_REDACTED]");
+    }
+
+    [Theory]
     [InlineData("Card: 4532-1234-5678-9010", "Card: [CARD_REDACTED]")]
     [InlineData("Credit card 4532 1234 5678 9010", "Credit card [CARD_REDACTED]")]
     [InlineData("Payment: 4532123456789010", "Payment: [CARD_REDACTED]")]
+    // ITEM 6: real 16-digit cards (grouped/contiguous) and 15-digit Amex.
+    [InlineData("4111 1111 1111 1111", "[CARD_REDACTED]")]
+    [InlineData("4111-1111-1111-1111", "[CARD_REDACTED]")]
+    [InlineData("4111111111111111", "[CARD_REDACTED]")]
+    [InlineData("3782 822463 10005", "[CARD_REDACTED]")]
     public void Sanitize_Should_Redact_Credit_Card_Numbers(string input, string expected)
     {
         var result = _sanitizer.Sanitize(input);
@@ -67,14 +104,40 @@ public class PiiSanitizerTests
     }
 
     [Theory]
+    // ITEM 6: arbitrary digit runs (build numbers, sequences) must NOT be redacted as cards.
+    [InlineData("Build 2024 1015 1200 5")]
+    [InlineData("seq 1234567890123 done")]
+    public void Sanitize_Should_Not_Redact_Non_Card_Digit_Runs(string input)
+    {
+        var result = _sanitizer.Sanitize(input);
+        result.Should().Be(input);
+        result.Should().NotContain("[CARD_REDACTED]");
+    }
+
+    [Theory]
     [InlineData("Call me at (555) 123-4567", "Call me at [PHONE_REDACTED]")]
     [InlineData("Phone: 555-123-4567", "Phone: [PHONE_REDACTED]")]
     [InlineData("Contact: +1-555-123-4567", "Contact: [PHONE_REDACTED]")]
-    [InlineData("Mobile: 5551234567", "Mobile: [PHONE_REDACTED]")]
+    // ITEM 7: formatted phone numbers (separator/parens/+country) must be redacted.
+    [InlineData("Call +1-234-567-8900", "Call [PHONE_REDACTED]")]
+    [InlineData("Phone: (123) 456-7890", "Phone: [PHONE_REDACTED]")]
+    [InlineData("123-456-7890", "[PHONE_REDACTED]")]
+    [InlineData("123.456.7890", "[PHONE_REDACTED]")]
     public void Sanitize_Should_Redact_Phone_Numbers(string input, string expected)
     {
         var result = _sanitizer.Sanitize(input);
         result.Should().Be(expected);
+    }
+
+    [Theory]
+    // ITEM 7: a bare run of 10 digits with NO separators must NOT be redacted.
+    [InlineData("id 5551234567 here")]
+    [InlineData("8005551234")]
+    public void Sanitize_Should_Not_Redact_Bare_Digit_Runs_As_Phone(string input)
+    {
+        var result = _sanitizer.Sanitize(input);
+        result.Should().Be(input);
+        result.Should().NotContain("[PHONE_REDACTED]");
     }
 
     [Theory]
@@ -90,8 +153,10 @@ public class PiiSanitizerTests
     [InlineData("api_key=sk_live_1234567890abcdefghij", "api_key=[KEY_REDACTED]")]
     [InlineData("token: abcdefghijklmnopqrstuvwxyz123456", "token: [KEY_REDACTED]")]
     [InlineData("Bearer abcdefghijklmnopqrstuvwxyz123456", "Bearer [KEY_REDACTED]")]
-    [InlineData("secret=\"my_secret_key_1234567890123456789012\"", "secret=\"[KEY_REDACTED]")]
     [InlineData("password=supersecretpassword123456", "password=[KEY_REDACTED]")]
+    // ITEM 9: the closing quote must be preserved (balanced quotes), not consumed.
+    [InlineData("secret=\"my_secret_value_1234567890123\"", "secret=\"[KEY_REDACTED]\"")]
+    [InlineData("api_key=abcdefghij1234567890abcdef", "api_key=[KEY_REDACTED]")]
     public void Sanitize_Should_Redact_API_Keys_And_Tokens(string input, string expected)
     {
         var result = _sanitizer.Sanitize(input);
