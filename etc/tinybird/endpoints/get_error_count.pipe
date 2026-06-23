@@ -11,3 +11,5 @@ SQL >
     AND timestamp <= {{DateTime(end_date)}}
     {% if defined(error_type) %}AND error_type = {{String(error_type)}}{% end %}
     {% if defined(os_name) %}AND os_name = {{String(os_name)}}{% end %}
+    {% if defined(severity) %}AND severity = {{String(severity)}}{% end %}
+    {% if defined(kind) %}AND kind = {{String(kind)}}{% end %}

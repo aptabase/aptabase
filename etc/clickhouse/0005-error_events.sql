@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS error_events
     `app_version` String,
     `sdk_version` String,
     `session_id` String,
+    `severity` LowCardinality(String),
+    `kind` LowCardinality(String),
     `ttl` DateTime
 )
 ENGINE = MergeTree()

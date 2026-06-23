@@ -20,6 +20,8 @@ public class ClickHouseErrorIngestionClient : IErrorIngestionClient
         "app_version",
         "sdk_version",
         "session_id",
+        "severity",
+        "kind",
         "ttl"
     ];
 
@@ -50,6 +52,8 @@ public class ClickHouseErrorIngestionClient : IErrorIngestionClient
             row.AppVersion,
             row.SdkVersion,
             row.SessionId,
+            row.Severity,
+            row.Kind,
             row.TTL,
         });
         await bulkCopy.InitAsync();

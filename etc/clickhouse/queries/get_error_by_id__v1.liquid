@@ -9,7 +9,9 @@ SELECT error_id as ErrorId,
        os_version as OsVersion,
        app_version as AppVersion,
        sdk_version as SdkVersion,
-       session_id as SessionId
+       session_id as SessionId,
+       severity as Severity,
+       kind as Kind
 FROM error_events
 WHERE app_id = '{{app_id}}'
 AND error_id = '{{error_id}}'

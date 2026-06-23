@@ -63,6 +63,9 @@ public class ErrorsController : ControllerBase
         // Normalize timestamp (convert to UTC, clamp to now if in future)
         body.NormalizeTimestamp();
 
+        // Normalize severity/kind against the known values (unknown values become empty)
+        body.NormalizeSeverityAndKind();
+
         // Extract App-Key header
         if (!Request.Headers.TryGetValue("App-Key", out var appKey) || string.IsNullOrWhiteSpace(appKey))
         {
@@ -137,7 +140,9 @@ public class ErrorsController : ControllerBase
             OsVersion = body.OsVersion,
             AppVersion = body.AppVersion,
             SdkVersion = body.SdkVersion,
-            SessionId = body.SessionId
+            SessionId = body.SessionId,
+            Severity = body.Severity,
+            Kind = body.Kind
         };
 
         // Add to buffer
@@ -157,6 +162,8 @@ public class ErrorsController : ControllerBase
         [FromQuery] DateTime? endDate,
         [FromQuery] string? errorType,
         [FromQuery] string? osName,
+        [FromQuery] string? severity,
+        [FromQuery] string? kind,
         [FromQuery] int offset = 0,
         [FromQuery] int limit = 50,
         CancellationToken cancellationToken = default)
@@ -192,6 +199,8 @@ public class ErrorsController : ControllerBase
             end,
             errorType,
             osName,
+            severity,
+            kind,
             offset,
             limit,
             cancellationToken);
@@ -203,6 +212,8 @@ public class ErrorsController : ControllerBase
             end,
             errorType,
             osName,
+            severity,
+            kind,
             cancellationToken);
 
         return Ok(new

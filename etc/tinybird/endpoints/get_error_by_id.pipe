@@ -15,7 +15,9 @@ SQL >
            os_version as OsVersion,
            app_version as AppVersion,
            sdk_version as SdkVersion,
-           session_id as SessionId
+           session_id as SessionId,
+           severity as Severity,
+           kind as Kind
     FROM error_events
     PREWHERE app_id = {{String(app_id)}}
     AND error_id = {{String(error_id)}}

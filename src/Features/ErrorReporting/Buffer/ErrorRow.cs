@@ -19,6 +19,8 @@ public readonly struct ErrorRow
     public readonly string AppVersion;
     public readonly string SdkVersion;
     public readonly string SessionId;
+    public readonly string Severity;
+    public readonly string Kind;
     public readonly DateTime TTL;
 
     public ErrorRow(ref TrackingError e)
@@ -35,6 +37,8 @@ public readonly struct ErrorRow
         AppVersion = e.AppVersion ?? "";
         SdkVersion = e.SdkVersion ?? "";
         SessionId = e.SessionId ?? "";
+        Severity = e.Severity ?? "";
+        Kind = e.Kind ?? "";
         TTL = e.Timestamp.Add(ErrorTTL);
     }
 
@@ -53,6 +57,8 @@ public readonly struct ErrorRow
         WriteProperty(writer, "appVersion", AppVersion);
         WriteProperty(writer, "sdkVersion", SdkVersion);
         WriteProperty(writer, "sessionId", SessionId);
+        WriteProperty(writer, "severity", Severity);
+        WriteProperty(writer, "kind", Kind);
         WriteProperty(writer, "ttl", TTL.ToString("o"), true);
         writer.Write("}");
     }

@@ -5,6 +5,10 @@ namespace Aptabase.Features.ErrorReporting;
 
 public class ErrorBody
 {
+    // Known values sent by the SDKs. Anything else is normalized to "".
+    private static readonly string[] KnownSeverities = new[] { "fatal", "error" };
+    private static readonly string[] KnownKinds = new[] { "crash", "unhandled", "taskException", "handled" };
+
     public string? ErrorMessage { get; set; }
     public string? ErrorType { get; set; }
     public string? StackTrace { get; set; }
@@ -15,6 +19,8 @@ public class ErrorBody
     public string? AppVersion { get; set; }
     public string? SdkVersion { get; set; }
     public string? SessionId { get; set; }
+    public string? Severity { get; set; }
+    public string? Kind { get; set; }
 
     public bool IsValid()
     {
@@ -52,6 +58,12 @@ public class ErrorBody
         if (!string.IsNullOrWhiteSpace(SessionId) && SessionId.Length > 100)
             return false;
 
+        if (!string.IsNullOrWhiteSpace(Severity) && Severity.Length > 20)
+            return false;
+
+        if (!string.IsNullOrWhiteSpace(Kind) && Kind.Length > 20)
+            return false;
+
         return true;
     }
 
@@ -69,5 +81,28 @@ public class ErrorBody
         // Clamp future timestamps to now
         if (Timestamp.Value > now)
             Timestamp = now;
+    }
+
+    public void NormalizeSeverityAndKind()
+    {
+        Severity = Canonicalize(Severity, KnownSeverities);
+        Kind = Canonicalize(Kind, KnownKinds);
+    }
+
+    // Case-insensitively matches the value against the known list and returns
+    // its canonical casing. Unknown, null or empty values become "" — we never
+    // reject the whole error report over a bad enum value.
+    private static string Canonicalize(string? value, string[] knownValues)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return "";
+
+        foreach (var known in knownValues)
+        {
+            if (string.Equals(known, value, StringComparison.OrdinalIgnoreCase))
+                return known;
+        }
+
+        return "";
     }
 }

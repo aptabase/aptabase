@@ -33,6 +33,8 @@ public class ErrorDto
     public string AppVersion { get; set; } = "";
     public string SdkVersion { get; set; } = "";
     public string SessionId { get; set; } = "";
+    public string Severity { get; set; } = "";
+    public string Kind { get; set; } = "";
 }
 
 public class ErrorCountDto
@@ -42,7 +44,7 @@ public class ErrorCountDto
 
 public interface IErrorQueryClient
 {
-    Task<IEnumerable<ErrorDto>> GetErrorsAsync(string appId, DateTime startDate, DateTime endDate, string? errorType, string? osName, int offset, int limit, CancellationToken cancellationToken);
+    Task<IEnumerable<ErrorDto>> GetErrorsAsync(string appId, DateTime startDate, DateTime endDate, string? errorType, string? osName, string? severity, string? kind, int offset, int limit, CancellationToken cancellationToken);
     Task<ErrorDto?> GetErrorByIdAsync(string appId, string errorId, CancellationToken cancellationToken);
-    Task<int> GetErrorCountAsync(string appId, DateTime startDate, DateTime endDate, string? errorType, string? osName, CancellationToken cancellationToken);
+    Task<int> GetErrorCountAsync(string appId, DateTime startDate, DateTime endDate, string? errorType, string? osName, string? severity, string? kind, CancellationToken cancellationToken);
 }

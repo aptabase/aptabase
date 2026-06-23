@@ -47,6 +47,8 @@ paths:
               appVersion: "1.2.3"
               sdkVersion: "aptabase-flutter@0.1.0"
               sessionId: "abc-123-def"
+              severity: "fatal"
+              kind: "crash"
       responses:
         "202":
           description: Accepted – error has been buffered for processing.
@@ -152,6 +154,22 @@ components:
           type: string
           maxLength: 100
           description: Client session identifier.
+        severity:
+          type: string
+          maxLength: 20
+          enum: [fatal, error]
+          description: |
+            Error severity. Matched case-insensitively against the known
+            values; unknown values are stored as an empty string (the report
+            itself is never rejected over an unknown severity).
+        kind:
+          type: string
+          maxLength: 20
+          enum: [crash, unhandled, taskException, handled]
+          description: |
+            How the error was captured. Matched case-insensitively against the
+            known values; unknown values are stored as an empty string (the
+            report itself is never rejected over an unknown kind).
 
     ErrorResponse:
       type: object
