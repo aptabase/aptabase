@@ -26,7 +26,7 @@ public readonly struct ErrorRow
     public ErrorRow(ref TrackingError e)
     {
         ErrorId = e.ErrorId;
-        AppId = e.AppId;
+        AppId = e.IsDebug ? $"{e.AppId}_DEBUG" : e.AppId;
         Timestamp = e.Timestamp;
         ErrorMessage = e.ErrorMessage;
         ErrorType = e.ErrorType;

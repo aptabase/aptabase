@@ -49,6 +49,7 @@ paths:
               sessionId: "abc-123-def"
               severity: "fatal"
               kind: "crash"
+              isDebug: false
       responses:
         "202":
           description: Accepted – error has been buffered for processing.
@@ -170,6 +171,14 @@ components:
             How the error was captured. Matched case-insensitively against the
             known values; unknown values are stored as an empty string (the
             report itself is never rejected over an unknown kind).
+        isDebug:
+          type: boolean
+          default: false
+          description: |
+            Whether the error originated from a debug build of the app. Errors
+            from debug builds are stored separately from release builds (under
+            a `_DEBUG`-suffixed app id) so they never mix in the dashboard.
+            Older SDKs that omit this field are treated as release builds.
 
     ErrorResponse:
       type: object

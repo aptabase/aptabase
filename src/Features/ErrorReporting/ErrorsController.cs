@@ -142,7 +142,8 @@ public class ErrorsController : ControllerBase
             SdkVersion = body.SdkVersion,
             SessionId = body.SessionId,
             Severity = body.Severity,
-            Kind = body.Kind
+            Kind = body.Kind,
+            IsDebug = body.IsDebug
         };
 
         // Add to buffer
@@ -158,6 +159,7 @@ public class ErrorsController : ControllerBase
     [Route("/api/v0/apps/{appId}/errors")]
     public async Task<IActionResult> GetErrors(
         string appId,
+        [FromQuery] string? buildMode,
         [FromQuery] DateTime? startDate,
         [FromQuery] DateTime? endDate,
         [FromQuery] string? errorType,
@@ -168,13 +170,16 @@ public class ErrorsController : ControllerBase
         [FromQuery] int limit = 50,
         CancellationToken cancellationToken = default)
     {
-        // Check if user has access to the app
+        // Check if user has access to the app (always against the raw app id)
         var user = HttpContext.GetCurrentUserIdentity();
         var hasAccess = await _db.HasReadAccessToApp(appId, user, cancellationToken);
         if (!hasAccess)
         {
             return StatusCode(403);
         }
+
+        // Debug builds are stored under a suffixed app id, same as analytics events
+        var queryAppId = ResolveAppId(appId, buildMode);
 
         // Set default date range if not provided (last 7 days)
         var end = endDate ?? DateTime.UtcNow;
@@ -194,7 +199,7 @@ public class ErrorsController : ControllerBase
 
         // Query errors
         var errors = await _errorQueryClient.GetErrorsAsync(
-            appId,
+            queryAppId,
             start,
             end,
             errorType,
@@ -207,7 +212,7 @@ public class ErrorsController : ControllerBase
 
         // Get total count for pagination
         var totalCount = await _errorQueryClient.GetErrorCountAsync(
-            appId,
+            queryAppId,
             start,
             end,
             errorType,
@@ -235,9 +240,10 @@ public class ErrorsController : ControllerBase
     public async Task<IActionResult> GetErrorById(
         string appId,
         string errorId,
+        [FromQuery] string? buildMode = null,
         CancellationToken cancellationToken = default)
     {
-        // Check if user has access to the app
+        // Check if user has access to the app (always against the raw app id)
         var user = HttpContext.GetCurrentUserIdentity();
         var hasAccess = await _db.HasReadAccessToApp(appId, user, cancellationToken);
         if (!hasAccess)
@@ -245,8 +251,11 @@ public class ErrorsController : ControllerBase
             return StatusCode(403);
         }
 
+        // Debug builds are stored under a suffixed app id, same as analytics events
+        var queryAppId = ResolveAppId(appId, buildMode);
+
         // Query error by ID
-        var error = await _errorQueryClient.GetErrorByIdAsync(appId, errorId, cancellationToken);
+        var error = await _errorQueryClient.GetErrorByIdAsync(queryAppId, errorId, cancellationToken);
 
         // Return 404 if error not found or doesn't belong to app
         if (error == null)
@@ -263,5 +272,15 @@ public class ErrorsController : ControllerBase
     public IActionResult OptionsError()
     {
         return Ok();
+    }
+
+    // Maps the buildMode query parameter to the stored app id, mirroring Stats.QueryParams.Parse()
+    private static string ResolveAppId(string appId, string? buildMode)
+    {
+        return buildMode?.ToLower() switch
+        {
+            "debug" => $"{appId}_DEBUG",
+            _ => appId,
+        };
     }
 }

@@ -21,6 +21,8 @@ public class ErrorBody
     public string? SessionId { get; set; }
     public string? Severity { get; set; }
     public string? Kind { get; set; }
+    // Older SDKs don't send this field, so it defaults to false (release build)
+    public bool IsDebug { get; set; }
 
     public bool IsValid()
     {

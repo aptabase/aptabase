@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@components/Dialog";
 import { LoadingState } from "@components/LoadingState";
+import { useApps } from "@features/apps";
 import { IconCheck, IconCopy } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -29,8 +30,9 @@ interface ErrorDetailModalProps {
   onClose: () => void;
 }
 
-async function fetchErrorDetail(appId: string, errorId: string): Promise<ErrorDetail> {
-  const response = await fetch(`/api/v0/apps/${appId}/errors/${errorId}`, {
+async function fetchErrorDetail(appId: string, errorId: string, buildMode: string): Promise<ErrorDetail> {
+  const params = new URLSearchParams({ buildMode });
+  const response = await fetch(`/api/v0/apps/${appId}/errors/${errorId}?${params}`, {
     credentials: "include",
   });
 
@@ -42,12 +44,13 @@ async function fetchErrorDetail(appId: string, errorId: string): Promise<ErrorDe
 }
 
 export function ErrorDetailModal({ appId, errorId, open, onClose }: ErrorDetailModalProps) {
+  const { buildMode } = useApps();
   const [justCopied, setJustCopied] = useState(false);
   const navigate = useNavigate();
 
   const { data: error, isLoading } = useQuery({
-    queryKey: ["error-detail", appId, errorId],
-    queryFn: () => fetchErrorDetail(appId, errorId!),
+    queryKey: ["error-detail", appId, buildMode, errorId],
+    queryFn: () => fetchErrorDetail(appId, errorId!, buildMode),
     enabled: !!errorId && open,
   });
 

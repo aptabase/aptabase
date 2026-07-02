@@ -3,6 +3,7 @@ import { EmptyState } from "@components/EmptyState";
 import { ErrorState } from "@components/ErrorState";
 import { LoadingState } from "@components/LoadingState";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/Select";
+import { useApps } from "@features/apps";
 import {
   IconAlertTriangle,
   IconChevronLeft,
@@ -49,6 +50,7 @@ interface ErrorsResponse {
 
 async function fetchErrors(
   appId: string,
+  buildMode: string,
   offset: number,
   limit: number,
   startDate?: string,
@@ -58,6 +60,7 @@ async function fetchErrors(
   severity?: string,
 ): Promise<ErrorsResponse> {
   const params = new URLSearchParams({
+    buildMode,
     offset: offset.toString(),
     limit: limit.toString(),
   });
@@ -102,6 +105,7 @@ interface ErrorsListProps {
 }
 
 export function ErrorsList({ appId }: ErrorsListProps) {
+  const { buildMode } = useApps();
   const [offset, setOffset] = useState(0);
   const limit = 50;
   const [searchParams, setSearchParams] = useSearchParams();
@@ -117,6 +121,7 @@ export function ErrorsList({ appId }: ErrorsListProps) {
     queryKey: [
       "errors",
       appId,
+      buildMode,
       offset,
       limit,
       dateFilters.startDateIso,
@@ -128,6 +133,7 @@ export function ErrorsList({ appId }: ErrorsListProps) {
     queryFn: () =>
       fetchErrors(
         appId,
+        buildMode,
         offset,
         limit,
         dateFilters.startDateIso,
