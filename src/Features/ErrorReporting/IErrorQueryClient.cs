@@ -42,9 +42,18 @@ public class ErrorCountDto
     public int Count { get; set; }
 }
 
+// Shaped like Stats.TopNItem ({ name, value }) so the frontend can treat it
+// like the other top-N filter sources (e.g. /_stats/top-operatingsystems).
+public class ErrorTypeDto
+{
+    public string Name { get; set; } = "";
+    public int Value { get; set; }
+}
+
 public interface IErrorQueryClient
 {
     Task<IEnumerable<ErrorDto>> GetErrorsAsync(string appId, DateTime startDate, DateTime endDate, string? errorType, string? osName, string? severity, string? kind, int offset, int limit, CancellationToken cancellationToken);
     Task<ErrorDto?> GetErrorByIdAsync(string appId, string errorId, CancellationToken cancellationToken);
     Task<int> GetErrorCountAsync(string appId, DateTime startDate, DateTime endDate, string? errorType, string? osName, string? severity, string? kind, CancellationToken cancellationToken);
+    Task<IEnumerable<ErrorTypeDto>> GetErrorTypesAsync(string appId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken);
 }

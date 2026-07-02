@@ -57,4 +57,16 @@ public class TinybirdErrorQueryClient : IErrorQueryClient
         var result = await _queryClient.NamedQuerySingleAsync<ErrorCountDto>("get_error_count", args, cancellationToken);
         return result.Count;
     }
+
+    public async Task<IEnumerable<ErrorTypeDto>> GetErrorTypesAsync(string appId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken)
+    {
+        var args = new
+        {
+            app_id = appId,
+            start_date = startDate,
+            end_date = endDate
+        };
+
+        return await _queryClient.NamedQueryAsync<ErrorTypeDto>("get_error_types", args, cancellationToken);
+    }
 }

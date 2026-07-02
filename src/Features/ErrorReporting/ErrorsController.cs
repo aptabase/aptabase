@@ -233,6 +233,39 @@ public class ErrorsController : ControllerBase
         });
     }
 
+    // Note on routing: the literal segment "types" takes precedence over the
+    // {errorId} template on /errors/{errorId}, so both routes coexist safely.
+    [HttpGet]
+    [IsAuthenticated]
+    [EnableRateLimiting("Stats")]
+    [Route("/api/v0/apps/{appId}/errors/types")]
+    public async Task<IActionResult> GetErrorTypes(
+        string appId,
+        [FromQuery] string? buildMode,
+        [FromQuery] DateTime? startDate,
+        [FromQuery] DateTime? endDate,
+        CancellationToken cancellationToken = default)
+    {
+        // Check if user has access to the app (always against the raw app id)
+        var user = HttpContext.GetCurrentUserIdentity();
+        var hasAccess = await _db.HasReadAccessToApp(appId, user, cancellationToken);
+        if (!hasAccess)
+        {
+            return StatusCode(403);
+        }
+
+        // Debug builds are stored under a suffixed app id, same as analytics events
+        var queryAppId = ResolveAppId(appId, buildMode);
+
+        // Set default date range if not provided (last 7 days)
+        var end = endDate ?? DateTime.UtcNow;
+        var start = startDate ?? end.AddDays(-7);
+
+        var types = await _errorQueryClient.GetErrorTypesAsync(queryAppId, start, end, cancellationToken);
+
+        return Ok(types);
+    }
+
     [HttpGet]
     [IsAuthenticated]
     [EnableRateLimiting("Stats")]

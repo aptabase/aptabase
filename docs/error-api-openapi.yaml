@@ -105,6 +105,72 @@ paths:
         "200":
           description: OK
 
+  /api/v0/apps/{appId}/errors/types:
+    get:
+      operationId: getErrorTypes
+      summary: List top error types for an app
+      description: |
+        Returns the distinct error types recorded for an app within a date
+        range, together with how many times each occurred, ordered by
+        occurrence count (top 50). Used by the dashboard to populate the
+        error-type filter dropdown.
+
+        This is a dashboard endpoint: it requires an authenticated dashboard
+        session (cookie) and is rate-limited by the `Stats` policy
+        (1000 requests/hour per IP). Access is always checked against the
+        raw app id, before any build-mode suffix is applied.
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          description: The app id (raw, without any build-mode suffix).
+          schema:
+            type: string
+        - name: buildMode
+          in: query
+          required: false
+          description: |
+            Which build of the app to query. `debug` reads errors stored
+            under the `_DEBUG`-suffixed app id; anything else (or omitted)
+            reads release errors.
+          schema:
+            type: string
+            enum: [release, debug]
+        - name: startDate
+          in: query
+          required: false
+          description: |
+            Start of the date range (ISO 8601). Defaults to 7 days before
+            `endDate` when omitted.
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          required: false
+          description: |
+            End of the date range (ISO 8601). Defaults to the current time
+            when omitted.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: The list of error types with occurrence counts.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ErrorTypeItem"
+              example:
+                - name: "InvalidOperationException"
+                  value: 42
+                - name: "NullReferenceException"
+                  value: 17
+        "403":
+          description: Forbidden – the user does not have read access to the app.
+
 components:
   schemas:
     ErrorBody:
@@ -186,3 +252,13 @@ components:
         error:
           type: string
           description: Human-readable error message.
+
+    ErrorTypeItem:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The error type/class name (e.g. "InvalidOperationException").
+        value:
+          type: integer
+          description: Number of error events with this type within the date range.

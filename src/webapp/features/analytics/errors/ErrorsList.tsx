@@ -21,6 +21,7 @@ import { OSIcon } from "../dashboard/icons/os";
 import { DateFilterContainer } from "../date-filters/DateFilterContainer";
 import { OsFilterDropdown } from "../sessions/filters/OsFilterDropdown";
 import { ErrorDetailModal } from "./ErrorDetailModal";
+import { ErrorTypeFilterDropdown } from "./ErrorTypeFilterDropdown";
 
 interface ErrorItem {
   errorId: string;
@@ -226,20 +227,7 @@ export function ErrorsList({ appId }: ErrorsListProps) {
 
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Error Type:</span>
-          <Select value={errorType} onValueChange={handleErrorTypeChange}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              {/* Note: In a real implementation, you might want to fetch unique error types from the API */}
-              <SelectItem value="RuntimeError">RuntimeError</SelectItem>
-              <SelectItem value="TypeError">TypeError</SelectItem>
-              <SelectItem value="NetworkError">NetworkError</SelectItem>
-              <SelectItem value="SyntaxError">SyntaxError</SelectItem>
-              <SelectItem value="ReferenceError">ReferenceError</SelectItem>
-            </SelectContent>
-          </Select>
+          <ErrorTypeFilterDropdown appId={appId} value={errorType} onValueChange={handleErrorTypeChange} />
         </div>
 
         <div className="flex items-center gap-2">
