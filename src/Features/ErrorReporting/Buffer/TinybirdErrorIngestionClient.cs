@@ -46,6 +46,9 @@ public class TinybirdErrorIngestionClient : IErrorIngestionClient
                 response.EnsureSuccessStatusCode();
 
                 var result = await response.Content.ReadFromJsonAsync<InsertErrorResult>() ?? new InsertErrorResult();
+                if (result.QuarantinedRows > 0)
+                    _logger.LogWarning("Tinybird quarantined {QuarantinedRows} error rows ({SuccessfulRows} rows ingested successfully). Check the error_events quarantine datasource for schema mismatches.", result.QuarantinedRows, result.SuccessfulRows);
+
                 return result.SuccessfulRows;
             }
             catch (Exception ex)
