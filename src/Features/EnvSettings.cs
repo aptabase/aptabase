@@ -14,6 +14,12 @@ public class EnvSettings
     // Variable Name: DATABASE_URL
     public string ConnectionString { get; private set; } = "";
 
+    // The name of an HTTP header that carries the real client IP address, set by a trusted reverse proxy/CDN
+    // Only set this if the app is behind a proxy you trust, since the header value is used as-is
+    // E.g: CF-Connecting-IP
+    // Variable Name: CLIENT_IP_HEADER
+    public string ClientIpHeader { get; private set; } = "";
+
     // The full connection string to ClickHouse using .NET format
     // E.g: Host=my.clickhouse;Protocol=https;Port=12345;Username=user
     // Variable Name: CLICKHOUSE_URL
@@ -98,6 +104,7 @@ public class EnvSettings
             Region = region,
             SelfBaseUrl = MustGet("BASE_URL"),
             ConnectionString = GetOrNull("ConnectionStrings__postgresdb") ?? MustGet("DATABASE_URL"),
+            ClientIpHeader = Get("CLIENT_IP_HEADER"),
             ClickHouseConnectionString = GetOrNull("ConnectionStrings__clickhousedb") ?? Get("CLICKHOUSE_URL"),
             TinybirdBaseUrl = Get("TINYBIRD_BASE_URL"),
             TinybirdToken = Get("TINYBIRD_TOKEN"),

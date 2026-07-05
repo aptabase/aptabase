@@ -93,7 +93,7 @@ public partial class Program
             c.RejectionStatusCode = 429;
 
             c.AddPolicy("SignUp", httpContext => RateLimitPartition.GetFixedWindowLimiter(
-                httpContext.ResolveClientIpAddress(),
+                httpContext.ResolveClientIpAddress(appEnv.ClientIpHeader),
                 partition => new FixedWindowRateLimiterOptions
                 {
                     AutoReplenishment = true,
@@ -103,7 +103,7 @@ public partial class Program
             );
 
             c.AddPolicy("Stats", httpContext => RateLimitPartition.GetFixedWindowLimiter(
-                httpContext.ResolveClientIpAddress(),
+                httpContext.ResolveClientIpAddress(appEnv.ClientIpHeader),
                 partition => new FixedWindowRateLimiterOptions
                 {
                     AutoReplenishment = true,
@@ -113,7 +113,7 @@ public partial class Program
             );
 
             c.AddPolicy("EventIngestion", httpContext => RateLimitPartition.GetFixedWindowLimiter(
-                httpContext.ResolveClientIpAddress(),
+                httpContext.ResolveClientIpAddress(appEnv.ClientIpHeader),
                 partition => new FixedWindowRateLimiterOptions
                 {
                     AutoReplenishment = true,
@@ -123,7 +123,7 @@ public partial class Program
             );
 
             c.AddPolicy("FeatureFlags", httpContext => RateLimitPartition.GetFixedWindowLimiter(
-                httpContext.ResolveClientIpAddress(),
+                httpContext.ResolveClientIpAddress(appEnv.ClientIpHeader),
                 partition => new FixedWindowRateLimiterOptions
                 {
                     AutoReplenishment = true,

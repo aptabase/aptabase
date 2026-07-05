@@ -14,15 +14,18 @@ public class EventsController : Controller
     private readonly IIngestionCache _cache;
     private readonly IEventBuffer _buffer;
     private readonly GeoIPClient _geoIP;
+    private readonly EnvSettings _env;
 
     public EventsController(IIngestionCache cache,
                             IEventBuffer buffer,
                             GeoIPClient geoIP,
+                            EnvSettings env,
                             ILogger<EventsController> logger)
     {
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
         _geoIP = geoIP ?? throw new ArgumentNullException(nameof(geoIP));
+        _env = env ?? throw new ArgumentNullException(nameof(env));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -72,7 +75,7 @@ public class EventsController : Controller
         if (!isWeb)
             userAgent = $"{body.SystemProps.OSName}/{body.SystemProps.OSVersion} {body.SystemProps.EngineName}/{body.SystemProps.EngineVersion} {body.SystemProps.Locale}";
 
-        var clientIp = HttpContext.ResolveClientIpAddress();
+        var clientIp = HttpContext.ResolveClientIpAddress(_env.ClientIpHeader);
         var location = _geoIP.GetClientLocation(HttpContext);
         var trackingEvent = NewTrackingEvent(app.Id, location.CountryCode, location.RegionName, clientIp, userAgent ?? "", body);
         _buffer.Add(ref trackingEvent);
@@ -119,7 +122,7 @@ public class EventsController : Controller
         if (app.IsLocked) 
             return BadRequest($"Owner account is locked.");
 
-        var clientIp = HttpContext.ResolveClientIpAddress();
+        var clientIp = HttpContext.ResolveClientIpAddress(_env.ClientIpHeader);
         var location = _geoIP.GetClientLocation(HttpContext);
         var trackingEvents = validEvents.Select(e => NewTrackingEvent(app.Id, location.CountryCode, location.RegionName, clientIp, userAgent ?? "", e));
 

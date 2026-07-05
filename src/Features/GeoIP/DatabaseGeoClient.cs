@@ -5,16 +5,18 @@ namespace Aptabase.Features.GeoIP;
 public class DatabaseGeoClient : GeoIPClient
 {
     private readonly DatabaseReader _db;
+    private readonly EnvSettings _env;
 
     public DatabaseGeoClient(EnvSettings env)
         : base(env)
     {
+        _env = env;
         _db = new DatabaseReader(Path.Combine(env.EtcDirectoryPath, "geoip/GeoLite2-City.mmdb"));
     }
 
     public override GeoLocation GetClientLocation(HttpContext httpContext)
     {
-        var ip = httpContext.ResolveClientIpAddress();
+        var ip = httpContext.ResolveClientIpAddress(_env.ClientIpHeader);
         
         if (string.IsNullOrEmpty(ip))
             return GeoLocation.Empty;

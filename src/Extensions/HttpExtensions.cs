@@ -2,8 +2,15 @@ namespace Microsoft.AspNetCore.Http;
 
 public static class HttpContextExtensions
 {
-    public static string ResolveClientIpAddress(this HttpContext httpContext)
+    public static string ResolveClientIpAddress(this HttpContext httpContext, string clientIpHeader = "")
     {
+        // Only trust this header when the instance is behind a trusted reverse proxy/CDN,
+        // since its value is used as-is with no further validation
+        if (!string.IsNullOrEmpty(clientIpHeader) &&
+            httpContext.Request.Headers.TryGetValue(clientIpHeader, out var configuredIp) &&
+            !string.IsNullOrEmpty(configuredIp))
+            return configuredIp.ToString();
+
         if (httpContext.Request.Headers.TryGetValue("X-Real-Ip", out var ip) && !string.IsNullOrEmpty(ip))
             return ip.ToString();
 

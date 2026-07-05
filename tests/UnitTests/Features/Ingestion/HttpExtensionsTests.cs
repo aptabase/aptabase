@@ -20,4 +20,42 @@ public class HttpExtensionsTests
         var value = context.ResolveClientIpAddress();
         Assert.Equal(expected, value);
     }
+
+    [Fact]
+    public void ResolveClientIpAddress_WithClientIpHeader_TakesPriorityOverEverythingElse()
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Headers.Append("CF-Connecting-IP", new StringValues("203.0.113.1"));
+        context.Request.Headers.Append("X-Real-Ip", new StringValues("10.0.0.1"));
+        context.Request.Headers.Append("X-Forwarded-For", new StringValues("10.0.0.2"));
+
+        var value = context.ResolveClientIpAddress("CF-Connecting-IP");
+
+        Assert.Equal("203.0.113.1", value);
+    }
+
+    [Fact]
+    public void ResolveClientIpAddress_WithClientIpHeaderMissingFromRequest_FallsBackToExistingLogic()
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Headers.Append("X-Real-Ip", new StringValues("10.0.0.1"));
+
+        var value = context.ResolveClientIpAddress("CF-Connecting-IP");
+
+        Assert.Equal("10.0.0.1", value);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void ResolveClientIpAddress_WithoutClientIpHeaderConfigured_BehavesExactlyAsBefore(string? clientIpHeader)
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Headers.Append("CF-Connecting-IP", new StringValues("203.0.113.1"));
+        context.Request.Headers.Append("X-Real-Ip", new StringValues("10.0.0.1"));
+
+        var value = context.ResolveClientIpAddress(clientIpHeader ?? "");
+
+        Assert.Equal("10.0.0.1", value);
+    }
 }
