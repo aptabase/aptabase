@@ -45,6 +45,16 @@ public class AccountClient
         return metrics?.Current.Events ?? 0;
     }
 
+    public async Task<HttpResponseMessage> GetErrors(string appId)
+    {
+        return await _client.GetAsync($"/api/v0/apps/{appId}/errors?buildMode=release");
+    }
+
+    public async Task<HttpResponseMessage> GetErrorById(string appId, string errorId)
+    {
+        return await _client.GetAsync($"/api/v0/apps/{appId}/errors/{errorId}?buildMode=release");
+    }
+
     public async Task<SessionTimeline?> GetSessionTimeline(string appId, object sessionId)
     {
         return await _client.GetFromJsonAsync<SessionTimeline>($"/api/_stats/live-session-details?buildMode=release&appId={appId}&sessionId={sessionId}");
