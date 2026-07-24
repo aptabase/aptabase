@@ -308,6 +308,7 @@ export function ErrorsList({ appId }: ErrorsListProps) {
         </div>
       )}
 
+      {data.pagination.total > 0 && (
       <div className="flex justify-between items-center mt-4">
         <div className="text-sm text-muted-foreground">
           Showing {offset + 1} to {Math.min(offset + limit, data.pagination.total)} of {data.pagination.total} errors
@@ -323,6 +324,7 @@ export function ErrorsList({ appId }: ErrorsListProps) {
           </Button>
         </div>
       </div>
+      )}
 
       <ErrorDetailModal
         appId={appId}
