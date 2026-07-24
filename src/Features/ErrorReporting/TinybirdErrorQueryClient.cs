@@ -26,7 +26,7 @@ public class TinybirdErrorQueryClient : IErrorQueryClient
             limit = limit
         };
 
-        return await _queryClient.NamedQueryAsync<ErrorDto>("get_errors", args, cancellationToken);
+        return await _queryClient.NamedQueryAsync<ErrorDto>("get_errors__v1", args, cancellationToken);
     }
 
     public async Task<ErrorDto?> GetErrorByIdAsync(string appId, string errorId, CancellationToken cancellationToken)
@@ -37,7 +37,7 @@ public class TinybirdErrorQueryClient : IErrorQueryClient
             error_id = errorId
         };
 
-        var result = await _queryClient.NamedQueryAsync<ErrorDto>("get_error_by_id", args, cancellationToken);
+        var result = await _queryClient.NamedQueryAsync<ErrorDto>("get_error_by_id__v1", args, cancellationToken);
         return result.FirstOrDefault();
     }
 
@@ -54,7 +54,7 @@ public class TinybirdErrorQueryClient : IErrorQueryClient
             kind = kind
         };
 
-        var result = await _queryClient.NamedQuerySingleAsync<ErrorCountDto>("get_error_count", args, cancellationToken);
+        var result = await _queryClient.NamedQuerySingleAsync<ErrorCountDto>("get_error_count__v1", args, cancellationToken);
         return result.Count;
     }
 
@@ -67,6 +67,6 @@ public class TinybirdErrorQueryClient : IErrorQueryClient
             end_date = endDate
         };
 
-        return await _queryClient.NamedQueryAsync<ErrorTypeDto>("get_error_types", args, cancellationToken);
+        return await _queryClient.NamedQueryAsync<ErrorTypeDto>("get_error_types__v1", args, cancellationToken);
     }
 }
