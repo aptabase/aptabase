@@ -16,8 +16,8 @@ public class ClickHouseErrorQueryClient : IErrorQueryClient
         var args = new
         {
             app_id = appId,
-            start_date = startDate,
-            end_date = endDate,
+            start_date = startDate.ToString("yyyy-MM-dd HH:mm:ss"),
+            end_date = endDate.ToString("yyyy-MM-dd HH:mm:ss"),
             error_type = errorType,
             os_name = osName,
             severity = severity,
@@ -46,8 +46,8 @@ public class ClickHouseErrorQueryClient : IErrorQueryClient
         var args = new
         {
             app_id = appId,
-            start_date = startDate,
-            end_date = endDate,
+            start_date = startDate.ToString("yyyy-MM-dd HH:mm:ss"),
+            end_date = endDate.ToString("yyyy-MM-dd HH:mm:ss"),
             error_type = errorType,
             os_name = osName,
             severity = severity,
@@ -63,8 +63,8 @@ public class ClickHouseErrorQueryClient : IErrorQueryClient
         var args = new
         {
             app_id = appId,
-            start_date = startDate,
-            end_date = endDate
+            start_date = startDate.ToString("yyyy-MM-dd HH:mm:ss"),
+            end_date = endDate.ToString("yyyy-MM-dd HH:mm:ss")
         };
 
         return await _queryClient.NamedQueryAsync<ErrorTypeDto>("get_error_types__v1", args, cancellationToken);
