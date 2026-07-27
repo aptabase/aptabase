@@ -1,0 +1,24 @@
+DESCRIPTION >
+    Error/crash reports for apps. Errors from debug builds arrive with an appId already suffixed with _DEBUG
+
+SCHEMA >
+    `error_id` String `json:$.errorId`,
+    `app_id` String `json:$.appId`,
+    `timestamp` DateTime `json:$.timestamp`,
+    `error_message` String `json:$.errorMessage`,
+    `error_type` String `json:$.errorType`,
+    `stack_trace` String `json:$.stackTrace`,
+    `platform` LowCardinality(String) `json:$.platform`,
+    `os_name` LowCardinality(String) `json:$.osName`,
+    `os_version` String `json:$.osVersion`,
+    `app_version` String `json:$.appVersion`,
+    `sdk_version` String `json:$.sdkVersion`,
+    `session_id` String `json:$.sessionId`,
+    `severity` LowCardinality(String) `json:$.severity`,
+    `kind` LowCardinality(String) `json:$.kind`,
+    `ttl` DateTime `json:$.ttl`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "app_id, timestamp, error_type"
+ENGINE_TTL "ttl"

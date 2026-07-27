@@ -85,6 +85,10 @@ public class EnvSettings
     public string LemonSqueezySigningSecret { get; private set; } = "";
     public string EtcDirectoryPath { get; private set; } = "";
 
+    // Whether per-app error-reporting quota enforcement is active.
+    // Variable Name: ERROR_QUOTA_ENABLED (default: false). Not yet enabled.
+    public bool ErrorQuotaEnabled { get; private set; }
+
     public static EnvSettings Load()
     {
         var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
@@ -119,7 +123,9 @@ public class EnvSettings
 
             // On the container, the etc directory is mounted at ./etc
             // But during development, it's at ../etc
-            EtcDirectoryPath = Directory.Exists("./etc") ? "./etc" : "../etc"
+            EtcDirectoryPath = Directory.Exists("./etc") ? "./etc" : "../etc",
+
+            ErrorQuotaEnabled = GetBool("ERROR_QUOTA_ENABLED")
         };
     }
 
@@ -144,6 +150,12 @@ public class EnvSettings
         if (int.TryParse(value, out var result))
             return result;
         return 0;
+    }
+
+    private static bool GetBool(string name)
+    {
+        var value = Environment.GetEnvironmentVariable(name) ?? "";
+        return bool.TryParse(value, out var result) && result;
     }
 
     private static string MustGet(string name)

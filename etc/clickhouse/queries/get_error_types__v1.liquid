@@ -1,0 +1,10 @@
+SELECT error_type as Name,
+       count(*) as Value
+FROM error_events
+WHERE app_id = '{{app_id}}'
+AND timestamp >= toDateTime('{{start_date}}')
+AND timestamp <= toDateTime('{{end_date}}')
+AND error_type <> ''
+GROUP BY error_type
+ORDER BY Value DESC
+LIMIT 50

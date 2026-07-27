@@ -1,0 +1,16 @@
+TOKEN aptabase-api READ
+
+VERSION 1
+NODE endpoint
+SQL >
+    %
+    SELECT error_type as Name,
+           count(*) as Value
+    FROM error_events
+    PREWHERE app_id = {{String(app_id)}}
+    AND timestamp >= {{DateTime(start_date)}}
+    AND timestamp <= {{DateTime(end_date)}}
+    AND error_type != ''
+    GROUP BY error_type
+    ORDER BY Value DESC
+    LIMIT 50

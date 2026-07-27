@@ -1,0 +1,24 @@
+TOKEN aptabase-api READ
+
+VERSION 1
+NODE endpoint
+SQL >
+    %
+    SELECT error_id as ErrorId,
+           app_id as AppId,
+           timestamp as Timestamp,
+           error_message as ErrorMessage,
+           error_type as ErrorType,
+           stack_trace as StackTrace,
+           platform as Platform,
+           os_name as OsName,
+           os_version as OsVersion,
+           app_version as AppVersion,
+           sdk_version as SdkVersion,
+           session_id as SessionId,
+           severity as Severity,
+           kind as Kind
+    FROM error_events
+    PREWHERE app_id = {{String(app_id)}}
+    AND error_id = {{String(error_id)}}
+    LIMIT 1
