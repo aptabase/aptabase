@@ -5,6 +5,21 @@ namespace Aptabase.UnitTests.Features.Ingestion;
 
 public class HttpExtensionsTests
 {
+    [Fact]
+    public void ResolveClientIpAddressPrioritizesCfConnectingIp()
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Headers.Append("Cf-Connecting-Ip", "203.0.113.1");
+        context.Request.Headers.Append("X-Real-Ip", "203.0.113.2");
+        context.Request.Headers.Append("X-Forwarded-For", "203.0.113.3");
+        context.Request.Headers.Append("CloudFront-Viewer-Address", "203.0.113.4:443");
+        context.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("203.0.113.5");
+
+        var value = context.ResolveClientIpAddress();
+
+        Assert.Equal("203.0.113.1", value);
+    }
+
     [Theory]
     [InlineData(new string[] {}, "")]
     [InlineData(new string[] {""}, "")]
