@@ -168,17 +168,15 @@ public class EnvSettings
 
     private static string NormalizeBaseUrl(string baseUrl)
     {
-        var value = (baseUrl ?? "").Trim();
+        var value = baseUrl.Trim().TrimEnd('/');
         if (string.IsNullOrWhiteSpace(value))
-            return value;
+            throw new Exception("BASE_URL must not be empty, e.g. https://analytics.yourdomain.com");
 
         if (!value.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
             !value.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
         {
             value = $"https://{value}";
         }
-
-        value = value.TrimEnd('/');
 
         if (!Uri.TryCreate(value, UriKind.Absolute, out _))
             throw new Exception("BASE_URL must be an absolute URL, e.g. https://analytics.yourdomain.com");

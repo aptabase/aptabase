@@ -1,4 +1,4 @@
-import { getOAuthProviders, requestSignInLink } from "@features/auth";
+import { requestSignInLink, useOAuthProviders } from "@features/auth";
 import { Page } from "@components/Page";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -10,7 +10,6 @@ import { SignInWithGoogle } from "./SignInWithGoogle";
 import { Logo } from "./Logo";
 import { Button } from "@components/Button";
 import { TextInput } from "@components/TextInput";
-import { useQuery } from "@tanstack/react-query";
 
 type FormStatus = "idle" | "loading" | "success" | "notfound";
 
@@ -66,15 +65,8 @@ export function Component() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<FormStatus>("idle");
 
-  const { data: providers } = useQuery({
-    queryKey: ["oauthProviders"],
-    queryFn: getOAuthProviders,
-    staleTime: Infinity,
-  });
-
-  const showGitHub = !!providers?.github;
-  const showGoogle = !!providers?.google;
-  const showOAuth = showGitHub || showGoogle;
+  const providers = useOAuthProviders();
+  const showOAuth = providers.github || providers.google;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -100,8 +92,8 @@ export function Component() {
           {showOAuth && (
             <>
               <div className="space-y-2">
-                {showGitHub && <SignInWithGitHub />}
-                {showGoogle && <SignInWithGoogle />}
+                {providers.github && <SignInWithGitHub />}
+                {providers.google && <SignInWithGoogle />}
               </div>
 
               <div className="relative my-4">
