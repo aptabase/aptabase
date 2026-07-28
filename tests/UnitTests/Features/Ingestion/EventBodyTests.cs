@@ -1,7 +1,7 @@
 using Xunit;
 using System.Text.Json;
 using Aptabase.Features.Ingestion;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace Aptabase.UnitTests.Features.Ingestion;
 

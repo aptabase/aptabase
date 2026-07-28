@@ -1,5 +1,5 @@
 using Xunit;
-using FluentAssertions;
+using AwesomeAssertions;
 using Aptabase.IntegrationTests.Clients;
 using Aptabase.Features.Ingestion.Buffer;
 

@@ -1,6 +1,6 @@
 using Xunit;
 using System.Net;
-using FluentAssertions;
+using AwesomeAssertions;
 using Aptabase.IntegrationTests.Clients;
 using Aptabase.Features.ErrorReporting.Buffer;
 
