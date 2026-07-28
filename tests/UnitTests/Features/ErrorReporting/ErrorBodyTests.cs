@@ -1,5 +1,5 @@
 using Xunit;
-using FluentAssertions;
+using AwesomeAssertions;
 using Aptabase.Features.ErrorReporting;
 
 namespace Aptabase.UnitTests.Features.ErrorReporting;

@@ -1,5 +1,5 @@
 using Xunit;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace Aptabase.UnitTests.Extensions;
 

@@ -1,7 +1,7 @@
 using Xunit;
 using Moq;
 using Aptabase.Features.Ingestion;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Caching.Memory;
 using Aptabase.Features.Apps;
 

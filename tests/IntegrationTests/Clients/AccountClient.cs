@@ -1,5 +1,5 @@
 using System.Net;
-using FluentAssertions;
+using AwesomeAssertions;
 using Aptabase.Features.Apps;
 using Aptabase.Features.Stats;
 

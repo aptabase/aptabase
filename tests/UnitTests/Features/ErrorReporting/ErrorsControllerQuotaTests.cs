@@ -1,6 +1,6 @@
 using Xunit;
 using Moq;
-using FluentAssertions;
+using AwesomeAssertions;
 using Aptabase.Data;
 using Aptabase.Features;
 using Aptabase.Features.Apps;
