@@ -32,10 +32,10 @@ jobs:
           - 1080:1080
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup .NET Core SDK 10.x
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.x
 
@@ -59,13 +59,13 @@ jobs:
             platform: arm64
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/${{ matrix.platform }}
@@ -73,7 +73,7 @@ jobs:
           outputs: type=docker,dest=/tmp/aptabase-${{ matrix.platform }}.tar
 
       - name: Upload Image
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: aptabase-${{ matrix.platform }}
           path: /tmp/aptabase-${{ matrix.platform }}.tar
@@ -85,13 +85,13 @@ jobs:
     needs: [build, test]
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Download amd64 Image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: aptabase-amd64
           path: /tmp
@@ -100,7 +100,7 @@ jobs:
         run: docker load --input /tmp/aptabase-amd64.tar
 
       - name: Download arm64 Image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: aptabase-arm64
           path: /tmp
@@ -110,7 +110,7 @@ jobs:
 
       # Push to Public Registry
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -142,10 +142,10 @@ jobs:
     needs: [publish]
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Download amd64 Image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: aptabase-amd64
           path: /tmp
@@ -154,7 +154,7 @@ jobs:
         run: docker load --input /tmp/aptabase-amd64.tar
 
       - name: Download arm64 Image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: aptabase-arm64
           path: /tmp
@@ -163,7 +163,7 @@ jobs:
         run: docker load --input /tmp/aptabase-arm64.tar
 
       - name: Configure AWS credentials (US)
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::907052285437:role/github-action
           aws-region: us-east-1
@@ -199,10 +199,10 @@ jobs:
     needs: [publish]
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Download amd64 Image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: aptabase-amd64
           path: /tmp
@@ -211,7 +211,7 @@ jobs:
         run: docker load --input /tmp/aptabase-amd64.tar
 
       - name: Download arm64 Image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: aptabase-arm64
           path: /tmp
@@ -220,7 +220,7 @@ jobs:
         run: docker load --input /tmp/aptabase-arm64.tar
 
       - name: Configure AWS credentials (EU)
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::907052285437:role/github-action
           aws-region: eu-central-1
