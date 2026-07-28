@@ -65,13 +65,29 @@ public class AuthController : Controller
     [HttpGet("/api/_auth/github")]
     public IActionResult GitHub()
     {
+        if (string.IsNullOrWhiteSpace(_env.OAuthGitHubClientId) || string.IsNullOrWhiteSpace(_env.OAuthGitHubClientSecret))
+            return NotFound(new { });
+
         return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "github");
     }
 
     [HttpGet("/api/_auth/google")]
     public IActionResult Google()
     {
+        if (string.IsNullOrWhiteSpace(_env.OAuthGoogleClientId) || string.IsNullOrWhiteSpace(_env.OAuthGoogleClientSecret))
+            return NotFound(new { });
+
         return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "google");
+    }
+
+    [HttpGet("/api/_auth/providers")]
+    public IActionResult Providers()
+    {
+        return Ok(new
+        {
+            github = !string.IsNullOrWhiteSpace(_env.OAuthGitHubClientId) && !string.IsNullOrWhiteSpace(_env.OAuthGitHubClientSecret),
+            google = !string.IsNullOrWhiteSpace(_env.OAuthGoogleClientId) && !string.IsNullOrWhiteSpace(_env.OAuthGoogleClientSecret)
+        });
     }
 
     [HttpGet("/api/_auth/me")]

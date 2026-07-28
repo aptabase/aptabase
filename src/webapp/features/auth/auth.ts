@@ -8,6 +8,15 @@ export type UserAccount = {
   avatarUrl: string;
 };
 
+export type OAuthProviders = {
+  github: boolean;
+  google: boolean;
+};
+
+export async function getOAuthProviders(): Promise<OAuthProviders> {
+  return await api.get<OAuthProviders>("/_auth/providers");
+}
+
 export async function requestSignInLink(email: string): Promise<boolean> {
   const [status, response] = await api.fetch("POST", "/_auth/signin", {
     email,

@@ -59,6 +59,9 @@ public class EnvSettings
     // Variable Name: SMTP_FROM_ADDRESS
     public string SmtpFromAddress { get; private set; } = "";
 
+    // OAuth will be enabled if at least one pair is configured.
+    // Set this callback: https://YOUR_BASE_URL/api/_auth/github/callback
+
     // The GitHub Client ID for OAuth
     // Variable Name: OAUTH_GITHUB_CLIENT_ID
     public string OAuthGitHubClientId { get; private set; } = "";
@@ -100,7 +103,7 @@ public class EnvSettings
         {
             IsDevelopment = isDevelopment,
             Region = region,
-            SelfBaseUrl = MustGet("BASE_URL"),
+            SelfBaseUrl = NormalizeBaseUrl(MustGet("BASE_URL")),
             ConnectionString = GetOrNull("ConnectionStrings__postgresdb") ?? MustGet("DATABASE_URL"),
             ClickHouseConnectionString = GetOrNull("ConnectionStrings__clickhousedb") ?? Get("CLICKHOUSE_URL"),
             TinybirdBaseUrl = Get("TINYBIRD_BASE_URL"),
@@ -161,5 +164,25 @@ public class EnvSettings
     private static string MustGet(string name)
     {
         return Environment.GetEnvironmentVariable(name) ?? throw new Exception($"Missing {name} environment variable");
+    }
+
+    private static string NormalizeBaseUrl(string baseUrl)
+    {
+        var value = (baseUrl ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(value))
+            return value;
+
+        if (!value.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+            !value.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            value = $"https://{value}";
+        }
+
+        value = value.TrimEnd('/');
+
+        if (!Uri.TryCreate(value, UriKind.Absolute, out _))
+            throw new Exception("BASE_URL must be an absolute URL, e.g. https://analytics.yourdomain.com");
+
+        return value;
     }
 }

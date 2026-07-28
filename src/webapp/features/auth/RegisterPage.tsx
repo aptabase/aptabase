@@ -1,4 +1,4 @@
-import { requestRegisterLink } from "@features/auth";
+import { getOAuthProviders, requestRegisterLink } from "@features/auth";
 import { Page } from "@components/Page";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -7,10 +7,10 @@ import { LegalNotice } from "./LegalNotice";
 import { RegionSwitch } from "./RegionSwitch";
 import { SignInWithGitHub } from "./SignInWithGitHub";
 import { SignInWithGoogle } from "./SignInWithGoogle";
-import { isOAuthEnabled } from "@features/env";
 import { Logo } from "./Logo";
 import { Button } from "@components/Button";
 import { TextInput } from "@components/TextInput";
+import { useQuery } from "@tanstack/react-query";
 
 type FormStatus = "idle" | "loading" | "success";
 
@@ -40,6 +40,16 @@ export function Component() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<FormStatus>("idle");
 
+  const { data: providers } = useQuery({
+    queryKey: ["oauthProviders"],
+    queryFn: getOAuthProviders,
+    staleTime: Infinity,
+  });
+
+  const showGitHub = !!providers?.github;
+  const showGoogle = !!providers?.google;
+  const showOAuth = showGitHub || showGoogle;
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setStatus("loading");
@@ -58,11 +68,11 @@ export function Component() {
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="py-8 px-4 sm:rounded-lg sm:px-10">
-          {isOAuthEnabled && (
+          {showOAuth && (
             <>
               <div className="space-y-2">
-                <SignInWithGitHub />
-                <SignInWithGoogle />
+                {showGitHub && <SignInWithGitHub />}
+                {showGoogle && <SignInWithGoogle />}
               </div>
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center" aria-hidden="true">
