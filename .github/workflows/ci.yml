@@ -104,15 +104,18 @@ jobs:
           done
           exit $missing
 
+      # The remaining steps only run when the push changed etc/tinybird; the parity check above always runs.
       - name: Setup Tinybird CLI
+        if: steps.changes.outputs.tinybird == 'true'
         uses: ./.github/actions/setup-tinybird
 
       - name: Tinybird local build
+        if: steps.changes.outputs.tinybird == 'true'
         run: tb --local build
         working-directory: etc/tinybird
 
       - name: Tinybird deploy check (dev)
-        if: env.TB_TOKEN != ''
+        if: steps.changes.outputs.tinybird == 'true' && env.TB_TOKEN != ''
         run: tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy --check
         working-directory: etc/tinybird
 
