@@ -45,14 +45,23 @@ A deploy with no pending changes is a no-op and exits 0, so the steps are safe t
 
 ### Secrets
 
-| Scope                 | Name                 | Value                                  |
-| --------------------- | -------------------- | -------------------------------------- |
-| Repository            | `TINYBIRD_DEV_TOKEN` | `aptabase_dev` workspace admin token   |
-| Environment (EU, US)  | `TINYBIRD_HOST`      | API host from the table above          |
-| Environment (EU, US)  | `TINYBIRD_TOKEN`     | Workspace admin token                  |
+| Scope                 | Name                 | Value                                        |
+| --------------------- | -------------------- | -------------------------------------------- |
+| Repository            | `TINYBIRD_DEV_TOKEN` | `aptabase_dev` token with `WORKSPACE:DEPLOY` |
+| Environment (EU, US)  | `TINYBIRD_HOST`      | API host from the table above                |
+| Environment (EU, US)  | `TINYBIRD_TOKEN`     | Workspace token with `WORKSPACE:DEPLOY`      |
 
-Copy a workspace admin token with `tb --cloud token copy "admin token"` while logged in to
-that workspace, or from the Tokens page in the Tinybird UI.
+Use a dedicated static token with the `WORKSPACE:DEPLOY` scope rather than the workspace admin
+token. It can create and check deployments but cannot read or manage tokens, secrets or data.
+Create one per workspace while logged in to it, then copy the value:
+
+```sh
+tb --cloud token create static ci_deploy --scope WORKSPACE:DEPLOY
+tb --cloud token copy ci_deploy
+```
+
+Static tokens created this way are not declared in datafiles and are **not** removed by
+deployments. Only resource-scoped tokens (`TOKEN "..." READ` lines) are deployment-managed.
 
 ## Manual operations
 
