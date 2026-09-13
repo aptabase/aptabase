@@ -1,4 +1,4 @@
-# Data Source created from Pipe 'top_props_daily'
+# Data Source created from Pipe 'top_props_daily_v2'
 
 SCHEMA >
     `app_id` String,
@@ -18,6 +18,5 @@ SCHEMA >
     `sum_value_state` AggregateFunction(sum, Float32)
 
 ENGINE "AggregatingMergeTree"
-ENGINE_PARTITION_KEY "toYYYYMM(period)"
 ENGINE_SORTING_KEY "app_id, period, event_name, string_key, string_value, numeric_key, country_code, os_name, app_version, device_model"
 ENGINE_TTL "period + toIntervalDay(1500)"

@@ -1,4 +1,4 @@
-NODE events_daily_v2
+NODE events_daily_v3
 SQL >
 
     SELECT
@@ -31,6 +31,6 @@ SQL >
         session_id
 
 TYPE materialized
-DATASOURCE events_daily_v2_mv
+DATASOURCE events_daily_v3_mv
 
 

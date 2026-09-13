@@ -1,0 +1,10 @@
+# Data Source created from Pipe 'monthly_usage_v1_mv'
+
+SCHEMA >
+    `app_id` String,
+    `period` Date,
+    `events` AggregateFunction(count)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toStartOfYear(period)"
+ENGINE_SORTING_KEY "app_id, period"

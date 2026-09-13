@@ -1,12 +1,10 @@
 TOKEN "aptabase-api" READ
 
-TOKEN "key_metrics__v2_endpoint_read_4996" READ
-
 NODE endpoint
 SQL >
 
-    %
-    {% if granularity == 'Hour' %}
+%
+{% if granularity == 'Hour' %}
        SELECT 
            uniqExact(user_id) / (date_diff('day', min(min), max(max)) + if(date_diff('day', min(min), max(max)) = 0, 1, 0)) AS DailyUsers,
            uniqExact(session_id) as Sessions,
@@ -49,12 +47,21 @@ SQL >
                session_id,
                maxMerge(max_ts) - minMerge(min_ts) as duration,
                countMerge(events_count) as session_count
-           FROM events_daily_v2_mv
+           FROM events_daily_v3_mv
            PREWHERE app_id = {{String(app_id)}}
            WHERE 1 = 1
            {% if defined(date_from) and defined(date_to) %}
-           AND period BETWEEN {{String(date_from)}} AND {{String(date_to)}}
-           {% end %}
+            AND period BETWEEN 
+                {% if granularity == 'Month' %}
+                    toStartOfMonth(toDate({{String(date_from)}}))
+                    AND
+                    {{String(date_to)}}
+                {% else %}
+                    toStartOfMonth(toDate({{String(date_from)}}))
+                    AND
+                    {{String(date_to)}}
+                {% end %}
+            {% end %}
            {% if defined(country_code) %}
            AND country_code = {{String(country_code)}}
            {% end %}
@@ -79,5 +86,8 @@ SQL >
            sum(session_count) as Events
        FROM SessionStats
     {% end %}
+
+
+TYPE endpoint
 
 

@@ -1,4 +1,4 @@
-NODE event_props
+NODE event_props_daily_v2
 SQL >
 
     SELECT
@@ -45,6 +45,6 @@ SQL >
         numeric_key
 
 TYPE materialized
-DATASOURCE event_props_mv
+DATASOURCE event_props_daily_v2_mv
 
 

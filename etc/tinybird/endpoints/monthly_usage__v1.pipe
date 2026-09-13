@@ -1,9 +1,9 @@
-TOKEN aptabase-api READ
+TOKEN "aptabase-api" READ
 
-VERSION 1
 NODE endpoint
 SQL >
-    %
+
+%
     SELECT toYear(Date) as Year, toMonth(Date) as Month, Events
     FROM (
       SELECT period as Date,
@@ -13,3 +13,7 @@ SQL >
       GROUP BY period
       ORDER BY period WITH FILL TO toStartOfMonth(now() + INTERVAL 1 MONTH) STEP toIntervalMonth(1)
     ) ORDER BY Year DESC, Month DESC
+
+TYPE endpoint
+
+

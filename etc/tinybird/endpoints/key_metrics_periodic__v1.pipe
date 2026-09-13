@@ -1,9 +1,9 @@
-TOKEN aptabase-api READ
+TOKEN "aptabase-api" READ
 
-VERSION 2
 NODE endpoint
 SQL >
-    %
+
+%
     SELECT
         {% if granularity == 'Hour' %}
          toStartOfHour(timestamp)
@@ -34,9 +34,6 @@ SQL >
     {% if defined(os_name) %}
     AND os_name = {{String(os_name)}}
     {% end %}
-    {% if defined(device_model) %}
-    AND device_model = {{String(device_model)}}
-    {% end %}
     {% if defined(app_version) %}
     AND app_version = {{String(app_version)}}
     {% end %}
@@ -60,3 +57,7 @@ SQL >
     {% else %}
     toIntervalMonth(1)
     {% end %}
+
+TYPE endpoint
+
+

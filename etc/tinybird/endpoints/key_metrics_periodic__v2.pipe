@@ -1,12 +1,10 @@
 TOKEN "aptabase-api" READ
 
-TOKEN "key_metrics_periodic__v2_endpoint_read_2953" READ
-
 NODE endpoint
 SQL >
 
-    %
-    {% if granularity == 'Hour' %}
+%
+{% if granularity == 'Hour' %}
         SELECT
             toStartOfHour(timestamp) AS Period,
             uniqExact(user_id) AS Users,
@@ -45,11 +43,20 @@ SQL >
                 user_id,
                 session_id,
                 countMerge(events_count) as period_count
-            FROM events_daily_v2_mv
+            FROM events_daily_v3_mv
             PREWHERE app_id = {{String(app_id)}}
             WHERE 1 = 1
             {% if defined(date_from) and defined(date_to) %}
-            AND period BETWEEN {{String(date_from)}} AND {{String(date_to)}}
+            AND period BETWEEN 
+                {% if granularity == 'Month' %}
+                    toStartOfMonth(toDate({{String(date_from)}}))
+                    AND
+                    {{String(date_to)}}
+                {% else %}
+                    toStartOfDay(toDate({{String(date_from)}}))
+                    AND
+                    {{String(date_to)}}
+                {% end %}
             {% end %}
             {% if defined(country_code) %}
             AND country_code = {{String(country_code)}}
@@ -99,5 +106,7 @@ SQL >
     {% else %}
     toIntervalMonth(1)
     {% end %}
+
+TYPE endpoint
 
 

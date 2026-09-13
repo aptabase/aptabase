@@ -1,9 +1,9 @@
-TOKEN aptabase-api READ
+TOKEN "aptabase-api" READ
 
-VERSION 1
 NODE endpoint
 SQL >
-    %
+
+%
     SELECT period as Date,
 		   countMerge(events) as Events
     FROM monthly_usage_v1
@@ -11,3 +11,7 @@ SQL >
     AND period >= toStartOfMonth(now() - INTERVAL 6 MONTH)
     GROUP BY period
     ORDER BY period WITH FILL FROM toStartOfMonth(now() - INTERVAL 6 MONTH) TO toStartOfMonth(now() + INTERVAL 1 MONTH) STEP toIntervalMonth(1)
+
+TYPE endpoint
+
+

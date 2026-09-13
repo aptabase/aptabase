@@ -1,9 +1,9 @@
-TOKEN aptabase-api READ
+TOKEN "aptabase-api" READ
 
-VERSION 2
 NODE endpoint
 SQL >
-    %
+
+%
     SELECT string_arr.1 AS StringKey,
            string_arr.2 AS StringValue,
            numeric_arr.1 AS NumericKey,
@@ -31,9 +31,6 @@ SQL >
             {% if defined(os_name) %}
             AND os_name = {{String(os_name)}}
             {% end %}
-            {% if defined(device_model) %}
-            AND device_model = {{String(device_model)}}
-            {% end %}
             {% if defined(app_version) %}
             AND app_version = {{String(app_version)}}
             {% end %}
@@ -41,3 +38,7 @@ SQL >
     ) LEFT ARRAY JOIN numeric_arr
     GROUP BY StringKey, StringValue, NumericKey
     ORDER BY StringKey, Events DESC
+
+TYPE endpoint
+
+

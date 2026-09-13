@@ -1,9 +1,9 @@
-TOKEN aptabase-api READ
+TOKEN "aptabase-api" READ
 
-VERSION 2
 NODE endpoint
 SQL >
-    %
+
+%
     SELECT {{column(name_column, 'country_code')}} as Name,
            {% if value_column == 'UniqueSessions' %}
             uniqExact(session_id) as Value
@@ -25,11 +25,12 @@ SQL >
     {% if defined(os_name) %}
     AND os_name = {{String(os_name)}}
     {% end %}
-    {% if defined(device_model) %}
-    AND device_model = {{String(device_model)}}
-    {% end %}
     {% if defined(app_version) %}
     AND app_version = {{String(app_version)}}
     {% end %}
     GROUP BY Name
     ORDER BY Value DESC
+
+TYPE endpoint
+
+

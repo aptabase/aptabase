@@ -1,3 +1,5 @@
+TOKEN "aptabase-api" APPEND
+
 DESCRIPTION >
     Error/crash reports for apps. Errors from debug builds arrive with an appId already suffixed with _DEBUG
 

@@ -1,3 +1,7 @@
+TOKEN "aptabase-api" APPEND
+
+TOKEN "aptabase-api" READ
+
 DESCRIPTION >
     Analytics events for production app environments
 
@@ -9,7 +13,6 @@ SCHEMA >
     `session_id` String `json:$.sessionId`,
     `os_name` LowCardinality(String) `json:$.osName`,
     `os_version` String `json:$.osVersion`,
-    `device_model` String `json:$.deviceModel`,
     `locale` LowCardinality(String) `json:$.locale`,
     `app_version` String `json:$.appVersion`,
     `app_build_number` String `json:$.appBuildNumber`,
@@ -21,7 +24,8 @@ SCHEMA >
     `city` String `json:$.city`,
     `string_props` String `json:$.stringProps`,
     `numeric_props` String `json:$.numericProps`,
-    `ttl` DateTime `json:$.ttl`
+    `ttl` DateTime `json:$.ttl`,
+    `device_model` String `json:$.deviceModel`
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
