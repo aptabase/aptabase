@@ -241,7 +241,7 @@ jobs:
       group: tinybird-us
       cancel-in-progress: false
     env:
-      TB_HOST: ${{ secrets.TINYBIRD_HOST }}
+      TB_HOST: ${{ vars.TINYBIRD_HOST }}
       TB_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
     steps:
       - name: Checkout repo
@@ -264,7 +264,7 @@ jobs:
       group: tinybird-eu
       cancel-in-progress: false
     env:
-      TB_HOST: ${{ secrets.TINYBIRD_HOST }}
+      TB_HOST: ${{ vars.TINYBIRD_HOST }}
       TB_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
     steps:
       - name: Checkout repo

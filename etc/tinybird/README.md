@@ -57,13 +57,13 @@ The "Tinybird US" and "Tinybird EU" environments must exist with required review
 the workflow first runs on `main`. GitHub auto-creates a missing environment with no protection
 rules, which would skip the approval.
 
-| Scope                        | Name                 | Value                                        |
-| ---------------------------- | -------------------- | -------------------------------------------- |
-| Repository                   | `TINYBIRD_DEV_TOKEN` | `aptabase_dev` token with `WORKSPACE:DEPLOY` |
-| Environment "Tinybird EU"    | `TINYBIRD_HOST`      | `https://api.tinybird.co`                    |
-| Environment "Tinybird EU"    | `TINYBIRD_TOKEN`     | `aptabase_eu_prod` token with `WORKSPACE:DEPLOY` |
-| Environment "Tinybird US"    | `TINYBIRD_HOST`      | `https://api.us-east.aws.tinybird.co`        |
-| Environment "Tinybird US"    | `TINYBIRD_TOKEN`     | `aptabase_us_prod` token with `WORKSPACE:DEPLOY` |
+| Scope                        | Kind     | Name                 | Value                                            |
+| ---------------------------- | -------- | -------------------- | ------------------------------------------------ |
+| Repository                   | secret   | `TINYBIRD_DEV_TOKEN` | `aptabase_dev` token with `WORKSPACE:DEPLOY`     |
+| Environment "Tinybird EU"    | variable | `TINYBIRD_HOST`      | `https://api.tinybird.co`                        |
+| Environment "Tinybird EU"    | secret   | `TINYBIRD_TOKEN`     | `aptabase_eu_prod` token with `WORKSPACE:DEPLOY` |
+| Environment "Tinybird US"    | variable | `TINYBIRD_HOST`      | `https://api.us-east.aws.tinybird.co`            |
+| Environment "Tinybird US"    | secret   | `TINYBIRD_TOKEN`     | `aptabase_us_prod` token with `WORKSPACE:DEPLOY` |
 
 Use a dedicated static token with the `WORKSPACE:DEPLOY` scope rather than the workspace admin
 token. It can create and check deployments but cannot read or manage tokens, secrets or data.
