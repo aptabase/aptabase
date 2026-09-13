@@ -38,11 +38,15 @@ Rules that Forward enforces:
    `tb --cloud deploy --check` against `aptabase_dev`.
 2. **Push to `main`**: `deploy-tinybird-dev` deploys to `aptabase_dev` right after tests pass.
 3. **Push to `main`**, behind their own approvals: `deploy-tinybird-us` and `deploy-tinybird-eu`
-   deploy the project to production. Together with the existing backend gates that makes four
-   approvals per release: Tinybird US, Tinybird EU, Aptabase US, Aptabase EU.
+   deploy the project to production. Together with the existing backend gates that makes up to
+   four approvals per release: Tinybird US, Tinybird EU, Aptabase US, Aptabase EU.
 4. The backend deploy of each region (`deploy-us`, `deploy-eu`) **depends on** its Tinybird
    deploy, so the schema is always live before App Runner rolls out the new backend image.
-   A backend-only release still needs the Tinybird approval; the step is then a no-op.
+
+The Tinybird deploy jobs only run when the push changed `etc/tinybird` (`tinybird-check` compares
+the push's before and after commits). A backend-only release therefore shows just the two
+backend approvals. A failed or rejected Tinybird deploy still blocks the matching backend deploy.
+If the base commit is unknown (new branch, force push) the jobs run and act as a no-op.
 
 A deploy with no pending changes is a no-op and exits 0, so the steps are safe to re-run.
 
