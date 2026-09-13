@@ -26,30 +26,39 @@ Rules that Forward enforces:
 
 ## Workspaces
 
-| Workspace          | Host                                    | Deployed by                       |
-| ------------------ | --------------------------------------- | --------------------------------- |
-| `aptabase_dev`     | `https://api.tinybird.co`               | CI on every push to `main`        |
-| `aptabase_eu_prod` | `https://api.tinybird.co`               | CI, "Aptabase EU" environment gate |
-| `aptabase_us_prod` | `https://api.us-east.aws.tinybird.co`   | CI, "Aptabase US" environment gate |
+| Workspace          | Host                                    | Deployed by                        |
+| ------------------ | --------------------------------------- | ---------------------------------- |
+| `aptabase_dev`     | `https://api.tinybird.co`               | CI on every push to `main`         |
+| `aptabase_eu_prod` | `https://api.tinybird.co`               | CI, "Tinybird EU" environment gate |
+| `aptabase_us_prod` | `https://api.us-east.aws.tinybird.co`   | CI, "Tinybird US" environment gate |
 
 ## CI/CD flow
 
 1. **Every push**: `tinybird-check` runs the ClickHouse parity check and
    `tb --cloud deploy --check` against `aptabase_dev`.
 2. **Push to `main`**: `deploy-tinybird-dev` deploys to `aptabase_dev` right after tests pass.
-3. **Push to `main`**, after environment approval: `deploy-us` and `deploy-eu` deploy the
-   Tinybird project **before** pushing the backend image to ECR, so the schema is live before
-   App Runner rolls out the new backend.
+3. **Push to `main`**, behind their own approvals: `deploy-tinybird-us` and `deploy-tinybird-eu`
+   deploy the project to production. Together with the existing backend gates that makes four
+   approvals per release: Tinybird US, Tinybird EU, Aptabase US, Aptabase EU.
+4. The backend deploy of each region (`deploy-us`, `deploy-eu`) **depends on** its Tinybird
+   deploy, so the schema is always live before App Runner rolls out the new backend image.
+   A backend-only release still needs the Tinybird approval; the step is then a no-op.
 
 A deploy with no pending changes is a no-op and exits 0, so the steps are safe to re-run.
 
-### Secrets
+### Environments and secrets
 
-| Scope                 | Name                 | Value                                        |
-| --------------------- | -------------------- | -------------------------------------------- |
-| Repository            | `TINYBIRD_DEV_TOKEN` | `aptabase_dev` token with `WORKSPACE:DEPLOY` |
-| Environment (EU, US)  | `TINYBIRD_HOST`      | API host from the table above                |
-| Environment (EU, US)  | `TINYBIRD_TOKEN`     | Workspace token with `WORKSPACE:DEPLOY`      |
+The "Tinybird US" and "Tinybird EU" environments must exist with required reviewers **before**
+the workflow first runs on `main`. GitHub auto-creates a missing environment with no protection
+rules, which would skip the approval.
+
+| Scope                        | Name                 | Value                                        |
+| ---------------------------- | -------------------- | -------------------------------------------- |
+| Repository                   | `TINYBIRD_DEV_TOKEN` | `aptabase_dev` token with `WORKSPACE:DEPLOY` |
+| Environment "Tinybird EU"    | `TINYBIRD_HOST`      | `https://api.tinybird.co`                    |
+| Environment "Tinybird EU"    | `TINYBIRD_TOKEN`     | `aptabase_eu_prod` token with `WORKSPACE:DEPLOY` |
+| Environment "Tinybird US"    | `TINYBIRD_HOST`      | `https://api.us-east.aws.tinybird.co`        |
+| Environment "Tinybird US"    | `TINYBIRD_TOKEN`     | `aptabase_us_prod` token with `WORKSPACE:DEPLOY` |
 
 Use a dedicated static token with the `WORKSPACE:DEPLOY` scope rather than the workspace admin
 token. It can create and check deployments but cannot read or manage tokens, secrets or data.
@@ -90,4 +99,6 @@ tb --cloud deploy --check
 ```
 
 Always pass `--host` and `--token` explicitly when targeting production, so the target is
-visible in the command.
+visible in the command. Be aware that the CLI can persist the last token it authenticated
+with into the folder's `.tinyb`, replacing the stored login. Run `--token` commands from a
+scratch folder if you want to keep a folder's login intact.

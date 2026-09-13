@@ -190,30 +190,65 @@ jobs:
         run: tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
         working-directory: etc/tinybird
 
-  deploy-us:
+  # Production Tinybird deploys have their own approval gates ("Tinybird US" / "Tinybird EU").
+  # The backend deploy of each region depends on its Tinybird deploy: App Runner auto-deploys on
+  # ECR push, so the schema must be live before the new backend image starts.
+  deploy-tinybird-us:
     if: ${{ github.ref == 'refs/heads/main' }}
-    name: Deploy to Aptabase US
-    runs-on: "ubuntu-latest"
-    environment: "Aptabase US"
-    needs: [publish, tinybird-check]
+    name: Deploy Tinybird (US)
+    runs-on: ubuntu-latest
+    environment: "Tinybird US"
+    needs: [test, tinybird-check]
     concurrency:
-      group: deploy-us
+      group: tinybird-us
       cancel-in-progress: false
+    env:
+      TB_HOST: ${{ secrets.TINYBIRD_HOST }}
+      TB_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v7
 
-      # Tinybird schema must be live before App Runner rolls out the new image (auto-deploys on ECR push).
       - name: Setup Tinybird CLI
         uses: ./.github/actions/setup-tinybird
 
       - name: Tinybird deploy (US)
         run: tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
         working-directory: etc/tinybird
-        env:
-          TB_HOST: ${{ secrets.TINYBIRD_HOST }}
-          TB_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
 
+  deploy-tinybird-eu:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    name: Deploy Tinybird (EU)
+    runs-on: ubuntu-latest
+    environment: "Tinybird EU"
+    needs: [test, tinybird-check]
+    concurrency:
+      group: tinybird-eu
+      cancel-in-progress: false
+    env:
+      TB_HOST: ${{ secrets.TINYBIRD_HOST }}
+      TB_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Setup Tinybird CLI
+        uses: ./.github/actions/setup-tinybird
+
+      - name: Tinybird deploy (EU)
+        run: tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
+        working-directory: etc/tinybird
+
+  deploy-us:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    name: Deploy to Aptabase US
+    runs-on: "ubuntu-latest"
+    environment: "Aptabase US"
+    needs: [publish, deploy-tinybird-us]
+    concurrency:
+      group: deploy-us
+      cancel-in-progress: false
+    steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
@@ -269,25 +304,11 @@ jobs:
     name: Deploy to Aptabase EU
     runs-on: "ubuntu-latest"
     environment: "Aptabase EU"
-    needs: [publish, tinybird-check]
+    needs: [publish, deploy-tinybird-eu]
     concurrency:
       group: deploy-eu
       cancel-in-progress: false
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v7
-
-      # Tinybird schema must be live before App Runner rolls out the new image (auto-deploys on ECR push).
-      - name: Setup Tinybird CLI
-        uses: ./.github/actions/setup-tinybird
-
-      - name: Tinybird deploy (EU)
-        run: tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
-        working-directory: etc/tinybird
-        env:
-          TB_HOST: ${{ secrets.TINYBIRD_HOST }}
-          TB_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
