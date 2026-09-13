@@ -1,0 +1,24 @@
+name: Setup Tinybird CLI
+description: Installs a pinned version of the Tinybird Forward CLI (tb) and adds it to PATH.
+
+inputs:
+  version:
+    description: Tinybird CLI version to install
+    required: false
+    default: "4.6.18"
+
+runs:
+  using: composite
+  steps:
+    - name: Install uv
+      uses: astral-sh/setup-uv@v10.1.0
+
+    - name: Install Tinybird CLI
+      shell: bash
+      run: |
+        uv tool install "tinybird==${{ inputs.version }}" --python 3.11
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+    - name: Print Tinybird CLI version
+      shell: bash
+      run: tb --version

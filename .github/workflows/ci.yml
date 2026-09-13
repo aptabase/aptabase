@@ -47,6 +47,85 @@ jobs:
         run: dotnet test
         working-directory: tests/IntegrationTests
 
+  # Runs on every push, no containers: detects whether etc/tinybird changed and checks ClickHouse
+  # parity. Exposes `changed`, used to skip tinybird-build and the Tinybird deploy jobs (and their
+  # approvals) when the push did not touch etc/tinybird.
+  tinybird-check:
+    name: Tinybird Check
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.changes.outputs.tinybird }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes in etc/tinybird
+        id: changes
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            echo "No usable base commit (new branch or force push); assuming etc/tinybird changed."
+            echo "tinybird=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Documentation inside etc/tinybird does not need a deployment.
+          PATHS=(etc/tinybird ':!etc/tinybird/*.md')
+          if git diff --quiet "$BEFORE" "$GITHUB_SHA" -- "${PATHS[@]}"; then
+            echo "No changes in etc/tinybird between $BEFORE and $GITHUB_SHA."
+            echo "tinybird=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "etc/tinybird changed between $BEFORE and $GITHUB_SHA:"
+            git diff --name-only "$BEFORE" "$GITHUB_SHA" -- "${PATHS[@]}"
+            echo "tinybird=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check every Tinybird endpoint has a ClickHouse twin
+        run: |
+          missing=0
+          for pipe in etc/tinybird/endpoints/*.pipe; do
+            name=$(basename "$pipe" .pipe)
+            if [ ! -f "etc/clickhouse/queries/$name.liquid" ]; then
+              echo "::error file=$pipe::Missing ClickHouse twin etc/clickhouse/queries/$name.liquid"
+              missing=1
+            fi
+          done
+          exit $missing
+
+  # Only when etc/tinybird changed: a token-free `tb --local build` against a Tinybird Local
+  # container, plus a deploy check against the dev workspace (skipped when TINYBIRD_DEV_TOKEN is
+  # not available, e.g. forks). Split from tinybird-check so the container is not pulled otherwise.
+  tinybird-build:
+    if: ${{ needs.tinybird-check.outputs.changed == 'true' }}
+    name: Tinybird Build
+    runs-on: ubuntu-latest
+    needs: [tinybird-check]
+    services:
+      tinybird:
+        image: tinybirdco/tinybird-local:latest
+        ports:
+          - 7181:7181
+    env:
+      TB_HOST: https://api.tinybird.co
+      TB_TOKEN: ${{ secrets.TINYBIRD_DEV_TOKEN }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Setup Tinybird CLI
+        uses: ./.github/actions/setup-tinybird
+
+      - name: Tinybird local build
+        run: tb --local build
+        working-directory: etc/tinybird
+
+      - name: Tinybird deploy check (dev)
+        if: env.TB_TOKEN != ''
+        run: tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy --check
+        working-directory: etc/tinybird
+
   build:
     name: Build
     runs-on: ${{ matrix.os }}
@@ -134,12 +213,95 @@ jobs:
           REPOSITORY: aptabase
           IMAGE_TAG: main
 
+  # Keeps the dev Tinybird workspace in sync with main. Acts as a live rehearsal before the production gates.
+  # All Tinybird deploy jobs run only when the push changed etc/tinybird.
+  deploy-tinybird-dev:
+    if: ${{ github.ref == 'refs/heads/main' && needs.tinybird-check.outputs.changed == 'true' }}
+    name: Deploy Tinybird (dev)
+    runs-on: ubuntu-latest
+    needs: [test, tinybird-check, tinybird-build]
+    concurrency:
+      group: tinybird-dev
+      cancel-in-progress: false
+    env:
+      TB_HOST: https://api.tinybird.co
+      TB_TOKEN: ${{ secrets.TINYBIRD_DEV_TOKEN }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Setup Tinybird CLI
+        uses: ./.github/actions/setup-tinybird
+
+      - name: Tinybird deploy (dev)
+        run: tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
+        working-directory: etc/tinybird
+
+  # Production Tinybird deploys have their own approval gates ("Tinybird US" / "Tinybird EU").
+  # The backend deploy of each region depends on its Tinybird deploy: App Runner auto-deploys on
+  # ECR push, so the schema must be live before the new backend image starts. When etc/tinybird
+  # did not change, these jobs are skipped and the backend deploys proceed without them.
+  deploy-tinybird-us:
+    if: ${{ github.ref == 'refs/heads/main' && needs.tinybird-check.outputs.changed == 'true' }}
+    name: Deploy Tinybird (US)
+    runs-on: ubuntu-latest
+    environment: "Tinybird US"
+    needs: [test, tinybird-check, tinybird-build]
+    concurrency:
+      group: tinybird-us
+      cancel-in-progress: false
+    env:
+      TB_HOST: ${{ vars.TINYBIRD_HOST }}
+      TB_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Setup Tinybird CLI
+        uses: ./.github/actions/setup-tinybird
+
+      - name: Tinybird deploy (US)
+        run: tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
+        working-directory: etc/tinybird
+
+  deploy-tinybird-eu:
+    if: ${{ github.ref == 'refs/heads/main' && needs.tinybird-check.outputs.changed == 'true' }}
+    name: Deploy Tinybird (EU)
+    runs-on: ubuntu-latest
+    environment: "Tinybird EU"
+    needs: [test, tinybird-check, tinybird-build]
+    concurrency:
+      group: tinybird-eu
+      cancel-in-progress: false
+    env:
+      TB_HOST: ${{ vars.TINYBIRD_HOST }}
+      TB_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Setup Tinybird CLI
+        uses: ./.github/actions/setup-tinybird
+
+      - name: Tinybird deploy (EU)
+        run: tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
+        working-directory: etc/tinybird
+
+  # Runs after the Tinybird deploy succeeded, or when it was skipped because etc/tinybird did not change.
+  # A failed or rejected Tinybird deploy blocks the backend deploy.
   deploy-us:
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: >-
+      ${{ !cancelled()
+          && github.ref == 'refs/heads/main'
+          && needs.publish.result == 'success'
+          && (needs.deploy-tinybird-us.result == 'success' || needs.deploy-tinybird-us.result == 'skipped') }}
     name: Deploy to Aptabase US
     runs-on: "ubuntu-latest"
     environment: "Aptabase US"
-    needs: [publish]
+    needs: [publish, deploy-tinybird-us]
+    concurrency:
+      group: deploy-us
+      cancel-in-progress: false
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -192,11 +354,18 @@ jobs:
           IMAGE_TAG: main
 
   deploy-eu:
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: >-
+      ${{ !cancelled()
+          && github.ref == 'refs/heads/main'
+          && needs.publish.result == 'success'
+          && (needs.deploy-tinybird-eu.result == 'success' || needs.deploy-tinybird-eu.result == 'skipped') }}
     name: Deploy to Aptabase EU
     runs-on: "ubuntu-latest"
     environment: "Aptabase EU"
-    needs: [publish]
+    needs: [publish, deploy-tinybird-eu]
+    concurrency:
+      group: deploy-eu
+      cancel-in-progress: false
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
