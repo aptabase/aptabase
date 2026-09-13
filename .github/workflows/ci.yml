@@ -47,24 +47,14 @@ jobs:
         run: dotnet test
         working-directory: tests/IntegrationTests
 
-  # Validates etc/tinybird on every push: ClickHouse parity, a token-free `tb --local build` against
-  # a Tinybird Local container, and a deploy check against the dev workspace. The deploy check is
-  # skipped when TINYBIRD_DEV_TOKEN is not available (e.g. forks).
-  # Also exposes `changed`, used to skip the Tinybird deploy jobs (and their approvals) when the
-  # push did not touch etc/tinybird.
+  # Runs on every push, no containers: detects whether etc/tinybird changed and checks ClickHouse
+  # parity. Exposes `changed`, used to skip tinybird-build and the Tinybird deploy jobs (and their
+  # approvals) when the push did not touch etc/tinybird.
   tinybird-check:
     name: Tinybird Check
     runs-on: ubuntu-latest
-    services:
-      tinybird:
-        image: tinybirdco/tinybird-local:latest
-        ports:
-          - 7181:7181
     outputs:
       changed: ${{ steps.changes.outputs.tinybird }}
-    env:
-      TB_HOST: https://api.tinybird.co
-      TB_TOKEN: ${{ secrets.TINYBIRD_DEV_TOKEN }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v7
@@ -104,18 +94,35 @@ jobs:
           done
           exit $missing
 
-      # The remaining steps only run when the push changed etc/tinybird; the parity check above always runs.
+  # Only when etc/tinybird changed: a token-free `tb --local build` against a Tinybird Local
+  # container, plus a deploy check against the dev workspace (skipped when TINYBIRD_DEV_TOKEN is
+  # not available, e.g. forks). Split from tinybird-check so the container is not pulled otherwise.
+  tinybird-build:
+    if: ${{ needs.tinybird-check.outputs.changed == 'true' }}
+    name: Tinybird Build
+    runs-on: ubuntu-latest
+    needs: [tinybird-check]
+    services:
+      tinybird:
+        image: tinybirdco/tinybird-local:latest
+        ports:
+          - 7181:7181
+    env:
+      TB_HOST: https://api.tinybird.co
+      TB_TOKEN: ${{ secrets.TINYBIRD_DEV_TOKEN }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
       - name: Setup Tinybird CLI
-        if: steps.changes.outputs.tinybird == 'true'
         uses: ./.github/actions/setup-tinybird
 
       - name: Tinybird local build
-        if: steps.changes.outputs.tinybird == 'true'
         run: tb --local build
         working-directory: etc/tinybird
 
       - name: Tinybird deploy check (dev)
-        if: steps.changes.outputs.tinybird == 'true' && env.TB_TOKEN != ''
+        if: env.TB_TOKEN != ''
         run: tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy --check
         working-directory: etc/tinybird
 
@@ -212,7 +219,7 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' && needs.tinybird-check.outputs.changed == 'true' }}
     name: Deploy Tinybird (dev)
     runs-on: ubuntu-latest
-    needs: [test, tinybird-check]
+    needs: [test, tinybird-check, tinybird-build]
     concurrency:
       group: tinybird-dev
       cancel-in-progress: false
@@ -239,7 +246,7 @@ jobs:
     name: Deploy Tinybird (US)
     runs-on: ubuntu-latest
     environment: "Tinybird US"
-    needs: [test, tinybird-check]
+    needs: [test, tinybird-check, tinybird-build]
     concurrency:
       group: tinybird-us
       cancel-in-progress: false
@@ -262,7 +269,7 @@ jobs:
     name: Deploy Tinybird (EU)
     runs-on: ubuntu-latest
     environment: "Tinybird EU"
-    needs: [test, tinybird-check]
+    needs: [test, tinybird-check, tinybird-build]
     concurrency:
       group: tinybird-eu
       cancel-in-progress: false
