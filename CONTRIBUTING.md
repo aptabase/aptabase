@@ -15,6 +15,19 @@ That's it! You're ready to start writing some code 🚀
 
 **Note:** Emails are sent via Mailcatcher, the UI is available at `http://localhost:1080`
 
+## Changing analytics queries or schema
+
+Aptabase has two analytics backends and both must be kept in sync:
+
+- `etc/clickhouse/` is used by self-hosted installs, local development and CI tests. Queries are
+  `queries/<name>.liquid` files and schema changes are numbered `.sql` migrations that run when the
+  app starts. This is what ships inside the Docker image.
+- `etc/tinybird/` is a Tinybird Forward project used only by the managed cloud regions (EU and US).
+  It is deployed by CI, never baked into the image. See `etc/tinybird/README.md`.
+
+When you add or change an endpoint, update both the `.pipe` and the matching `.liquid` file. CI
+fails if a Tinybird endpoint has no ClickHouse twin with the same name.
+
 ## Getting some work done
 
 We have a very light process for contributing to Aptabase, simply find an issue you want to work on, ask for it to be assigned to you, and submit a PR when you're done. We'll review it and merge it as soon as possible. If you can't find an issue you want to work on, feel free to open one and we'll discuss it with you.
