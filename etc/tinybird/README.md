@@ -34,8 +34,9 @@ Rules that Forward enforces:
 
 ## CI/CD flow
 
-1. **Every push**: `tinybird-check` runs the ClickHouse parity check and
-   `tb --cloud deploy --check` against `aptabase_dev`.
+1. **Every push**: `tinybird-check` runs the ClickHouse parity check, a token-free
+   `tb --local build` against a Tinybird Local container, and `tb --cloud deploy --check`
+   against `aptabase_dev` (the last one only when the dev token is available).
 2. **Push to `main`**: `deploy-tinybird-dev` deploys to `aptabase_dev` right after tests pass.
 3. **Push to `main`**, behind their own approvals: `deploy-tinybird-us` and `deploy-tinybird-eu`
    deploy the project to production. Together with the existing backend gates that makes up to

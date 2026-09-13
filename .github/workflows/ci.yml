@@ -47,13 +47,19 @@ jobs:
         run: dotnet test
         working-directory: tests/IntegrationTests
 
-  # Validates etc/tinybird on every push: ClickHouse parity + a deploy check against the dev workspace.
-  # The deploy check is skipped when TINYBIRD_DEV_TOKEN is not available (e.g. forks).
+  # Validates etc/tinybird on every push: ClickHouse parity, a token-free `tb --local build` against
+  # a Tinybird Local container, and a deploy check against the dev workspace. The deploy check is
+  # skipped when TINYBIRD_DEV_TOKEN is not available (e.g. forks).
   # Also exposes `changed`, used to skip the Tinybird deploy jobs (and their approvals) when the
   # push did not touch etc/tinybird.
   tinybird-check:
     name: Tinybird Check
     runs-on: ubuntu-latest
+    services:
+      tinybird:
+        image: tinybirdco/tinybird-local:latest
+        ports:
+          - 7181:7181
     outputs:
       changed: ${{ steps.changes.outputs.tinybird }}
     env:
@@ -99,8 +105,11 @@ jobs:
           exit $missing
 
       - name: Setup Tinybird CLI
-        if: env.TB_TOKEN != ''
         uses: ./.github/actions/setup-tinybird
+
+      - name: Tinybird local build
+        run: tb --local build
+        working-directory: etc/tinybird
 
       - name: Tinybird deploy check (dev)
         if: env.TB_TOKEN != ''
