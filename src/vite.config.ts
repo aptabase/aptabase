@@ -66,6 +66,10 @@ export default defineConfig({
         find: "@features",
         replacement: path.resolve(__dirname, "./webapp/features"),
       },
+      {
+        find: "@root",
+        replacement: path.resolve(__dirname, "./webapp"),
+      }
     ],
   },
 });
