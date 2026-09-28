@@ -163,7 +163,7 @@ public record QueryArgs
     }
 }
 
-public class QueryParams
+public class QueryParams : IAppScopedRequest
 {
     public string BuildMode { get; set; } = "";
     public string AppId { get; set; } = "";

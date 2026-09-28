@@ -56,14 +56,11 @@ public class ClickHouseQueryClient : IQueryClient
     {
         return value switch
         {
-            string[] s => string.Join("','", s.Select(EscapeForClickHouse)),
-            string str => EscapeForClickHouse(str),
+            string[] s => string.Join("','", s.Select(ClickHouseSql.Escape)),
+            string str => ClickHouseSql.Escape(str),
             DateTime d => d.ToString("yyyy-MM-dd HH:mm:ss"),
             null => null,
             _ => $"{value}",
         };
     }
-
-    private static string EscapeForClickHouse(string value)
-        => value.Replace("\\", "\\\\").Replace("'", "\\'");
 }

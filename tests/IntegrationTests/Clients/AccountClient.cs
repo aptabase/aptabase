@@ -34,6 +34,11 @@ public class AccountClient
         return app ?? throw new Exception("No app found");
     }
 
+    public async Task<HttpResponseMessage> Get(string url)
+    {
+        return await _client.GetAsync(url);
+    }
+
     public async Task<HttpResponseMessage> GetKeyMetrics(string appId, string period)
     {
         return await _client.GetAsync($"/api/_stats/metrics?buildMode=release&period={period}&appId={appId}");

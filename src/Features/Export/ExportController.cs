@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Aptabase.Features.Export;
 
-public class DownloadRequest
+public class DownloadRequest : IAppScopedRequest
 {
     public string BuildMode { get; set; } = "";
     public string AppId { get; set; } = "";
@@ -56,13 +56,15 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
         var startDate = body.StartDate.Value;
         var endDate = body.EndDate.Value;
 
+        var appIdLiteral = ClickHouseSql.Literal(GetAppId(body.BuildMode, body.AppId));
+
         var (formatName, contentType, fileExtension) = GetFormat(body.Format);
         var appName = UnsafeCharacters().Replace(body.AppName, "").ToLower();
         var fileName = $"{appName}-{body.BuildMode.ToLower()}-{startDate:yyyy-MM-dd}.{fileExtension}";
 
         var countQuery = $@"SELECT COUNT(*) as event_count
                        FROM events
-                       WHERE app_id = '{GetAppId(body.BuildMode, body.AppId)}'
+                       WHERE app_id = {appIdLiteral}
                        AND timestamp BETWEEN '{startDate:yyyy-MM-dd HH:mm:ss}' AND '{endDate:yyyy-MM-dd HH:mm:ss}'
                        FORMAT JSON";
 
@@ -102,7 +104,7 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
                               engine_name, engine_version,
                               country_code, {COUNTRY_NAME_COLUMN}, region_name
                        FROM events
-                       WHERE app_id = '{GetAppId(body.BuildMode, body.AppId)}'
+                       WHERE app_id = {appIdLiteral}
                        AND timestamp BETWEEN '{startDate:yyyy-MM-dd HH:mm:ss}' AND '{endDate:yyyy-MM-dd HH:mm:ss}'
                        ORDER BY timestamp DESC
                        FORMAT {formatName}";
@@ -132,7 +134,7 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
                            engine_name, engine_version,
                            country_code, {COUNTRY_NAME_COLUMN}, region_name
                     FROM events
-                    WHERE app_id = '{GetAppId(body.BuildMode, body.AppId)}'
+                    WHERE app_id = {appIdLiteral}
                     AND timestamp BETWEEN '{startDate:yyyy-MM-dd HH:mm:ss}' AND '{endDate:yyyy-MM-dd HH:mm:ss}'
                     ORDER BY timestamp DESC
                     LIMIT {pageSize}
