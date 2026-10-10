@@ -62,17 +62,25 @@ public class LemonSqueezyWebhookController : Controller
             return Ok(new { message = "Ignoring event from different region" });
         }
 
+        // Every subscription_* lifecycle event carries the subscription object, so they all go
+        // through the same handler; what happens to the owner's lock depends on the status, not
+        // on the event name.
         var task = ev.Meta.EventName switch
         {
-            "subscription_created" => HandleSubscriptionCreatedOrUpdated(ev, cancellationToken),
-            "subscription_updated" => HandleSubscriptionCreatedOrUpdated(ev, cancellationToken),
+            "subscription_created" => HandleSubscriptionChanged(ev, cancellationToken),
+            "subscription_updated" => HandleSubscriptionChanged(ev, cancellationToken),
+            "subscription_cancelled" => HandleSubscriptionChanged(ev, cancellationToken),
+            "subscription_resumed" => HandleSubscriptionChanged(ev, cancellationToken),
+            "subscription_expired" => HandleSubscriptionChanged(ev, cancellationToken),
+            "subscription_paused" => HandleSubscriptionChanged(ev, cancellationToken),
+            "subscription_unpaused" => HandleSubscriptionChanged(ev, cancellationToken),
             _ => HandleUnknownEvent(ev),
         };
 
         return await task;
     }
 
-    private async Task<IActionResult> HandleSubscriptionCreatedOrUpdated([FromBody] WebhookEvent ev, CancellationToken cancellationToken)
+    private async Task<IActionResult> HandleSubscriptionChanged(WebhookEvent ev, CancellationToken cancellationToken)
     {
         var body = JsonSerializer.Deserialize<SubscriptionAttributes>(ev.Data.Attributes, LemonSqueezyClient.JsonSettings);
 
@@ -91,12 +99,22 @@ public class LemonSqueezyWebhookController : Controller
             return BadRequest(new { message = "Missing 'user_id' on meta.custom_data" });
         }
 
-        await _db.Connection.ExecuteAsync(
-            @"UPDATE users SET lock_reason = null WHERE id = @ownerId",
-            new { ownerId }
-        );
+        // A cancellation or expiry also arrives as subscription_updated and used to unlock the
+        // owner like any other change, which let an over-quota account resume ingestion by
+        // cancelling its subscription. Those two statuses leave the lock alone.
+        if (SubscriptionStatus.ClearsLock(body.Status))
+        {
+            await _db.Connection.ExecuteAsync(
+                @"UPDATE users SET lock_reason = null WHERE id = @ownerId",
+                new { ownerId }
+            );
+        }
+        else
+        {
+            _logger.LogInformation("Subscription {SubId} for user {UserId} is now {Status}; lock left unchanged.", subId, ownerId, body.Status);
+        }
 
-        if (body.Status == "expired")
+        if (SubscriptionStatus.IsEnded(body.Status))
         {
             await _db.Connection.ExecuteAsync(
                 @"DELETE FROM subscriptions WHERE id = @subId",
