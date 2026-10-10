@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 
 namespace Aptabase.IntegrationTests.Clients;
 
@@ -53,6 +54,15 @@ public class IngestionClient
         body.Headers.Add("App-Key", _appKey);
         body.Headers.Add("CloudFront-Viewer-Address", _ipAddress);
         var response = await _client.PostAsync($"/api/v0/events", body);
+        return response.StatusCode;
+    }
+
+    public async Task<HttpStatusCode> PostRaw(string path, string json)
+    {
+        var body = new StringContent(json, Encoding.UTF8, "application/json");
+        body.Headers.Add("App-Key", _appKey);
+        body.Headers.Add("CloudFront-Viewer-Address", _ipAddress);
+        var response = await _client.PostAsync(path, body);
         return response.StatusCode;
     }
 

@@ -108,6 +108,17 @@ public class IngestionTests
         var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked", null);
         code.Should().Be(HttpStatusCode.NotFound);
     }
+
+    [Theory]
+    [InlineData("/api/v0/event")]
+    [InlineData("/api/v0/events")]
+    public async Task Rejects_Unknown_AppKey_Before_Parsing_Body(string path)
+    {
+        // A malformed body would be a 400 if it were parsed, so a 404 proves the app key check ran first
+        var client = new IngestionClient(_fixture.CreateClient(), "THIS-DOES-NOT-EXIST");
+        var code = await client.PostRaw(path, "{ this is not json");
+        code.Should().Be(HttpStatusCode.NotFound);
+    }
  
     public static IEnumerable<object[]> ValidProps => 
     [
