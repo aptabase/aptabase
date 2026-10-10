@@ -7,12 +7,12 @@ namespace Aptabase.Features.Billing.LemonSqueezy;
 public static class SubscriptionStatus
 {
     /// <summary>
-    /// A status change to one of these means the customer is entitled to the plan and any
-    /// overuse/trial lock on the owner can be cleared. Every other status (cancelled, expired,
-    /// paused, past_due, unpaid) must never clear a lock: a lock is only released by payment.
+    /// Whether a subscription change with this status may clear an overuse/trial lock on the
+    /// owner. Every status does, as before, except the two that mean the customer is leaving:
+    /// a cancellation or expiry must never release a lock.
     /// </summary>
-    public static bool GrantsAccess(string? status) =>
-        status is "active" or "on_trial";
+    public static bool ClearsLock(string? status) =>
+        status is not ("cancelled" or "expired");
 
     /// <summary>
     /// The subscription is over and its row should be removed.

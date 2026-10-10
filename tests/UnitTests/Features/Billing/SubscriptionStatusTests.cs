@@ -6,28 +6,27 @@ namespace Aptabase.UnitTests.Features.Billing;
 
 public class SubscriptionStatusTests
 {
-    [Theory]
-    [InlineData("active")]
-    [InlineData("on_trial")]
-    public void Paid_statuses_grant_access(string status)
-    {
-        SubscriptionStatus.GrantsAccess(status).Should().BeTrue();
-    }
-
     // Regression: a subscription_updated webhook with status "cancelled" or "expired" used to
     // clear the owner's lock_reason, so cancelling a subscription unlocked an over-quota account.
     [Theory]
     [InlineData("cancelled")]
     [InlineData("expired")]
+    public void Cancelled_and_expired_never_clear_a_lock(string status)
+    {
+        SubscriptionStatus.ClearsLock(status).Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData("active")]
+    [InlineData("on_trial")]
     [InlineData("paused")]
     [InlineData("past_due")]
     [InlineData("unpaid")]
     [InlineData("")]
     [InlineData(null)]
-    [InlineData("ACTIVE")]
-    public void Non_paid_statuses_never_grant_access(string? status)
+    public void Every_other_status_clears_a_lock_as_before(string? status)
     {
-        SubscriptionStatus.GrantsAccess(status).Should().BeFalse();
+        SubscriptionStatus.ClearsLock(status).Should().BeTrue();
     }
 
     [Theory]

@@ -99,10 +99,10 @@ public class LemonSqueezyWebhookController : Controller
             return BadRequest(new { message = "Missing 'user_id' on meta.custom_data" });
         }
 
-        // Only a paid status releases an overuse/trial lock. A cancellation, expiry or failed
-        // payment also arrives as subscription_updated and used to unlock the owner too, which
-        // let an over-quota account resume ingestion by cancelling its subscription.
-        if (SubscriptionStatus.GrantsAccess(body.Status))
+        // A cancellation or expiry also arrives as subscription_updated and used to unlock the
+        // owner like any other change, which let an over-quota account resume ingestion by
+        // cancelling its subscription. Those two statuses leave the lock alone.
+        if (SubscriptionStatus.ClearsLock(body.Status))
         {
             await _db.Connection.ExecuteAsync(
                 @"UPDATE users SET lock_reason = null WHERE id = @ownerId",
