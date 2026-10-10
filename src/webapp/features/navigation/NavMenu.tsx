@@ -11,11 +11,13 @@ import {
   IconSettings,
   IconUsers,
 } from "@tabler/icons-react";
+import { useLocation } from "react-router-dom";
 import { NavCategory } from "./NavCategory";
 import { NavItem } from "./NavItem";
 
 export function NavMenu(props: { onNavigation?: VoidFunction }) {
   const currentApp = useCurrentApp();
+  const location = useLocation();
 
   return (
     <div className="flex flex-col h-full justify-between">
@@ -41,7 +43,7 @@ export function NavMenu(props: { onNavigation?: VoidFunction }) {
           <NavItem
             label="User Sessions"
             disabled={!currentApp || !!currentApp.lockReason}
-            href={`/${currentApp?.id}/sessions`}
+            href={`/${currentApp?.id}/sessions${location.search}`}
             icon={IconUsers}
             onNavigation={props.onNavigation}
           />
