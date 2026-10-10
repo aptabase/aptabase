@@ -20,11 +20,13 @@ public sealed record RejectionSnapshot(long Total, long Overflow, IReadOnlyList<
 public sealed class RejectionStats : IRejectionStats
 {
     // Hard caps so a flood from many distinct IPs can't grow memory or the summary without bound.
+    // Every key field is caller-controlled (the client IP comes from forwarding headers), so each one is truncated.
     public const int MaxTrackedSources = 500;
     public const int MaxUserAgentLength = 80;
+    public const int MaxClientIpLength = 100;
     private const int MaxAppKeyLength = 20;
 
-    private ConcurrentDictionary<RejectionKey, long> _counts = new();
+    private Window _window = new();
     private long _total;
     private long _overflow;
 
@@ -35,23 +37,44 @@ public sealed class RejectionStats : IRejectionStats
         var key = new RejectionKey(
             reason,
             Truncate(appKey?.Trim().ToUpperInvariant(), MaxAppKeyLength),
-            clientIp?.Trim() ?? "",
+            Truncate(clientIp?.Trim(), MaxClientIpLength),
             Truncate(userAgent?.Trim(), MaxUserAgentLength));
 
-        var counts = _counts;
-        if (counts.ContainsKey(key) || counts.Count < MaxTrackedSources)
-            counts.AddOrUpdate(key, 1, static (_, n) => n + 1);
+        var window = _window;
+        if (window.Counts.ContainsKey(key))
+        {
+            window.Counts.AddOrUpdate(key, 1, static (_, n) => n + 1);
+            return;
+        }
+
+        // New sources are admitted under a lock so concurrent callers can't push the window past the cap.
+        // A window never shrinks before the next snapshot, so once it's full a flood of new sources skips the lock.
+        if (Volatile.Read(ref window.Sources) < MaxTrackedSources)
+        {
+            lock (window)
+            {
+                if (window.Sources < MaxTrackedSources && window.Counts.TryAdd(key, 1))
+                {
+                    Volatile.Write(ref window.Sources, window.Sources + 1);
+                    return;
+                }
+            }
+        }
+
+        // Either the window is full, or another caller added this source while we checked
+        if (window.Counts.ContainsKey(key))
+            window.Counts.AddOrUpdate(key, 1, static (_, n) => n + 1);
         else
             Interlocked.Increment(ref _overflow);
     }
 
     public RejectionSnapshot Snapshot()
     {
-        var counts = Interlocked.Exchange(ref _counts, new ConcurrentDictionary<RejectionKey, long>());
+        var window = Interlocked.Exchange(ref _window, new Window());
         var total = Interlocked.Exchange(ref _total, 0);
         var overflow = Interlocked.Exchange(ref _overflow, 0);
 
-        var entries = counts.OrderByDescending(e => e.Value).ToArray();
+        var entries = window.Counts.OrderByDescending(e => e.Value).ToArray();
         return new RejectionSnapshot(total, overflow, entries);
     }
 
@@ -60,6 +83,14 @@ public sealed class RejectionStats : IRejectionStats
         if (string.IsNullOrEmpty(value))
             return "";
         return value.Length <= max ? value : value[..max];
+    }
+
+    // One reporting interval, swapped out whole by Snapshot. Sources tracks admitted sources so the cap check
+    // doesn't call ConcurrentDictionary.Count, which takes every internal lock of the dictionary.
+    private sealed class Window
+    {
+        public readonly ConcurrentDictionary<RejectionKey, long> Counts = new();
+        public int Sources;
     }
 }
 
