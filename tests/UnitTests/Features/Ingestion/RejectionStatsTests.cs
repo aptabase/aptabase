@@ -68,4 +68,76 @@ public class RejectionStatsTests
         key.AppKey.Should().HaveLength(20);
         key.UserAgent.Should().HaveLength(RejectionStats.MaxUserAgentLength);
     }
+
+    [Fact]
+    public void Truncates_long_client_ips()
+    {
+        // The client IP comes from forwarding headers, so a caller can make it as long as the header limit allows
+        var stats = new RejectionStats();
+        stats.Record("unknown_key", "A-US-123", new string('1', 5000), "sdk/1.0");
+
+        var key = stats.Snapshot().Entries[0].Key;
+
+        key.ClientIp.Should().HaveLength(RejectionStats.MaxClientIpLength);
+    }
+
+    [Fact]
+    public void Cap_holds_when_new_sources_race_for_the_last_slot()
+    {
+        const int threads = 32;
+
+        for (var round = 0; round < 50; round++)
+        {
+            var stats = new RejectionStats();
+            for (var i = 0; i < RejectionStats.MaxTrackedSources - 1; i++)
+                stats.Record("unknown_key", $"KEY-{i}", "1.1.1.1", "sdk/1.0");
+
+            RunTogether(threads, t => stats.Record("unknown_key", $"RACE-{t}", "1.1.1.1", "sdk/1.0"));
+
+            var snapshot = stats.Snapshot();
+            snapshot.Entries.Should().HaveCount(RejectionStats.MaxTrackedSources);
+            snapshot.Overflow.Should().Be(threads - 1);
+            snapshot.Total.Should().Be(RejectionStats.MaxTrackedSources - 1 + threads);
+        }
+    }
+
+    [Fact]
+    public void Same_new_source_recorded_concurrently_uses_one_slot()
+    {
+        const int threads = 32;
+
+        for (var round = 0; round < 50; round++)
+        {
+            var stats = new RejectionStats();
+            for (var i = 0; i < RejectionStats.MaxTrackedSources - 2; i++)
+                stats.Record("unknown_key", $"KEY-{i}", "1.1.1.1", "sdk/1.0");
+
+            RunTogether(threads, _ => stats.Record("unknown_key", "HOT", "1.1.1.1", "sdk/1.0"));
+
+            // Callers that lost the race to add HOT must give their slot back, so one more source still fits
+            stats.Record("unknown_key", "LAST", "1.1.1.1", "sdk/1.0");
+
+            var snapshot = stats.Snapshot();
+            snapshot.Entries.Should().HaveCount(RejectionStats.MaxTrackedSources);
+            snapshot.Overflow.Should().Be(0);
+            snapshot.Entries[0].Key.AppKey.Should().Be("HOT");
+            snapshot.Entries[0].Value.Should().Be(threads);
+        }
+    }
+
+    // Starts every action on its own thread and releases them at the same moment to maximize contention
+    private static void RunTogether(int count, Action<int> action)
+    {
+        using var barrier = new Barrier(count);
+        var threads = Enumerable.Range(0, count)
+            .Select(t => new Thread(() =>
+            {
+                barrier.SignalAndWait();
+                action(t);
+            }))
+            .ToList();
+
+        threads.ForEach(t => t.Start());
+        threads.ForEach(t => t.Join());
+    }
 }
