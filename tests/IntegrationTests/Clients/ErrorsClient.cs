@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 
 namespace Aptabase.IntegrationTests.Clients;
 
@@ -25,6 +26,15 @@ public class ErrorsClient
     public async Task<HttpStatusCode> TrackError(object error)
     {
         var body = JsonContent.Create(error);
+        body.Headers.Add("App-Key", _appKey);
+        body.Headers.Add("CloudFront-Viewer-Address", _ipAddress);
+        var response = await _client.PostAsync("/api/v0/error", body);
+        return response.StatusCode;
+    }
+
+    public async Task<HttpStatusCode> PostRaw(string json)
+    {
+        var body = new StringContent(json, Encoding.UTF8, "application/json");
         body.Headers.Add("App-Key", _appKey);
         body.Headers.Add("CloudFront-Viewer-Address", _ipAddress);
         var response = await _client.PostAsync("/api/v0/error", body);

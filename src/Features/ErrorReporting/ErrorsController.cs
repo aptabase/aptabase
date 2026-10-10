@@ -20,40 +20,35 @@ public class ErrorsController : ControllerBase
     private static readonly TimeSpan QuotaExhaustedCacheDuration = TimeSpan.FromMinutes(5);
 
     private readonly IErrorBuffer _buffer;
-    private readonly IIngestionCache _cache;
     private readonly IPiiSanitizer _piiSanitizer;
     private readonly IErrorQueryClient _errorQueryClient;
     private readonly IDbContext _db;
     private readonly EnvSettings _env;
     private readonly IMemoryCache _memoryCache;
-    private readonly IRejectionStats _rejections;
     private readonly ILogger<ErrorsController> _logger;
 
     public ErrorsController(
         IErrorBuffer buffer,
-        IIngestionCache cache,
         IPiiSanitizer piiSanitizer,
         IErrorQueryClient errorQueryClient,
         IDbContext db,
         EnvSettings env,
         IMemoryCache memoryCache,
-        IRejectionStats rejections,
         ILogger<ErrorsController> logger)
     {
         _buffer = buffer;
-        _cache = cache;
         _piiSanitizer = piiSanitizer;
         _errorQueryClient = errorQueryClient;
         _db = db;
         _env = env;
         _memoryCache = memoryCache;
-        _rejections = rejections;
         _logger = logger;
     }
 
     [HttpPost]
     [EnableCors("AllowAny")]
     [EnableRateLimiting("EventIngestion")]
+    [ResolveErrorAppKey]
     [Route("/api/v0/error")]
     public async Task<IActionResult> PostError([FromBody] ErrorBody body, CancellationToken cancellationToken)
     {
@@ -69,27 +64,8 @@ public class ErrorsController : ControllerBase
         // Normalize severity/kind against the known values (unknown values become empty)
         body.NormalizeSeverityAndKind();
 
-        // Extract App-Key header
-        if (!Request.Headers.TryGetValue("App-Key", out var appKey) || string.IsNullOrWhiteSpace(appKey))
-        {
-            return BadRequest(new { error = "Missing App-Key header" });
-        }
-
-        var normalizedAppKey = appKey.ToString().ToUpperInvariant();
-
-        // Look up app by key
-        var app = await _cache.FindByAppKey(normalizedAppKey, cancellationToken);
-        if (string.IsNullOrEmpty(app.Id))
-        {
-            _logger.LogWarning("Error rejected: Invalid App-Key {AppKey}", normalizedAppKey);
-            return Unauthorized(new { error = "Invalid App-Key" });
-        }
-
-        if (app.IsLocked)
-        {
-            _rejections.Record("locked", normalizedAppKey, HttpContext.ResolveClientIpAddress(), Request.Headers.UserAgent);
-            return BadRequest(new { error = "Owner account is locked" });
-        }
+        // Missing, unknown and locked App-Keys were already rejected by ResolveErrorAppKey, before the body was parsed
+        var app = ResolveAppKeyAttribute.GetApp(HttpContext);
 
         // Enforce the per-app error quota (atomically increments the counter).
         // Disabled by default; enable via ERROR_QUOTA_ENABLED once quota tiers are finalized.
