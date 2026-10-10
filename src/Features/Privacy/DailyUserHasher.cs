@@ -1,8 +1,5 @@
-using Aptabase.Data;
 using System.Text;
-using System.Security.Cryptography;
 using Microsoft.Extensions.Caching.Memory;
-using Dapper;
 using FastHashes;
 
 namespace Aptabase.Features.Privacy;
@@ -14,13 +11,26 @@ public interface IUserHasher
 
 public class DailyUserHasher : IUserHasher
 {
-    private readonly IMemoryCache _cache;
-    private readonly IDbContext _db;
+    // After a failed salt lookup, callers queued behind it fail immediately instead of each waiting out
+    // its own connection timeout, which would stall the whole flush during a database outage.
+    // Kept shorter than the ingestion flush interval so the next flush retries.
+    private static readonly TimeSpan SaltRetryDelay = TimeSpan.FromSeconds(5);
 
-    public DailyUserHasher(IMemoryCache cache, IDbContext db)
+    private readonly IMemoryCache _cache;
+    private readonly IPrivacyQueries _privacyQueries;
+    private readonly TimeProvider _time;
+
+    // Salt cache misses come in bursts (every app at once when the UTC date rolls over, or on a cold start)
+    // while every event of a flush is hashed concurrently. Loading salts one at a time means each one is
+    // read once and at most one Postgres connection is used, instead of one per event.
+    private readonly SemaphoreSlim _saltLock = new(1, 1);
+    private DateTimeOffset _lastSaltFailure = DateTimeOffset.MinValue;
+
+    public DailyUserHasher(IMemoryCache cache, IPrivacyQueries privacyQueries, TimeProvider? time = null)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        _privacyQueries = privacyQueries ?? throw new ArgumentNullException(nameof(privacyQueries));
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+        _time = time ?? TimeProvider.System;
     }
 
     public async Task<string> CalculateHash(DateTime timestamp, string appId, string sessionId, string clientIP, string userAgent)
@@ -55,16 +65,33 @@ public class DailyUserHasher : IUserHasher
         if (_cache.TryGetValue(cacheKey, out byte[]? cachedSalt) && cachedSalt != null)
             return cachedSalt;
 
-        var storedSalt = await ReadOrCreateSalt(date, appId);
-        _cache.Set(cacheKey, storedSalt, TimeSpan.FromDays(2));
-        return storedSalt;
-    }
+        await _saltLock.WaitAsync();
+        try
+        {
+            // Another caller may have loaded it while we were waiting for the lock
+            if (_cache.TryGetValue(cacheKey, out cachedSalt) && cachedSalt != null)
+                return cachedSalt;
 
-    private async Task<byte[]> ReadOrCreateSalt(string date, string appId)
-    {
-        var newSalt = RandomNumberGenerator.GetBytes(16);
-        await _db.Connection.ExecuteAsync($"INSERT INTO app_salts (app_id, date, salt) VALUES (@appId, @date, @newSalt) ON CONFLICT DO NOTHING", new { appId, date, newSalt });
-        var bytes = await _db.Connection.ExecuteScalarAsync<byte[]>($"SELECT salt FROM app_salts WHERE app_id = @appId AND date = @date", new { appId, date });
-        return bytes ?? newSalt;
+            if (_time.GetUtcNow() - _lastSaltFailure < SaltRetryDelay)
+                throw new InvalidOperationException("Skipped salt lookup because a recent one failed.");
+
+            byte[] storedSalt;
+            try
+            {
+                storedSalt = await _privacyQueries.ReadOrCreateSalt(appId, date);
+            }
+            catch
+            {
+                _lastSaltFailure = _time.GetUtcNow();
+                throw;
+            }
+
+            _cache.Set(cacheKey, storedSalt, TimeSpan.FromDays(2));
+            return storedSalt;
+        }
+        finally
+        {
+            _saltLock.Release();
+        }
     }
 }
