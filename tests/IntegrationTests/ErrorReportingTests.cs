@@ -149,6 +149,15 @@ public class ErrorReportingTests
     }
 
     [Fact]
+    public async Task Rejects_Unknown_AppKey_Before_Parsing_Body()
+    {
+        // A malformed body would be a 400 if it were parsed, so a 401 proves the App-Key check ran first
+        var client = new ErrorsClient(_fixture.CreateClient(), "THIS-DOES-NOT-EXIST");
+        var code = await client.PostRaw("{ this is not json");
+        code.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
     public async Task Cant_Read_Errors_From_Other_Users()
     {
         var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());

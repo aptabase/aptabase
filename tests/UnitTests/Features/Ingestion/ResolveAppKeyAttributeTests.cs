@@ -2,6 +2,7 @@ using Xunit;
 using Moq;
 using AwesomeAssertions;
 using Aptabase.Features.Apps;
+using Aptabase.Features.ErrorReporting;
 using Aptabase.Features.Ingestion;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +36,7 @@ public class ResolveAppKeyAttributeTests
 
         var result = context.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
         result.Value.Should().Be("Appplication not found with given app key: A-DEV-000");
+        _rejections.Verify(r => r.Record("unknown_key", "A-DEV-000", It.IsAny<string?>(), "test-agent"), Times.Once());
         _nextCalled.Should().BeFalse();
     }
 
@@ -46,7 +48,8 @@ public class ResolveAppKeyAttributeTests
         await _sut.OnResourceExecutionAsync(context, Next(context));
 
         context.Result.Should().BeOfType<NotFoundObjectResult>();
-        _cache.Verify(c => c.FindByAppKey("", It.IsAny<CancellationToken>()), Times.Once());
+        _cache.VerifyNoOtherCalls();
+        _rejections.Verify(r => r.Record("missing_key", "", It.IsAny<string?>(), "test-agent"), Times.Once());
         _nextCalled.Should().BeFalse();
     }
 
@@ -76,6 +79,45 @@ public class ResolveAppKeyAttributeTests
         _nextCalled.Should().BeTrue();
         ResolveAppKeyAttribute.GetApp(context.HttpContext).Id.Should().Be("APP-1");
         _rejections.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task Error_Endpoint_Should_Return_400_For_Missing_AppKey()
+    {
+        var context = CreateContext(appKey: null);
+
+        await new ResolveErrorAppKeyAttribute().OnResourceExecutionAsync(context, Next(context));
+
+        var result = context.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        result.Value.Should().BeEquivalentTo(new { error = "Missing App-Key header" });
+        _nextCalled.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Error_Endpoint_Should_Return_401_For_Unknown_AppKey()
+    {
+        var context = CreateContext("A-DEV-000");
+
+        await new ResolveErrorAppKeyAttribute().OnResourceExecutionAsync(context, Next(context));
+
+        var result = context.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
+        result.Value.Should().BeEquivalentTo(new { error = "Invalid App-Key" });
+        _rejections.Verify(r => r.Record("unknown_key", "A-DEV-000", It.IsAny<string?>(), "test-agent"), Times.Once());
+        _nextCalled.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Error_Endpoint_Should_Return_400_For_Locked_App()
+    {
+        SetupApp("A-DEV-000", new Application { Id = "APP-1", LockReason = 'T' });
+        var context = CreateContext("A-DEV-000");
+
+        await new ResolveErrorAppKeyAttribute().OnResourceExecutionAsync(context, Next(context));
+
+        var result = context.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        result.Value.Should().BeEquivalentTo(new { error = "Owner account is locked" });
+        _rejections.Verify(r => r.Record("locked", "A-DEV-000", It.IsAny<string?>(), "test-agent"), Times.Once());
+        _nextCalled.Should().BeFalse();
     }
 
     private void SetupApp(string appKey, Application app)
