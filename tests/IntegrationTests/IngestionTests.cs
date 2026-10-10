@@ -3,6 +3,8 @@ using System.Net;
 using AwesomeAssertions;
 using Aptabase.IntegrationTests.Clients;
 using Aptabase.Features.Ingestion.Buffer;
+using Aptabase.Data;
+using Dapper;
 
 namespace Aptabase.IntegrationTests;
 
@@ -104,9 +106,44 @@ public class IngestionTests
     [Fact]
     public async Task Cant_Ingest_Unknown_AppKey()
     {
+        // Dropped, but answered with success so SDKs that retry every non-2xx response don't re-send it forever
         var client = new IngestionClient(_fixture.CreateClient(), "THIS-DOES-NOT-EXIST");
         var code = await client.TrackEvent(DateTime.UtcNow, "Button Clicked", null);
-        code.Should().Be(HttpStatusCode.NotFound);
+        code.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Drops_Events_For_Locked_Account_With_Success_Status()
+    {
+        // A dedicated owner, because locking the shared fixture users would affect other tests
+        var owner = new AccountClient(_fixture.CreateClient());
+        await owner.CreateAccount("Locked Owner", $"locked.owner.{Guid.NewGuid()}@got.com");
+        var app = await owner.CreateApp(Guid.NewGuid().ToString());
+
+        var db = _fixture.GetService<IDbContext>();
+        await SetOwnerLockReason(db, app.Id, 'O');
+
+        // SDKs that retry every non-2xx response must see success, or they re-send these events forever
+        var client = new IngestionClient(_fixture.CreateClient(), app.AppKey);
+        (await client.TrackEvent(DateTime.UtcNow, "Button Clicked", null)).Should().Be(HttpStatusCode.OK);
+        (await client.TrackEvents([
+            (DateTime.UtcNow, "App Started", null),
+            (DateTime.UtcNow, "Menu Opened", null),
+        ])).Should().Be(HttpStatusCode.OK);
+
+        await _eventWritter.FlushEvents();
+
+        // Stats are hidden while the owner is locked, so unlock to check nothing was recorded
+        await SetOwnerLockReason(db, app.Id, null);
+        var count = await owner.CountEvents(app.Id, "24h");
+        count.Should().Be(0);
+    }
+
+    private static Task SetOwnerLockReason(IDbContext db, string appId, char? lockReason)
+    {
+        return db.Connection.ExecuteAsync(
+            "UPDATE users SET lock_reason = @lockReason WHERE id = (SELECT owner_id FROM apps WHERE id = @appId)",
+            new { appId, lockReason });
     }
 
     [Theory]
@@ -114,10 +151,10 @@ public class IngestionTests
     [InlineData("/api/v0/events")]
     public async Task Rejects_Unknown_AppKey_Before_Parsing_Body(string path)
     {
-        // A malformed body would be a 400 if it were parsed, so a 404 proves the app key check ran first
+        // A malformed body would be a 400 if it were parsed, so a 200 proves the app key check ran first
         var client = new IngestionClient(_fixture.CreateClient(), "THIS-DOES-NOT-EXIST");
         var code = await client.PostRaw(path, "{ this is not json");
-        code.Should().Be(HttpStatusCode.NotFound);
+        code.Should().Be(HttpStatusCode.OK);
     }
  
     public static IEnumerable<object[]> ValidProps => 
