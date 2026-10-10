@@ -28,41 +28,43 @@ public class ResolveAppKeyAttributeTests
     }
 
     [Fact]
-    public async Task Should_Return_404_Without_Running_Action_For_Unknown_AppKey()
+    public async Task Should_Return_200_Without_Running_Action_For_Unknown_AppKey()
     {
         var context = CreateContext("A-DEV-000");
 
         await _sut.OnResourceExecutionAsync(context, Next(context));
 
-        var result = context.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
-        result.Value.Should().Be("Appplication not found with given app key: A-DEV-000");
+        // A 2xx makes SDKs that retry every failed response drop the events instead of re-sending them forever
+        var result = context.Result.Should().BeOfType<OkObjectResult>().Subject;
+        result.Value.Should().BeEquivalentTo(new { error = "Application not found with given app key: A-DEV-000. Events are not being recorded." });
         _rejections.Verify(r => r.Record("unknown_key", "A-DEV-000", It.IsAny<string?>(), "test-agent"), Times.Once());
         _nextCalled.Should().BeFalse();
     }
 
     [Fact]
-    public async Task Should_Return_404_Without_Running_Action_For_Missing_AppKey()
+    public async Task Should_Return_200_Without_Running_Action_For_Missing_AppKey()
     {
         var context = CreateContext(appKey: null);
 
         await _sut.OnResourceExecutionAsync(context, Next(context));
 
-        context.Result.Should().BeOfType<NotFoundObjectResult>();
+        var result = context.Result.Should().BeOfType<OkObjectResult>().Subject;
+        result.Value.Should().BeEquivalentTo(new { error = "Missing App-Key header. Events are not being recorded." });
         _cache.VerifyNoOtherCalls();
         _rejections.Verify(r => r.Record("missing_key", "", It.IsAny<string?>(), "test-agent"), Times.Once());
         _nextCalled.Should().BeFalse();
     }
 
     [Fact]
-    public async Task Should_Return_400_And_Record_Rejection_Without_Running_Action_For_Locked_App()
+    public async Task Should_Return_200_And_Record_Rejection_Without_Running_Action_For_Locked_App()
     {
         SetupApp("A-DEV-000", new Application { Id = "APP-1", LockReason = 'T' });
         var context = CreateContext("A-DEV-000");
 
         await _sut.OnResourceExecutionAsync(context, Next(context));
 
-        var result = context.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
-        result.Value.Should().Be("Owner account is locked.");
+        var result = context.Result.Should().BeOfType<OkObjectResult>().Subject;
+        result.Value.Should().BeEquivalentTo(new { error = "Owner account is locked. Events are not being recorded." });
         _rejections.Verify(r => r.Record("locked", "A-DEV-000", It.IsAny<string?>(), "test-agent"), Times.Once());
         _nextCalled.Should().BeFalse();
     }

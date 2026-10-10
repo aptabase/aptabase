@@ -44,11 +44,16 @@ public class ResolveAppKeyAttribute : Attribute, IAsyncResourceFilter
         await next();
     }
 
-    protected virtual IActionResult MissingAppKey() => AppNotFound("");
+    // Event ingestion drops rejected events but answers with 200, the same status as success. Deployed SDKs that retry
+    // every non-2xx response (e.g. Aptabase.Unity up to 0.3.1) keep failed events queued and re-send the whole queue on
+    // every flush, so a 4xx here makes their traffic grow for as long as the key stays missing, unknown or locked.
+    protected virtual IActionResult MissingAppKey() => Dropped("Missing App-Key header.");
 
-    protected virtual IActionResult AppNotFound(string appKey) => new NotFoundObjectResult($"Appplication not found with given app key: {appKey}");
+    protected virtual IActionResult AppNotFound(string appKey) => Dropped($"Application not found with given app key: {appKey}.");
 
-    protected virtual IActionResult AppLocked() => new BadRequestObjectResult("Owner account is locked.");
+    protected virtual IActionResult AppLocked() => Dropped("Owner account is locked.");
+
+    private static IActionResult Dropped(string reason) => new OkObjectResult(new { error = $"{reason} Events are not being recorded." });
 
     public static CachedApplication GetApp(HttpContext httpContext)
     {
