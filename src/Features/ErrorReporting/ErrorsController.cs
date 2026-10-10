@@ -26,6 +26,7 @@ public class ErrorsController : ControllerBase
     private readonly IDbContext _db;
     private readonly EnvSettings _env;
     private readonly IMemoryCache _memoryCache;
+    private readonly IRejectionStats _rejections;
     private readonly ILogger<ErrorsController> _logger;
 
     public ErrorsController(
@@ -36,6 +37,7 @@ public class ErrorsController : ControllerBase
         IDbContext db,
         EnvSettings env,
         IMemoryCache memoryCache,
+        IRejectionStats rejections,
         ILogger<ErrorsController> logger)
     {
         _buffer = buffer;
@@ -45,6 +47,7 @@ public class ErrorsController : ControllerBase
         _db = db;
         _env = env;
         _memoryCache = memoryCache;
+        _rejections = rejections;
         _logger = logger;
     }
 
@@ -84,7 +87,7 @@ public class ErrorsController : ControllerBase
 
         if (app.IsLocked)
         {
-            _logger.LogWarning("Error rejected: App {AppId} is locked", app.Id);
+            _rejections.Record("locked", normalizedAppKey, HttpContext.ResolveClientIpAddress(), Request.Headers.UserAgent);
             return BadRequest(new { error = "Owner account is locked" });
         }
 

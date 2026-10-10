@@ -21,14 +21,17 @@ public class FeatureFlagStateController : Controller
     private readonly ILogger _logger;
     private readonly IIngestionCache _cache;
     private readonly IDbContext _db;
+    private readonly IRejectionStats _rejections;
 
     public FeatureFlagStateController(
         IDbContext db,
         IIngestionCache cache,
+        IRejectionStats rejections,
         ILogger<FeatureFlagStateController> logger)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+        _rejections = rejections ?? throw new ArgumentNullException(nameof(rejections));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -52,6 +55,7 @@ public class FeatureFlagStateController : Controller
 
         if (app.IsLocked)
         {
+            _rejections.Record("locked", appKey, HttpContext.ResolveClientIpAddress(), Request.Headers.UserAgent);
             return BadRequest($"Owner account is locked.");
         }
 
@@ -87,6 +91,7 @@ public class FeatureFlagStateController : Controller
 
         if (app.IsLocked)
         {
+            _rejections.Record("locked", appKey, HttpContext.ResolveClientIpAddress(), Request.Headers.UserAgent);
             return BadRequest($"Owner account is locked.");
         }
 

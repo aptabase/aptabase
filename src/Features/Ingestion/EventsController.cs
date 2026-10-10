@@ -14,14 +14,17 @@ public class EventsController : Controller
     private readonly IIngestionCache _cache;
     private readonly IEventBuffer _buffer;
     private readonly GeoIPClient _geoIP;
+    private readonly IRejectionStats _rejections;
 
     public EventsController(IIngestionCache cache,
                             IEventBuffer buffer,
                             GeoIPClient geoIP,
+                            IRejectionStats rejections,
                             ILogger<EventsController> logger)
     {
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
+        _rejections = rejections ?? throw new ArgumentNullException(nameof(rejections));
         _geoIP = geoIP ?? throw new ArgumentNullException(nameof(geoIP));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -49,8 +52,11 @@ public class EventsController : Controller
         if (string.IsNullOrEmpty(app.Id))
             return AppNotFound(appKey);
 
-        if (app.IsLocked) 
+        if (app.IsLocked)
+        {
+            _rejections.Record("locked", appKey, HttpContext.ResolveClientIpAddress(), userAgent);
             return BadRequest($"Owner account is locked.");
+        }
 
         // We never expect the Web SDK to send the OS name, so it's safe to assume that if it's missing the event is coming from a browser
         var isWeb = string.IsNullOrEmpty(body.SystemProps.OSName);
@@ -116,8 +122,11 @@ public class EventsController : Controller
         if (string.IsNullOrEmpty(app.Id))
             return AppNotFound(appKey);
 
-        if (app.IsLocked) 
+        if (app.IsLocked)
+        {
+            _rejections.Record("locked", appKey, HttpContext.ResolveClientIpAddress(), userAgent);
             return BadRequest($"Owner account is locked.");
+        }
 
         var clientIp = HttpContext.ResolveClientIpAddress();
         var location = _geoIP.GetClientLocation(HttpContext);

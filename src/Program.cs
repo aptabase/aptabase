@@ -93,6 +93,16 @@ public partial class Program
         builder.Services.AddRateLimiter(c =>
         {
             c.RejectionStatusCode = 429;
+            c.OnRejected = (ctx, _) =>
+            {
+                var http = ctx.HttpContext;
+                http.RequestServices.GetRequiredService<IRejectionStats>().Record(
+                    "rate_limit",
+                    http.Request.Headers["App-Key"],
+                    http.ResolveClientIpAddress(),
+                    http.Request.Headers.UserAgent);
+                return ValueTask.CompletedTask;
+            };
 
             c.AddPolicy("SignUp", httpContext => RateLimitPartition.GetFixedWindowLimiter(
                 httpContext.ResolveClientIpAddress(),
@@ -145,6 +155,8 @@ public partial class Program
         builder.Services.AddSingleton<IUserHasher, DailyUserHasher>();
         builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
         builder.Services.AddSingleton<IIngestionCache, IngestionCache>();
+        builder.Services.AddSingleton<IRejectionStats, RejectionStats>();
+        builder.Services.AddHostedService<RejectionStatsReporter>();
         builder.Services.AddSingleton<IBlobService, DatabaseBlobService>();
         builder.Services.AddSingleton<IEventBuffer, InMemoryEventBuffer>();
         builder.Services.AddSingleton<IErrorBuffer, InMemoryErrorBuffer>();

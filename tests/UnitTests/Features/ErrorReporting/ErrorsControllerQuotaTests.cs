@@ -106,6 +106,7 @@ public class ErrorsControllerQuotaTests
             _db.Object,
             CreateEnvSettings(errorQuotaEnabled),
             _memoryCache,
+            new RejectionStats(),
             Mock.Of<ILogger<ErrorsController>>())
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
