@@ -17,14 +17,11 @@ public class ResolveAppKeyAttributeTests
 {
     private readonly Mock<IIngestionCache> _cache = new();
     private readonly Mock<IRejectionStats> _rejections = new();
-    private readonly Mock<IAppQueries> _queries = new();
     private readonly ResolveAppKeyAttribute _sut = new();
     private bool _nextCalled;
 
     public ResolveAppKeyAttributeTests()
     {
-        _queries.Setup(q => q.GetRetentionMonthsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(60);
         _cache
             .Setup(c => c.FindByAppKey(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(CachedApplication.Empty);
@@ -75,7 +72,7 @@ public class ResolveAppKeyAttributeTests
     [Fact]
     public async Task Should_Run_Action_With_Resolved_App_For_Active_App()
     {
-        SetupApp("A-DEV-000", new Application { Id = "APP-1" });
+        SetupApp("A-DEV-000", new Application { Id = "APP-1", RetentionMonths = 24 });
         var context = CreateContext("a-dev-000");
 
         await _sut.OnResourceExecutionAsync(context, Next(context));
@@ -83,46 +80,12 @@ public class ResolveAppKeyAttributeTests
         context.Result.Should().BeNull();
         _nextCalled.Should().BeTrue();
         ResolveAppKeyAttribute.GetApp(context.HttpContext).Id.Should().Be("APP-1");
-        _queries.VerifyNoOtherCalls();
+        ResolveAppKeyAttribute.GetApp(context.HttpContext).RetentionMonths.Should().Be(24);
         _rejections.VerifyNoOtherCalls();
     }
 
     [Fact]
-    public async Task Should_Read_Current_Retention_Without_Mutating_Cached_Or_InFlight_Apps()
-    {
-        var cached = new CachedApplication(new Application { Id = "APP-1", RetentionMonths = 60 });
-        _cache.Setup(c => c.FindByAppKey("A-DEV-000", It.IsAny<CancellationToken>())).ReturnsAsync(cached);
-        _queries.SetupSequence(q => q.GetRetentionMonthsAsync("APP-1", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(24).ReturnsAsync(12);
-
-        var first = CreateContext("A-DEV-000");
-        await _sut.OnResourceExecutionAsync(first, Next(first));
-        (await ResolveAppKeyAttribute.ResolveRetentionAsync(first.HttpContext)).Should().BeNull();
-        var second = CreateContext("A-DEV-000");
-        await _sut.OnResourceExecutionAsync(second, Next(second));
-        (await ResolveAppKeyAttribute.ResolveRetentionAsync(second.HttpContext)).Should().BeNull();
-
-        ResolveAppKeyAttribute.GetApp(first.HttpContext).RetentionMonths.Should().Be(24);
-        ResolveAppKeyAttribute.GetApp(second.HttpContext).RetentionMonths.Should().Be(12);
-        cached.RetentionMonths.Should().Be(60);
-    }
-
-    [Fact]
-    public async Task Should_Drop_When_An_App_Was_Deleted_After_Status_Was_Cached()
-    {
-        SetupApp("A-DEV-000", new Application { Id = "APP-1" });
-        _queries.Setup(q => q.GetRetentionMonthsAsync("APP-1", It.IsAny<CancellationToken>()))
-            .ReturnsAsync((int?)null);
-        var context = CreateContext("A-DEV-000");
-
-        await _sut.OnResourceExecutionAsync(context, Next(context));
-
-        (await ResolveAppKeyAttribute.ResolveRetentionAsync(context.HttpContext)).Should().BeOfType<OkObjectResult>();
-        _cache.Verify(c => c.MarkAsDeleted("A-DEV-000"), Times.Once());
-    }
-
-    [Fact]
-    public async Task Active_Error_Ingestion_Does_Not_Read_Retention()
+    public async Task Active_Error_Ingestion_Uses_The_Cached_App()
     {
         SetupApp("A-DEV-000", new Application { Id = "APP-1", RetentionMonths = 6 });
         var context = CreateContext("A-DEV-000");
@@ -130,7 +93,7 @@ public class ResolveAppKeyAttributeTests
         await new ResolveErrorAppKeyAttribute().OnResourceExecutionAsync(context, Next(context));
 
         _nextCalled.Should().BeTrue();
-        _queries.VerifyNoOtherCalls();
+        _cache.Verify(c => c.FindByAppKey("A-DEV-000", It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact]
@@ -184,7 +147,6 @@ public class ResolveAppKeyAttributeTests
         var services = new ServiceCollection()
             .AddSingleton(_cache.Object)
             .AddSingleton(_rejections.Object)
-            .AddSingleton(_queries.Object)
             .AddLogging()
             .BuildServiceProvider();
 

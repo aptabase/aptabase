@@ -31,7 +31,7 @@ export function RetentionSelect({ value, onChange, disabled, creating }: Props) 
       <p id={`${id}-description`} className="mt-1 text-sm text-muted-foreground">
         {creating
           ? "New events expire after this period. You can change it later."
-          : "Changes apply only to new events. Existing events keep their original expiry."}
+          : "Changes take effect within 30 minutes and apply only to new events. Existing events keep their original expiry."}
         {" "}Debug events are kept for up to 182 days.
       </p>
     </div>

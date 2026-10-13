@@ -20,7 +20,6 @@ public interface IAppQueries
     Task<Application?> GetActiveAppByAppKey(string appKey, CancellationToken cancellationToken);
     Task MaskAsOnboarded(string appId, CancellationToken cancellationToken);
     Task<Application?> GetOwnedAppAsync(string appId, string userId);
-    Task<int?> GetRetentionMonthsAsync(string appId, CancellationToken cancellationToken);
 }
 
 public class AppQueries : IAppQueries
@@ -72,13 +71,5 @@ public class AppQueries : IAppQueries
               AND a.deleted_at IS NULL",
             new { appId, userId }
         );
-    }
-
-    public async Task<int?> GetRetentionMonthsAsync(string appId, CancellationToken cancellationToken)
-    {
-        using var connection = _db.Connection;
-        return await connection.QuerySingleOrDefaultAsync<int?>(new CommandDefinition(
-            "SELECT retention_months FROM apps WHERE id = @appId AND deleted_at IS NULL",
-            new { appId }, cancellationToken: cancellationToken));
     }
 }

@@ -11,6 +11,7 @@ using ClickHouse.Client.ADO;
 using Dapper;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Caching.Memory;
 using Xunit;
 
 namespace Aptabase.IntegrationTests;
@@ -89,7 +90,7 @@ public class AppRetentionTests(IntegrationTestsFixture fixture)
     }
 
     [Fact]
-    public async Task Policy_Changes_Affect_New_Requests_While_Buffered_Events_Keep_Their_Deadline()
+    public async Task Policy_Changes_Apply_After_Cache_Refresh_While_Buffered_Events_Keep_Their_Deadline()
     {
         var app = await fixture.UserA.CreateApp(Guid.NewGuid().ToString(), 24);
         var client = new IngestionClient(fixture.CreateClient(), app.AppKey);
@@ -99,10 +100,15 @@ public class AppRetentionTests(IntegrationTestsFixture fixture)
         (await client.TrackEvent(timestamp, "two_years", null)).Should().Be(HttpStatusCode.OK);
         var response = await fixture.UserA.Put($"/api/_apps/{app.Id}", new { name = app.Name, retentionMonths = 12 });
         response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await client.TrackEvent(timestamp, "before_cache_refresh", null)).Should().Be(HttpStatusCode.OK);
+        // Simulate cache expiry without waiting; the cache unit test verifies the 30-minute lifetime.
+        var cache = fixture.GetService<IMemoryCache>();
+        cache.Remove($"APP-KEY-STATUS-{app.AppKey}");
         (await client.TrackEvents([(timestamp, "one_year_a", null), (timestamp, "one_year_b", null)]))
             .Should().Be(HttpStatusCode.OK);
         response = await fixture.UserA.Put($"/api/_apps/{app.Id}", new { name = app.Name, retentionMonths = 60 });
         response.StatusCode.Should().Be(HttpStatusCode.OK);
+        cache.Remove($"APP-KEY-STATUS-{app.AppKey}");
         (await client.TrackEvent(timestamp, "five_years", null)).Should().Be(HttpStatusCode.OK);
 
         await fixture.GetHostedService<EventBackgroundWritter>().FlushEvents();
@@ -110,8 +116,9 @@ public class AppRetentionTests(IntegrationTestsFixture fixture)
         var rows = (await connection.QueryAsync<StoredEvent>(
             "SELECT event_name, ttl FROM events WHERE app_id = @appId", new { appId = app.Id })).ToArray();
 
-        rows.Should().HaveCount(4);
+        rows.Should().HaveCount(5);
         rows.Single(r => r.EventName == "two_years").TTL.Should().Be(timestamp.AddMonths(24));
+        rows.Single(r => r.EventName == "before_cache_refresh").TTL.Should().Be(timestamp.AddMonths(24));
         rows.Where(r => r.EventName.StartsWith("one_year")).Should().AllSatisfy(r => r.TTL.Should().Be(timestamp.AddMonths(12)));
         rows.Single(r => r.EventName == "five_years").TTL.Should().Be(timestamp.AddMonths(60));
     }
@@ -184,35 +191,10 @@ public class AppRetentionTests(IntegrationTestsFixture fixture)
             (await response.Content.ReadFromJsonAsync<Application>())!.RetentionMonths.Should().Be(6);
     }
 
-    [Fact]
-    public async Task Invalid_And_Empty_Event_Requests_Do_Not_Query_Retention()
-    {
-        using var factory = new CustomWebApplicationFactory<Program>().WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services => services.AddSingleton<IAppQueries>(provider =>
-                new ObservedAppQueries(new AppQueries(provider.GetRequiredService<IDbContext>())))));
-        var owner = new AccountClient(factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false }));
-        await owner.CreateAccount("Retention audit", $"retention.{Guid.NewGuid()}@example.test");
-        var app = await owner.CreateApp(Guid.NewGuid().ToString(), 24);
-        var client = new IngestionClient(factory.CreateClient(), app.AppKey);
-        var queries = (ObservedAppQueries)factory.Services.GetRequiredService<IAppQueries>();
-
-        (await client.PostRaw("/api/v0/event", "invalid-json")).Should().Be(HttpStatusCode.BadRequest);
-        (await client.TrackEvent(DateTime.UtcNow.AddDays(-10), "too_old", null)).Should().Be(HttpStatusCode.BadRequest);
-        (await client.TrackEvents([])).Should().Be(HttpStatusCode.OK);
-        (await client.TrackEvents([(DateTime.UtcNow.AddDays(-10), "too_old", null)])).Should().Be(HttpStatusCode.OK);
-        (await client.TrackEvents(Enumerable.Repeat((DateTime.UtcNow, "too_many", (object?)null), 26)))
-            .Should().Be(HttpStatusCode.BadRequest);
-        queries.RetentionReads.Should().Be(0);
-
-        (await client.TrackEvents([(DateTime.UtcNow, "valid_a", null), (DateTime.UtcNow, "valid_b", null)]))
-            .Should().Be(HttpStatusCode.OK);
-        queries.RetentionReads.Should().Be(1);
-    }
-
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task A_Failed_Policy_Read_Does_Not_Buffer_Events_Using_The_Cached_Policy(bool batch)
+    public async Task A_Warm_Cache_Accepts_Single_And_Batch_Events_Without_Database_Lookups(bool batch)
     {
         using var factory = new CustomWebApplicationFactory<Program>().WithWebHostBuilder(builder =>
             builder.ConfigureTestServices(services => services.AddSingleton<IAppQueries>(provider =>
@@ -228,23 +210,21 @@ public class AppRetentionTests(IntegrationTestsFixture fixture)
         (await client.TrackEvent(timestamp, "before_change", null)).Should().Be(HttpStatusCode.OK);
         (await owner.Put($"/api/_apps/{app.Id}", new { name = app.Name, retentionMonths = 6 }))
             .StatusCode.Should().Be(HttpStatusCode.OK);
-        queries.FailRetentionRead = true;
+        queries.FailAppLookup = true;
         var status = batch
-            ? await client.TrackEvents([(timestamp, "failed_read", null)])
-            : await client.TrackEvent(timestamp, "failed_read", null);
-        status.Should().Be(HttpStatusCode.InternalServerError);
+            ? await client.TrackEvents([(timestamp, "cached_policy", null)])
+            : await client.TrackEvent(timestamp, "cached_policy", null);
+        status.Should().Be(HttpStatusCode.OK);
+        queries.AppReads.Should().Be(1);
 
-        queries.FailRetentionRead = false;
-        (await client.TrackEvent(timestamp, "after_recovery", null)).Should().Be(HttpStatusCode.OK);
         var writer = factory.Services.GetServices<IHostedService>().OfType<EventBackgroundWritter>().Single();
         await writer.FlushEvents();
         var rows = (await factory.Services.GetRequiredService<ClickHouseConnection>().QueryAsync<StoredEvent>(
             "SELECT event_name, ttl FROM events WHERE app_id = @appId", new { appId = app.Id })).ToArray();
         rows.Should().HaveCount(2);
-        rows.Should().NotContain(r => r.EventName == "failed_read");
         // ClickHouse DateTime stores whole seconds.
-        var expiry = timestamp.AddMonths(6);
-        rows.Single(r => r.EventName == "after_recovery").TTL.Should()
+        var expiry = timestamp.AddMonths(60);
+        rows.Single(r => r.EventName == "cached_policy").TTL.Should()
             .Be(new DateTime(expiry.Ticks - expiry.Ticks % TimeSpan.TicksPerSecond, DateTimeKind.Utc));
     }
 
@@ -261,18 +241,17 @@ public class AppRetentionTests(IntegrationTestsFixture fixture)
 
     private class ObservedAppQueries(IAppQueries queries) : IAppQueries
     {
-        public int RetentionReads { get; private set; }
-        public bool FailRetentionRead { get; set; }
-        public Task<Application?> GetActiveAppByAppKey(string appKey, CancellationToken cancellationToken) => queries.GetActiveAppByAppKey(appKey, cancellationToken);
+        public int AppReads { get; private set; }
+        public bool FailAppLookup { get; set; }
+        public Task<Application?> GetActiveAppByAppKey(string appKey, CancellationToken cancellationToken)
+        {
+            AppReads++;
+            if (FailAppLookup)
+                throw new InvalidOperationException("Simulated metadata database outage");
+            return queries.GetActiveAppByAppKey(appKey, cancellationToken);
+        }
         public Task MaskAsOnboarded(string appId, CancellationToken cancellationToken) => queries.MaskAsOnboarded(appId, cancellationToken);
         public Task<Application?> GetOwnedAppAsync(string appId, string userId) => queries.GetOwnedAppAsync(appId, userId);
-        public Task<int?> GetRetentionMonthsAsync(string appId, CancellationToken cancellationToken)
-        {
-            RetentionReads++;
-            if (FailRetentionRead)
-                throw new InvalidOperationException("Simulated retention database outage");
-            return queries.GetRetentionMonthsAsync(appId, cancellationToken);
-        }
     }
 
     private class StoredEvent

@@ -1,12 +1,12 @@
 # Aptabase retention for future events
 
-Owners can choose 5 years, 2 years, 1 year, or 6 months when creating an app or in General Settings. The default is 5 years. Each ingestion request captures the current policy and assigns its events a fixed UTC expiry. Later setting changes affect new requests; existing and buffered events keep their assigned deadlines. Native ClickHouse and Tinybird TTL handle expiry.
+Owners can choose 5 years, 2 years, 1 year, or 6 months when creating an app or in General Settings. The default is 5 years. Each ingestion request uses the cached app policy and assigns its events a fixed UTC expiry. Saved changes take effect as the existing app cache expires, within 30 minutes; existing and buffered events keep their assigned deadlines. Native ClickHouse and Tinybird TTL handle expiry.
 
 ## Event admission
 
 PostgreSQL stores `apps.retention_months`, constrained to 6, 12, 24, or 60. Existing apps receive 60. App creation accepts the setting; editing can omit it without resetting the existing value. Only the owner can change it, while shared readers receive it in app metadata.
 
-The app-status cache remains available for cheap rejection of unknown and locked keys. After event validation, current retention is read separately once per accepted event request, including batches, so a saved change takes effect across replicas without waiting for the 30-minute status cache. Invalid JSON, invalid events, oversized or empty batches, and error-reporting requests do not perform this read. The request gets its own immutable app snapshot rather than mutating the cached object. This adds one small indexed PostgreSQL read per accepted request, not per individual event. Requests already past that read when an update commits keep their snapshot.
+Retention is loaded with the existing app metadata query and stored in `CachedApplication`. The existing 30-minute success cache, five-minute negative cache, and coalesced cold lookups are unchanged. Cache hits perform no PostgreSQL query. Saving a policy does not invalidate entries: each instance picks it up when its entry expires, within 30 minutes. Requests copy the cached policy into each `TrackingEvent`, so refreshing the cache never changes an in-flight or buffered event's deadline. The edit UI explains this delay.
 
 `TrackingEvent` carries that snapshot into the buffer. `EventRow` computes expiry using calendar months from the UTC event timestamp. Timestamps are normalized to UTC before future-date clamping. SDK payloads and the existing raw `ttl` column stay compatible; SDK-supplied expiry or retention fields cannot override the server policy. Debug events keep the earlier of the selected period and the existing 182-day cap; errors keep their independent 180-day cap. Retrying a serialized batch does not recalculate its deadlines.
 
@@ -37,7 +37,7 @@ The committed definitions use identity `FORWARD_QUERY SELECT *`, preserving exis
 
 The legacy patch is used only during the initial upgrade; it must not remain applied after promotion. Production schema jobs wait for the Cloud dev deployment. Each region's schema deploy precedes its backend deploy and retains the existing production approval gate. Failed schema checks, builds, dev deployments, or regional deployments block the backend; a skipped schema job permits a backend deployment only when change detection succeeded and explicitly reported no schema changes. Check production backfill size and available storage before promotion.
 
-On main, change detection compares the release with the last successful main push workflow, rather than just the previous push. This keeps failed or still-pending schema changes in the next release's deployment requirements. Missing or unrelated release history requires a schema deployment; a GitHub API failure blocks release. Feature branches use the normal previous-push comparison. Cancel or drain older queued deployments, then stage retention-aware ingestion across all replicas before enabling the controls, or temporarily gate app creation/edits during the initial rollout. A legacy replica cannot honor the new setting.
+On main, change detection compares the release with the last successful main push workflow, rather than just the previous push. This keeps failed or still-pending schema changes in the next release's deployment requirements. Missing or unrelated release history requires a schema deployment; a GitHub API failure blocks release. Feature branches use the normal previous-push comparison. Cancel or drain older queued deployments and complete backend rollout before relying on retention settings. A legacy replica cannot honor the new setting.
 
 ## Validation and limits
 
@@ -47,6 +47,6 @@ Tinybird Local migration checks preserve legacy aggregate states after raw event
 
 A Local migration with concurrent ingestion failed because Local's non-replicated engine does not support the partition move used during promotion. The live legacy tables preserved all 80 ingested events and their aggregate states, but this does not establish that a concurrent Cloud promotion succeeds. Rehearse the upgrade under ingestion in Cloud dev before approving production. See [the retention audit](retention_audit.md) for the findings and release requirements.
 
-TTL cleanup runs during background merges. This feature relies on that behavior and does not add a purge worker or a read-time filter. Mixed retention values can require rewriting shared parts; monitor PostgreSQL request load, aggregate row growth, and merge backlog during rollout.
+TTL cleanup runs during background merges. This feature relies on that behavior and does not add a purge worker or a read-time filter. Mixed retention values can require rewriting shared parts; monitor aggregate row growth and merge backlog during rollout. Ingestion keeps the existing cached metadata lookup and adds no database round-trip on cache hits.
 
 This future-only setting does not shorten the customer's already stored events to 25 months. Those existing events keep their prior deadlines.

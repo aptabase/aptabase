@@ -55,17 +55,25 @@ public class IngestionCacheTests
     }
 
     [Fact]
-    public async Task Should_Negatively_Cache_An_App_Deleted_After_It_Was_Resolved()
+    public async Task Retention_Refreshes_After_Thirty_Minutes_Without_Changing_Existing_Snapshots()
     {
+        var clock = new TestClock();
+        using var cache = new MemoryCache(new MemoryCacheOptions { Clock = clock });
+        var sut = new IngestionCache(cache, _queries.Object);
+        var storedApp = new Application { Id = "1234", HasEvents = true, RetentionMonths = 24 };
         _queries.Setup(q => q.GetActiveAppByAppKey("A-DEV-000", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Application { Id = "1234" });
-        (await _sut.FindByAppKey("A-DEV-000", default)).Id.Should().Be("1234");
+            .ReturnsAsync(storedApp);
+        var original = await sut.FindByAppKey("A-DEV-000", default);
 
-        _sut.MarkAsDeleted("A-DEV-000");
-
-        (await _sut.FindByAppKey("A-DEV-000", default)).Id.Should().BeEmpty();
-        (await _sut.FindByAppKey("A-DEV-000", default)).Id.Should().BeEmpty();
+        storedApp.RetentionMonths = 12;
+        clock.UtcNow = clock.UtcNow.AddMinutes(29);
+        (await sut.FindByAppKey("A-DEV-000", default)).RetentionMonths.Should().Be(24);
         _queries.Verify(q => q.GetActiveAppByAppKey(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once());
+
+        clock.UtcNow = clock.UtcNow.AddMinutes(1);
+        (await sut.FindByAppKey("A-DEV-000", default)).RetentionMonths.Should().Be(12);
+        original.RetentionMonths.Should().Be(24);
+        _queries.Verify(q => q.GetActiveAppByAppKey(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
     [Fact]
@@ -192,5 +200,10 @@ public class IngestionCacheTests
         public ICacheEntry CreateEntry(object key) => Inner.CreateEntry(key);
         public void Remove(object key) => Inner.Remove(key);
         public void Dispose() => Inner.Dispose();
+    }
+
+    private sealed class TestClock : Microsoft.Extensions.Internal.ISystemClock
+    {
+        public DateTimeOffset UtcNow { get; set; } = DateTimeOffset.UtcNow;
     }
 }

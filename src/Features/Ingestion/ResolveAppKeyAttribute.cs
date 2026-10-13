@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Aptabase.Features.Apps;
 
 namespace Aptabase.Features.Ingestion;
 
@@ -43,26 +42,6 @@ public class ResolveAppKeyAttribute : Attribute, IAsyncResourceFilter
 
         SetApp(httpContext, app);
         await next();
-    }
-
-    // Called by event ingestion after validation, before buffering any events. Error reports have
-    // a fixed 180-day cap, shorter than every app policy, so they do not need this database read.
-    public static async Task<IActionResult?> ResolveRetentionAsync(HttpContext httpContext)
-    {
-        var app = GetApp(httpContext);
-        var queries = httpContext.RequestServices.GetRequiredService<IAppQueries>();
-        var retentionMonths = await queries.GetRetentionMonthsAsync(app.Id, httpContext.RequestAborted);
-        if (!retentionMonths.HasValue)
-        {
-            var appKey = httpContext.Request.Headers["App-Key"].ToString().ToUpperInvariant();
-            httpContext.RequestServices.GetRequiredService<IIngestionCache>().MarkAsDeleted(appKey);
-            RecordRejection(httpContext, "unknown_key", appKey);
-            return Dropped($"Application not found with given app key: {appKey}.");
-        }
-
-        // Never mutate the cached object or another request's assigned policy.
-        SetApp(httpContext, new CachedApplication(app, retentionMonths.Value));
-        return null;
     }
 
     // Event ingestion drops rejected events but answers with 200, the same status as success. Deployed SDKs that retry
