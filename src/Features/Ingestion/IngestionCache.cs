@@ -35,6 +35,7 @@ public class CachedApplication
 public interface IIngestionCache
 {
     Task<CachedApplication> FindByAppKey(string appKey, CancellationToken cancellationToken);
+    void MarkAsDeleted(string appKey);
 }
 
 public class IngestionCache : IIngestionCache
@@ -53,6 +54,11 @@ public class IngestionCache : IIngestionCache
     {
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _appQueries = appQueries ?? throw new ArgumentNullException(nameof(appQueries));
+    }
+
+    public void MarkAsDeleted(string appKey)
+    {
+        _cache.Set($"APP-KEY-STATUS-{appKey}", CachedApplication.Empty, FailureCacheDuration);
     }
 
     public async Task<CachedApplication> FindByAppKey(string appKey, CancellationToken cancellationToken)

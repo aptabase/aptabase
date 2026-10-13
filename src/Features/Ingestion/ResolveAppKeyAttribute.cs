@@ -47,6 +47,7 @@ public class ResolveAppKeyAttribute : Attribute, IAsyncResourceFilter
         var retentionMonths = await queries.GetRetentionMonthsAsync(app.Id, httpContext.RequestAborted);
         if (!retentionMonths.HasValue)
         {
+            cache.MarkAsDeleted(appKey);
             RecordRejection(httpContext, "unknown_key", appKey);
             context.Result = AppNotFound(appKey);
             return;

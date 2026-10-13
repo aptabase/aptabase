@@ -55,6 +55,20 @@ public class IngestionCacheTests
     }
 
     [Fact]
+    public async Task Should_Negatively_Cache_An_App_Deleted_After_It_Was_Resolved()
+    {
+        _queries.Setup(q => q.GetActiveAppByAppKey("A-DEV-000", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Application { Id = "1234" });
+        (await _sut.FindByAppKey("A-DEV-000", default)).Id.Should().Be("1234");
+
+        _sut.MarkAsDeleted("A-DEV-000");
+
+        (await _sut.FindByAppKey("A-DEV-000", default)).Id.Should().BeEmpty();
+        (await _sut.FindByAppKey("A-DEV-000", default)).Id.Should().BeEmpty();
+        _queries.Verify(q => q.GetActiveAppByAppKey(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once());
+    }
+
+    [Fact]
     public async Task Should_Share_One_Lookup_For_Concurrent_Misses()
     {
         var lookup = new TaskCompletionSource<Application?>();

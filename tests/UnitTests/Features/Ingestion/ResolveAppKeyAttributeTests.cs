@@ -115,6 +115,7 @@ public class ResolveAppKeyAttributeTests
         await _sut.OnResourceExecutionAsync(context, Next(context));
 
         context.Result.Should().BeOfType<OkObjectResult>();
+        _cache.Verify(c => c.MarkAsDeleted("A-DEV-000"), Times.Once());
         _nextCalled.Should().BeFalse();
     }
 
