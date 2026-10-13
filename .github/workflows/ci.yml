@@ -52,12 +52,18 @@ jobs:
         env:
           CLICKHOUSE_TEST_URL: http://localhost:8123
 
+      - name: Test Tinybird release change detection
+        run: python3 -m unittest discover -s tests/CI -p '*_test.py'
+
   # Runs on every push, no containers: detects Tinybird project/test changes and checks ClickHouse
   # parity. Exposes `changed`, used to skip tinybird-build and the Tinybird deploy jobs (and their
-  # approvals) when the push did not touch etc/tinybird.
+  # approvals) when the release has no pending Tinybird changes.
   tinybird-check:
     name: Tinybird Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     outputs:
       changed: ${{ steps.changes.outputs.tinybird }}
     steps:
@@ -70,9 +76,15 @@ jobs:
         id: changes
         env:
           BEFORE: ${{ github.event.before }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
-            echo "No usable base commit (new branch or force push); assuming etc/tinybird changed."
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            # A previous push may still be awaiting approval or may have failed its schema deploy.
+            # Only a successful release proves its Tinybird changes reached both regions.
+            BEFORE=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?branch=main&status=success&event=push&per_page=1" --jq '.workflow_runs[0].head_sha // empty')
+          fi
+          if ! [[ "$BEFORE" =~ ^[0-9a-f]{40}$ ]] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null || ! git merge-base --is-ancestor "$BEFORE" "$GITHUB_SHA"; then
+            echo "No usable successful base commit; assuming Tinybird changed."
             echo "tinybird=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -211,7 +223,7 @@ jobs:
           IMAGE_TAG: main
 
   # Keeps the dev Tinybird workspace in sync with main. Acts as a live rehearsal before the production gates.
-  # All Tinybird deploy jobs run only when the push changed etc/tinybird.
+  # On main, change detection includes Tinybird changes since the last successful release.
   deploy-tinybird-dev:
     if: ${{ github.ref == 'refs/heads/main' && needs.tinybird-check.outputs.changed == 'true' }}
     name: Deploy Tinybird (dev)

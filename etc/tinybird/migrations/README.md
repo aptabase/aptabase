@@ -18,6 +18,8 @@ The daily query preserves the former 1500-day TTL. The monthly query preserves l
 
 Use a checkout of this PR with Tinybird CLI 4.6.18. Before applying, confirm that both daily targets still use `period + toIntervalDay(1500)`, monthly usage has no TTL, and all three lack `expires_at` (monthly also lacks `retention_managed`). This patch is for that legacy schema only. Do not reapply it to upgraded workspaces: its fixed defaults could reset assigned deadlines during a later rewrite. An upgraded workspace uses the ordinary committed definitions.
 
+Inspect the live datasource schemas in Tinybird before applying the patch. This is a required operator check: `deploy --check` can report no changes on an upgraded workspace even with the temporary forward queries applied. It does not prove that replaying this patch is safe. If the schemas are partially upgraded, stop and inspect the previous deployment rather than applying legacy defaults to all three targets.
+
 Set `TB_HOST` and `TB_TOKEN` to the specific workspace. From the repository root:
 
 ```sh

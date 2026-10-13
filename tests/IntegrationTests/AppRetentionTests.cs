@@ -209,6 +209,45 @@ public class AppRetentionTests(IntegrationTestsFixture fixture)
         queries.RetentionReads.Should().Be(1);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task A_Failed_Policy_Read_Does_Not_Buffer_Events_Using_The_Cached_Policy(bool batch)
+    {
+        using var factory = new CustomWebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+            builder.ConfigureTestServices(services => services.AddSingleton<IAppQueries>(provider =>
+                new ObservedAppQueries(new AppQueries(provider.GetRequiredService<IDbContext>())))));
+        var owner = new AccountClient(factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false }));
+        await owner.CreateAccount("Retention audit", $"retention.{Guid.NewGuid()}@example.test");
+        var app = await owner.CreateApp(Guid.NewGuid().ToString(), 60);
+        var client = new IngestionClient(factory.CreateClient(), app.AppKey);
+        var timestamp = DateTime.UtcNow.AddMinutes(-5);
+        var queries = (ObservedAppQueries)factory.Services.GetRequiredService<IAppQueries>();
+
+        // Warm the status cache with the old policy, then save a shorter policy.
+        (await client.TrackEvent(timestamp, "before_change", null)).Should().Be(HttpStatusCode.OK);
+        (await owner.Put($"/api/_apps/{app.Id}", new { name = app.Name, retentionMonths = 6 }))
+            .StatusCode.Should().Be(HttpStatusCode.OK);
+        queries.FailRetentionRead = true;
+        var status = batch
+            ? await client.TrackEvents([(timestamp, "failed_read", null)])
+            : await client.TrackEvent(timestamp, "failed_read", null);
+        status.Should().Be(HttpStatusCode.InternalServerError);
+
+        queries.FailRetentionRead = false;
+        (await client.TrackEvent(timestamp, "after_recovery", null)).Should().Be(HttpStatusCode.OK);
+        var writer = factory.Services.GetServices<IHostedService>().OfType<EventBackgroundWritter>().Single();
+        await writer.FlushEvents();
+        var rows = (await factory.Services.GetRequiredService<ClickHouseConnection>().QueryAsync<StoredEvent>(
+            "SELECT event_name, ttl FROM events WHERE app_id = @appId", new { appId = app.Id })).ToArray();
+        rows.Should().HaveCount(2);
+        rows.Should().NotContain(r => r.EventName == "failed_read");
+        // ClickHouse DateTime stores whole seconds.
+        var expiry = timestamp.AddMonths(6);
+        rows.Single(r => r.EventName == "after_recovery").TTL.Should()
+            .Be(new DateTime(expiry.Ticks - expiry.Ticks % TimeSpan.TicksPerSecond, DateTimeKind.Utc));
+    }
+
     private class DuringUploadBlobService(Func<Task> change) : IBlobService
     {
         public async Task<string> UploadAsync(string prefix, byte[] content, string contentType, CancellationToken cancellationToken)
@@ -223,12 +262,15 @@ public class AppRetentionTests(IntegrationTestsFixture fixture)
     private class ObservedAppQueries(IAppQueries queries) : IAppQueries
     {
         public int RetentionReads { get; private set; }
+        public bool FailRetentionRead { get; set; }
         public Task<Application?> GetActiveAppByAppKey(string appKey, CancellationToken cancellationToken) => queries.GetActiveAppByAppKey(appKey, cancellationToken);
         public Task MaskAsOnboarded(string appId, CancellationToken cancellationToken) => queries.MaskAsOnboarded(appId, cancellationToken);
         public Task<Application?> GetOwnedAppAsync(string appId, string userId) => queries.GetOwnedAppAsync(appId, userId);
         public Task<int?> GetRetentionMonthsAsync(string appId, CancellationToken cancellationToken)
         {
             RetentionReads++;
+            if (FailRetentionRead)
+                throw new InvalidOperationException("Simulated retention database outage");
             return queries.GetRetentionMonthsAsync(appId, cancellationToken);
         }
     }

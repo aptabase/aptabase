@@ -45,12 +45,15 @@ Rules that Forward enforces:
 4. The backend deploy of each region (`deploy-us`, `deploy-eu`) **depends on** its Tinybird
    deploy, so the schema is always live before App Runner rolls out the new backend image.
 
-The Tinybird deploy jobs run when the push changes `etc/tinybird` or `tests/Tinybird` (`tinybird-check` compares
-the push's before and after commits). A backend-only release therefore shows just the two
-backend approvals. Failed checks, builds, dev deployments, or rejected/failed production schema
+The Tinybird deploy jobs run when the release changes `etc/tinybird` or `tests/Tinybird`. On main,
+`tinybird-check` compares against the last successful main push workflow, so changes from failed
+or still-pending releases remain required. Feature branches compare the push's before and after commits.
+A backend-only release after a successful schema release shows just the two backend approvals.
+Failed checks, builds, dev deployments, or rejected/failed production schema
 deployments block the matching backend deployment. A skipped schema job permits backend deployment
 only after successful change detection explicitly reports no schema changes.
-If the base commit is unknown (new branch, force push) the jobs run and act as a no-op.
+If the base commit is missing or outside the current history, a schema deployment is required;
+an API failure blocks change detection. With no pending workspace changes, the deployment is a no-op.
 
 A deploy with no pending changes is a no-op and exits 0, so the steps are safe to re-run.
 

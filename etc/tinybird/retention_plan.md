@@ -37,6 +37,8 @@ The committed definitions use identity `FORWARD_QUERY SELECT *`, preserving exis
 
 The legacy patch is used only during the initial upgrade; it must not remain applied after promotion. Production schema jobs wait for the Cloud dev deployment. Each region's schema deploy precedes its backend deploy and retains the existing production approval gate. Failed schema checks, builds, dev deployments, or regional deployments block the backend; a skipped schema job permits a backend deployment only when change detection succeeded and explicitly reported no schema changes. Check production backfill size and available storage before promotion.
 
+On main, change detection compares the release with the last successful main push workflow, rather than just the previous push. This keeps failed or still-pending schema changes in the next release's deployment requirements. Missing or unrelated release history requires a schema deployment; a GitHub API failure blocks release. Feature branches use the normal previous-push comparison. Cancel or drain older queued deployments, then stage retention-aware ingestion across all replicas before enabling the controls, or temporarily gate app creation/edits during the initial rollout. A legacy replica cannot honor the new setting.
+
 ## Validation and limits
 
 Backend tests cover all supported values, creation defaults, omitted update values, invalid settings, owner/shared-reader authorization, concurrent ownership transfer/deletion during edits, UTC calendar boundaries and offsets, debug caps, SDK override attempts, and changing policy while events are buffered. Browser checks cover the first-app form, new-app modal, and edit form, including recovery from HTTP and network failures.
