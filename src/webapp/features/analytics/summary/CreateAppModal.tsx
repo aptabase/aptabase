@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@components/Button";
 import { IconX } from "@tabler/icons-react";
 import { TextInput } from "@components/TextInput";
+import { RetentionSelect } from "@features/apps/RetentionSelect";
+import type { RetentionMonths } from "@features/apps/apps";
 
 type Props = {
   open: boolean;
@@ -16,26 +18,36 @@ export function CreateAppModal(props: Props) {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [processing, setIsProcessing] = useState(false);
+  const [retentionMonths, setRetentionMonths] = useState<RetentionMonths>(60);
+  const [error, setError] = useState("");
 
   const close = () => {
     setName("");
+    setRetentionMonths(60);
     setIsProcessing(false);
+    setError("");
     props.onClose();
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (processing) return;
     setIsProcessing(true);
-
-    const app = await createApp(name);
-    navigate(app.id);
-
-    return close();
+    setError("");
+    try {
+      const app = await createApp(name, retentionMonths);
+      navigate(app.id);
+      close();
+    } catch {
+      setError("Could not create your app. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
     <Transition.Root show={props.open} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={close}>
+      <Dialog as="div" className="relative z-50" onClose={() => { if (!processing) close(); }}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -63,8 +75,10 @@ export function CreateAppModal(props: Props) {
                 <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
                   <button
                     type="button"
+                    aria-label="Close"
                     className="rounded-md text-muted-foreground hover:text-foreground"
-                    onClick={props.onClose}
+                    onClick={close}
+                    disabled={processing}
                   >
                     <IconX className="h-6 w-6" />
                   </button>
@@ -78,12 +92,17 @@ export function CreateAppModal(props: Props) {
                     placeholder="App Name"
                     autoComplete="off"
                     required={true}
+                    disabled={processing}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
                   <p className="text-sm text-muted-foreground mt-1">
                     A friendly name to identify your app. You can change it later.
                   </p>
+                  <div className="mt-4">
+                    <RetentionSelect value={retentionMonths} onChange={setRetentionMonths} disabled={processing} creating />
+                  </div>
+                  {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
                   <Button
                     className="mt-4"
                     disabled={name.length < 2 || name.length > 40 || processing}

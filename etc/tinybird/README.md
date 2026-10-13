@@ -36,20 +36,24 @@ Rules that Forward enforces:
 
 1. **Every push**: `tinybird-check` detects whether `etc/tinybird` changed and runs the ClickHouse
    parity check. When it changed, `tinybird-build` runs a token-free `tb --local build` against a
-   Tinybird Local container and `tb --cloud deploy --check` against `aptabase_dev` (the last one
-   only when the dev token is available). Otherwise `tinybird-build` is skipped entirely, so no
-   container is pulled.
-2. **Push to `main`**: `deploy-tinybird-dev` deploys to `aptabase_dev` right after tests pass.
+   Tinybird Local container. Otherwise `tinybird-build` is skipped entirely, so no container is pulled.
+2. **Push to `main`**: `deploy-tinybird-dev` checks the live workspace and deploys to `aptabase_dev`
+   after tests pass. Any required one-time migration must already be complete.
 3. **Push to `main`**, behind their own approvals: `deploy-tinybird-us` and `deploy-tinybird-eu`
-   deploy the project to production. Together with the existing backend gates that makes up to
+   deploy the project to production after the Cloud dev deployment succeeds. Together with the existing backend gates that makes up to
    four approvals per release: Tinybird US, Tinybird EU, Aptabase US, Aptabase EU.
 4. The backend deploy of each region (`deploy-us`, `deploy-eu`) **depends on** its Tinybird
    deploy, so the schema is always live before App Runner rolls out the new backend image.
 
-The Tinybird deploy jobs only run when the push changed `etc/tinybird` (`tinybird-check` compares
-the push's before and after commits). A backend-only release therefore shows just the two
-backend approvals. A failed or rejected Tinybird deploy still blocks the matching backend deploy.
-If the base commit is unknown (new branch, force push) the jobs run and act as a no-op.
+The Tinybird deploy jobs run when the release changes `etc/tinybird` or `tests/Tinybird`. On main,
+`tinybird-check` compares against the last successful main push workflow, so changes from failed
+or still-pending releases remain required. Feature branches compare the push's before and after commits.
+A backend-only release after a successful schema release shows just the two backend approvals.
+Failed checks, builds, dev deployments, or rejected/failed production schema
+deployments block the matching backend deployment. A skipped schema job permits backend deployment
+only after successful change detection explicitly reports no schema changes.
+If the base commit is missing or outside the current history, a schema deployment is required;
+an API failure blocks change detection. With no pending workspace changes, the deployment is a no-op.
 
 A deploy with no pending changes is a no-op and exits 0, so the steps are safe to re-run.
 
@@ -80,6 +84,19 @@ Static tokens created this way are not declared in datafiles and are **not** rem
 deployments. Only resource-scoped tokens (`TOKEN "..." READ` lines) are deployment-managed.
 
 ## Manual operations
+
+Use ordinary Tinybird commands for deploy checks and deployments:
+
+```sh
+cd etc/tinybird
+tb --cloud --host "${TB_HOST:?Set TB_HOST}" --token "${TB_TOKEN:?Set TB_TOKEN}" deploy --check
+tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
+```
+
+Legacy workspaces need the explicit [one-time retention migration](migrations/README.md)
+before the feature's first deployment. The migration uses plain SQL to preserve existing history.
+Normal deployments use identity forward queries to preserve already assigned expiry timestamps.
+See [event retention](retention_plan.md) for behavior and rollout.
 
 CI never passes `--allow-destructive-operations`, so removing a datasource, materialized view
 or connection fails in CI on purpose. To ship such a change:

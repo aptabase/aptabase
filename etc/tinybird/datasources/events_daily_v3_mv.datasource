@@ -14,8 +14,14 @@ SCHEMA >
     `session_id` String,
     `min_ts` AggregateFunction(min, DateTime),
     `max_ts` AggregateFunction(max, DateTime),
-    `events_count` AggregateFunction(count)
+    `events_count` AggregateFunction(count),
+    `expires_at` DateTime DEFAULT period + toIntervalDay(1500)
 
 ENGINE "AggregatingMergeTree"
-ENGINE_SORTING_KEY "app_id, period, event_name, country_code, region_name, os_name, os_version, app_version, device_model, user_id, session_id"
-ENGINE_TTL "period + toIntervalDay(1500)"
+ENGINE_SORTING_KEY "app_id, period, event_name, country_code, region_name, os_name, os_version, app_version, device_model, user_id, session_id, expires_at"
+ENGINE_TTL "expires_at"
+
+# Keep assigned expiry timestamps during later schema evolution.
+# The initial legacy upgrade is in migrations/app_retention.patch.
+FORWARD_QUERY >
+    SELECT *

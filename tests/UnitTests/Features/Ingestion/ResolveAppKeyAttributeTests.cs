@@ -72,7 +72,7 @@ public class ResolveAppKeyAttributeTests
     [Fact]
     public async Task Should_Run_Action_With_Resolved_App_For_Active_App()
     {
-        SetupApp("A-DEV-000", new Application { Id = "APP-1" });
+        SetupApp("A-DEV-000", new Application { Id = "APP-1", RetentionMonths = 24 });
         var context = CreateContext("a-dev-000");
 
         await _sut.OnResourceExecutionAsync(context, Next(context));
@@ -80,7 +80,20 @@ public class ResolveAppKeyAttributeTests
         context.Result.Should().BeNull();
         _nextCalled.Should().BeTrue();
         ResolveAppKeyAttribute.GetApp(context.HttpContext).Id.Should().Be("APP-1");
+        ResolveAppKeyAttribute.GetApp(context.HttpContext).RetentionMonths.Should().Be(24);
         _rejections.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task Active_Error_Ingestion_Uses_The_Cached_App()
+    {
+        SetupApp("A-DEV-000", new Application { Id = "APP-1", RetentionMonths = 6 });
+        var context = CreateContext("A-DEV-000");
+
+        await new ResolveErrorAppKeyAttribute().OnResourceExecutionAsync(context, Next(context));
+
+        _nextCalled.Should().BeTrue();
+        _cache.Verify(c => c.FindByAppKey("A-DEV-000", It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact]
