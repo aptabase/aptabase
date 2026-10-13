@@ -37,6 +37,16 @@ class RetentionDeploymentTests(unittest.TestCase):
     def legacy_error(self):
         return subprocess.CompletedProcess([], 1, "Error on datasource 'datasources/events_daily_v3_mv.datasource': FORWARD_QUERY columns don't match datasource schema")
 
+    def test_empty_explicit_target_does_not_fall_back_to_other_credentials(self):
+        for option in ("host", "token", "branch"):
+            args = ["deploy_tinybird.py", "--branch", ""] if option == "branch" else ["deploy_tinybird.py", "--cloud", "--" + option, ""]
+            with self.subTest(option=option), patch("sys.argv", args), \
+                 patch.object(deployment, "run") as run, contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit) as error:
+                    deployment.main()
+                self.assertEqual(error.exception.code, 2)
+                run.assert_not_called()
+
     def test_failed_migration_validation_restores_original_definitions(self):
         def second_check(*_):
             self.assertIn("period + toIntervalDay(1500)", self.source.read_text())
@@ -61,6 +71,34 @@ class RetentionDeploymentTests(unittest.TestCase):
         self.assertEqual((code, calls), (1, 1))
         self.assertEqual(self.source.read_text(), self.original)
 
+    def test_custom_schema_transform_is_not_replaced(self):
+        original = self.original.replace("SELECT *", "SELECT period, 'custom' AS source")
+        self.source.write_text(original)
+        code, calls = self.invoke([self.legacy_error()])
+        self.assertEqual((code, calls), (1, 1))
+        self.assertEqual(self.source.read_text(), original)
+
+    def test_interrupted_deployment_restores_original_definitions(self):
+        with self.assertRaises(KeyboardInterrupt):
+            self.invoke([self.legacy_error(), subprocess.CompletedProcess([], 0, "Valid"), KeyboardInterrupt()])
+        self.assertEqual(self.source.read_text(), self.original)
+
+    def test_failed_deployment_restores_original_definitions(self):
+        code, calls = self.invoke([
+            self.legacy_error(), subprocess.CompletedProcess([], 0, "Valid"),
+            subprocess.CompletedProcess([], 1, "Deployment failed"),
+        ])
+        self.assertEqual((code, calls), (1, 3))
+        self.assertEqual(self.source.read_text(), self.original)
+
+    def test_successful_deployment_restores_original_definitions(self):
+        code, calls = self.invoke([
+            self.legacy_error(), subprocess.CompletedProcess([], 0, "Valid"),
+            subprocess.CompletedProcess([], 0, "Promoted"),
+        ])
+        self.assertEqual((code, calls), (0, 3))
+        self.assertEqual(self.source.read_text(), self.original)
+
     def test_job_tokens_are_redacted_from_logs(self):
         result = subprocess.CompletedProcess([], 0, "Job URL: https://example.test/jobs/1?token=test_secret&other=value\n")
         output = io.StringIO()
@@ -68,6 +106,13 @@ class RetentionDeploymentTests(unittest.TestCase):
             deployment.run(["tb"], self.project)
         self.assertNotIn("test_secret", output.getvalue())
         self.assertIn("token=[redacted]&other=value", output.getvalue())
+
+    def test_explicit_credentials_are_redacted_outside_job_urls(self):
+        result = subprocess.CompletedProcess([], 1, "Failed with credential test_secret\n")
+        output = io.StringIO()
+        with patch.object(deployment.subprocess, "run", return_value=result), contextlib.redirect_stdout(output):
+            deployment.run(["tb", "--token", "test_secret"], self.project)
+        self.assertNotIn("test_secret", output.getvalue())
 
 
 if __name__ == "__main__":

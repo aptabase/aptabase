@@ -41,20 +41,28 @@ public class ResolveAppKeyAttribute : Attribute, IAsyncResourceFilter
             return;
         }
 
-        // App status remains cached for cheap rejection. Retention is read once per accepted request
-        // so settings saved on another replica apply immediately. Never mutate the shared cached app.
+        SetApp(httpContext, app);
+        await next();
+    }
+
+    // Called by event ingestion after validation, before buffering any events. Error reports have
+    // a fixed 180-day cap, shorter than every app policy, so they do not need this database read.
+    public static async Task<IActionResult?> ResolveRetentionAsync(HttpContext httpContext)
+    {
+        var app = GetApp(httpContext);
         var queries = httpContext.RequestServices.GetRequiredService<IAppQueries>();
         var retentionMonths = await queries.GetRetentionMonthsAsync(app.Id, httpContext.RequestAborted);
         if (!retentionMonths.HasValue)
         {
-            cache.MarkAsDeleted(appKey);
+            var appKey = httpContext.Request.Headers["App-Key"].ToString().ToUpperInvariant();
+            httpContext.RequestServices.GetRequiredService<IIngestionCache>().MarkAsDeleted(appKey);
             RecordRejection(httpContext, "unknown_key", appKey);
-            context.Result = AppNotFound(appKey);
-            return;
+            return Dropped($"Application not found with given app key: {appKey}.");
         }
 
+        // Never mutate the cached object or another request's assigned policy.
         SetApp(httpContext, new CachedApplication(app, retentionMonths.Value));
-        await next();
+        return null;
     }
 
     // Event ingestion drops rejected events but answers with 200, the same status as success. Deployed SDKs that retry

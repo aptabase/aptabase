@@ -32,7 +32,7 @@ export function RetentionSelect({ value, onChange, disabled, creating }: Props) 
         {creating
           ? "New events expire after this period. You can change it later."
           : "Changes apply only to new events. Existing events keep their original expiry."}
-        {" "}Debug events are kept for up to 6 months.
+        {" "}Debug events are kept for up to 182 days.
       </p>
     </div>
   );

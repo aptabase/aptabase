@@ -4,7 +4,6 @@ public readonly struct TrackingError
 {
     public required string ErrorId { get; init; }
     public required string AppId { get; init; }
-    public int RetentionMonths { get; init; }
     public required DateTime Timestamp { get; init; }
     public required string ErrorMessage { get; init; }
     public required string ErrorType { get; init; }

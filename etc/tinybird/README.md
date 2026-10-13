@@ -36,19 +36,21 @@ Rules that Forward enforces:
 
 1. **Every push**: `tinybird-check` detects whether `etc/tinybird` changed and runs the ClickHouse
    parity check. When it changed, `tinybird-build` runs a token-free `tb --local build` against a
-   Tinybird Local container and `tb --cloud deploy --check` against `aptabase_dev` (the last one
+   Tinybird Local container and the retention-aware deploy check against `aptabase_dev` (the last one
    only when the dev token is available). Otherwise `tinybird-build` is skipped entirely, so no
    container is pulled.
 2. **Push to `main`**: `deploy-tinybird-dev` deploys to `aptabase_dev` right after tests pass.
 3. **Push to `main`**, behind their own approvals: `deploy-tinybird-us` and `deploy-tinybird-eu`
-   deploy the project to production. Together with the existing backend gates that makes up to
+   deploy the project to production after the Cloud dev deployment succeeds. Together with the existing backend gates that makes up to
    four approvals per release: Tinybird US, Tinybird EU, Aptabase US, Aptabase EU.
 4. The backend deploy of each region (`deploy-us`, `deploy-eu`) **depends on** its Tinybird
    deploy, so the schema is always live before App Runner rolls out the new backend image.
 
 The Tinybird deploy jobs run when the push changes `etc/tinybird` or `scripts/deploy_tinybird.py` (`tinybird-check` compares
 the push's before and after commits). A backend-only release therefore shows just the two
-backend approvals. A failed or rejected Tinybird deploy still blocks the matching backend deploy.
+backend approvals. Failed checks, builds, dev deployments, or rejected/failed production schema
+deployments block the matching backend deployment. A skipped schema job permits backend deployment
+only after successful change detection explicitly reports no schema changes.
 If the base commit is unknown (new branch, force push) the jobs run and act as a no-op.
 
 A deploy with no pending changes is a no-op and exits 0, so the steps are safe to re-run.

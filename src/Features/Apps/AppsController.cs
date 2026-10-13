@@ -173,17 +173,26 @@ public class AppsController : Controller
         }
 
         app.Name = body.Name;
-        await _db.Connection.ExecuteAsync(@"UPDATE apps SET name = @name, icon_path = @iconPath,
-            retention_months = COALESCE(@retentionMonths, retention_months) WHERE id = @appId", new
+        var user = this.GetCurrentUserIdentity();
+        using var connection = _db.Connection;
+        var savedRetention = await connection.QuerySingleOrDefaultAsync<int?>(new CommandDefinition(
+            @"UPDATE apps SET name = @name, icon_path = @iconPath,
+            retention_months = COALESCE(@retentionMonths, retention_months)
+            WHERE id = @appId AND owner_id = @userId AND deleted_at IS NULL
+            RETURNING retention_months", new
         {
             appId = app.Id,
+            userId = user.Id,
             name = app.Name,
             iconPath = app.IconPath,
             retentionMonths = body.RetentionMonths,
-        });
+        }, cancellationToken: cancellationToken));
 
-        if (body.RetentionMonths.HasValue)
-            app.RetentionMonths = body.RetentionMonths.Value;
+        // Ownership or deletion can change while an icon upload is in progress.
+        if (!savedRetention.HasValue)
+            return NotFound();
+
+        app.RetentionMonths = savedRetention.Value;
 
         return Ok(app);
     }

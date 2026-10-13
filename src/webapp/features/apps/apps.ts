@@ -23,14 +23,21 @@ export async function getAppById(appId: string): Promise<Application> {
 }
 
 export async function createApp(name: string, retentionMonths: RetentionMonths = 60): Promise<Application> {
-  const app = await api.post<Application>("/_apps", { name, retentionMonths });
+  const app = await saveApp("POST", "/_apps", { name, retentionMonths });
   trackEvent("app_created", { name });
 
   return app;
 }
 
 export async function updateApp(appId: string, name: string, icon: string, retentionMonths?: RetentionMonths): Promise<Application> {
-  return await api.put<Application>(`/_apps/${appId}`, { name, icon, retentionMonths });
+  return await saveApp("PUT", `/_apps/${appId}`, { name, icon, retentionMonths });
+}
+
+async function saveApp(method: "POST" | "PUT", path: string, body: object): Promise<Application> {
+  const [status, response] = await api.fetch(method, path, body);
+  await api.handleError(status, response);
+  if (!response.ok) throw new Error("Could not save the app. Please try again.");
+  return await response.json();
 }
 
 export async function deleteApp(appId: string): Promise<void> {

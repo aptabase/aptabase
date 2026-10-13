@@ -2,6 +2,7 @@
 
 import argparse
 import re
+import signal
 import subprocess
 from pathlib import Path
 
@@ -20,13 +21,16 @@ FORWARD_QUERIES = {
 def run(command, project):
     result = subprocess.run(command, cwd=project, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     # The CLI's job URLs contain credentials; keep them out of deployment logs.
-    print(re.sub(r"([?&]token=)[^&\s]+", r"\1[redacted]", result.stdout), end="", flush=True)
+    output = re.sub(r"([?&]token=)[^&\s]+", r"\1[redacted]", result.stdout)
+    if "--token" in command:
+        output = output.replace(command[command.index("--token") + 1], "[redacted]")
+    print(output, end="", flush=True)
     return result
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    mode = parser.add_mutually_exclusive_group()
+    mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--local", action="store_true")
     mode.add_argument("--cloud", action="store_true")
     mode.add_argument("--branch")
@@ -34,6 +38,10 @@ def main():
     parser.add_argument("--token")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
+    for option in ("host", "token", "branch"):
+        value = getattr(args, option)
+        if value is not None and not value.strip():
+            parser.error(f"--{option} must not be empty")
     if not (Path.cwd() / "tinybird.config.json").is_file():
         parser.error("Run this script from the Tinybird project directory (etc/tinybird)")
     command = ["tb", "--branch", args.branch] if args.branch else ["tb", "--local" if args.local else "--cloud"]
@@ -77,4 +85,9 @@ def main():
 
 
 if __name__ == "__main__":
+    # CI cancellation normally sends SIGTERM, which otherwise skips the restoration in finally.
+    def terminate(signum, _frame):
+        raise SystemExit(128 + signum)
+
+    signal.signal(signal.SIGTERM, terminate)
     raise SystemExit(main())

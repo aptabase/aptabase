@@ -27,7 +27,7 @@ public class EventsController : Controller
     [EnableCors("AllowAny")]
     [EnableRateLimiting("EventIngestion")]
     [ResolveAppKey]
-    public IActionResult Single(
+    public async Task<IActionResult> Single(
         [FromHeader(Name = "App-Key")] string? appKey,
         [FromHeader(Name = "User-Agent")] string? userAgent,
         [FromBody] EventBody body
@@ -41,6 +41,10 @@ public class EventsController : Controller
             _logger.LogWarning($"Dropping event from {appKey} because: {validationMessage}.");
             return BadRequest(validationMessage);
         }
+
+        var rejection = await ResolveAppKeyAttribute.ResolveRetentionAsync(HttpContext);
+        if (rejection is not null)
+            return rejection;
 
         var app = ResolveAppKeyAttribute.GetApp(HttpContext);
 
@@ -83,7 +87,7 @@ public class EventsController : Controller
     [EnableCors("AllowAny")]
     [EnableRateLimiting("EventIngestion")]
     [ResolveAppKey]
-    public IActionResult Multiple(
+    public async Task<IActionResult> Multiple(
         [FromHeader(Name = "App-Key")] string? appKey,
         [FromHeader(Name = "User-Agent")] string? userAgent,
         [FromBody] EventBody[] events
@@ -103,6 +107,10 @@ public class EventsController : Controller
 
         if (!validEvents.Any())
             return Ok(new { });
+
+        var rejection = await ResolveAppKeyAttribute.ResolveRetentionAsync(HttpContext);
+        if (rejection is not null)
+            return rejection;
 
         var app = ResolveAppKeyAttribute.GetApp(HttpContext);
 

@@ -45,7 +45,12 @@ public class EventBody
     public DateTime Timestamp
     {
         get => _ts;
-        set => _ts = value > DateTime.UtcNow ? DateTime.UtcNow : value;
+        set
+        {
+            var utc = value.ToUniversalTime();
+            var now = DateTime.UtcNow;
+            _ts = utc > now ? now : utc;
+        }
     }
 
     [Required]

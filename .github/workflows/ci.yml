@@ -47,6 +47,11 @@ jobs:
         run: dotnet test
         working-directory: tests/IntegrationTests
 
+      - name: Test retention materializations and TTL cleanup
+        run: python3 -m unittest discover -s tests/Tinybird -p '*_test.py'
+        env:
+          CLICKHOUSE_TEST_URL: http://localhost:8123
+
   # Runs on every push, no containers: detects Tinybird project/helper changes and checks ClickHouse
   # parity. Exposes `changed`, used to skip tinybird-build and the Tinybird deploy jobs (and their
   # approvals) when the push did not touch etc/tinybird.
@@ -249,7 +254,7 @@ jobs:
     name: Deploy Tinybird (US)
     runs-on: ubuntu-latest
     environment: "Tinybird US"
-    needs: [test, tinybird-check, tinybird-build]
+    needs: [test, tinybird-check, tinybird-build, deploy-tinybird-dev]
     concurrency:
       group: tinybird-us
       cancel-in-progress: false
@@ -272,7 +277,7 @@ jobs:
     name: Deploy Tinybird (EU)
     runs-on: ubuntu-latest
     environment: "Tinybird EU"
-    needs: [test, tinybird-check, tinybird-build]
+    needs: [test, tinybird-check, tinybird-build, deploy-tinybird-dev]
     concurrency:
       group: tinybird-eu
       cancel-in-progress: false
@@ -290,18 +295,20 @@ jobs:
         run: python3 ../../scripts/deploy_tinybird.py --cloud --host "$TB_HOST" --token "$TB_TOKEN"
         working-directory: etc/tinybird
 
-  # Runs after the Tinybird deploy succeeded, or when it was skipped because etc/tinybird did not change.
-  # A failed or rejected Tinybird deploy blocks the backend deploy.
+  # A skipped schema job is safe only when change detection succeeded and found no schema changes.
+  # Failed checks/builds can also skip the schema job; those must block backend deployment.
   deploy-us:
     if: >-
       ${{ !cancelled()
           && github.ref == 'refs/heads/main'
           && needs.publish.result == 'success'
-          && (needs.deploy-tinybird-us.result == 'success' || needs.deploy-tinybird-us.result == 'skipped') }}
+          && needs.tinybird-check.result == 'success'
+          && (needs.deploy-tinybird-us.result == 'success'
+              || (needs.deploy-tinybird-us.result == 'skipped' && needs.tinybird-check.outputs.changed == 'false')) }}
     name: Deploy to Aptabase US
     runs-on: "ubuntu-latest"
     environment: "Aptabase US"
-    needs: [publish, deploy-tinybird-us]
+    needs: [publish, tinybird-check, deploy-tinybird-us]
     concurrency:
       group: deploy-us
       cancel-in-progress: false
@@ -361,11 +368,13 @@ jobs:
       ${{ !cancelled()
           && github.ref == 'refs/heads/main'
           && needs.publish.result == 'success'
-          && (needs.deploy-tinybird-eu.result == 'success' || needs.deploy-tinybird-eu.result == 'skipped') }}
+          && needs.tinybird-check.result == 'success'
+          && (needs.deploy-tinybird-eu.result == 'success'
+              || (needs.deploy-tinybird-eu.result == 'skipped' && needs.tinybird-check.outputs.changed == 'false')) }}
     name: Deploy to Aptabase EU
     runs-on: "ubuntu-latest"
     environment: "Aptabase EU"
-    needs: [publish, deploy-tinybird-eu]
+    needs: [publish, tinybird-check, deploy-tinybird-eu]
     concurrency:
       group: deploy-eu
       cancel-in-progress: false

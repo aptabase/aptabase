@@ -7,7 +7,7 @@ SQL >
     SELECT
         app_id,
         toStartOfMonth(timestamp) AS period,
-        toStartOfDay(ttl) AS expires_at,
+        toStartOfDay(toTimeZone(ttl, 'UTC')) AS expires_at,
         toUInt8(1) AS retention_managed,
         countState() AS events
     FROM events

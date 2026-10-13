@@ -83,6 +83,7 @@ public class ResolveAppKeyAttributeTests
         context.Result.Should().BeNull();
         _nextCalled.Should().BeTrue();
         ResolveAppKeyAttribute.GetApp(context.HttpContext).Id.Should().Be("APP-1");
+        _queries.VerifyNoOtherCalls();
         _rejections.VerifyNoOtherCalls();
     }
 
@@ -96,8 +97,10 @@ public class ResolveAppKeyAttributeTests
 
         var first = CreateContext("A-DEV-000");
         await _sut.OnResourceExecutionAsync(first, Next(first));
+        (await ResolveAppKeyAttribute.ResolveRetentionAsync(first.HttpContext)).Should().BeNull();
         var second = CreateContext("A-DEV-000");
         await _sut.OnResourceExecutionAsync(second, Next(second));
+        (await ResolveAppKeyAttribute.ResolveRetentionAsync(second.HttpContext)).Should().BeNull();
 
         ResolveAppKeyAttribute.GetApp(first.HttpContext).RetentionMonths.Should().Be(24);
         ResolveAppKeyAttribute.GetApp(second.HttpContext).RetentionMonths.Should().Be(12);
@@ -114,9 +117,20 @@ public class ResolveAppKeyAttributeTests
 
         await _sut.OnResourceExecutionAsync(context, Next(context));
 
-        context.Result.Should().BeOfType<OkObjectResult>();
+        (await ResolveAppKeyAttribute.ResolveRetentionAsync(context.HttpContext)).Should().BeOfType<OkObjectResult>();
         _cache.Verify(c => c.MarkAsDeleted("A-DEV-000"), Times.Once());
-        _nextCalled.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Active_Error_Ingestion_Does_Not_Read_Retention()
+    {
+        SetupApp("A-DEV-000", new Application { Id = "APP-1", RetentionMonths = 6 });
+        var context = CreateContext("A-DEV-000");
+
+        await new ResolveErrorAppKeyAttribute().OnResourceExecutionAsync(context, Next(context));
+
+        _nextCalled.Should().BeTrue();
+        _queries.VerifyNoOtherCalls();
     }
 
     [Fact]

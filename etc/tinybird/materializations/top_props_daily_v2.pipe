@@ -4,7 +4,7 @@ SQL >
     SELECT
         app_id,
         toStartOfDay(timestamp) as period,
-        toStartOfDay(ttl) as expires_at,
+        toStartOfDay(toTimeZone(ttl, 'UTC')) as expires_at,
         country_code,
         event_name,
         os_name,
