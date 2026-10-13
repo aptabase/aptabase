@@ -1,0 +1,25 @@
+diff --git a/etc/tinybird/datasources/events_daily_v3_mv.datasource b/etc/tinybird/datasources/events_daily_v3_mv.datasource
+--- a/etc/tinybird/datasources/events_daily_v3_mv.datasource
++++ b/etc/tinybird/datasources/events_daily_v3_mv.datasource
+@@ -25,2 +25,3 @@
+ FORWARD_QUERY >
+-    SELECT *
++    SELECT *,
++        period + toIntervalDay(1500) AS expires_at
+diff --git a/etc/tinybird/datasources/event_props_daily_v2_mv.datasource b/etc/tinybird/datasources/event_props_daily_v2_mv.datasource
+--- a/etc/tinybird/datasources/event_props_daily_v2_mv.datasource
++++ b/etc/tinybird/datasources/event_props_daily_v2_mv.datasource
+@@ -24,2 +24,3 @@
+ FORWARD_QUERY >
+-    SELECT *
++    SELECT *,
++        period + toIntervalDay(1500) AS expires_at
+diff --git a/etc/tinybird/datasources/monthly_usage_v1.datasource b/etc/tinybird/datasources/monthly_usage_v1.datasource
+--- a/etc/tinybird/datasources/monthly_usage_v1.datasource
++++ b/etc/tinybird/datasources/monthly_usage_v1.datasource
+@@ -16,2 +16,4 @@
+ FORWARD_QUERY >
+-    SELECT *
++    SELECT *,
++        toDateTime(0) AS expires_at,
++        toUInt8(0) AS retention_managed

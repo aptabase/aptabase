@@ -21,7 +21,7 @@ ENGINE "AggregatingMergeTree"
 ENGINE_SORTING_KEY "app_id, period, event_name, country_code, region_name, os_name, os_version, app_version, device_model, user_id, session_id, expires_at"
 ENGINE_TTL "expires_at"
 
-# Keep aggregate history during schema evolution. scripts/deploy_tinybird.py
-# supplies the former TTL when adding expires_at to a legacy workspace.
+# Keep assigned expiry timestamps during later schema evolution.
+# The initial legacy upgrade is in migrations/app_retention.patch.
 FORWARD_QUERY >
     SELECT *

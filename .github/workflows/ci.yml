@@ -52,7 +52,7 @@ jobs:
         env:
           CLICKHOUSE_TEST_URL: http://localhost:8123
 
-  # Runs on every push, no containers: detects Tinybird project/helper changes and checks ClickHouse
+  # Runs on every push, no containers: detects Tinybird project/test changes and checks ClickHouse
   # parity. Exposes `changed`, used to skip tinybird-build and the Tinybird deploy jobs (and their
   # approvals) when the push did not touch etc/tinybird.
   tinybird-check:
@@ -77,12 +77,12 @@ jobs:
             exit 0
           fi
           # Documentation inside etc/tinybird does not need a deployment.
-          PATHS=(etc/tinybird scripts/deploy_tinybird.py tests/Tinybird ':!etc/tinybird/*.md')
+          PATHS=(etc/tinybird tests/Tinybird ':!etc/tinybird/*.md')
           if git diff --quiet "$BEFORE" "$GITHUB_SHA" -- "${PATHS[@]}"; then
-            echo "No changes in the Tinybird project or deployment helper between $BEFORE and $GITHUB_SHA."
+            echo "No changes in the Tinybird project or tests between $BEFORE and $GITHUB_SHA."
             echo "tinybird=false" >> "$GITHUB_OUTPUT"
           else
-            echo "The Tinybird project or deployment helper changed between $BEFORE and $GITHUB_SHA:"
+            echo "The Tinybird project or tests changed between $BEFORE and $GITHUB_SHA:"
             git diff --name-only "$BEFORE" "$GITHUB_SHA" -- "${PATHS[@]}"
             echo "tinybird=true" >> "$GITHUB_OUTPUT"
           fi
@@ -100,8 +100,8 @@ jobs:
           exit $missing
 
   # Only when etc/tinybird changed: a token-free `tb --local build` against a Tinybird Local
-  # container, plus a deploy check against the dev workspace (skipped when TINYBIRD_DEV_TOKEN is
-  # not available, e.g. forks). Split from tinybird-check so the container is not pulled otherwise.
+  # container. Live-workspace compatibility is checked in the deployment jobs, after any explicit
+  # one-time migrations. Split from tinybird-check so the container is not pulled otherwise.
   tinybird-build:
     if: ${{ needs.tinybird-check.outputs.changed == 'true' }}
     name: Tinybird Build
@@ -112,9 +112,6 @@ jobs:
         image: tinybirdco/tinybird-local:latest
         ports:
           - 7181:7181
-    env:
-      TB_HOST: https://api.tinybird.co
-      TB_TOKEN: ${{ secrets.TINYBIRD_DEV_TOKEN }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v7
@@ -122,16 +119,8 @@ jobs:
       - name: Setup Tinybird CLI
         uses: ./.github/actions/setup-tinybird
 
-      - name: Test Tinybird deployment helper
-        run: python3 -m unittest discover -s tests/Tinybird -p '*_test.py'
-
       - name: Tinybird local build
         run: tb --local build
-        working-directory: etc/tinybird
-
-      - name: Tinybird deploy check (dev)
-        if: env.TB_TOKEN != ''
-        run: python3 ../../scripts/deploy_tinybird.py --cloud --host "$TB_HOST" --token "$TB_TOKEN" --check
         working-directory: etc/tinybird
 
   build:
@@ -242,7 +231,9 @@ jobs:
         uses: ./.github/actions/setup-tinybird
 
       - name: Tinybird deploy (dev)
-        run: python3 ../../scripts/deploy_tinybird.py --cloud --host "$TB_HOST" --token "$TB_TOKEN"
+        run: |
+          tb --cloud --host "${TB_HOST:?Set TB_HOST}" --token "${TB_TOKEN:?Set TB_TOKEN}" deploy --check
+          tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
         working-directory: etc/tinybird
 
   # Production Tinybird deploys have their own approval gates ("Tinybird US" / "Tinybird EU").
@@ -269,7 +260,9 @@ jobs:
         uses: ./.github/actions/setup-tinybird
 
       - name: Tinybird deploy (US)
-        run: python3 ../../scripts/deploy_tinybird.py --cloud --host "$TB_HOST" --token "$TB_TOKEN"
+        run: |
+          tb --cloud --host "${TB_HOST:?Set TB_HOST}" --token "${TB_TOKEN:?Set TB_TOKEN}" deploy --check
+          tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
         working-directory: etc/tinybird
 
   deploy-tinybird-eu:
@@ -292,7 +285,9 @@ jobs:
         uses: ./.github/actions/setup-tinybird
 
       - name: Tinybird deploy (EU)
-        run: python3 ../../scripts/deploy_tinybird.py --cloud --host "$TB_HOST" --token "$TB_TOKEN"
+        run: |
+          tb --cloud --host "${TB_HOST:?Set TB_HOST}" --token "${TB_TOKEN:?Set TB_TOKEN}" deploy --check
+          tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
         working-directory: etc/tinybird
 
   # A skipped schema job is safe only when change detection succeeded and found no schema changes.

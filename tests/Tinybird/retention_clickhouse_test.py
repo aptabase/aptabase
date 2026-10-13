@@ -131,6 +131,63 @@ class RetentionClickHouseTests(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertEqual(int(rows[0]["count"]), 2)
 
+    def test_explicit_migration_preserves_aggregate_only_history(self):
+        patch = (PROJECT / "migrations" / "app_retention.patch").read_text()
+        sections = patch.split("diff --git ")[1:]
+        timestamp = "toStartOfDay(now()) - toIntervalDay(500)"
+        for days in (365, 730):
+            self.insert("assigned_before_rewrite", "now()", f"now() + toIntervalDay({days})", 10)
+        for section in sections:
+            target = re.search(r"datasources/(\w+)\.datasource", section)[1]
+            forward = "\n".join(line[1:] for line in section.splitlines() if line.startswith("+    ")).strip()
+            definition = (PROJECT / "datasources" / f"{target}.datasource").read_text()
+            # The legacy schema has the same aggregate columns, without the new expiry metadata.
+            schema = definition.split("SCHEMA >", 1)[1].split("\nENGINE", 1)[0].split(",\n    `expires_at`", 1)[0].strip()
+            legacy = "legacy_" + target
+            copied = "copied_" + target
+            self.query(f"CREATE TABLE {legacy} ({schema}) ENGINE = AggregatingMergeTree ORDER BY (app_id, period)")
+            self.query(f"CREATE TABLE {copied} AS {target}")
+            if target == "monthly_usage_v1":
+                self.query(f"INSERT INTO {legacy} SELECT 'legacy_only', toStartOfMonth({timestamp}), countState() FROM numbers(3)")
+            elif target == "events_daily_v3_mv":
+                self.query(f"""INSERT INTO {legacy} (app_id, period, user_id, session_id, min_ts, max_ts, events_count)
+                    SELECT 'legacy_only', {timestamp}, 'user', 'session', minState({timestamp}),
+                    maxState({timestamp} + toIntervalMinute(number)), countState() FROM numbers(3)""")
+            else:
+                self.query(f"""INSERT INTO {legacy} (app_id, period, events_count, numeric_value_state,
+                    min_value_state, max_value_state, sum_value_state)
+                    SELECT 'legacy_only', {timestamp}, countState(), quantileState(toFloat32(10)),
+                    minState(toFloat32(10)), maxState(toFloat32(10)), sumState(toFloat32(10)) FROM numbers(3)""")
+            self.assertEqual(int(self.rows("SELECT count() AS count FROM events WHERE app_id = 'legacy_only'")[0]["count"]), 0)
+            self.query(f"INSERT INTO {copied} {forward} FROM {legacy}")
+            self.query(f"ALTER TABLE {copied} MATERIALIZE TTL SETTINGS mutations_sync = 2")
+            count_column = "events" if target == "monthly_usage_v1" else "events_count"
+            self.assertEqual(int(self.rows(f"SELECT countMerge({count_column}) AS count FROM {copied}")[0]["count"]), 3)
+            if target == "monthly_usage_v1":
+                row = self.rows(f"SELECT expires_at, retention_managed FROM {copied}")[0]
+                self.assertEqual(row, {"expires_at": "1970-01-01 00:00:00", "retention_managed": 0})
+            else:
+                row = self.rows(f"SELECT expires_at = period + toIntervalDay(1500) AS preserved FROM {copied}")[0]
+                self.assertEqual(row["preserved"], 1)
+                if target == "event_props_daily_v2_mv":
+                    row = self.rows(f"SELECT sumMerge(sum_value_state) AS sum, medianMerge(numeric_value_state) AS median FROM {copied}")[0]
+                    self.assertEqual(row, {"sum": 30, "median": 10})
+            # Once migrated, the ordinary forward query must preserve already assigned deadlines.
+            # This also catches accidentally committing the one-time patch into regular definitions.
+            rewrite = "rewrite_" + target
+            self.query(f"CREATE TABLE {rewrite} AS {target}")
+            normal_forward = definition.split("FORWARD_QUERY >", 1)[1].strip()
+            self.query(f"INSERT INTO {rewrite} {normal_forward} FROM {target} WHERE app_id = 'assigned_before_rewrite'")
+            columns = f"expires_at, countMerge({count_column}) AS count"
+            groups = "expires_at"
+            if target == "monthly_usage_v1":
+                columns += ", retention_managed"
+                groups += ", retention_managed"
+            expected = self.rows(f"SELECT {columns} FROM {target} WHERE app_id = 'assigned_before_rewrite' GROUP BY {groups} ORDER BY expires_at")
+            actual = self.rows(f"SELECT {columns} FROM {rewrite} GROUP BY {groups} ORDER BY expires_at")
+            self.assertEqual(len(expected), 2)
+            self.assertEqual(actual, expected)
+
 
 if __name__ == "__main__":
     unittest.main()

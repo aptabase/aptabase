@@ -36,17 +36,16 @@ Rules that Forward enforces:
 
 1. **Every push**: `tinybird-check` detects whether `etc/tinybird` changed and runs the ClickHouse
    parity check. When it changed, `tinybird-build` runs a token-free `tb --local build` against a
-   Tinybird Local container and the retention-aware deploy check against `aptabase_dev` (the last one
-   only when the dev token is available). Otherwise `tinybird-build` is skipped entirely, so no
-   container is pulled.
-2. **Push to `main`**: `deploy-tinybird-dev` deploys to `aptabase_dev` right after tests pass.
+   Tinybird Local container. Otherwise `tinybird-build` is skipped entirely, so no container is pulled.
+2. **Push to `main`**: `deploy-tinybird-dev` checks the live workspace and deploys to `aptabase_dev`
+   after tests pass. Any required one-time migration must already be complete.
 3. **Push to `main`**, behind their own approvals: `deploy-tinybird-us` and `deploy-tinybird-eu`
    deploy the project to production after the Cloud dev deployment succeeds. Together with the existing backend gates that makes up to
    four approvals per release: Tinybird US, Tinybird EU, Aptabase US, Aptabase EU.
 4. The backend deploy of each region (`deploy-us`, `deploy-eu`) **depends on** its Tinybird
    deploy, so the schema is always live before App Runner rolls out the new backend image.
 
-The Tinybird deploy jobs run when the push changes `etc/tinybird` or `scripts/deploy_tinybird.py` (`tinybird-check` compares
+The Tinybird deploy jobs run when the push changes `etc/tinybird` or `tests/Tinybird` (`tinybird-check` compares
 the push's before and after commits). A backend-only release therefore shows just the two
 backend approvals. Failed checks, builds, dev deployments, or rejected/failed production schema
 deployments block the matching backend deployment. A skipped schema job permits backend deployment
@@ -83,17 +82,18 @@ deployments. Only resource-scoped tokens (`TOKEN "..." READ` lines) are deployme
 
 ## Manual operations
 
-Use the retention-aware helper for regular deploy checks and deployments:
+Use ordinary Tinybird commands for deploy checks and deployments:
 
 ```sh
 cd etc/tinybird
-python3 ../../scripts/deploy_tinybird.py --cloud --host "$TB_HOST" --token "$TB_TOKEN" --check
-python3 ../../scripts/deploy_tinybird.py --cloud --host "$TB_HOST" --token "$TB_TOKEN"
+tb --cloud --host "${TB_HOST:?Set TB_HOST}" --token "${TB_TOKEN:?Set TB_TOKEN}" deploy --check
+tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
 ```
 
-It supplies the one-time mappings for legacy aggregate schemas, then restores the normal
-identity forward queries. Later deployments preserve the expiry timestamps already assigned
-to aggregate contributions. See [event retention](retention_plan.md) for behavior and rollout.
+Legacy workspaces need the explicit [one-time retention migration](migrations/README.md)
+before the feature's first deployment. The migration uses plain SQL to preserve existing history.
+Normal deployments use identity forward queries to preserve already assigned expiry timestamps.
+See [event retention](retention_plan.md) for behavior and rollout.
 
 CI never passes `--allow-destructive-operations`, so removing a datasource, materialized view
 or connection fails in CI on purpose. To ship such a change:

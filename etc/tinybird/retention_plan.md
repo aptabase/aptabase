@@ -24,16 +24,18 @@ The session datasource keeps its existing, shorter 30-day TTL. Self-hosted Click
 
 The daily targets' sorting-key changes require a one-time rewrite. Copy their existing aggregate states instead of repopulating them from raw events, which may already have expired. Legacy daily expiry remains `period + 1,500 days`; legacy monthly counts remain unmanaged. Existing raw expiry timestamps are unchanged.
 
-Run deployment checks and deployments through [deploy_tinybird.py](../../scripts/deploy_tinybird.py) from `etc/tinybird`:
+Apply the [explicit one-time migration](migrations/README.md) to each legacy workspace before the feature's first backend deployment. Its patch supplies plain SQL: daily states receive their former `period + 1500 days` deadline; monthly states receive flag 0 and preserve their no-expiry behavior. Remove the patch after migration. It is not applied by CI and contains no schema detection or conditional column selectors.
+
+Normal deployment checks and deployments use the Tinybird CLI from `etc/tinybird`:
 
 ```sh
-python3 ../../scripts/deploy_tinybird.py --cloud --host "$TB_HOST" --token "$TB_TOKEN" --check
-python3 ../../scripts/deploy_tinybird.py --cloud --host "$TB_HOST" --token "$TB_TOKEN"
+tb --cloud --host "${TB_HOST:?Set TB_HOST}" --token "${TB_TOKEN:?Set TB_TOKEN}" deploy --check
+tb --cloud --host "$TB_HOST" --token "$TB_TOKEN" deploy
 ```
 
-CI uses this helper for dev, EU, and US. It first checks the normal definitions, which use identity `FORWARD_QUERY SELECT *`. If the pinned CLI reports missing retention columns in a legacy datasource, the helper temporarily supplies the explicit history-preserving mapping for that datasource, validates again, and deploys. It restores the source definitions on exit. Other deployment errors remain failures, and destructive operations are not enabled.
+The committed definitions use identity `FORWARD_QUERY SELECT *`, preserving existing expiry metadata on subsequent rewrites. CI validates the project against a fresh Local workspace; its live-workspace checks run in the deployment jobs. A legacy workspace must complete the one-time migration before those deployment checks pass. No automatic migration or destructive operation is enabled.
 
-Tinybird rejects leftover custom mappings once the columns exist. Supplying them only for the initial upgrade allows later schema rewrites to preserve already assigned deadlines using the identity query. Production schema jobs wait for the Cloud dev deployment. Each region's schema deploy precedes its backend deploy and retains the existing production approval gate. Failed schema checks, builds, dev deployments, or regional deployments block the backend; a skipped schema job permits a backend deployment only when change detection succeeded and explicitly reported no schema changes. Check production backfill size and available storage before promotion.
+The legacy patch is used only during the initial upgrade; it must not remain applied after promotion. Production schema jobs wait for the Cloud dev deployment. Each region's schema deploy precedes its backend deploy and retains the existing production approval gate. Failed schema checks, builds, dev deployments, or regional deployments block the backend; a skipped schema job permits a backend deployment only when change detection succeeded and explicitly reported no schema changes. Check production backfill size and available storage before promotion.
 
 ## Validation and limits
 
