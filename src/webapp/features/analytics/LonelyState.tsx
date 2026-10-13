@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@components/Button";
 import { TextInput } from "@components/TextInput";
+import { RetentionSelect } from "@features/apps/RetentionSelect";
+import type { RetentionMonths } from "@features/apps/apps";
 
 export function LonelyState() {
   const user = useAuth();
@@ -11,12 +13,13 @@ export function LonelyState() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [retentionMonths, setRetentionMonths] = useState<RetentionMonths>(60);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setProcessing(true);
 
-    const app = await createApp(name);
+    const app = await createApp(name, retentionMonths);
     navigate(app.id);
   };
 
@@ -41,6 +44,9 @@ export function LonelyState() {
         <p className="text-sm text-muted-foreground mt-1">
           A friendly name to identify your app. You can change it later.
         </p>
+        <div className="mt-4 w-80">
+          <RetentionSelect value={retentionMonths} onChange={setRetentionMonths} disabled={processing} creating />
+        </div>
         <Button className="mt-4" disabled={name.length < 2 || name.length > 40 || processing}>
           Create
         </Button>

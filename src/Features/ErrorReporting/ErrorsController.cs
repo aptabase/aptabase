@@ -110,6 +110,7 @@ public class ErrorsController : ControllerBase
         {
             ErrorId = errorId,
             AppId = app.Id,
+            RetentionMonths = app.RetentionMonths,
             Timestamp = body.Timestamp!.Value,
             ErrorMessage = sanitizedErrorMessage,
             ErrorType = body.ErrorType!,

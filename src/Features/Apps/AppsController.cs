@@ -43,6 +43,9 @@ public class CreateAppRequestBody
     [Required]
     [StringLength(40, MinimumLength = 2)]
     public string Name { get; set; } = "";
+
+    [AllowedValues(6, 12, 24, 60)]
+    public int RetentionMonths { get; set; } = DataRetention.DefaultMonths;
 }
 
 public class UpdateAppRequestBody
@@ -52,6 +55,9 @@ public class UpdateAppRequestBody
     [Required]
     [StringLength(40, MinimumLength = 2)]
     public string Name { get; set; } = "";
+
+    [AllowedValues(6, 12, 24, 60, null)]
+    public int? RetentionMonths { get; set; }
 }
 
 public class InitiateAppRequestBody
@@ -87,7 +93,7 @@ public class AppsController : Controller
         var apps = await _db.Connection.QueryAsync<Application>(
             @"SELECT a.id, a.name, a.icon_path, a.app_key, 
                      a.owner_id = @userId AS has_ownership, a.has_events, 
-                     u.lock_reason
+                     a.retention_months, u.lock_reason
               FROM apps a
               LEFT JOIN app_shares s
               ON s.app_id = a.id
@@ -109,18 +115,20 @@ public class AppsController : Controller
         {
             Id = NanoId.New(),
             Name = body.Name,
-            AppKey = $"A-{_env.Region}-{NanoId.Numbers(10)}"
+            AppKey = $"A-{_env.Region}-{NanoId.Numbers(10)}",
+            RetentionMonths = body.RetentionMonths
         };
 
         await _db.Connection.ExecuteScalarAsync<string>(@"
-            INSERT INTO apps (id, owner_id, name, app_key, has_events)
-            VALUES (@appId, @ownerId, @name, @appKey, false)",
+            INSERT INTO apps (id, owner_id, name, app_key, has_events, retention_months)
+            VALUES (@appId, @ownerId, @name, @appKey, false, @retentionMonths)",
         new
         {
             appId = app.Id,
             ownerId = user.Id,
             name = app.Name,
-            appKey = app.AppKey
+            appKey = app.AppKey,
+            retentionMonths = app.RetentionMonths
         });
 
         return Ok(app);
@@ -134,7 +142,7 @@ public class AppsController : Controller
         var app = await _db.Connection.QueryFirstOrDefaultAsync<Application>(
             @"SELECT a.id, a.name, a.icon_path, a.app_key, 
                      a.owner_id = @userId as has_ownership, a.has_events,
-                     u.lock_reason
+                     a.retention_months, u.lock_reason
               FROM apps a
               LEFT JOIN app_shares s
               ON s.app_id = a.id
@@ -165,12 +173,17 @@ public class AppsController : Controller
         }
 
         app.Name = body.Name;
-        await _db.Connection.ExecuteScalarAsync<string>("UPDATE apps SET name = @name, icon_path = @iconPath WHERE id = @appId", new
+        await _db.Connection.ExecuteAsync(@"UPDATE apps SET name = @name, icon_path = @iconPath,
+            retention_months = COALESCE(@retentionMonths, retention_months) WHERE id = @appId", new
         {
             appId = app.Id,
             name = app.Name,
             iconPath = app.IconPath,
+            retentionMonths = body.RetentionMonths,
         });
+
+        if (body.RetentionMonths.HasValue)
+            app.RetentionMonths = body.RetentionMonths.Value;
 
         return Ok(app);
     }
@@ -488,7 +501,7 @@ public class AppsController : Controller
         var user = this.GetCurrentUserIdentity();
         return await _db.Connection.QueryFirstOrDefaultAsync<Application>(
             @"SELECT a.id, a.name, a.icon_path, a.app_key, true as has_ownership, 
-                     a.has_events, u.lock_reason
+                     a.has_events, a.retention_months, u.lock_reason
               FROM apps a
               INNER JOIN users u
               ON u.id = a.owner_id

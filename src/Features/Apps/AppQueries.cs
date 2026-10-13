@@ -12,6 +12,7 @@ public class Application
     public bool HasEvents { get; set; } = false;
     public bool HasOwnership { get; set; } = false;
     public char? LockReason { get; set; }
+    public int RetentionMonths { get; set; } = DataRetention.DefaultMonths;
 }
 
 public interface IAppQueries
@@ -19,6 +20,7 @@ public interface IAppQueries
     Task<Application?> GetActiveAppByAppKey(string appKey, CancellationToken cancellationToken);
     Task MaskAsOnboarded(string appId, CancellationToken cancellationToken);
     Task<Application?> GetOwnedAppAsync(string appId, string userId);
+    Task<int?> GetRetentionMonthsAsync(string appId, CancellationToken cancellationToken);
 }
 
 public class AppQueries : IAppQueries
@@ -34,7 +36,7 @@ public class AppQueries : IAppQueries
     {
         var cmd = new CommandDefinition(@"
             SELECT a.id, a.name, a.icon_path, 
-                   a.app_key, a.has_events, 
+                   a.app_key, a.has_events, a.retention_months,
                    u.lock_reason
             FROM apps a
             INNER JOIN users u
@@ -61,7 +63,7 @@ public class AppQueries : IAppQueries
     {
         return await _db.Connection.QueryFirstOrDefaultAsync<Application>(
             @"SELECT a.id, a.name, a.icon_path, a.app_key, true as has_ownership, 
-                     a.has_events, u.lock_reason
+                     a.has_events, a.retention_months, u.lock_reason
               FROM apps a
               INNER JOIN users u
               ON u.id = a.owner_id
@@ -70,5 +72,13 @@ public class AppQueries : IAppQueries
               AND a.deleted_at IS NULL",
             new { appId, userId }
         );
+    }
+
+    public async Task<int?> GetRetentionMonthsAsync(string appId, CancellationToken cancellationToken)
+    {
+        using var connection = _db.Connection;
+        return await connection.QuerySingleOrDefaultAsync<int?>(new CommandDefinition(
+            "SELECT retention_months FROM apps WHERE id = @appId AND deleted_at IS NULL",
+            new { appId }, cancellationToken: cancellationToken));
     }
 }

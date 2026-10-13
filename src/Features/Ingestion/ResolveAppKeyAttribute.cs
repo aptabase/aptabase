@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Aptabase.Features.Apps;
 
 namespace Aptabase.Features.Ingestion;
 
@@ -40,7 +41,18 @@ public class ResolveAppKeyAttribute : Attribute, IAsyncResourceFilter
             return;
         }
 
-        SetApp(httpContext, app);
+        // App status remains cached for cheap rejection. Retention is read once per accepted request
+        // so settings saved on another replica apply immediately. Never mutate the shared cached app.
+        var queries = httpContext.RequestServices.GetRequiredService<IAppQueries>();
+        var retentionMonths = await queries.GetRetentionMonthsAsync(app.Id, httpContext.RequestAborted);
+        if (!retentionMonths.HasValue)
+        {
+            RecordRejection(httpContext, "unknown_key", appKey);
+            context.Result = AppNotFound(appKey);
+            return;
+        }
+
+        SetApp(httpContext, new CachedApplication(app, retentionMonths.Value));
         await next();
     }
 

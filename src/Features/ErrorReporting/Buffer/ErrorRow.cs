@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Aptabase.Features.Apps;
 
 namespace Aptabase.Features.ErrorReporting.Buffer;
 
@@ -39,7 +40,7 @@ public readonly struct ErrorRow
         SessionId = e.SessionId ?? "";
         Severity = e.Severity ?? "";
         Kind = e.Kind ?? "";
-        TTL = e.Timestamp.Add(ErrorTTL);
+        TTL = DataRetention.ExpiresAt(e.Timestamp, e.RetentionMonths, ErrorTTL);
     }
 
     public void WriteJson(StringWriter writer)

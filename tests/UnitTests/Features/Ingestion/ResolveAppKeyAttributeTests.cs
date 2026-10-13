@@ -17,11 +17,14 @@ public class ResolveAppKeyAttributeTests
 {
     private readonly Mock<IIngestionCache> _cache = new();
     private readonly Mock<IRejectionStats> _rejections = new();
+    private readonly Mock<IAppQueries> _queries = new();
     private readonly ResolveAppKeyAttribute _sut = new();
     private bool _nextCalled;
 
     public ResolveAppKeyAttributeTests()
     {
+        _queries.Setup(q => q.GetRetentionMonthsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(60);
         _cache
             .Setup(c => c.FindByAppKey(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(CachedApplication.Empty);
@@ -84,6 +87,38 @@ public class ResolveAppKeyAttributeTests
     }
 
     [Fact]
+    public async Task Should_Read_Current_Retention_Without_Mutating_Cached_Or_InFlight_Apps()
+    {
+        var cached = new CachedApplication(new Application { Id = "APP-1", RetentionMonths = 60 });
+        _cache.Setup(c => c.FindByAppKey("A-DEV-000", It.IsAny<CancellationToken>())).ReturnsAsync(cached);
+        _queries.SetupSequence(q => q.GetRetentionMonthsAsync("APP-1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(24).ReturnsAsync(12);
+
+        var first = CreateContext("A-DEV-000");
+        await _sut.OnResourceExecutionAsync(first, Next(first));
+        var second = CreateContext("A-DEV-000");
+        await _sut.OnResourceExecutionAsync(second, Next(second));
+
+        ResolveAppKeyAttribute.GetApp(first.HttpContext).RetentionMonths.Should().Be(24);
+        ResolveAppKeyAttribute.GetApp(second.HttpContext).RetentionMonths.Should().Be(12);
+        cached.RetentionMonths.Should().Be(60);
+    }
+
+    [Fact]
+    public async Task Should_Drop_When_An_App_Was_Deleted_After_Status_Was_Cached()
+    {
+        SetupApp("A-DEV-000", new Application { Id = "APP-1" });
+        _queries.Setup(q => q.GetRetentionMonthsAsync("APP-1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync((int?)null);
+        var context = CreateContext("A-DEV-000");
+
+        await _sut.OnResourceExecutionAsync(context, Next(context));
+
+        context.Result.Should().BeOfType<OkObjectResult>();
+        _nextCalled.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task Error_Endpoint_Should_Return_400_For_Missing_AppKey()
     {
         var context = CreateContext(appKey: null);
@@ -134,6 +169,7 @@ public class ResolveAppKeyAttributeTests
         var services = new ServiceCollection()
             .AddSingleton(_cache.Object)
             .AddSingleton(_rejections.Object)
+            .AddSingleton(_queries.Object)
             .AddLogging()
             .BuildServiceProvider();
 

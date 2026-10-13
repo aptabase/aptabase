@@ -46,7 +46,7 @@ Rules that Forward enforces:
 4. The backend deploy of each region (`deploy-us`, `deploy-eu`) **depends on** its Tinybird
    deploy, so the schema is always live before App Runner rolls out the new backend image.
 
-The Tinybird deploy jobs only run when the push changed `etc/tinybird` (`tinybird-check` compares
+The Tinybird deploy jobs run when the push changes `etc/tinybird` or `scripts/deploy_tinybird.py` (`tinybird-check` compares
 the push's before and after commits). A backend-only release therefore shows just the two
 backend approvals. A failed or rejected Tinybird deploy still blocks the matching backend deploy.
 If the base commit is unknown (new branch, force push) the jobs run and act as a no-op.
@@ -80,6 +80,18 @@ Static tokens created this way are not declared in datafiles and are **not** rem
 deployments. Only resource-scoped tokens (`TOKEN "..." READ` lines) are deployment-managed.
 
 ## Manual operations
+
+Use the retention-aware helper for regular deploy checks and deployments:
+
+```sh
+cd etc/tinybird
+python3 ../../scripts/deploy_tinybird.py --cloud --host "$TB_HOST" --token "$TB_TOKEN" --check
+python3 ../../scripts/deploy_tinybird.py --cloud --host "$TB_HOST" --token "$TB_TOKEN"
+```
+
+It supplies the one-time mappings for legacy aggregate schemas, then restores the normal
+identity forward queries. Later deployments preserve the expiry timestamps already assigned
+to aggregate contributions. See [event retention](retention_plan.md) for behavior and rollout.
 
 CI never passes `--allow-destructive-operations`, so removing a datasource, materialized view
 or connection fails in CI on purpose. To ship such a change:

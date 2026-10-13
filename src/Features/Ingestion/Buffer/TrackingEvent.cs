@@ -8,6 +8,7 @@ public readonly struct TrackingEvent
     public readonly string UserAgent { get; init; }
 
     public readonly string AppId { get; init; }
+    public readonly int RetentionMonths { get; init; }
     public readonly DateTime Timestamp { get; init; }
     public readonly string EventName { get; init; }
     public readonly string SessionId { get; init; }

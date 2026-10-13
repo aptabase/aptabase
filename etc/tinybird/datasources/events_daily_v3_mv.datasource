@@ -14,8 +14,14 @@ SCHEMA >
     `session_id` String,
     `min_ts` AggregateFunction(min, DateTime),
     `max_ts` AggregateFunction(max, DateTime),
-    `events_count` AggregateFunction(count)
+    `events_count` AggregateFunction(count),
+    `expires_at` DateTime DEFAULT period + toIntervalDay(1500)
 
 ENGINE "AggregatingMergeTree"
-ENGINE_SORTING_KEY "app_id, period, event_name, country_code, region_name, os_name, os_version, app_version, device_model, user_id, session_id"
-ENGINE_TTL "period + toIntervalDay(1500)"
+ENGINE_SORTING_KEY "app_id, period, event_name, country_code, region_name, os_name, os_version, app_version, device_model, user_id, session_id, expires_at"
+ENGINE_TTL "expires_at"
+
+# Keep aggregate history during schema evolution. scripts/deploy_tinybird.py
+# supplies the former TTL when adding expires_at to a legacy workspace.
+FORWARD_QUERY >
+    SELECT *

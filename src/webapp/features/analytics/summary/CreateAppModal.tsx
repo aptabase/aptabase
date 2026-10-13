@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@components/Button";
 import { IconX } from "@tabler/icons-react";
 import { TextInput } from "@components/TextInput";
+import { RetentionSelect } from "@features/apps/RetentionSelect";
+import type { RetentionMonths } from "@features/apps/apps";
 
 type Props = {
   open: boolean;
@@ -16,9 +18,11 @@ export function CreateAppModal(props: Props) {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [processing, setIsProcessing] = useState(false);
+  const [retentionMonths, setRetentionMonths] = useState<RetentionMonths>(60);
 
   const close = () => {
     setName("");
+    setRetentionMonths(60);
     setIsProcessing(false);
     props.onClose();
   };
@@ -27,7 +31,7 @@ export function CreateAppModal(props: Props) {
     event.preventDefault();
     setIsProcessing(true);
 
-    const app = await createApp(name);
+    const app = await createApp(name, retentionMonths);
     navigate(app.id);
 
     return close();
@@ -64,7 +68,7 @@ export function CreateAppModal(props: Props) {
                   <button
                     type="button"
                     className="rounded-md text-muted-foreground hover:text-foreground"
-                    onClick={props.onClose}
+                    onClick={close}
                   >
                     <IconX className="h-6 w-6" />
                   </button>
@@ -84,6 +88,9 @@ export function CreateAppModal(props: Props) {
                   <p className="text-sm text-muted-foreground mt-1">
                     A friendly name to identify your app. You can change it later.
                   </p>
+                  <div className="mt-4">
+                    <RetentionSelect value={retentionMonths} onChange={setRetentionMonths} disabled={processing} creating />
+                  </div>
                   <Button
                     className="mt-4"
                     disabled={name.length < 2 || name.length > 40 || processing}

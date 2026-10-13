@@ -7,11 +7,15 @@ SQL >
     SELECT
         app_id,
         toStartOfMonth(timestamp) AS period,
+        toStartOfDay(ttl) AS expires_at,
+        toUInt8(1) AS retention_managed,
         countState() AS events
     FROM events
     GROUP BY
         app_id,
-        period
+        period,
+        expires_at,
+        retention_managed
 
 TYPE materialized
 DATASOURCE monthly_usage_v1

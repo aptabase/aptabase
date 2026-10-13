@@ -25,7 +25,7 @@ export function Component() {
           <TabsTrigger value="danger">Danger Zone</TabsTrigger>
         </TabsList>
         <TabsContent value="general">
-          <GeneralSettings app={app} />
+          <GeneralSettings key={app.id} app={app} />
         </TabsContent>
         <TabsContent value="sharing">
           <AppSharing app={app} />
