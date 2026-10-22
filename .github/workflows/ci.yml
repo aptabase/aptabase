@@ -39,6 +39,17 @@ jobs:
         with:
           dotnet-version: 10.x
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/package-lock.json
+
+      - name: Run Webapp Tests
+        run: npm ci && npm test
+        working-directory: src
+
       - name: Run Unit Tests
         run: dotnet test
         working-directory: tests/UnitTests

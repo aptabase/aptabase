@@ -11,7 +11,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
-import { useApps, useCurrentApp } from "@features/apps";
+import { Application, useApps, useCurrentApp } from "@features/apps";
 import { IconShare } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai/react";
 import { useMemo } from "react";
@@ -35,11 +35,10 @@ import { DebugModeBanner } from "./mode/DebugModeBanner";
 Component.displayName = "DashboardPage";
 
 export function Component() {
-  const { buildMode } = useApps();
   const app = useCurrentApp();
-  const navigate = useNavigate();
-  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
+  // Guards live here, above any hook of the dashboard itself: returning early
+  // between hooks changes the hook count when switching between apps.
   if (!app) return <Navigate to="/" />;
   if (app.lockReason) {
     return (
@@ -50,6 +49,14 @@ export function Component() {
   }
 
   if (!app.hasEvents) return <OnboardingDashboard app={app} />;
+
+  return <AppDashboard app={app} />;
+}
+
+function AppDashboard({ app }: { app: Application }) {
+  const { buildMode } = useApps();
+  const navigate = useNavigate();
+  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
   const getWidgetsForApp = useAtomValue(getDashboardWidgetsForAppAtom);
   const widgetsConfig = getWidgetsForApp(app.id);
