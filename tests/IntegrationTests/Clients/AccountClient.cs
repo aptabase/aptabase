@@ -9,6 +9,8 @@ public class AccountClient
 {
     private readonly HttpClient _client;
 
+    public string Email { get; private set; } = "";
+
     public AccountClient(HttpClient client)
     {
         _client = client;
@@ -16,6 +18,7 @@ public class AccountClient
 
     public async Task CreateAccount(string name, string email)
     {
+        Email = email.ToLower();
         var response = await _client.PostAsJsonAsync("/api/_auth/register", new { name, email });
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -37,6 +40,33 @@ public class AccountClient
     public async Task<HttpResponseMessage> Get(string url)
     {
         return await _client.GetAsync(url);
+    }
+
+    public async Task DeleteApp(string appId)
+    {
+        var response = await _client.DeleteAsync($"/api/_apps/{appId}");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    public async Task ShareApp(string appId, string email)
+    {
+        var response = await _client.PutAsync($"/api/_apps/{appId}/shares/{Uri.EscapeDataString(email)}", null);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    public async Task<HttpResponseMessage> DeleteAccount()
+    {
+        return await _client.PostAsync("/api/_auth/account/delete", null);
+    }
+
+    public async Task<HttpResponseMessage> Post(string url, object body)
+    {
+        return await _client.PostAsJsonAsync(url, body);
+    }
+
+    public async Task<T> GetJson<T>(string url)
+    {
+        return await _client.GetFromJsonAsync<T>(url) ?? throw new Exception($"Empty response from {url}");
     }
 
     public async Task<HttpResponseMessage> GetKeyMetrics(string appId, string period)
