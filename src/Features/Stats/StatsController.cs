@@ -179,15 +179,9 @@ public class QueryParams : IAppScopedRequest
 
     public QueryArgs Parse()
     {
-        var appId = BuildMode.ToLower() switch
-        {
-            "debug" => $"{AppId}_DEBUG",
-            _ => AppId,
-        };
-
         return new QueryArgs
         {
-            AppId = appId,
+            AppId = StoredAppId.Resolve(AppId, BuildMode),
             SessionId = SessionId,
             DateFrom = StartDate,
             DateTo = EndDate,
