@@ -124,6 +124,15 @@ public partial class Program
                 })
             );
 
+            c.AddPolicy("BillingSync", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+                httpContext.ResolveClientIpAddress(),
+                partition => new FixedWindowRateLimiterOptions
+                {
+                    AutoReplenishment = true,
+                    PermitLimit = 6,
+                    Window = TimeSpan.FromMinutes(1)
+                })
+            );
 
             c.AddPolicy("EventIngestion", httpContext => RateLimitPartition.GetFixedWindowLimiter(
                 httpContext.ResolveClientIpAddress(),

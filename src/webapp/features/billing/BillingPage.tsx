@@ -8,6 +8,7 @@ import { CurrentPlan } from "./CurrentPlan";
 import { CurrentUsage } from "./CurrentUsage";
 import { DeleteAccountModal } from "./DeleteAccountModal";
 import { MonthlyUsageChart } from "./MonthlyUsageChart";
+import { SyncSubscriptionButton } from "./SyncSubscriptionButton";
 import { BillingHistoricalUsage, BillingInfo, useBilling, useHistoricalData } from "./useBilling";
 
 Component.displayName = "BillingPage";
@@ -52,6 +53,18 @@ function Body(props: { billing: BillingInfo; historical: BillingHistoricalUsage[
           />
         </div>
       </div>
+      {props.billing.subscription && (
+        <div className="flex items-center justify-between gap-4 border rounded-md p-4">
+          <div>
+            <p className="text-sm">Changed your plan in Lemon Squeezy?</p>
+            <p className="text-sm text-muted-foreground">
+              Plan changes normally show up here on their own. If yours hasn't, sync to re-check your subscription
+              and apply it now.
+            </p>
+          </div>
+          <SyncSubscriptionButton variant="outline" size="sm" className="shrink-0" />
+        </div>
+      )}
       <div>
         <p>Monthly Usage</p>
 

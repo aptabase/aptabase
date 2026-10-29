@@ -18,6 +18,7 @@ public interface IBillingQueries
     Task<IEnumerable<UserQuota>> GetUserQuotaForApps(string[] appIds);
     Task<IEnumerable<UserQuota>> GetLockedOveruseSubscribers();
     Task<int> UnlockUser(string userId);
+    Task<char?> GetLockReason(string userId);
 }
 
 public class BillingQueries : IBillingQueries
@@ -108,6 +109,13 @@ public class BillingQueries : IBillingQueries
     {
         return await _db.Connection.ExecuteAsync(
             @"UPDATE users SET lock_reason = NULL WHERE id = @userId",
+            new { userId });
+    }
+
+    public async Task<char?> GetLockReason(string userId)
+    {
+        return await _db.Connection.QueryFirstOrDefaultAsync<char?>(
+            @"SELECT lock_reason FROM users WHERE id = @userId",
             new { userId });
     }
 

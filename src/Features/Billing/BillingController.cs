@@ -2,6 +2,7 @@ using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing.LemonSqueezy;
 using Aptabase.Features.Stats;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Aptabase.Features.Billing;
 
@@ -72,6 +73,53 @@ public class BillingController : Controller
 
         return Ok(rows);
     }
+
+    // The customer-facing counterpart of the checks the overuse job and the billing page already do:
+    // re-read the subscription from LemonSqueezy, store it, and lift an overuse or trial lock when the
+    // current plan has room for this month's usage. Unlocking goes through the same usage check as the
+    // job, so clicking it cannot release an account that is genuinely over its plan.
+    [HttpPost("/api/_billing/sync")]
+    [EnableRateLimiting("BillingSync")]
+    public async Task<IActionResult> SyncSubscription(CancellationToken cancellationToken)
+    {
+        var user = this.GetCurrentUserIdentity();
+        var sub = await _billingQueries.GetUserSubscription(user);
+
+        if (sub is null)
+        {
+            return Ok(new SyncResult("no_subscription", false, null));
+        }
+
+        var previousVariantId = sub.VariantId;
+        var refreshed = await _subscriptions.RefreshFromLemonSqueezy(sub.Id, user.Id, cancellationToken, unlockOnPlanChange: false);
+        if (refreshed is null)
+        {
+            return Ok(new SyncResult("unavailable", false, null));
+        }
+
+        sub = await _billingQueries.GetUserSubscription(user);
+        var plan = await ResolvePlan(user, sub);
+        var outcome = sub?.VariantId == previousVariantId ? "unchanged" : "updated";
+
+        var appIds = await _billingQueries.GetOwnedAppIds(user);
+        var usage = await _queryClient.NamedQuerySingleAsync<BillingUsage>("get_billing_usage__v1", new {
+            app_ids = appIds,
+        }, cancellationToken);
+        var hasRoom = (usage?.Count ?? 0) < plan.MonthlyEvents;
+        var hasActiveSubscription = sub is not null && !SubscriptionStatus.IsEnded(sub.Status);
+
+        var unlocked = false;
+        var lockReason = await _billingQueries.GetLockReason(user.Id);
+        if ((lockReason == 'O' && hasRoom) || (lockReason == 'T' && hasActiveSubscription))
+        {
+            await _billingQueries.UnlockUser(user.Id);
+            unlocked = true;
+        }
+
+        return Ok(new SyncResult(outcome, unlocked, plan));
+    }
+
+    public record SyncResult(string Outcome, bool Unlocked, SubscriptionPlan? Plan);
 
     [HttpPost("/api/_billing/checkout")]
     public async Task<IActionResult> GenerateCheckoutUrl(CancellationToken cancellationToken)
