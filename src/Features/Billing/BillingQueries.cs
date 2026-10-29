@@ -16,6 +16,9 @@ public interface IBillingQueries
     Task<int> UnlockOveruseAccounts();
     Task<IEnumerable<BillingUsageByApp>> GetBillingUsageByApp(int year, int month);
     Task<IEnumerable<UserQuota>> GetUserQuotaForApps(string[] appIds);
+    Task<IEnumerable<UserQuota>> GetLockedOveruseSubscribers();
+    Task<int> UnlockUser(string userId);
+    Task<char?> GetLockReason(string userId);
 }
 
 public class BillingQueries : IBillingQueries
@@ -66,7 +69,8 @@ public class BillingQueries : IBillingQueries
                      u.name AS name,
                      ARRAY_AGG(a.id) as app_ids,
                      u.free_quota,
-                     s.variant_id 
+                     s.id AS subscription_id,
+                     s.variant_id
               FROM users u
               LEFT JOIN subscriptions s
               ON s.owner_id = u.id
@@ -75,7 +79,44 @@ public class BillingQueries : IBillingQueries
               ON a.owner_id = u.id
               AND a.id = ANY(@appIds)
               WHERE u.lock_reason IS NULL
-              GROUP BY u.id, u.email, u.name, u.free_quota, s.variant_id", new { appIds });
+              GROUP BY u.id, u.email, u.name, u.free_quota, s.id, s.variant_id", new { appIds });
+    }
+
+    // Subscribers currently paused for overuse, with every app they own (an app with no events this
+    // month still counts toward "all their usage"). These are exactly the accounts the overuse pass
+    // above never sees again, so they get their plan re-checked separately.
+    public async Task<IEnumerable<UserQuota>> GetLockedOveruseSubscribers()
+    {
+        return await _db.Connection.QueryAsync<UserQuota>(
+            @"SELECT u.id AS id,
+                     u.email AS email,
+                     u.name AS name,
+                     ARRAY_AGG(a.id) as app_ids,
+                     u.free_quota,
+                     s.id AS subscription_id,
+                     s.variant_id
+              FROM users u
+              INNER JOIN subscriptions s
+              ON s.owner_id = u.id
+              AND s.status != 'expired'
+              INNER JOIN apps a
+              ON a.owner_id = u.id
+              WHERE u.lock_reason = 'O'
+              GROUP BY u.id, u.email, u.name, u.free_quota, s.id, s.variant_id");
+    }
+
+    public async Task<int> UnlockUser(string userId)
+    {
+        return await _db.Connection.ExecuteAsync(
+            @"UPDATE users SET lock_reason = NULL WHERE id = @userId",
+            new { userId });
+    }
+
+    public async Task<char?> GetLockReason(string userId)
+    {
+        return await _db.Connection.QueryFirstOrDefaultAsync<char?>(
+            @"SELECT lock_reason FROM users WHERE id = @userId",
+            new { userId });
     }
 
     public async Task<UserIdentity[]> GetTrialsDueSoon()

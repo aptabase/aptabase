@@ -1,8 +1,32 @@
+using System.Text.Json.Serialization;
+
 namespace Aptabase.Features.Billing.LemonSqueezy;
 
 public class PagedList<T> where T : new()
 {
+    public PagedListMeta Meta { get; set; } = new PagedListMeta();
     public IEnumerable<Resource<T>> Data { get; set; } = Enumerable.Empty<Resource<T>>();
+}
+
+public class PagedListMeta
+{
+    public PageInfo Page { get; set; } = new PageInfo();
+}
+
+// LemonSqueezy's page metadata is camelCase, unlike the snake_case attributes.
+public class PageInfo
+{
+    [JsonPropertyName("currentPage")]
+    public int CurrentPage { get; set; }
+
+    [JsonPropertyName("lastPage")]
+    public int LastPage { get; set; }
+
+    [JsonPropertyName("perPage")]
+    public int PerPage { get; set; }
+
+    [JsonPropertyName("total")]
+    public int Total { get; set; }
 }
 
 public class Resource<T> where T : new()
