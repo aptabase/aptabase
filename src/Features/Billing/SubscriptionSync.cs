@@ -14,7 +14,30 @@ public interface ISubscriptionSync
 {
     Task<string?> FindOwnerId(long subscriptionId);
     Task Apply(long subscriptionId, string ownerId, SubscriptionAttributes sub, bool unlock = true);
-    Task<SubscriptionAttributes?> RefreshFromLemonSqueezy(long subscriptionId, string ownerId, CancellationToken cancellationToken);
+    Task<SubscriptionAttributes?> RefreshFromLemonSqueezy(long subscriptionId, string ownerId, CancellationToken cancellationToken, bool unlockOnPlanChange = true);
+    Task<ReconciliationSummary> ReconcileAll(CancellationToken cancellationToken);
+}
+
+public record ReconciliationSummary(int Stored, int Fetched, int Changed, int Missing);
+
+public class StoredSubscription
+{
+    public long Id { get; set; }
+    public string OwnerId { get; set; } = "";
+    public long VariantId { get; set; }
+    public string Status { get; set; } = "";
+    public DateTime? EndsAt { get; set; }
+
+    public bool Differs(SubscriptionAttributes sub) =>
+        VariantId != sub.VariantID
+        || !string.Equals(Status, sub.Status, StringComparison.Ordinal)
+        || !NullableUtcEquals(EndsAt, sub.EndsAt);
+
+    private static bool NullableUtcEquals(DateTime? a, DateTime? b)
+    {
+        if (a is null || b is null) return a is null && b is null;
+        return a.Value.ToUniversalTime() == b.Value.ToUniversalTime();
+    }
 }
 
 public class SubscriptionSync : ISubscriptionSync
@@ -85,7 +108,48 @@ public class SubscriptionSync : ISubscriptionSync
             });
     }
 
-    public async Task<SubscriptionAttributes?> RefreshFromLemonSqueezy(long subscriptionId, string ownerId, CancellationToken cancellationToken)
+    /// <summary>
+    /// Pulls the whole store from LemonSqueezy in pages and rewrites every stored subscription whose
+    /// plan, status or end date differs. It never touches locks: the hourly overuse job releases
+    /// locked subscribers whose (now corrected) plan has room, with the usage numbers it already has.
+    /// Subscriptions LemonSqueezy returns that this region does not store belong to the other region
+    /// or were never attributed, and are skipped.
+    /// </summary>
+    public async Task<ReconciliationSummary> ReconcileAll(CancellationToken cancellationToken)
+    {
+        var stored = (await _db.Connection.QueryAsync<StoredSubscription>(
+            @"SELECT id, owner_id, variant_id, status, ends_at FROM subscriptions")).ToList();
+
+        if (stored.Count == 0)
+            return new ReconciliationSummary(0, 0, 0, 0);
+
+        var fetched = await _lsClient.ListStoreSubscriptions(cancellationToken);
+        var byId = fetched.ToDictionary(x => x.Id, x => x.Attributes);
+
+        var changed = 0;
+        var missing = 0;
+        foreach (var row in stored)
+        {
+            if (!byId.TryGetValue(row.Id, out var current))
+            {
+                missing++;
+                _logger.LogWarning("Stored subscription {SubId} of user {UserId} was not returned by LemonSqueezy; leaving it as is.", row.Id, row.OwnerId);
+                continue;
+            }
+
+            if (!row.Differs(current))
+                continue;
+
+            await Apply(row.Id, row.OwnerId, current, unlock: false);
+            changed++;
+            _logger.LogInformation("Reconciled subscription {SubId} of user {UserId}: variant {OldVariant} -> {NewVariant}, status {OldStatus} -> {NewStatus}.",
+                row.Id, row.OwnerId, row.VariantId, current.VariantID, row.Status, current.Status);
+        }
+
+        return new ReconciliationSummary(stored.Count, fetched.Count, changed, missing);
+    }
+
+    public async Task<SubscriptionAttributes?> RefreshFromLemonSqueezy(long subscriptionId, string ownerId, CancellationToken cancellationToken, bool unlockOnPlanChange = true)
     {
         try
         {
@@ -104,7 +168,7 @@ public class SubscriptionSync : ISubscriptionSync
             // for any over-quota subscriber, and an unchanged plan must not let a locked account unlock
             // itself by loading that page.
             var planChanged = storedVariantId != sub.VariantID;
-            await Apply(subscriptionId, ownerId, sub, unlock: planChanged);
+            await Apply(subscriptionId, ownerId, sub, unlock: unlockOnPlanChange && planChanged);
             _logger.LogInformation("Refreshed subscription {SubId} for user {UserId} from LemonSqueezy: variant {VariantId}, status {Status}.", subscriptionId, ownerId, sub.VariantID, sub.Status);
             return sub;
         }

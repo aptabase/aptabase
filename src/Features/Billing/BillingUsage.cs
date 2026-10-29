@@ -18,6 +18,7 @@ public class UserQuota
     public string Name { get; set; } = "";
     public string[] AppIds { get; set; } = Array.Empty<string>();
     public long? FreeQuota { get; set; }
+    public long? SubscriptionId { get; set; }
     public long? VariantID { get; set; }
 
     public long GetQuota()

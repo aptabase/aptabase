@@ -49,7 +49,7 @@ public class LemonSqueezyClient
                     store = new {
                         data = new {
                             type = "stores",
-                            id = "30508"
+                            id = StoreId
                         }
                     },
                     variant = new {
@@ -82,6 +82,44 @@ public class LemonSqueezyClient
         await response.EnsureSuccessWithLog(_logger);
         var result = await response.Content.ReadFromJsonAsync<GetResponse<Resource<SubscriptionAttributes>>>(JsonSettings, cancellationToken);
         return result?.Data.Attributes;
+    }
+
+    public const string StoreId = "30508";
+
+    // LemonSqueezy serves at most 100 resources per page; asking for more is silently capped, and the
+    // loop trusts meta.page.lastPage rather than the requested size so a lower cap still terminates.
+    private const int PageSize = 100;
+    private const int MaxPages = 200;
+
+    /// <summary>
+    /// Every subscription in the store, across all regions, a page at a time. One call per 100
+    /// subscriptions, which is what makes a periodic full reconciliation affordable.
+    /// </summary>
+    public async Task<IReadOnlyList<(long Id, SubscriptionAttributes Attributes)>> ListStoreSubscriptions(CancellationToken cancellationToken)
+    {
+        var result = new List<(long, SubscriptionAttributes)>();
+
+        for (var page = 1; page <= MaxPages; page++)
+        {
+            var url = $"/v1/subscriptions?filter[store_id]={StoreId}&page[number]={page}&page[size]={PageSize}";
+            var response = await _httpClient.GetAsync(url, cancellationToken);
+            await response.EnsureSuccessWithLog(_logger);
+
+            var body = await response.Content.ReadFromJsonAsync<PagedList<SubscriptionAttributes>>(JsonSettings, cancellationToken);
+            if (body is null)
+                break;
+
+            foreach (var item in body.Data)
+            {
+                if (long.TryParse(item.Id, out var id))
+                    result.Add((id, item.Attributes));
+            }
+
+            if (page >= body.Meta.Page.LastPage)
+                break;
+        }
+
+        return result;
     }
 
     public async Task<string> GetBillingPortalUrl(long subscriptionId, CancellationToken cancellationToken)
