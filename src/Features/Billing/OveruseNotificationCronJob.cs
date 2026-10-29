@@ -1,3 +1,4 @@
+using Aptabase.Features.Billing.LemonSqueezy;
 using Aptabase.Features.Notification;
 using Features.Cache;
 using Sgbj.Cron;
@@ -7,14 +8,16 @@ namespace Aptabase.Features.Billing;
 public class OveruseNotificationCronJob : BackgroundService
 {
     private readonly IBillingQueries _billingQueries;
+    private readonly ISubscriptionSync _subscriptions;
     private readonly IEmailClient _emailClient;
     private readonly EnvSettings _env;
     private readonly ICache _cache;
     private readonly ILogger _logger;
 
-    public OveruseNotificationCronJob(IBillingQueries billingQueries, IEmailClient emailClient, EnvSettings env, ICache cache, ILogger<OveruseNotificationCronJob> logger)
+    public OveruseNotificationCronJob(IBillingQueries billingQueries, ISubscriptionSync subscriptions, IEmailClient emailClient, EnvSettings env, ICache cache, ILogger<OveruseNotificationCronJob> logger)
     {
         _billingQueries = billingQueries ?? throw new ArgumentNullException(nameof(billingQueries));
+        _subscriptions = subscriptions ?? throw new ArgumentNullException(nameof(subscriptions));
         _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
         _env = env ?? throw new ArgumentNullException(nameof(env));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -42,6 +45,20 @@ public class OveruseNotificationCronJob : BackgroundService
                         {
                             var quota = user.GetQuota();
                             var usage = usagePerApp.Where(x => user.AppIds.Contains(x.AppId)).Sum(x => x.Count);
+
+                            // Pausing ingestion is the one action here that costs a paying customer data, so before
+                            // doing it on a subscription make sure the stored plan is what LemonSqueezy has: a plan
+                            // change whose webhook was missed or rejected must not lock the customer at the old quota.
+                            if (usage >= quota && user.SubscriptionId is long subscriptionId)
+                            {
+                                var refreshed = await _subscriptions.RefreshFromLemonSqueezy(subscriptionId, user.Id, cancellationToken);
+                                if (refreshed is not null)
+                                {
+                                    user.VariantID = SubscriptionStatus.IsEnded(refreshed.Status) ? null : refreshed.VariantID;
+                                    quota = user.GetQuota();
+                                }
+                            }
+
                             var perc = usage * 1.0 / quota;
                             _logger.LogInformation("User {UserId} has used {Usage} ({Perc:P}) out of {Quota} events.", user.Id, usage, perc, quota);
 
@@ -74,6 +91,8 @@ public class OveruseNotificationCronJob : BackgroundService
                         }
                     }
                     _logger.LogInformation("Finished processing overuse notifications.");
+
+                    await ReleaseLockedSubscribersWithRoom(usagePerApp);
                 }
             }
             catch (OperationCanceledException)
@@ -83,6 +102,32 @@ public class OveruseNotificationCronJob : BackgroundService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "OveruseNotificationCronJob crashed.");
+            }
+        }
+    }
+
+    // The pass above only sees unlocked accounts, so a subscriber who was paused at a plan we had
+    // wrong would stay paused until the monthly reset. The stored plan is kept honest by webhooks,
+    // the six-hourly reconciliation and the Sync button, so this only compares usage with the stored
+    // quota and releases the subscribers who have room. No LemonSqueezy calls here.
+    private async Task ReleaseLockedSubscribersWithRoom(IEnumerable<BillingUsageByApp> usagePerApp)
+    {
+        var locked = await _billingQueries.GetLockedOveruseSubscribers();
+        foreach (var user in locked)
+        {
+            try
+            {
+                var quota = user.GetQuota();
+                var usage = usagePerApp.Where(x => user.AppIds.Contains(x.AppId)).Sum(x => x.Count);
+                if (usage < quota)
+                {
+                    _logger.LogInformation("User {UserId} is locked for overuse but has used {Usage} of {Quota} on their current plan; resuming ingestion.", user.Id, usage, quota);
+                    await _billingQueries.UnlockUser(user.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "OveruseNotificationCronJob failed to re-check locked user {UserId}.", user.Id);
             }
         }
     }

@@ -124,6 +124,7 @@ public partial class Program
                 })
             );
 
+
             c.AddPolicy("EventIngestion", httpContext => RateLimitPartition.GetFixedWindowLimiter(
                 httpContext.ResolveClientIpAddress(),
                 partition => new FixedWindowRateLimiterOptions
@@ -174,6 +175,7 @@ public partial class Program
             builder.Services.AddHostedService<TrialExpiredCronJob>();
             builder.Services.AddHostedService<TrialNotificationCronJob>();
             builder.Services.AddHostedService<ResetOveruseCronJob>();
+            builder.Services.AddHostedService<SubscriptionReconciliationCronJob>();
         }
 
         builder.Services.AddGeoIPClient(appEnv);

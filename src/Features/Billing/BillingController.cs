@@ -11,11 +11,13 @@ public class BillingController : Controller
 {
     private readonly IQueryClient _queryClient;
     private readonly IBillingQueries _billingQueries;
+    private readonly ISubscriptionSync _subscriptions;
     private readonly LemonSqueezyClient _lsClient;
 
-    public BillingController(IBillingQueries billingQueries, LemonSqueezyClient lsClient, IQueryClient queryClient)
+    public BillingController(IBillingQueries billingQueries, ISubscriptionSync subscriptions, LemonSqueezyClient lsClient, IQueryClient queryClient)
     {
         _billingQueries = billingQueries ?? throw new ArgumentNullException(nameof(billingQueries));
+        _subscriptions = subscriptions ?? throw new ArgumentNullException(nameof(subscriptions));
         _lsClient = lsClient ?? throw new ArgumentNullException(nameof(lsClient));
         _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));
     }
@@ -31,9 +33,7 @@ public class BillingController : Controller
         }, cancellationToken);
 
         var sub = await _billingQueries.GetUserSubscription(user);
-        var plan = sub is null || sub.Status == "expired" 
-            ? SubscriptionPlan.GetFreeVariant(await _billingQueries.GetUserFreeTierOrTrial(user))
-            : SubscriptionPlan.GetByVariantId(sub.VariantId);
+        var plan = await ResolvePlan(user, sub);
 
         var state = (usage?.Count ?? 0) < plan.MonthlyEvents ? "OK" : "OVERUSE";
         
@@ -50,6 +50,13 @@ public class BillingController : Controller
             } : null,
             Plan = plan
         });
+    }
+
+    private async Task<SubscriptionPlan> ResolvePlan(UserIdentity user, Subscription? sub)
+    {
+        return sub is null || SubscriptionStatus.IsEnded(sub.Status)
+            ? SubscriptionPlan.GetFreeVariant(await _billingQueries.GetUserFreeTierOrTrial(user))
+            : SubscriptionPlan.GetByVariantId(sub.VariantId);
     }
 
     [HttpGet("/api/_billing/historical")]
