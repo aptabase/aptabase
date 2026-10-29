@@ -10,6 +10,8 @@ type SyncResult = {
   outcome: "no_subscription" | "unavailable" | "unchanged" | "updated";
   unlocked: boolean;
   plan?: { name: string; monthlyEvents: number };
+  // lock still in place after the sync: "O" overuse, "T" expired trial, null when none
+  lockReason?: string | null;
 };
 
 type Props = {
@@ -67,7 +69,8 @@ export function SyncSubscriptionButton(props: Props) {
 }
 
 function notify(result: SyncResult) {
-  const unlockedNote = result.unlocked ? " Your account is unpaused and events will be accepted again shortly." : "";
+  const planLine =
+    result.outcome === "updated" ? `Your plan is now ${result.plan?.name}.` : `Your plan is up to date: ${result.plan?.name}.`;
 
   switch (result.outcome) {
     case "no_subscription":
@@ -77,10 +80,16 @@ function notify(result: SyncResult) {
       toast.error("Lemon Squeezy did not answer. Your stored plan was kept, please try again in a minute.");
       return;
     case "updated":
-      toast.success(`Your plan is now ${result.plan?.name}.${unlockedNote}`);
-      return;
     case "unchanged":
-      toast.success(`Your plan is up to date: ${result.plan?.name}.${unlockedNote}`);
+      if (result.unlocked) {
+        toast.success(`${planLine} Your account is unpaused and events will be accepted again shortly.`);
+      } else if (result.lockReason === "O") {
+        toast(`${planLine} This month's usage is still over its limit, so your account stays paused until you upgrade.`);
+      } else if (result.lockReason) {
+        toast(`${planLine} Your account is still locked; contact support if this looks wrong.`);
+      } else {
+        toast.success(planLine);
+      }
       return;
   }
 }

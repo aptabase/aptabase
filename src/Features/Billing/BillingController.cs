@@ -87,14 +87,14 @@ public class BillingController : Controller
 
         if (sub is null)
         {
-            return Ok(new SyncResult("no_subscription", false, null));
+            return Ok(new SyncResult("no_subscription", false, null, await _billingQueries.GetLockReason(user.Id)));
         }
 
         var previousVariantId = sub.VariantId;
         var refreshed = await _subscriptions.RefreshFromLemonSqueezy(sub.Id, user.Id, cancellationToken, unlockOnPlanChange: false);
         if (refreshed is null)
         {
-            return Ok(new SyncResult("unavailable", false, null));
+            return Ok(new SyncResult("unavailable", false, null, await _billingQueries.GetLockReason(user.Id)));
         }
 
         sub = await _billingQueries.GetUserSubscription(user);
@@ -114,12 +114,19 @@ public class BillingController : Controller
         {
             await _billingQueries.UnlockUser(user.Id);
             unlocked = true;
+            lockReason = null;
         }
 
-        return Ok(new SyncResult(outcome, unlocked, plan));
+        return Ok(new SyncResult(outcome, unlocked, plan, lockReason));
     }
 
-    public record SyncResult(string Outcome, bool Unlocked, SubscriptionPlan? Plan);
+    // LockReason is the lock still in place after the sync (null when none), so the UI can say
+    // "still paused" instead of a reassuring "up to date" to a customer whose usage is still over.
+    public record SyncResult(string Outcome, bool Unlocked, SubscriptionPlan? Plan, char? LockReason)
+    {
+        public SyncResult(string outcome, bool unlocked, SubscriptionPlan? plan, string? lockReason)
+            : this(outcome, unlocked, plan, string.IsNullOrEmpty(lockReason) ? null : lockReason[0]) { }
+    }
 
     [HttpPost("/api/_billing/checkout")]
     public async Task<IActionResult> GenerateCheckoutUrl(CancellationToken cancellationToken)

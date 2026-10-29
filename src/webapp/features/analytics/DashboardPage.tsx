@@ -40,6 +40,17 @@ export function Component() {
   const navigate = useNavigate();
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
+  // Hooks must run on every render. They used to sit below the early returns, which crashed with
+  // "Rendered more hooks than during the previous render" the moment an app went from locked to
+  // unlocked without a reload (e.g. after the Sync subscription button refetched the apps list).
+  const getWidgetsForApp = useAtomValue(getDashboardWidgetsForAppAtom);
+  const setWidgetsConfig = useSetAtom(dashboardWidgetsAtom);
+  const widgetsConfig = getWidgetsForApp(app?.id ?? "");
+  const widgetsOrder = useMemo(
+    () => widgetsConfig.toSorted((wa, wb) => wa.orderIndex - wb.orderIndex).map((w) => w.id),
+    [widgetsConfig]
+  );
+
   if (!app) return <Navigate to="/" />;
   if (app.lockReason) {
     return (
@@ -50,14 +61,6 @@ export function Component() {
   }
 
   if (!app.hasEvents) return <OnboardingDashboard app={app} />;
-
-  const getWidgetsForApp = useAtomValue(getDashboardWidgetsForAppAtom);
-  const widgetsConfig = getWidgetsForApp(app.id);
-  const setWidgetsConfig = useSetAtom(dashboardWidgetsAtom);
-  const widgetsOrder = useMemo(
-    () => widgetsConfig.toSorted((wa, wb) => wa.orderIndex - wb.orderIndex).map((w) => w.id),
-    [widgetsConfig]
-  );
 
   const resetFilters = () => navigate(`/${app.id}/`);
 
