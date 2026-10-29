@@ -1,6 +1,4 @@
-using Aptabase.Data;
 using Aptabase.Features.Billing.LemonSqueezy;
-using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
@@ -12,17 +10,15 @@ namespace Aptabase.Features.Billing;
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class LemonSqueezyWebhookController : Controller
 {
-    private readonly IDbContext _db;
-    private readonly LemonSqueezyClient _lsClient;
+    private readonly ISubscriptionSync _subscriptions;
     private readonly ILogger _logger;
 
     private readonly string _region;
     private readonly byte[] _signingSecret;
 
-    public LemonSqueezyWebhookController(EnvSettings env, IDbContext db, LemonSqueezyClient lsClient, ILogger<LemonSqueezyWebhookController> logger)
+    public LemonSqueezyWebhookController(EnvSettings env, ISubscriptionSync subscriptions, ILogger<LemonSqueezyWebhookController> logger)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _lsClient = lsClient ?? throw new ArgumentNullException(nameof(lsClient));
+        _subscriptions = subscriptions ?? throw new ArgumentNullException(nameof(subscriptions));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         _region = env.Region;
@@ -41,7 +37,16 @@ public class LemonSqueezyWebhookController : Controller
             return Unauthorized(new { message = "Invalid LemonSqueezy Signature" });
         }
 
-        var ev = JsonSerializer.Deserialize<WebhookEvent>(body, LemonSqueezyClient.JsonSettings);
+        WebhookEvent? ev;
+        try
+        {
+            ev = JsonSerializer.Deserialize<WebhookEvent>(body, LemonSqueezyClient.JsonSettings);
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex, "Invalid JSON Body: {Body}", body);
+            return BadRequest(new { message = "Invalid JSON Body" });
+        }
 
         if (ev == null)
         {
@@ -50,37 +55,29 @@ public class LemonSqueezyWebhookController : Controller
             return BadRequest(new { message = "Invalid JSON Body" });
         }
 
-        if (ev.Meta.CustomData.TryGetValue("region", out var eventRegion) == false)
-        {
-            _logger.LogError("LemonSqueezy event is missing region");
-
-            return BadRequest(new { message = "Missing 'region' on meta.custom_data" });
-        }
-
-        if (eventRegion != _region)
-        {
-            return Ok(new { message = "Ignoring event from different region" });
-        }
-
-        // Every subscription_* lifecycle event carries the subscription object, so they all go
-        // through the same handler; what happens to the owner's lock depends on the status, not
-        // on the event name.
-        var task = ev.Meta.EventName switch
-        {
-            "subscription_created" => HandleSubscriptionChanged(ev, cancellationToken),
-            "subscription_updated" => HandleSubscriptionChanged(ev, cancellationToken),
-            "subscription_cancelled" => HandleSubscriptionChanged(ev, cancellationToken),
-            "subscription_resumed" => HandleSubscriptionChanged(ev, cancellationToken),
-            "subscription_expired" => HandleSubscriptionChanged(ev, cancellationToken),
-            "subscription_paused" => HandleSubscriptionChanged(ev, cancellationToken),
-            "subscription_unpaused" => HandleSubscriptionChanged(ev, cancellationToken),
-            _ => HandleUnknownEvent(ev),
-        };
-
-        return await task;
+        return SubscriptionLifecycleEvents.Contains(ev.Meta.EventName)
+            ? await HandleSubscriptionChanged(ev)
+            : AcknowledgeOtherEvent(ev);
     }
 
-    private async Task<IActionResult> HandleSubscriptionChanged(WebhookEvent ev, CancellationToken cancellationToken)
+    // Every one of these carries the subscription object in `data`, so they all go through the same
+    // handler; what happens to the owner's lock depends on the status, not on the event name.
+    // subscription_plan_changed is the one LemonSqueezy sends when a customer switches plan in the
+    // customer portal; until it was listed here a plan change was answered with 400 and the stored
+    // variant (and therefore the quota) stayed at the old plan.
+    private static readonly HashSet<string> SubscriptionLifecycleEvents = new(StringComparer.Ordinal)
+    {
+        "subscription_created",
+        "subscription_updated",
+        "subscription_plan_changed",
+        "subscription_cancelled",
+        "subscription_resumed",
+        "subscription_expired",
+        "subscription_paused",
+        "subscription_unpaused",
+    };
+
+    private async Task<IActionResult> HandleSubscriptionChanged(WebhookEvent ev)
     {
         var body = JsonSerializer.Deserialize<SubscriptionAttributes>(ev.Data.Attributes, LemonSqueezyClient.JsonSettings);
 
@@ -89,64 +86,48 @@ public class LemonSqueezyWebhookController : Controller
             return BadRequest(new { message = "Event body is null" });
         }
 
-        var subId = Convert.ToInt64(ev.Data.Id);
-        var ownerId = ev.Meta.CustomData["user_id"];
-
-        if (string.IsNullOrEmpty(ownerId))
+        if (!long.TryParse(ev.Data.Id, out var subId))
         {
-            _logger.LogError("LemonSqueezy event is missing user_id");
-
-            return BadRequest(new { message = "Missing 'user_id' on meta.custom_data" });
+            _logger.LogError("LemonSqueezy {EventName} has a non-numeric subscription id: {Id}", ev.Meta.EventName, ev.Data.Id);
+            return BadRequest(new { message = "Invalid subscription id" });
         }
 
-        // A cancellation or expiry also arrives as subscription_updated and used to unlock the
-        // owner like any other change, which let an over-quota account resume ingestion by
-        // cancelling its subscription. Those two statuses leave the lock alone.
-        if (SubscriptionStatus.ClearsLock(body.Status))
+        // custom_data is what the checkout attached (user_id + region). It is the source of truth for a
+        // new subscription, but later events are not guaranteed to carry it, so an event about a
+        // subscription we already store is attributed to its stored owner instead.
+        ev.Meta.CustomData.TryGetValue("region", out var eventRegion);
+        ev.Meta.CustomData.TryGetValue("user_id", out var customOwnerId);
+
+        string? ownerId;
+        if (!string.IsNullOrEmpty(eventRegion))
         {
-            await _db.Connection.ExecuteAsync(
-                @"UPDATE users SET lock_reason = null WHERE id = @ownerId",
-                new { ownerId }
-            );
+            if (eventRegion != _region)
+            {
+                return Ok(new { message = "Ignoring event from different region" });
+            }
+
+            ownerId = !string.IsNullOrEmpty(customOwnerId) ? customOwnerId : await _subscriptions.FindOwnerId(subId);
+            if (string.IsNullOrEmpty(ownerId))
+            {
+                _logger.LogError("LemonSqueezy {EventName} for subscription {SubId} has no user_id and the subscription is unknown", ev.Meta.EventName, subId);
+                return BadRequest(new { message = "Missing 'user_id' on meta.custom_data" });
+            }
         }
         else
         {
-            _logger.LogInformation("Subscription {SubId} for user {UserId} is now {Status}; lock left unchanged.", subId, ownerId, body.Status);
+            // Without a region every region's deployment receives this event. Only the one that
+            // already stores the subscription may act on it; the others acknowledge and move on.
+            ownerId = await _subscriptions.FindOwnerId(subId);
+            if (string.IsNullOrEmpty(ownerId))
+            {
+                _logger.LogWarning("LemonSqueezy {EventName} for subscription {SubId} has no custom_data and the subscription is not stored in this region; ignoring", ev.Meta.EventName, subId);
+                return Ok(new { message = "Ignoring event for a subscription not stored in this region" });
+            }
         }
 
-        if (SubscriptionStatus.IsEnded(body.Status))
-        {
-            await _db.Connection.ExecuteAsync(
-                @"DELETE FROM subscriptions WHERE id = @subId",
-            new
-            {
-                subId,
-            });
-        }
-        else
-        {
-            await _db.Connection.ExecuteAsync(
-                @"INSERT INTO subscriptions
-                    (id, owner_id, customer_id, product_id, variant_id, status, ends_at)
-                VALUES
-                    (@subId, @ownerId, @customerId, @productId, @variantId, @status, @endsAt)
-                ON CONFLICT (id) 
-                DO UPDATE SET product_id = @productId,
-                            variant_id = @variantId,
-                            status = @status,
-                            ends_at = @endsAt,
-                            modified_at = now()",
-            new
-            {
-                subId,
-                ownerId,
-                customerId = body.CustomerID,
-                productId = body.ProductID,
-                variantId = body.VariantID,
-                status = body.Status,
-                endsAt = body.EndsAt,
-            });
-        }
+        await _subscriptions.Apply(subId, ownerId, body);
+
+        _logger.LogInformation("Applied LemonSqueezy {EventName} for subscription {SubId} of user {UserId}: variant {VariantId}, status {Status}", ev.Meta.EventName, subId, ownerId, body.VariantID, body.Status);
 
         return Ok(new {});
     }
@@ -172,10 +153,23 @@ public class LemonSqueezyWebhookController : Controller
         return (true, body);
     }
 
-    private Task<IActionResult> HandleUnknownEvent(WebhookEvent ev)
+    // Payment, order, customer and license events carry no subscription state we need, and an unknown
+    // event is not a delivery failure on our side: LemonSqueezy retries anything but a 200 three times
+    // and then drops it, so a non-200 here only adds noise. Acknowledge and log instead.
+    private IActionResult AcknowledgeOtherEvent(WebhookEvent ev)
     {
-        _logger.LogError("Unknown LemonSqueezy event: {EventName}", ev.Meta.EventName);
+        if (ev.Meta.EventName.StartsWith("subscription_payment_", StringComparison.Ordinal)
+            || ev.Meta.EventName.StartsWith("order_", StringComparison.Ordinal)
+            || ev.Meta.EventName.StartsWith("license_key_", StringComparison.Ordinal)
+            || ev.Meta.EventName is "customer_updated" or "affiliate_activated")
+        {
+            _logger.LogInformation("Acknowledged LemonSqueezy {EventName} without changes", ev.Meta.EventName);
+        }
+        else
+        {
+            _logger.LogWarning("Unknown LemonSqueezy event acknowledged without changes: {EventName}", ev.Meta.EventName);
+        }
 
-        return Task.FromResult<IActionResult>(BadRequest(new { message = "Unknown event" }));
+        return Ok(new { message = "Acknowledged" });
     }
 }

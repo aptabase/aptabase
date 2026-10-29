@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using Aptabase.Features.Authentication;
 using Yoh.Text.Json.NamingPolicies;
@@ -68,13 +69,25 @@ public class LemonSqueezyClient
         return result?.Data.Attributes.Url ?? "";
     }
 
-    public async Task<string> GetBillingPortalUrl(long subscriptionId, CancellationToken cancellationToken)
+    /// <summary>
+    /// The current state of a subscription as LemonSqueezy sees it, or null when LemonSqueezy no longer knows it.
+    /// </summary>
+    public async Task<SubscriptionAttributes?> GetSubscription(long subscriptionId, CancellationToken cancellationToken)
     {
         var response = await _httpClient.GetAsync($"/v1/subscriptions/{subscriptionId}", cancellationToken);
 
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            return null;
+
         await response.EnsureSuccessWithLog(_logger);
-        var result = await response.Content.ReadFromJsonAsync<GetResponse<Resource<SubscriptionAttributes>>>(JsonSettings);
-        var urls = result?.Data.Attributes.Urls;
+        var result = await response.Content.ReadFromJsonAsync<GetResponse<Resource<SubscriptionAttributes>>>(JsonSettings, cancellationToken);
+        return result?.Data.Attributes;
+    }
+
+    public async Task<string> GetBillingPortalUrl(long subscriptionId, CancellationToken cancellationToken)
+    {
+        var sub = await GetSubscription(subscriptionId, cancellationToken);
+        var urls = sub?.Urls;
         if (urls is null)
             return "";
 

@@ -151,6 +151,7 @@ public partial class Program
         builder.Services.AddSingleton<ICache, DatabaseCache>();
         builder.Services.AddSingleton<IAppQueries, AppQueries>();
         builder.Services.AddSingleton<IBillingQueries, BillingQueries>();
+        builder.Services.AddSingleton<ISubscriptionSync, SubscriptionSync>();
         builder.Services.AddSingleton<IPrivacyQueries, PrivacyQueries>();
         builder.Services.AddSingleton<IUserHasher, DailyUserHasher>();
         builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
