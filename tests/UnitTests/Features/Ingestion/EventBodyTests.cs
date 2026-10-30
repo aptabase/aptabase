@@ -25,6 +25,32 @@ public class EventBodyTests
     }
 
     [Fact]
+    public void Local_past_timestamps_preserve_their_utc_instant()
+    {
+        var expected = DateTime.UtcNow.AddMinutes(-10);
+
+        var body = new EventBody { Timestamp = expected.ToLocalTime() };
+
+        body.Timestamp.Should().Be(expected);
+        body.Timestamp.Kind.Should().Be(DateTimeKind.Utc);
+    }
+
+    [Theory]
+    [InlineData(330)]
+    [InlineData(-420)]
+    public void Json_offsets_are_normalized_before_clamping_future_timestamps(int minutes)
+    {
+        var expected = DateTime.UtcNow.AddMinutes(-10);
+        var input = new DateTimeOffset(expected).ToOffset(TimeSpan.FromMinutes(minutes));
+        var json = JsonSerializer.Serialize(new { Timestamp = input.ToString("o") });
+
+        var body = JsonSerializer.Deserialize<EventBody>(json)!;
+
+        body.Timestamp.Should().Be(expected);
+        body.Timestamp.Kind.Should().Be(DateTimeKind.Utc);
+    }
+
+    [Fact]
     public void SplitProps_should_ignore_nonprimitive_types()
     {
         var body = new EventBody

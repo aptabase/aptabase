@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
 import { Navigate, useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Application, createApp, deleteApp, listApps, updateApp } from "./apps";
+import { Application, RetentionMonths, createApp, deleteApp, listApps, updateApp } from "./apps";
 import { OwnershipTransferStartupCheck } from "./OwnershipTransferStartupCheck";
 
 type Props = {
@@ -17,9 +17,9 @@ export type BuildMode = "debug" | "release";
 type AppsContextType = {
   apps: Application[];
   buildMode: BuildMode;
-  createApp: (name: string) => Promise<Application>;
+  createApp: (name: string, retentionMonths?: RetentionMonths) => Promise<Application>;
   deleteApp: (appId: string) => Promise<void>;
-  updateApp: (appId: string, name: string, icon: string) => Promise<Application>;
+  updateApp: (appId: string, name: string, icon: string, retentionMonths?: RetentionMonths) => Promise<Application>;
   refetchApps: () => Promise<void>;
   switchBuildMode: (mode: BuildMode) => void;
 };
@@ -32,8 +32,8 @@ export function AppsProvider(props: Props) {
 
   const { isLoading, isError, data, refetch } = useQuery({ queryKey: ["apps"], queryFn: listApps });
 
-  const createAppAndRefresh = async (name: string): Promise<Application> => {
-    const app = await createApp(name);
+  const createAppAndRefresh = async (name: string, retentionMonths: RetentionMonths = 60): Promise<Application> => {
+    const app = await createApp(name, retentionMonths);
     toast(`${name} app was created. 🎉`);
     await refetch();
     return app;
@@ -44,8 +44,8 @@ export function AppsProvider(props: Props) {
     await refetch();
   };
 
-  const updateAppAndRefresh = async (appId: string, name: string, icon: string): Promise<Application> => {
-    const app = await updateApp(appId, name, icon);
+  const updateAppAndRefresh = async (appId: string, name: string, icon: string, retentionMonths?: RetentionMonths): Promise<Application> => {
+    const app = await updateApp(appId, name, icon, retentionMonths);
     toast(`${name} app was successfully updated.`);
     await refetch();
     return app;

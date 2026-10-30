@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Aptabase.Features.Apps;
 
 namespace Aptabase.Features.Ingestion.Buffer;
 
@@ -6,8 +7,6 @@ public readonly struct EventRow
 {
     // Events from Debug builds are kept for 6 months
     public static readonly TimeSpan DebugTTL = TimeSpan.FromDays(182);
-    // Events from Release builds are kept for 5 years
-    public static readonly TimeSpan ReleaseTTL = TimeSpan.FromDays(5 * 365);
 
     public readonly string AppId;
     public readonly DateTime Timestamp;
@@ -32,8 +31,6 @@ public readonly struct EventRow
 
     public EventRow(ref TrackingEvent e, string userId)
     {
-        var ttl = e.IsDebug ? DebugTTL : ReleaseTTL;
-
         AppId = e.IsDebug ? $"{e.AppId}_DEBUG" : e.AppId;
         Timestamp = e.Timestamp;
         EventName = e.EventName;
@@ -53,7 +50,7 @@ public readonly struct EventRow
         City = "";
         StringProps = e.StringProps;
         NumericProps = e.NumericProps;
-        TTL = e.Timestamp.Add(ttl);
+        TTL = DataRetention.ExpiresAt(e.Timestamp, e.RetentionMonths, e.IsDebug ? DebugTTL : null);
     }
 
     public void WriteJson(StringWriter writer)

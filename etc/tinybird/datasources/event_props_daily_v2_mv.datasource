@@ -15,8 +15,12 @@ SCHEMA >
     `numeric_value_state` AggregateFunction(quantile, Float32),
     `min_value_state` AggregateFunction(min, Float32),
     `max_value_state` AggregateFunction(max, Float32),
-    `sum_value_state` AggregateFunction(sum, Float32)
+    `sum_value_state` AggregateFunction(sum, Float32),
+    `expires_at` DateTime DEFAULT period + toIntervalDay(1500)
 
 ENGINE "AggregatingMergeTree"
-ENGINE_SORTING_KEY "app_id, period, event_name, string_key, string_value, numeric_key, country_code, os_name, app_version, device_model"
-ENGINE_TTL "period + toIntervalDay(1500)"
+ENGINE_SORTING_KEY "app_id, period, event_name, string_key, string_value, numeric_key, country_code, os_name, app_version, device_model, expires_at"
+ENGINE_TTL "expires_at"
+
+FORWARD_QUERY >
+    SELECT *

@@ -8,6 +8,7 @@ public class CachedApplication
 {
     public string Id { get; private set; }
     public bool IsLocked { get; private set; }
+    public int RetentionMonths { get; private set; } = DataRetention.DefaultMonths;
 
     public CachedApplication()
     {
@@ -18,6 +19,7 @@ public class CachedApplication
     {
         Id = app.Id;
         IsLocked = app.LockReason.HasValue;
+        RetentionMonths = app.RetentionMonths;
     }
 
     public static CachedApplication Empty => new CachedApplication();
