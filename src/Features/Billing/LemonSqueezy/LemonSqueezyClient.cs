@@ -74,6 +74,13 @@ public class LemonSqueezyClient
 
         await response.EnsureSuccessWithLog(_logger);
         var result = await response.Content.ReadFromJsonAsync<GetResponse<Resource<SubscriptionAttributes>>>(JsonSettings);
-        return result?.Data.Attributes.Urls.CustomerPortal ?? "";
+        var urls = result?.Data.Attributes.Urls;
+        if (urls is null)
+            return "";
+
+        var updateUrl = urls.CustomerPortalUpdateSubscription ?? urls.UpdateCustomerPortal;
+        _logger.LogInformation("Subscription {SubscriptionId} portal plan-change link available: {HasUpdateUrl}", subscriptionId, !string.IsNullOrEmpty(updateUrl));
+
+        return string.IsNullOrEmpty(updateUrl) ? urls.CustomerPortal : updateUrl;
     }
 }
