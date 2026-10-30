@@ -35,4 +35,9 @@ public class SubscriptionAttributes
 public class SubscriptionUrls
 {
     public string CustomerPortal { get; set; } = "";
+
+    // Opens the portal's plan picker directly. The API reference documents this link under two
+    // names and says it is PayPal-only (card subscriptions return it too), so callers must fall back.
+    public string? CustomerPortalUpdateSubscription { get; set; }
+    public string? UpdateCustomerPortal { get; set; }
 }
