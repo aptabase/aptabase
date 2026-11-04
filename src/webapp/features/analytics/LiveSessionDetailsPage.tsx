@@ -3,7 +3,7 @@ import { Button } from "@components/Button";
 import { Page, PageHeading } from "@components/Page";
 import { liveSessionDetails } from "@features/analytics/query";
 import { useApps, useCurrentApp } from "@features/apps";
-import { CountryFlag, CountryName } from "@features/geo";
+import { CountryFlag, CountryName, getCountryName } from "@features/geo";
 import { formatDate, formatTime } from "@fns/format-date";
 import { formatNumber } from "@fns/format-number";
 import { IconArrowLeft, IconClick, IconClock, IconDevices, IconUser } from "@tabler/icons-react";
@@ -79,9 +79,16 @@ export function Component() {
             <div className="space-y-1">
               <div className="flex gap-2 items-center">
                 <CountryFlag countryCode={data.countryCode} />
-                <div>
+                <a
+                  href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(
+                    [data.regionName, getCountryName(data.countryCode)].filter(Boolean).join(", ")
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground"
+                >
                   {data.regionName && <span>{data.regionName} · </span>} <CountryName countryCode={data.countryCode} />
-                </div>
+                </a>
               </div>
 
               <div className="flex gap-2 items-center">
