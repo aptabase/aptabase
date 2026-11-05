@@ -19,7 +19,7 @@ jobs:
         ports:
           - 5432:5432
       clickhouse:
-        image: clickhouse/clickhouse-server:23.3.8.21
+        image: clickhouse/clickhouse-server:26.8.36.3
         env:
           CLICKHOUSE_USER: aptabase
           CLICKHOUSE_PASSWORD: aptabase_pw
