@@ -124,7 +124,12 @@ public class SubscriptionSync : ISubscriptionSync
             return new ReconciliationSummary(0, 0, 0, 0);
 
         var fetched = await _lsClient.ListStoreSubscriptions(cancellationToken);
-        var byId = fetched.ToDictionary(x => x.Id, x => x.Attributes);
+
+        // A subscription created while the pages are being fetched shifts the list, so the same id can
+        // appear on two consecutive pages. The later page is the fresher read; ToDictionary would throw.
+        var byId = new Dictionary<long, SubscriptionAttributes>(fetched.Count);
+        foreach (var (id, attributes) in fetched)
+            byId[id] = attributes;
 
         var changed = 0;
         var missing = 0;
