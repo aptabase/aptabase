@@ -1,6 +1,7 @@
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Aptabase.Data;
 
 namespace Aptabase.Features.Authentication;
 
@@ -12,6 +13,9 @@ public enum AuthTokenType
 
 public class ParsedAuthToken
 {
+    // Unique id of the token (jti claim), used to make links single-use
+    public string Id { get; set; } = "";
+    public DateTime ExpiresAt { get; set; }
     public AuthTokenType Type { get; set; }
     public string Name { get; set; } = "";
     public string Email { get; set; } = "";
@@ -39,6 +43,7 @@ public class AuthTokenManager : IAuthTokenManager
     {
         var claims = new[]
         {
+            new Claim(JwtRegisteredClaimNames.Jti, NanoId.New()),
             new Claim("type", type.ToString()),
             new Claim("name", name),
             new Claim("email", email)
@@ -74,8 +79,15 @@ public class AuthTokenManager : IAuthTokenManager
 
         var jwtToken = (JwtSecurityToken)validatedToken;
 
+        // Tokens issued before ids were introduced can not be tracked as single-use, so they are refused.
+        var id = jwtToken.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
+        if (string.IsNullOrWhiteSpace(id) || id.Length > 22)
+            throw new SecurityTokenException("Auth token has no valid id");
+
         return new ParsedAuthToken
         {
+            Id = id,
+            ExpiresAt = jwtToken.ValidTo,
             Type = (AuthTokenType)Enum.Parse(typeof(AuthTokenType), jwtToken.Claims.First(x => x.Type == "type").Value),
             Name = jwtToken.Claims.First(x => x.Type == "name").Value,
             Email = jwtToken.Claims.First(x => x.Type == "email").Value

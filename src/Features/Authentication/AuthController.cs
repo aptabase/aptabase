@@ -131,6 +131,13 @@ public class AuthController : Controller
         try
         {
             var result = _tokenManager.ParseAuthToken(token);
+
+            if (!await _authService.TryConsumeAuthTokenAsync(result, cancellationToken))
+            {
+                _logger.LogWarning("Refused reuse of auth token {tokenId} for {email}", result.Id, result.Email);
+                return Redirect($"{_env.SelfBaseUrl}/auth?error=used");
+            }
+
             var user = await _authService.FindUserByEmailAsync(result.Email, cancellationToken);
 
             if (result.Type == AuthTokenType.Register && user == null)

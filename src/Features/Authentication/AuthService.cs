@@ -20,6 +20,7 @@ public interface IAuthService
     Task<UserAccount> CreateAccountAsync(string name, string email, CancellationToken cancellationToken);
     Task AttachUserAuthProviderAsync(UserAccount user, string providerName, string providerUid, CancellationToken cancellationToken);
     Task DeleteUserByIdAsync(string id, CancellationToken cancellationToken);
+    Task<bool> TryConsumeAuthTokenAsync(ParsedAuthToken token, CancellationToken cancellationToken);
 }
 
 public class AuthService : IAuthService
@@ -133,6 +134,30 @@ public class AuthService : IAuthService
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(claimsIdentity),
             authProperties);
+    }
+
+    // Marks a sign-in / registration link as used. Returns false when the same link was already
+    // redeemed, so that a leaked or replayed link can not be used a second time.
+    public async Task<bool> TryConsumeAuthTokenAsync(ParsedAuthToken token, CancellationToken cancellationToken)
+    {
+        var now = DateTime.UtcNow;
+
+        // Used ids only need to be remembered until the token itself has expired.
+        await _db.Connection.ExecuteAsync(new CommandDefinition(
+            "DELETE FROM auth_token_uses WHERE expires_at < @now",
+            new { now },
+            cancellationToken: cancellationToken
+        ));
+
+        var inserted = await _db.Connection.ExecuteAsync(new CommandDefinition(
+            @"INSERT INTO auth_token_uses (token_id, expires_at, used_at)
+              VALUES (@tokenId, @expiresAt, @now)
+              ON CONFLICT (token_id) DO NOTHING",
+            new { tokenId = token.Id, expiresAt = token.ExpiresAt, now },
+            cancellationToken: cancellationToken
+        ));
+
+        return inserted == 1;
     }
 
     public Task DeleteUserByIdAsync(string id, CancellationToken cancellationToken)
