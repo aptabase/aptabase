@@ -218,6 +218,9 @@ public partial class Program
         }
 
         var app = builder.Build();
+
+        if (appEnv.IsProduction && string.IsNullOrEmpty(appEnv.TrustedClientIpHeader))
+            app.Logger.LogWarning("TRUSTED_CLIENT_IP_HEADER is not set. Client addresses are taken from unverified request headers, so per-IP rate limits can be bypassed by anyone who sets them.");
         
         app.UseResponseCompression();
 

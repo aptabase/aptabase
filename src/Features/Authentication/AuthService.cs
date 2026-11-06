@@ -139,11 +139,23 @@ public class AuthService : IAuthService
     {
         var sql = @"
         BEGIN;
-            DELETE FROM public.app_shares 
+            DELETE FROM public.app_requests
+            WHERE current_owner_id = @userId
+            OR app_id IN (SELECT id FROM public.apps WHERE owner_id = @userId)
+            OR target_user_email = (SELECT email FROM public.users WHERE id = @userId);
+
+            DELETE FROM public.feature_flags
             WHERE app_id IN (SELECT id FROM public.apps WHERE owner_id = @userId);
+
+            DELETE FROM public.app_shares 
+            WHERE app_id IN (SELECT id FROM public.apps WHERE owner_id = @userId)
+            OR email = (SELECT email FROM public.users WHERE id = @userId);
 
             DELETE FROM public.app_salts 
             WHERE app_id IN (SELECT id FROM public.apps WHERE owner_id = @userId);
+
+            DELETE FROM public.blobs
+            WHERE path IN (SELECT icon_path FROM public.apps WHERE owner_id = @userId AND icon_path IS NOT NULL);
 
             DELETE FROM public.apps 
             WHERE owner_id = @userId;
