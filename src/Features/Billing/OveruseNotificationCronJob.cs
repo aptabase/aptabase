@@ -66,16 +66,22 @@ public class OveruseNotificationCronJob : BackgroundService
                             if (string.IsNullOrEmpty(templateName) || string.IsNullOrEmpty(subject))
                                 continue; // No need to send notification
 
+                            // The cache only stops the same e-mail going out twice in a month. It must not gate the
+                            // lock: a subscriber released mid-month (plan corrected, Sync button) who then outgrows the
+                            // new plan has already received the 100% e-mail, and used to stay unpaused for the rest of
+                            // the month because the lock sat behind this check.
                             var cacheKey = $"OveruseNotification.{user.Id}.{templateName}.{DateTime.UtcNow.Year}-{DateTime.UtcNow.Month.ToString().PadLeft(2, '0')}";
-                            if (await _cache.Exists(cacheKey))
-                                continue; // Already sent notification
+                            var alreadyNotified = await _cache.Exists(cacheKey);
 
-                            await _emailClient.SendEmailAsync(user.Email, subject, templateName, new()
+                            if (!alreadyNotified)
                             {
-                                { "name", user.Name.Split(" ").ElementAtOrDefault(0) ?? user.Name },
-                                { "quota", quota.ToString("N0") },
-                                { "url", _env.SelfBaseUrl },
-                            }, cancellationToken);
+                                await _emailClient.SendEmailAsync(user.Email, subject, templateName, new()
+                                {
+                                    { "name", user.Name.Split(" ").ElementAtOrDefault(0) ?? user.Name },
+                                    { "quota", quota.ToString("N0") },
+                                    { "url", _env.SelfBaseUrl },
+                                }, cancellationToken);
+                            }
 
                             if (usage >= quota)
                             {
@@ -83,7 +89,8 @@ public class OveruseNotificationCronJob : BackgroundService
                                 await _billingQueries.LockUser(user.Id, "O");
                             }
 
-                            await _cache.Set(cacheKey, DateTime.UtcNow.ToString("o"), TimeSpan.FromDays(10));
+                            if (!alreadyNotified)
+                                await _cache.Set(cacheKey, DateTime.UtcNow.ToString("o"), TimeSpan.FromDays(10));
                         }
                         catch (Exception ex)
                         {
