@@ -81,6 +81,17 @@ public class LemonSqueezyWebhookTests
     }
 
     [Fact]
+    public async Task Manual_sync_reports_when_there_is_nothing_to_sync()
+    {
+        var response = await _fixture.UserB.Post("/api/_billing/sync");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        doc.RootElement.GetProperty("outcome").GetString().Should().Be("no_subscription");
+        doc.RootElement.GetProperty("unlocked").GetBoolean().Should().BeFalse();
+    }
+
+    [Fact]
     public async Task Unsigned_events_are_rejected()
     {
         var client = _fixture.CreateClient();
