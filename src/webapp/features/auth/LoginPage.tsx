@@ -51,7 +51,12 @@ const RedirectErrorMessage = () => {
   if (!error) {
     return null;
   }
-  const message = error === "expired" ? "This link has expired." : "This link is invalid.";
+  const message =
+    error === "expired"
+      ? "This link has expired."
+      : error === "used"
+        ? "This link has already been used."
+        : "This link is invalid.";
 
   return (
     <p className="mx-auto text-center mb-10 text-destructive text-sm">

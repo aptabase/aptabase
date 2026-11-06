@@ -108,7 +108,7 @@ public class EnvSettings
             ClickHouseConnectionString = GetOrNull("ConnectionStrings__clickhousedb") ?? Get("CLICKHOUSE_URL"),
             TinybirdBaseUrl = Get("TINYBIRD_BASE_URL"),
             TinybirdToken = Get("TINYBIRD_TOKEN"),
-            AuthSecret = Encoding.ASCII.GetBytes(MustGet("AUTH_SECRET")),
+            AuthSecret = Encoding.ASCII.GetBytes(ValidateAuthSecret(MustGet("AUTH_SECRET"), isDevelopment)),
             LemonSqueezyApiKey = Get("LEMONSQUEEZY_API_KEY"),
             LemonSqueezySigningSecret = Get("LEMONSQUEEZY_SIGNING_SECRET"),
 
@@ -135,6 +135,35 @@ public class EnvSettings
     private EnvSettings()
     {
 
+    }
+
+    // Minimum length of AUTH_SECRET in bytes. It is the HMAC-SHA256 key that signs
+    // sign-in and registration links, so it must carry at least 256 bits of entropy.
+    public const int MinAuthSecretLength = 32;
+
+    // AUTH_SECRET values that have been published as examples. Anyone who knows one of
+    // these can mint a valid sign-in link for any e-mail address, so a server must
+    // refuse to start with them. The first one shipped in aptabase/self-hosting's
+    // docker-compose.yml and was copied into several third-party deployment templates.
+    private static readonly string[] KnownExampleAuthSecrets =
+    {
+        "c4rI4x8kz5DgKJ1is5Eiu9bNncSQ6ROD",
+        "E9F5C811CD74B9A3921A5DB502C0EDBE64B746000663AF04D91C249687FA969B",
+    };
+
+    public static string ValidateAuthSecret(string value, bool isDevelopment)
+    {
+        var secret = value.Trim();
+
+        if (secret.Length < MinAuthSecretLength)
+            throw new Exception($"AUTH_SECRET must be at least {MinAuthSecretLength} characters long. Generate one with: openssl rand -base64 32");
+
+        // Developers copy launchSettings.example.json as-is, so the example value is
+        // tolerated when ASPNETCORE_ENVIRONMENT=Development. Everywhere else it is refused.
+        if (!isDevelopment && KnownExampleAuthSecrets.Any(known => string.Equals(known, secret, StringComparison.Ordinal)))
+            throw new Exception("AUTH_SECRET is set to a publicly known example value, which lets anyone sign in as any user. Generate your own with: openssl rand -base64 32");
+
+        return secret;
     }
 
     private static string? GetOrNull(string name)
