@@ -1,7 +1,6 @@
 {
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.organizeImports": "always"
   },
   "csharp.format.enable": true,
   "editor.tabSize": 2,
