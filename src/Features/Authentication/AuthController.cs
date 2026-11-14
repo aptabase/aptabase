@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Aptabase.Features.OAuth;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Aptabase.Features.Authentication;
@@ -68,7 +69,7 @@ public class AuthController : Controller
         if (string.IsNullOrWhiteSpace(_env.OAuthGitHubClientId) || string.IsNullOrWhiteSpace(_env.OAuthGitHubClientSecret))
             return NotFound(new { });
 
-        return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "github");
+        return Challenge(new AuthenticationProperties { RedirectUri = ConsentCookie.PostSignInUrl(HttpContext) }, "github");
     }
 
     [HttpGet("/api/_auth/google")]
@@ -77,7 +78,7 @@ public class AuthController : Controller
         if (string.IsNullOrWhiteSpace(_env.OAuthGoogleClientId) || string.IsNullOrWhiteSpace(_env.OAuthGoogleClientSecret))
             return NotFound(new { });
 
-        return Challenge(new AuthenticationProperties { RedirectUri = $"{_env.SelfBaseUrl}/" }, "google");
+        return Challenge(new AuthenticationProperties { RedirectUri = ConsentCookie.PostSignInUrl(HttpContext) }, "google");
     }
 
     [HttpGet("/api/_auth/providers")]
@@ -158,6 +159,8 @@ public class AuthController : Controller
             return Redirect($"{_env.SelfBaseUrl}/auth?error=invalid");
         }
 
-        return Redirect($"{_env.SelfBaseUrl}/");
+        // A sign-in that happened in the middle of an OAuth authorization goes back to the
+        // consent page. The destination is fixed, nothing caller-supplied is redirected to.
+        return Redirect(ConsentCookie.PostSignInUrl(HttpContext));
     }
 }

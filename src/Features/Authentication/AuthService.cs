@@ -179,6 +179,17 @@ public class AuthService : IAuthService
             DELETE FROM public.app_salts 
             WHERE app_id IN (SELECT id FROM public.apps WHERE owner_id = @userId);
 
+            DELETE FROM public.api_grant_usage
+            WHERE owner_id = @userId
+            OR app_id IN (SELECT id FROM public.apps WHERE owner_id = @userId)
+            OR grant_id IN (SELECT id FROM public.oauth_grants WHERE subject_id = @userId);
+
+            DELETE FROM public.oauth_tokens
+            WHERE grant_id IN (SELECT id FROM public.oauth_grants WHERE subject_id = @userId);
+
+            DELETE FROM public.oauth_grants
+            WHERE subject_id = @userId;
+
             DELETE FROM public.blobs
             WHERE path IN (SELECT icon_path FROM public.apps WHERE owner_id = @userId AND icon_path IS NOT NULL);
 

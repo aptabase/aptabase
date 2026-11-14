@@ -1,6 +1,28 @@
+using Aptabase.Features.OAuth;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Aptabase.IntegrationTests;
+
+// Stands in for the public internet: OAuth clients are identified by a metadata document
+// the server fetches, and tests must not depend on a real host serving one.
+public class FakeClientMetadataFetcher : IClientMetadataFetcher
+{
+    public const string ClientId = "https://client.test/oauth/metadata.json";
+    public const string RedirectUri = "http://127.0.0.1/callback";
+
+    public Task<(string Body, TimeSpan? MaxAge)> FetchAsync(Uri url, CancellationToken cancellationToken)
+    {
+        if (url.ToString() != ClientId)
+            throw new ClientMetadataException("The client metadata document could not be fetched.");
+
+        var body = $$"""
+            { "client_id": "{{ClientId}}", "client_name": "Test Client", "redirect_uris": ["{{RedirectUri}}", "https://client.test/callback"] }
+            """;
+        return Task.FromResult<(string, TimeSpan?)>((body, null));
+    }
+}
 
 public class CustomWebApplicationFactory<TProgram>
     : WebApplicationFactory<TProgram> where TProgram : class
@@ -16,5 +38,12 @@ public class CustomWebApplicationFactory<TProgram>
         Environment.SetEnvironmentVariable("SMTP_HOST", "localhost");
         Environment.SetEnvironmentVariable("SMTP_PORT", "1025");
         Environment.SetEnvironmentVariable("SMTP_FROM_ADDRESS", "abc@hi.com");
+        Environment.SetEnvironmentVariable("QUERY_API_ENABLED", "true");
+
+        builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<IClientMetadataFetcher>();
+            services.AddSingleton<IClientMetadataFetcher, FakeClientMetadataFetcher>();
+        });
     }
 }

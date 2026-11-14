@@ -1,3 +1,4 @@
+using Aptabase.Features.Api;
 using Dapper;
 using Aptabase.Data;
 using Aptabase.Features.Blob;
@@ -187,6 +188,8 @@ public class AppsController : Controller
             appId = app.Id,
         });
 
+        ApiAccessCache.Invalidate(HttpContext, app.Id);
+
         return Ok(new { });
     }
 
@@ -274,6 +277,8 @@ public class AppsController : Controller
             appId,
             email,
         });
+
+        ApiAccessCache.Invalidate(HttpContext, appId);
 
         return Ok(new { });
     }
@@ -404,6 +409,19 @@ public class AppsController : Controller
                             UPDATE apps SET owner_id = @newOwnerId WHERE id = @appId",
                             new { appId, newOwnerId = user.Id }, transaction);
 
+                        // a service client is bound to the owner who created it, so it does not
+                        // follow the app: the new owner creates their own
+                        await cn.ExecuteAsync(@"
+                            UPDATE oauth_grants
+                            SET revoked_at = now(), revoked_reason = 'app_transferred', modified_at = now()
+                            WHERE kind = 'service' AND app_ids->>0 = @appId AND revoked_at IS NULL",
+                            new { appId }, transaction);
+
+                        await cn.ExecuteAsync(@"
+                            DELETE FROM oauth_tokens
+                            WHERE grant_id IN (SELECT id FROM oauth_grants WHERE kind = 'service' AND app_ids->>0 = @appId)",
+                            new { appId }, transaction);
+
                         // add previous owner to shares
                         await cn.ExecuteAsync(@"
                             INSERT INTO app_shares (app_id, email, created_at)
@@ -439,6 +457,7 @@ public class AppsController : Controller
                         new { appId, purpose = purpose.ToString(), completedAt = DateTime.UtcNow }, transaction);
 
                     transaction.Commit();
+                    ApiAccessCache.Invalidate(HttpContext, appId);
                 }
                 catch
                 {

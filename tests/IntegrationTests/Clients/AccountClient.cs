@@ -11,6 +11,9 @@ public class AccountClient
 
     public string Email { get; private set; } = "";
 
+    // The underlying client, with this account's session cookie
+    public HttpClient Http => _client;
+
     public AccountClient(HttpClient client)
     {
         _client = client;

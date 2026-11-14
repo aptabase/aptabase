@@ -95,6 +95,30 @@ public class EnvSettings
     public string TrustedClientIpHeader { get; private set; } = "";
     public int TrustedProxyCount { get; private set; } = 1;
 
+    // Master switch for the query API: the OAuth authorization server, /api/v1 and /mcp.
+    // Variable Name: QUERY_API_ENABLED (default: false)
+    public bool QueryApiEnabled { get; private set; }
+
+    // The key that signs OAuth access tokens. Kept apart from AUTH_SECRET so that a leak of
+    // one does not compromise the other. Derived from AUTH_SECRET when not set.
+    // Variable Name: OAUTH_SIGNING_SECRET
+    public byte[] OAuthSigningKey { get; private set; } = [];
+
+    // Signs the short-lived consent request cookie. Always derived from AUTH_SECRET.
+    public byte[] OAuthConsentKey { get; private set; } = [];
+
+    // Tinybird read token used for query API traffic, so it can be revoked without
+    // touching the dashboard. Falls back to TINYBIRD_TOKEN.
+    // Variable Name: TINYBIRD_API_TOKEN
+    public string TinybirdApiToken { get; private set; } = "";
+
+    // Maximum number of in-flight analytics queries from query API traffic, per instance.
+    // Variable Name: API_MAX_CONCURRENT_QUERIES (default: 4)
+    public int ApiMaxConcurrentQueries { get; private set; } = 4;
+
+    // scheme://host[:port] of BASE_URL. The OAuth issuer and the canonical resource identifier.
+    public string Origin { get; private set; } = "";
+
     public static EnvSettings Load()
     {
         var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
@@ -102,16 +126,27 @@ public class EnvSettings
         if (string.IsNullOrEmpty(region))
             region = "SH"; // Self Hosted
 
+        var baseUrl = NormalizeBaseUrl(MustGet("BASE_URL"));
+        var authSecret = Encoding.ASCII.GetBytes(ValidateAuthSecret(MustGet("AUTH_SECRET"), isDevelopment));
+        var tinybirdToken = Get("TINYBIRD_TOKEN");
+        var maxConcurrentQueries = GetInt("API_MAX_CONCURRENT_QUERIES");
+
         return new EnvSettings
         {
             IsDevelopment = isDevelopment,
             Region = region,
-            SelfBaseUrl = NormalizeBaseUrl(MustGet("BASE_URL")),
+            SelfBaseUrl = baseUrl,
+            Origin = new Uri(baseUrl).GetLeftPart(UriPartial.Authority).ToLowerInvariant(),
+            QueryApiEnabled = GetBool("QUERY_API_ENABLED"),
+            OAuthSigningKey = ResolveOAuthSigningKey(Get("OAUTH_SIGNING_SECRET"), authSecret),
+            OAuthConsentKey = DeriveKey(authSecret, "aptabase-oauth-consent-v1"),
+            TinybirdApiToken = Get("TINYBIRD_API_TOKEN") is { Length: > 0 } apiToken ? apiToken : tinybirdToken,
+            ApiMaxConcurrentQueries = maxConcurrentQueries > 0 ? maxConcurrentQueries : 4,
             ConnectionString = GetOrNull("ConnectionStrings__postgresdb") ?? MustGet("DATABASE_URL"),
             ClickHouseConnectionString = GetOrNull("ConnectionStrings__clickhousedb") ?? Get("CLICKHOUSE_URL"),
             TinybirdBaseUrl = Get("TINYBIRD_BASE_URL"),
-            TinybirdToken = Get("TINYBIRD_TOKEN"),
-            AuthSecret = Encoding.ASCII.GetBytes(ValidateAuthSecret(MustGet("AUTH_SECRET"), isDevelopment)),
+            TinybirdToken = tinybirdToken,
+            AuthSecret = authSecret,
             LemonSqueezyApiKey = Get("LEMONSQUEEZY_API_KEY"),
             LemonSqueezySigningSecret = Get("LEMONSQUEEZY_SIGNING_SECRET"),
 
@@ -171,6 +206,24 @@ public class EnvSettings
 
         return secret;
     }
+
+    // An explicit OAUTH_SIGNING_SECRET is used as-is and must be as long as AUTH_SECRET.
+    // Without one the key is derived from AUTH_SECRET with a purpose label, which adds no
+    // entropy but keeps access tokens and sign-in links from sharing a key.
+    public static byte[] ResolveOAuthSigningKey(string configured, byte[] authSecret)
+    {
+        var secret = configured.Trim();
+        if (secret.Length == 0)
+            return DeriveKey(authSecret, "aptabase-oauth-signing-v1");
+
+        if (secret.Length < MinAuthSecretLength)
+            throw new Exception($"OAUTH_SIGNING_SECRET must be at least {MinAuthSecretLength} characters long. Generate one with: openssl rand -base64 32");
+
+        return Encoding.ASCII.GetBytes(secret);
+    }
+
+    public static byte[] DeriveKey(byte[] secret, string purpose)
+        => System.Security.Cryptography.HKDF.DeriveKey(System.Security.Cryptography.HashAlgorithmName.SHA256, secret, 32, info: Encoding.ASCII.GetBytes(purpose));
 
     private static string? GetOrNull(string name)
     {
