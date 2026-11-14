@@ -20,6 +20,17 @@ const router = createBrowserRouter([
     ],
   },
   {
+    // Outside the console layout: no sidebar, and the page handles being signed out itself
+    path: "/oauth/consent",
+    element: <AuthenticationLayout />,
+    children: [
+      {
+        index: true,
+        lazy: () => import("./features/oauth/ConsentPage"),
+      },
+    ],
+  },
+  {
     path: "/",
     element: (
       <>
@@ -72,6 +83,10 @@ const router = createBrowserRouter([
       {
         path: "/billing",
         lazy: () => import("./features/billing/BillingPage"),
+      },
+      {
+        path: "/connected-apps",
+        lazy: () => import("./features/oauth/ConnectedAppsPage"),
       },
     ],
   },

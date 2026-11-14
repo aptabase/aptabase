@@ -45,6 +45,28 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      // Only these two paths under /oauth belong to the backend.
+      // /oauth/consent is a webapp route and must be served by Vite.
+      "/oauth/authorize": {
+        target: "https://localhost:5251",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/oauth/token": {
+        target: "https://localhost:5251",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/.well-known": {
+        target: "https://localhost:5251",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/mcp": {
+        target: "https://localhost:5251",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   resolve: {

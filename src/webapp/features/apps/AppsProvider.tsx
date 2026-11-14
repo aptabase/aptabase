@@ -58,7 +58,9 @@ export function AppsProvider(props: Props) {
   if (isLoading) return <LoadingState size="lg" color="primary" delay={0} />;
   if (isError) return <ErrorState />;
 
-  if (data?.length === 0 && location.pathname !== "/") {
+  // Connected apps is account-level: a user without apps can still have granted
+  // an application access to future ones and must be able to revoke it.
+  if (data?.length === 0 && location.pathname !== "/" && location.pathname !== "/connected-apps") {
     return <Navigate to="/" />;
   }
 

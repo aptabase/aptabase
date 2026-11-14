@@ -1,9 +1,10 @@
 import { PingSignal } from "@components/PingSignal";
 import { useBillingState } from "@features/billing";
 import { isBillingEnabled } from "@features/env";
+import { useGrants } from "@features/oauth/grants";
 import { ThemeToggle } from "@features/theme";
 import { Menu, Transition } from "@headlessui/react";
-import { IconCreditCard, IconDoorExit } from "@tabler/icons-react";
+import { IconCreditCard, IconDoorExit, IconPlugConnected } from "@tabler/icons-react";
 import React, { Fragment } from "react";
 import { Link } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
@@ -41,6 +42,10 @@ const MenuItem = (props: {
 export function UserMenu(props: Props) {
   const billing = useBillingState();
 
+  // null means the query API is switched off on the server
+  const { data: grants } = useGrants();
+  const showConnectedApps = grants !== null;
+
   return (
     <Menu as="div" className="relative">
       <Menu.Button className="flex w-full p-2 gap-2 items-center rounded text-sm focus-ring hover:bg-accent">
@@ -76,6 +81,15 @@ export function UserMenu(props: Props) {
                 <IconCreditCard className="w-4 h-4" />
                 <span>Billing & Profile</span>
                 {billing === "OVERUSE" && <PingSignal color="warning" size="sm" />}
+              </MenuItem>
+            </>
+          )}
+          {showConnectedApps && (
+            <>
+              <Divider />
+              <MenuItem href="/connected-apps">
+                <IconPlugConnected className="w-4 h-4" />
+                <span>Connected apps</span>
               </MenuItem>
             </>
           )}

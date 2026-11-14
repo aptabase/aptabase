@@ -1,4 +1,5 @@
 import { useCurrentApp } from "@features/apps";
+import { useAppApiUsage } from "@features/apps/query-api";
 import { isSupportEnabled } from "@features/env";
 import { SupportNavCategory } from "@features/support";
 import {
@@ -18,6 +19,12 @@ import { NavItem } from "./NavItem";
 export function NavMenu(props: { onNavigation?: VoidFunction }) {
   const currentApp = useCurrentApp();
   const location = useLocation();
+
+  // A shared user can open the settings page only for its API usage section,
+  // which exists when the query API is switched on. Owners need no lookup.
+  const isSharedApp = !!currentApp && !currentApp.hasOwnership;
+  const { data: apiUsage } = useAppApiUsage(currentApp?.id, isSharedApp);
+  const canOpenSettings = !!currentApp && (currentApp.hasOwnership || !!apiUsage);
 
   return (
     <div className="flex flex-col h-full justify-between">
@@ -70,10 +77,8 @@ export function NavMenu(props: { onNavigation?: VoidFunction }) {
           />
           <NavItem
             label="Settings"
-            disabled={!currentApp || !currentApp.hasOwnership}
-            disabledReason={
-              currentApp && !currentApp.hasOwnership ? "Settings are available only to application owners" : undefined
-            }
+            disabled={!canOpenSettings}
+            disabledReason={isSharedApp ? "Settings are available only to application owners" : undefined}
             href={`/${currentApp?.id}/settings`}
             icon={IconSettings}
             onNavigation={props.onNavigation}

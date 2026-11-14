@@ -69,6 +69,8 @@ Component.displayName = "LoginPage";
 export function Component() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<FormStatus>("idle");
+  const [params] = useSearchParams();
+  const isConsent = params.get("consent") === "1";
 
   const providers = useOAuthProviders();
   const showOAuth = providers.github || providers.google;
@@ -94,6 +96,11 @@ export function Component() {
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="py-8 px-4 sm:rounded-lg sm:px-10">
+          {isConsent && (
+            <p className="mb-4 text-center text-sm text-muted-foreground">
+              Sign in to continue connecting an application. If you use the email link, open it in this browser.
+            </p>
+          )}
           {showOAuth && (
             <>
               <div className="space-y-2">

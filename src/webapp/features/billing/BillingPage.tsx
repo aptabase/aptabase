@@ -4,6 +4,7 @@ import { LoadingState } from "@components/LoadingState";
 import { Page, PageHeading } from "@components/Page";
 import { formatPeriod } from "@fns/format-date";
 import { useState } from "react";
+import { ApiUsageCard } from "./ApiUsageCard";
 import { CurrentPlan } from "./CurrentPlan";
 import { CurrentUsage } from "./CurrentUsage";
 import { DeleteAccountModal } from "./DeleteAccountModal";
@@ -52,6 +53,7 @@ function Body(props: { billing: BillingInfo; historical: BillingHistoricalUsage[
           />
         </div>
       </div>
+      <ApiUsageCard />
       <div>
         <p>Monthly Usage</p>
 
