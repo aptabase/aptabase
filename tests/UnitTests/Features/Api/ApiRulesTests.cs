@@ -158,6 +158,21 @@ public class ApiRulesTests
         ApiValidation.ValidateFilters(new StatsRequest { EventName = new string('x', 201) }).Should().NotBeNull();
     }
 
+    [Theory]
+    [InlineData("from and to must both be ISO 8601 date-times.", "startDate and endDate must both be ISO 8601 date-times.")]
+    [InlineData("Use either period or from and to, not both.", "Use either period or startDate and endDate, not both.")]
+    [InlineData("to must be later than from.", "endDate must be later than startDate.")]
+    [InlineData("country_code must be a single value, commas are not supported.", "countryCode must be a single value, commas are not supported.")]
+    [InlineData("build_mode must be release or debug.", "buildMode must be release or debug.")]
+    [InlineData("event_name is required.", "eventName is required.")]
+    [InlineData("app_version is too long.", "appVersion is too long.")]
+    [InlineData("The app_build_number dimension needs hourly granularity.", "The app_build_number dimension needs hourly granularity.")]
+    [InlineData("dimension must be one of: country, region, os, os_version, device, app_version, app_build_number, event.", "dimension must be one of: country, region, os, os_version, device, app_version, app_build_number, event.")]
+    public void Mcp_errors_name_the_tool_arguments_not_the_rest_parameters(string rest, string expected)
+    {
+        McpTools.UseToolArgumentNames(rest).Should().Be(expected);
+    }
+
     [Fact]
     public void Dimensions_map_to_a_fixed_set_of_columns()
     {

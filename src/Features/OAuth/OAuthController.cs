@@ -14,6 +14,13 @@ namespace Aptabase.Features.OAuth;
 /// </summary>
 public class RequiresQueryApiAttribute : ActionFilterAttribute
 {
+    // Ahead of every other filter, so a switched-off route is a 404 and not, say, the 401
+    // of an authentication check that ran first
+    public RequiresQueryApiAttribute()
+    {
+        Order = int.MinValue;
+    }
+
     public override void OnActionExecuting(ActionExecutingContext context)
     {
         var env = context.HttpContext.RequestServices.GetRequiredService<EnvSettings>();

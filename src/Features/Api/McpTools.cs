@@ -183,10 +183,44 @@ public class McpTools
         if (result.Error is null)
             return new CallToolResult { Content = [new TextContentBlock { Text = JsonSerializer.Serialize(result.Data, ApiJson.Options) }] };
 
+        var error = new ApiError
+        {
+            Status = result.Error.Status,
+            Code = result.Error.Code,
+            Message = UseToolArgumentNames(result.Error.Message),
+            RetryAfterSeconds = result.Error.RetryAfterSeconds,
+            RequiredScope = result.Error.RequiredScope,
+            Quota = result.Error.Quota,
+        };
+
         return new CallToolResult
         {
             IsError = true,
-            Content = [new TextContentBlock { Text = JsonSerializer.Serialize(ApiJson.ErrorBody(result.Error), ApiJson.Options) }],
+            Content = [new TextContentBlock { Text = JsonSerializer.Serialize(ApiJson.ErrorBody(error), ApiJson.Options) }],
         };
+    }
+
+    // Validation messages are written once, in the vocabulary of the REST query string.
+    // A model reading a tool error fixes its next call from the words in it, so here they
+    // are put in terms of the arguments this surface actually takes.
+    private static readonly (string From, string To)[] ArgumentNames =
+    [
+        ("from and to", "startDate and endDate"),
+        ("to must be later than from", "endDate must be later than startDate"),
+        ("live=true", "live set to true"),
+        ("country_code", "countryCode"),
+        ("os_name", "osName"),
+        ("device_model", "deviceModel"),
+        ("event_name", "eventName"),
+        ("app_version ", "appVersion "),
+        ("build_mode", "buildMode"),
+        ("session_id", "sessionId"),
+    ];
+
+    public static string UseToolArgumentNames(string message)
+    {
+        foreach (var (from, to) in ArgumentNames)
+            message = message.Replace(from, to, StringComparison.Ordinal);
+        return message;
     }
 }

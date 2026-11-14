@@ -241,7 +241,7 @@ public class ApiQueryService : IApiQueryService
 
                 return new
                 {
-                    Window = window.Describe(),
+                    Window = window.DescribeRange(),
                     Data = inWindow.Select(DescribeSession).ToArray(),
                     NextCursor = hasMore ? $"{last!.StartedAt.ToString(ApiWindow.DateFormat, CultureInfo.InvariantCulture)}|{last.Id}" : null,
                 };

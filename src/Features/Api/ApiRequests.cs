@@ -79,6 +79,13 @@ public record ApiWindow(DateTime? From, DateTime? To, GranularityEnum Granularit
     public string? FromArg => From?.ToString(DateFormat, CultureInfo.InvariantCulture);
     public string? ToArg => To?.ToString(DateFormat, CultureInfo.InvariantCulture);
 
+    // For listings that have a window but no buckets
+    public object DescribeRange() => new
+    {
+        From = From.HasValue ? DateTime.SpecifyKind(From.Value, DateTimeKind.Utc) : (DateTime?)null,
+        To = To.HasValue ? DateTime.SpecifyKind(To.Value, DateTimeKind.Utc) : (DateTime?)null,
+    };
+
     public object Describe() => new
     {
         From = From.HasValue ? DateTime.SpecifyKind(From.Value, DateTimeKind.Utc) : (DateTime?)null,

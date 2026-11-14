@@ -218,6 +218,19 @@ public class QueryApiTests
     }
 
     [Fact]
+    public async Task Session_Listing_Describes_Its_Window_Without_A_Granularity()
+    {
+        var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
+        var (clientId, secret) = await OAuthTestClient.CreateServiceClient(_fixture.UserA, app.Id, "stats:read sessions:read");
+        var tokens = await _oauth.ClientCredentials(clientId, secret);
+
+        var sessions = await _oauth.GetJson($"/api/v1/apps/{app.Id}/sessions?period=24h", tokens.AccessToken);
+
+        sessions.GetProperty("window").TryGetProperty("from", out _).Should().BeTrue();
+        sessions.GetProperty("window").TryGetProperty("granularity", out _).Should().BeFalse();
+    }
+
+    [Fact]
     public async Task Injection_Attempts_In_Filters_Stay_Inside_String_Literals()
     {
         var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
