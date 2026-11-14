@@ -9,17 +9,32 @@ public class QueryResult<T>
 {
     [JsonPropertyName("data")]
     public IEnumerable<T> Data { get; set; } = Enumerable.Empty<T>();
+
+    [JsonPropertyName("statistics")]
+    public TinybirdStatistics? Statistics { get; set; }
+}
+
+public class TinybirdStatistics
+{
+    [JsonPropertyName("elapsed")]
+    public double Elapsed { get; set; }
+    [JsonPropertyName("rows_read")]
+    public long RowsRead { get; set; }
+    [JsonPropertyName("bytes_read")]
+    public long BytesRead { get; set; }
 }
 
 public class TinybirdQueryClient : IQueryClient
 {
     private readonly HttpClient _httpClient;
+    private readonly HttpClient _apiHttpClient;
     private readonly ILogger _logger;
     private readonly JsonSerializerOptions _options;
 
     public TinybirdQueryClient(IHttpClientFactory factory, ILogger<TinybirdQueryClient> logger)
     {
         _httpClient = factory.CreateClient("Tinybird");
+        _apiHttpClient = factory.CreateClient("TinybirdApi");
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         
         _options = new JsonSerializerOptions();
@@ -40,6 +55,22 @@ public class TinybirdQueryClient : IQueryClient
         await response.EnsureSuccessWithLog(_logger);
         var result = await response.Content.ReadFromJsonAsync<QueryResult<T>>(_options) ?? new QueryResult<T>();
         return result.Data;
+    }
+
+    public async Task<QueryResponse<T>> ApiQueryAsync<T>(string name, IReadOnlyDictionary<string, string?> args, CancellationToken cancellationToken)
+    {
+        var query = new QueryBuilder();
+        foreach (var (key, value) in args)
+        {
+            if (value is not null)
+                query.Add(key, value);
+        }
+
+        var response = await _apiHttpClient.GetAsync($"/v0/pipes/{name}.json{query.ToQueryString()}", cancellationToken);
+        await response.EnsureSuccessWithLog(_logger);
+        var result = await response.Content.ReadFromJsonAsync<QueryResult<T>>(_options, cancellationToken) ?? new QueryResult<T>();
+        var stats = result.Statistics is null ? null : new QueryStatistics(result.Statistics.Elapsed, result.Statistics.RowsRead, result.Statistics.BytesRead);
+        return new QueryResponse<T>(result.Data.ToList(), stats);
     }
 
     public async Task<T> NamedQuerySingleAsync<T>(string name, object args, CancellationToken cancellationToken) where T : new()

@@ -105,6 +105,42 @@ jobs:
           done
           exit $missing
 
+      # The query API lets third parties call pipes on behalf of one app. A pipe that can be
+      # called without an app id, or with a default one, would answer for every customer.
+      # The three billing pipes are the exception: they are unscoped by design, so they
+      # must never be readable with the query API token.
+      - name: Check every endpoint is scoped to one app
+        run: |
+          failed=0
+          unscoped="get_billing_usage__v1 billing_historical_usage__v1 billing_usage_per_app__v1"
+          for pipe in etc/tinybird/endpoints/*.pipe; do
+            name=$(basename "$pipe" .pipe)
+            if echo " $unscoped " | grep -q " $name "; then
+              if grep -q 'TOKEN "aptabase-query-api"' "$pipe"; then
+                echo "::error file=$pipe::Unscoped pipe must not be readable with the aptabase-query-api token"
+                failed=1
+              fi
+              continue
+            fi
+            if ! grep -q '{{ *String(app_id) *}}' "$pipe"; then
+              echo "::error file=$pipe::Endpoint does not require {{String(app_id)}}"
+              failed=1
+            fi
+            if grep -Eq 'String\(app_id *,' "$pipe"; then
+              echo "::error file=$pipe::app_id must not have a default value"
+              failed=1
+            fi
+          done
+
+          # The token and the allowlist in the backend must name the same pipes
+          declared=$(grep -l 'TOKEN "aptabase-query-api"' etc/tinybird/endpoints/*.pipe | xargs -n1 basename | sed 's/\.pipe$//' | sort | tr '\n' ' ')
+          allowed=$(sed -n '/AllowedPipes = /,/};/p' src/Features/Api/ApiQueryService.cs | grep -o '"[a-z_0-9]*"' | tr -d '"' | sort | tr '\n' ' ')
+          if [ "$declared" != "$allowed" ]; then
+            echo "::error::Pipes with the aptabase-query-api token ($declared) differ from ApiQueryService.AllowedPipes ($allowed)"
+            failed=1
+          fi
+          exit $failed
+
   # Only when etc/tinybird changed: a token-free `tb --local build` against a Tinybird Local
   # container, plus a deploy check against the dev workspace (skipped when TINYBIRD_DEV_TOKEN is
   # not available, e.g. forks). Split from tinybird-check so the container is not pulled otherwise.

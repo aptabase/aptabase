@@ -1,4 +1,5 @@
 TOKEN "aptabase-api" READ
+TOKEN "aptabase-query-api" READ
 
 NODE endpoint
 SQL >

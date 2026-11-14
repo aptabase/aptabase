@@ -24,6 +24,15 @@ public class ClickHouseQueryClient : IQueryClient
         return await _conn.QueryAsync<T>(query, cancellationToken);
     }
 
+    public async Task<QueryResponse<T>> ApiQueryAsync<T>(string name, IReadOnlyDictionary<string, string?> args, CancellationToken cancellationToken)
+    {
+        var dict = args.ToDictionary(a => a.Key, a => a.Value is null ? null : ClickHouseSql.Escape(a.Value));
+        var template = await ReadNamedQuery(name);
+        var query = await template.RenderAsync(dict);
+        var rows = await _conn.QueryAsync<T>(query, cancellationToken);
+        return new QueryResponse<T>(rows.ToList(), null);
+    }
+
     public async Task<T> NamedQuerySingleAsync<T>(string name, object args, CancellationToken cancellationToken) where T : new()
     {
         var rows = await NamedQueryAsync<T>(name, args, cancellationToken);

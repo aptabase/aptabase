@@ -12,7 +12,8 @@
         "AUTH_SECRET": "E9F5C811CD74B9A3921A5DB502C0EDBE64B746000663AF04D91C249687FA969B",
         "SMTP_HOST": "localhost",
         "SMTP_PORT": "1025",
-        "SMTP_FROM_ADDRESS": "aptabase@example.com"
+        "SMTP_FROM_ADDRESS": "aptabase@example.com",
+        "QUERY_API_ENABLED": "true"
       },
       "dotnetRunMessages": true
     }

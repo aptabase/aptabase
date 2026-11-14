@@ -1,6 +1,8 @@
 using Aptabase.Data;
 using Aptabase.Data.Migrations;
 using Aptabase.Features;
+using Aptabase.Features.Api;
+using Aptabase.Features.OAuth;
 using Aptabase.Features.Apps;
 using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing;
@@ -63,6 +65,19 @@ public partial class Program
                 policy.AllowAnyOrigin()
                     .WithHeaders("content-type", "app-key")
                     .WithMethods("POST", "OPTIONS")
+                    .SetPreflightMaxAge(TimeSpan.FromHours(1));
+            });
+
+            // The query API: /api/v1, /mcp, the token endpoint and the OAuth metadata.
+            // Open to any origin and never with credentials, since none of these routes
+            // reads a cookie. WWW-Authenticate has to be exposed, it is how a browser-based
+            // client finds the authorization server after its first 401.
+            options.AddPolicy(name: OAuthController.PublicCorsPolicy, policy =>
+            {
+                policy.AllowAnyOrigin()
+                    .WithHeaders("authorization", "content-type", "accept", "mcp-session-id", "mcp-protocol-version", "last-event-id")
+                    .WithMethods("GET", "POST", "DELETE", "OPTIONS")
+                    .WithExposedHeaders("WWW-Authenticate", "Mcp-Session-Id")
                     .SetPreflightMaxAge(TimeSpan.FromHours(1));
             });
         });
@@ -154,6 +169,7 @@ public partial class Program
         builder.Services.AddSingleton<IPrivacyQueries, PrivacyQueries>();
         builder.Services.AddSingleton<IUserHasher, DailyUserHasher>();
         builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
+        builder.Services.AddQueryApi();
         builder.Services.AddSingleton<IIngestionCache, IngestionCache>();
         builder.Services.AddSingleton<IRejectionStats, RejectionStats>();
         builder.Services.AddHostedService<RejectionStatsReporter>();
@@ -198,6 +214,13 @@ public partial class Program
             {
                 client.BaseAddress = new Uri(appEnv.TinybirdBaseUrl);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", appEnv.TinybirdToken);
+            });
+            // Query API traffic goes out with its own token: a separate line in Tinybird's
+            // statistics and a kill switch that leaves the dashboard alone
+            builder.Services.AddHttpClient("TinybirdApi", client =>
+            {
+                client.BaseAddress = new Uri(appEnv.TinybirdBaseUrl);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", appEnv.TinybirdApiToken);
             });
         }
 
@@ -245,6 +268,7 @@ public partial class Program
         app.UseRateLimiter();
         app.UseCors();
         app.UseAuthentication();
+        app.UseQueryApi();
         app.MapControllers();
         app.UseResponseCaching();
 
