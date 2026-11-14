@@ -1,5 +1,4 @@
 SELECT session_id as Id,
-       countMerge(events_count) as EventsCount,
        min(min_timestamp) as StartedAt,
        max(max_timestamp) - min(min_timestamp) as Duration,
        countMerge(events_count) as EventsCount,
