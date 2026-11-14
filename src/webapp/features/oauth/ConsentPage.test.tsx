@@ -13,6 +13,7 @@ import { Component as ConsentPage } from "./ConsentPage";
 const redirectUrl = "http://127.0.0.1:53124/callback?code=abc&state=xyz";
 
 const consent = (overrides: object = {}) => ({
+  requestId: "req-1",
   client: {
     name: "Stats CLI",
     url: "https://tools.example.com/oauth/client.json",
@@ -131,7 +132,7 @@ describe("ConsentPage", () => {
     fireEvent.click(allowButton());
 
     await waitFor(() => expect(assign).toHaveBeenCalledWith(redirectUrl));
-    expect(posted).toEqual([{ allow: true, scopes: ["stats:read"], appIds: ["a2"] }]);
+    expect(posted).toEqual([{ requestId: "req-1", allow: true, scopes: ["stats:read"], appIds: ["a2"] }]);
   });
 
   it("posts a denial with no scopes or apps on Deny", async () => {
@@ -141,7 +142,7 @@ describe("ConsentPage", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Deny" }));
 
     await waitFor(() => expect(assign).toHaveBeenCalledWith(redirectUrl));
-    expect(posted).toEqual([{ allow: false, scopes: [], appIds: null }]);
+    expect(posted).toEqual([{ requestId: "req-1", allow: false, scopes: [], appIds: null }]);
   });
 
   it("pre-fills from an existing grant", async () => {

@@ -384,6 +384,18 @@ public static class ConsentCookie
     }
 
     /// <summary>
+    /// Identifies the request currently held by this browser. The consent page receives it
+    /// with the request it displays and must send it back with the decision, so a decision
+    /// can only ever apply to the request the user was looking at. Without it, a second
+    /// /oauth/authorize opened in another tab would silently replace the cookie, and a
+    /// click on "Allow" under one client's name would grant access to a different one.
+    /// </summary>
+    public static string? RequestId(HttpContext context)
+        => context.Request.Cookies.TryGetValue(IOAuthTokenService.ConsentCookieName, out var value) && !string.IsNullOrEmpty(value)
+            ? OAuthCrypto.Sha256Hex(value)
+            : null;
+
+    /// <summary>
     /// Where a completed sign-in lands. There is no caller-supplied return path anywhere:
     /// a pending consent in this browser leads to the fixed consent page, everything else home.
     /// </summary>

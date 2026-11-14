@@ -121,8 +121,10 @@ public class OAuthFlowTests
         var response = await _fixture.UserA.Http.GetAsync("/api/_oauth/consent");
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
+        // The page never got a request id to send back, so a decision posted anyway is
+        // refused before the client is even looked at
         var decision = await _fixture.UserA.Http.PostAsJsonAsync("/api/_oauth/consent", new { allow = true, scopes = new[] { "stats:read" } });
-        decision.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        decision.StatusCode.Should().Be(HttpStatusCode.Conflict);
         (await decision.Content.ReadAsStringAsync()).Should().NotContain("attacker.example/callback?");
     }
 
@@ -133,7 +135,9 @@ public class OAuthFlowTests
         var (_, challenge) = OAuthTestClient.NewPkce();
         await _fixture.UserA.Http.GetAsync(OAuthTestClient.AuthorizeUrl(challenge));
 
-        var decision = await _fixture.UserA.Http.PostAsJsonAsync("/api/_oauth/consent", new { allow = true, scopes = new[] { "stats:read" }, appIds = new[] { foreign.Id } });
+        var requestId = await OAuthTestClient.ShownRequestId(_fixture.UserA);
+
+        var decision = await _fixture.UserA.Http.PostAsJsonAsync("/api/_oauth/consent", new { requestId, allow = true, scopes = new[] { "stats:read" }, appIds = new[] { foreign.Id } });
 
         decision.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -144,7 +148,9 @@ public class OAuthFlowTests
         var (_, challenge) = OAuthTestClient.NewPkce();
         await _fixture.UserA.Http.GetAsync(OAuthTestClient.AuthorizeUrl(challenge));
 
-        var decision = await _fixture.UserA.Http.PostAsJsonAsync("/api/_oauth/consent", new { allow = false });
+        var requestId = await OAuthTestClient.ShownRequestId(_fixture.UserA);
+
+        var decision = await _fixture.UserA.Http.PostAsJsonAsync("/api/_oauth/consent", new { requestId, allow = false });
         decision.StatusCode.Should().Be(HttpStatusCode.OK);
         var redirect = (await decision.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("redirectUrl").GetString()!;
 
@@ -157,6 +163,39 @@ public class OAuthFlowTests
 
         // The request is spent
         (await _fixture.UserA.Http.GetAsync("/api/_oauth/consent")).StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    // The page shows one client; another tab starts a request for a different one, which
+    // replaces the cookie. The click on the first page must not approve the second request.
+    [Fact]
+    public async Task A_Decision_Only_Applies_To_The_Request_That_Was_Displayed()
+    {
+        var (_, shownChallenge) = OAuthTestClient.NewPkce();
+        await _fixture.UserA.Http.GetAsync(OAuthTestClient.AuthorizeUrl(shownChallenge));
+        var shown = await OAuthTestClient.ShownRequestId(_fixture.UserA);
+
+        var (attackerVerifier, attackerChallenge) = OAuthTestClient.NewPkce();
+        var swapped = await _fixture.UserA.Http.GetAsync(OAuthTestClient.AuthorizeUrl(attackerChallenge, clientId: "cursor", redirectUri: "http://localhost:8787/callback"));
+        swapped.StatusCode.Should().Be(HttpStatusCode.Redirect);
+
+        var allow = await _fixture.UserA.Http.PostAsJsonAsync("/api/_oauth/consent", new { requestId = shown, allow = true, scopes = new[] { "stats:read" } });
+        allow.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        (await allow.Content.ReadAsStringAsync()).Should().NotContain("code=");
+
+        var deny = await _fixture.UserA.Http.PostAsJsonAsync("/api/_oauth/consent", new { requestId = shown, allow = false });
+        deny.StatusCode.Should().Be(HttpStatusCode.Conflict);
+
+        var missing = await _fixture.UserA.Http.PostAsJsonAsync("/api/_oauth/consent", new { allow = true, scopes = new[] { "stats:read" } });
+        missing.StatusCode.Should().Be(HttpStatusCode.Conflict);
+
+        // Nothing was granted to the client that slipped in
+        var grants = await _fixture.UserA.Http.GetFromJsonAsync<JsonElement>("/api/_oauth/grants");
+        grants.EnumerateArray().Should().NotContain(g => g.GetProperty("clientName").GetString() == "Cursor" && g.GetProperty("revokedAt").ValueKind == JsonValueKind.Null);
+
+        // After a reload the page shows the new request, and deciding on that one works
+        var reloaded = await OAuthTestClient.ShownRequestId(_fixture.UserA);
+        reloaded.Should().NotBe(shown);
+        (await _fixture.UserA.Http.PostAsJsonAsync("/api/_oauth/consent", new { requestId = reloaded, allow = false })).StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]

@@ -9,6 +9,9 @@ namespace Aptabase.Features.OAuth;
 
 public class ConsentDecisionBody
 {
+    // The id GET /api/_oauth/consent returned for the request this decision is about
+    public string RequestId { get; set; } = "";
+
     public bool Allow { get; set; }
     public string[] Scopes { get; set; } = [];
 
@@ -87,6 +90,7 @@ public class ConsentController : Controller
 
         return Ok(new
         {
+            requestId = ConsentCookie.RequestId(HttpContext),
             client = new
             {
                 name = client.Name,
@@ -114,6 +118,11 @@ public class ConsentController : Controller
         var request = ConsentCookie.Read(HttpContext);
         if (request is null)
             return BadRequest(new { error = "no_request", message = "This authorization request has expired. Start again from the application you want to connect." });
+
+        // Allow and Deny alike apply to the request that was on screen, or to nothing
+        var currentId = ConsentCookie.RequestId(HttpContext);
+        if (currentId is null || body.RequestId.Length != currentId.Length || !OAuthCrypto.FixedTimeEquals(body.RequestId, currentId))
+            return Conflict(new { error = "request_changed", message = "Another authorization request was started in this browser after this page was opened. Reload the page to see the request you would be deciding on." });
 
         var (client, error) = await ResolveClient(request, cancellationToken);
         if (client is null)

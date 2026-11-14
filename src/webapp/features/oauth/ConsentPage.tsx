@@ -12,6 +12,9 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { ScopeCheckboxes, VerifiedBadge, checkboxClassName } from "./scopes";
 
 type ConsentInfo = {
+  // Identifies the request this page displays. Sent back with the decision so the
+  // server can refuse it if another request replaced this one in the meantime.
+  requestId: string;
   client: { name: string; url: string; host: string; verified: boolean };
   scopes: string[];
   requestedScopes: string[];
@@ -107,9 +110,10 @@ function ConsentForm(props: { info: ConsentInfo }) {
     setBusy(allow ? "allow" : "deny");
     setError("");
 
+    const requestId = props.info.requestId;
     const body = allow
-      ? { allow: true, scopes: selectedScopes, appIds: mode === "all" ? null : appIds }
-      : { allow: false, scopes: [], appIds: null };
+      ? { requestId, allow: true, scopes: selectedScopes, appIds: mode === "all" ? null : appIds }
+      : { requestId, allow: false, scopes: [], appIds: null };
 
     try {
       const { redirectUrl } = await request<{ redirectUrl: string }>("POST", "/_oauth/consent", body);

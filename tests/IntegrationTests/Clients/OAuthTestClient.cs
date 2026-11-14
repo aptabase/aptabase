@@ -63,13 +63,20 @@ public class OAuthTestClient
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
         response.Headers.Location!.ToString().Should().Be($"{Origin}/oauth/consent");
 
-        var consent = await user.Http.GetAsync("/api/_oauth/consent");
-        consent.StatusCode.Should().Be(HttpStatusCode.OK);
+        var requestId = await ShownRequestId(user);
 
-        var decision = await user.Http.PostAsJsonAsync("/api/_oauth/consent", new { allow = true, scopes = scope.Split(' '), appIds });
+        var decision = await user.Http.PostAsJsonAsync("/api/_oauth/consent", new { requestId, allow = true, scopes = scope.Split(' '), appIds });
         decision.StatusCode.Should().Be(HttpStatusCode.OK, await decision.Content.ReadAsStringAsync());
         var body = await decision.Content.ReadFromJsonAsync<JsonElement>();
         return body.GetProperty("redirectUrl").GetString()!;
+    }
+
+    // What the consent page does first: load the pending request, and remember which one it shows
+    public static async Task<string> ShownRequestId(AccountClient user)
+    {
+        var consent = await user.Http.GetAsync("/api/_oauth/consent");
+        consent.StatusCode.Should().Be(HttpStatusCode.OK, await consent.Content.ReadAsStringAsync());
+        return (await consent.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("requestId").GetString()!;
     }
 
     public Task<HttpResponseMessage> PostToken(Dictionary<string, string> form)
