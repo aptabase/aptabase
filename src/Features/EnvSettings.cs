@@ -92,6 +92,9 @@ public class EnvSettings
     // Variable Name: ERROR_QUOTA_ENABLED (default: false). Not yet enabled.
     public bool ErrorQuotaEnabled { get; private set; }
 
+    public string TrustedClientIpHeader { get; private set; } = "";
+    public int TrustedProxyCount { get; private set; } = 1;
+
     public static EnvSettings Load()
     {
         var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
@@ -128,7 +131,10 @@ public class EnvSettings
             // But during development, it's at ../etc
             EtcDirectoryPath = Directory.Exists("./etc") ? "./etc" : "../etc",
 
-            ErrorQuotaEnabled = GetBool("ERROR_QUOTA_ENABLED")
+            ErrorQuotaEnabled = GetBool("ERROR_QUOTA_ENABLED"),
+
+            TrustedClientIpHeader = Get("TRUSTED_CLIENT_IP_HEADER").Trim(),
+            TrustedProxyCount = Math.Max(1, GetInt("TRUSTED_PROXY_COUNT"))
         };
     }
 

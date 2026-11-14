@@ -1,6 +1,6 @@
-using Dapper;
 using Aptabase.Data;
 using Aptabase.Features.Authentication;
+using Dapper;
 
 namespace Aptabase.Features.Stats;
 
@@ -16,6 +16,7 @@ public static class StatsQueries
               LEFT JOIN users u
               ON u.id = a.owner_id
               WHERE a.id = @appId
+              AND a.deleted_at IS NULL
               AND (a.owner_id = @userId OR s.email = @userEmail)
               AND u.lock_reason IS NULL
               LIMIT 1",

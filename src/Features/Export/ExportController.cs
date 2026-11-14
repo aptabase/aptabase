@@ -34,10 +34,10 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
     public async Task<IActionResult> MonthlyUsage([FromQuery] string buildMode, [FromQuery] string appId, CancellationToken cancellationToken)
     {
         var rows = await _queryClient.NamedQueryAsync<MonthlyUsage>("monthly_usage__v1", new {
-            app_id = GetAppId(buildMode, appId)
+            app_id = StoredAppId.Resolve(appId, buildMode)
         }, cancellationToken);
 
-        if (buildMode.Equals("debug", StringComparison.OrdinalIgnoreCase))
+        if (StoredAppId.IsDebug(buildMode))
         {
             return Ok(rows.Take(5));
         }
@@ -56,7 +56,7 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
         var startDate = body.StartDate.Value;
         var endDate = body.EndDate.Value;
 
-        var appIdLiteral = ClickHouseSql.Literal(GetAppId(body.BuildMode, body.AppId));
+        var appIdLiteral = ClickHouseSql.Literal(StoredAppId.Resolve(body.AppId, body.BuildMode));
 
         var (formatName, contentType, fileExtension) = GetFormat(body.Format);
         var appName = UnsafeCharacters().Replace(body.AppName, "").ToLower();
@@ -159,15 +159,6 @@ public partial class ExportController(IQueryClient queryClient, ILogger<ExportCo
             }
             
         }, contentType, fileName);
-    }
-
-    private static string GetAppId(string buildMode, string appId)
-    {
-        return buildMode.ToLower() switch
-        {
-            "debug" => $"{appId}_DEBUG",
-            _ => appId,
-        };
     }
 
     private static (string, string, string) GetFormat(string format)

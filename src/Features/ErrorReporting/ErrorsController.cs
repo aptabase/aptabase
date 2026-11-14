@@ -286,13 +286,6 @@ public class ErrorsController : ControllerBase
         return Ok();
     }
 
-    // Maps the buildMode query parameter to the stored app id, mirroring Stats.QueryParams.Parse()
     private static string ResolveAppId(string appId, string? buildMode)
-    {
-        return buildMode?.ToLower() switch
-        {
-            "debug" => $"{appId}_DEBUG",
-            _ => appId,
-        };
-    }
+        => StoredAppId.Resolve(appId, buildMode);
 }
