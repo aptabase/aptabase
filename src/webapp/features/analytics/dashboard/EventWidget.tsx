@@ -25,6 +25,7 @@ export function EventWidget(props: Props) {
           key="events"
           title="Events"
           searchParamKey="eventName"
+          pathname={`/${props.appId}/`}
           defaultFormat="absolute"
           valueLabel="Count"
         />
