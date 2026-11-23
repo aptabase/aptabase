@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@components/Button";
 import { TextInput } from "@components/TextInput";
+import { RetentionSelect } from "@features/apps/RetentionSelect";
+import type { RetentionMonths } from "@features/apps/apps";
 
 export function LonelyState() {
   const user = useAuth();
@@ -11,13 +13,22 @@ export function LonelyState() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [retentionMonths, setRetentionMonths] = useState<RetentionMonths>(60);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (processing) return;
     setProcessing(true);
-
-    const app = await createApp(name);
-    navigate(app.id);
+    setError("");
+    try {
+      const app = await createApp(name, retentionMonths);
+      navigate(app.id);
+    } catch {
+      setError("Could not create your app. Please try again.");
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (
@@ -34,6 +45,7 @@ export function LonelyState() {
           placeholder="App Name"
           autoComplete="off"
           required={true}
+          disabled={processing}
           className="w-80"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -41,7 +53,11 @@ export function LonelyState() {
         <p className="text-sm text-muted-foreground mt-1">
           A friendly name to identify your app. You can change it later.
         </p>
-        <Button className="mt-4" disabled={name.length < 2 || name.length > 40 || processing}>
+        <div className="mt-4 w-80">
+          <RetentionSelect value={retentionMonths} onChange={setRetentionMonths} disabled={processing} creating />
+        </div>
+        {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
+        <Button className="mt-4" loading={processing} disabled={name.length < 2 || name.length > 40 || processing}>
           Create
         </Button>
       </form>

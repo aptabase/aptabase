@@ -4,6 +4,7 @@ SQL >
     SELECT
         app_id,
         toStartOfDay(timestamp) as period,
+        toStartOfDay(toTimeZone(ttl, 'UTC')) as expires_at,
         country_code,
         region_name,
         event_name,
@@ -28,7 +29,8 @@ SQL >
         device_model,
         app_version,
         user_id,
-        session_id
+        session_id,
+        expires_at
 
 TYPE materialized
 DATASOURCE events_daily_v3_mv

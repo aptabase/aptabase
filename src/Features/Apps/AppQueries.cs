@@ -12,6 +12,7 @@ public class Application
     public bool HasEvents { get; set; } = false;
     public bool HasOwnership { get; set; } = false;
     public char? LockReason { get; set; }
+    public int RetentionMonths { get; set; } = DataRetention.DefaultMonths;
 }
 
 public interface IAppQueries
@@ -34,7 +35,7 @@ public class AppQueries : IAppQueries
     {
         var cmd = new CommandDefinition(@"
             SELECT a.id, a.name, a.icon_path, 
-                   a.app_key, a.has_events, 
+                   a.app_key, a.has_events, a.retention_months,
                    u.lock_reason
             FROM apps a
             INNER JOIN users u
@@ -61,7 +62,7 @@ public class AppQueries : IAppQueries
     {
         return await _db.Connection.QueryFirstOrDefaultAsync<Application>(
             @"SELECT a.id, a.name, a.icon_path, a.app_key, true as has_ownership, 
-                     a.has_events, u.lock_reason
+                     a.has_events, a.retention_months, u.lock_reason
               FROM apps a
               INNER JOIN users u
               ON u.id = a.owner_id

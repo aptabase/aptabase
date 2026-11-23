@@ -66,7 +66,7 @@ public class EventsController : Controller
 
         var clientIp = HttpContext.ResolveClientIpAddress();
         var location = _geoIP.GetClientLocation(HttpContext);
-        var trackingEvent = NewTrackingEvent(app.Id, location.CountryCode, location.RegionName, clientIp, userAgent ?? "", body);
+        var trackingEvent = NewTrackingEvent(app, location.CountryCode, location.RegionName, clientIp, userAgent ?? "", body);
         _buffer.Add(ref trackingEvent);
 
         return Ok(new { });
@@ -108,7 +108,7 @@ public class EventsController : Controller
 
         var clientIp = HttpContext.ResolveClientIpAddress();
         var location = _geoIP.GetClientLocation(HttpContext);
-        var trackingEvents = validEvents.Select(e => NewTrackingEvent(app.Id, location.CountryCode, location.RegionName, clientIp, userAgent ?? "", e));
+        var trackingEvents = validEvents.Select(e => NewTrackingEvent(app, location.CountryCode, location.RegionName, clientIp, userAgent ?? "", e));
 
         _buffer.AddRange(ref trackingEvents);
 
@@ -123,7 +123,7 @@ public class EventsController : Controller
         return Ok();
     }
 
-    private static TrackingEvent NewTrackingEvent(string appId, string countryCode, string regionName, string clientIp, string userAgent, EventBody body)
+    private static TrackingEvent NewTrackingEvent(CachedApplication app, string countryCode, string regionName, string clientIp, string userAgent, EventBody body)
     {
         var (stringProps, numericProps) = body.SplitProps();
         return new TrackingEvent
@@ -131,7 +131,8 @@ public class EventsController : Controller
             ClientIpAddress = clientIp,
             UserAgent = userAgent,
 
-            AppId = appId,
+            AppId = app.Id,
+            RetentionMonths = app.RetentionMonths,
             EventName = body.EventName,
             Timestamp = body.Timestamp.ToUniversalTime(),
             SessionId = body.SessionId?.ToString() ?? "",

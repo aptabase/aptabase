@@ -3,8 +3,15 @@
 SCHEMA >
     `app_id` String,
     `period` Date,
-    `events` AggregateFunction(count)
+    `events` AggregateFunction(count),
+    `expires_at` DateTime DEFAULT toDateTime(0),
+    `retention_managed` UInt8 DEFAULT 0
 
 ENGINE "AggregatingMergeTree"
 ENGINE_PARTITION_KEY "toStartOfYear(period)"
-ENGINE_SORTING_KEY "app_id, period"
+ENGINE_SORTING_KEY "app_id, period, expires_at, retention_managed"
+ENGINE_TTL "expires_at DELETE WHERE retention_managed = 1"
+
+# Legacy counts had no TTL. New contributions opt into their event's assigned expiry.
+FORWARD_QUERY >
+    SELECT *

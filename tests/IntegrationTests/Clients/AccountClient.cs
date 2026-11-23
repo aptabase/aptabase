@@ -24,9 +24,9 @@ public class AccountClient
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
     }
 
-    public async Task<Application> CreateApp(string name)
+    public async Task<Application> CreateApp(string name, int retentionMonths = 60)
     {
-        var response = await _client.PostAsJsonAsync("/api/_apps", new { name });
+        var response = await _client.PostAsJsonAsync("/api/_apps", new { name, retentionMonths });
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var apps = await _client.GetFromJsonAsync<Application[]>("/api/_apps");
@@ -38,6 +38,9 @@ public class AccountClient
     {
         return await _client.GetAsync(url);
     }
+
+    public Task<HttpResponseMessage> Post(string url, object body) => _client.PostAsJsonAsync(url, body);
+    public Task<HttpResponseMessage> Put(string url, object body) => _client.PutAsJsonAsync(url, body);
 
     public async Task<HttpResponseMessage> GetKeyMetrics(string appId, string period)
     {
