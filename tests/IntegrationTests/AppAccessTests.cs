@@ -46,6 +46,32 @@ public class AppAccessTests
     }
 
     [Fact]
+    public async Task Cannot_Read_Deleted_App_Stats()
+    {
+        var app = await _fixture.UserA.CreateApp(Guid.NewGuid().ToString());
+        await _fixture.UserA.DeleteApp(app.Id);
+
+        var response = await _fixture.UserA.Get($"/api/_stats/metrics?buildMode=release&appId={app.Id}&startDate=2026-01-01&endDate=2026-02-01");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Shared_User_Can_Read_App_Stats_Until_Deleted()
+    {
+        var app = await _fixture.UserB.CreateApp(Guid.NewGuid().ToString());
+        await _fixture.UserB.ShareApp(app.Id, _fixture.UserA.Email);
+
+        var response = await _fixture.UserA.Get($"/api/_stats/metrics?buildMode=release&appId={app.Id}&startDate=2026-01-01&endDate=2026-02-01");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        await _fixture.UserB.DeleteApp(app.Id);
+
+        response = await _fixture.UserA.Get($"/api/_stats/metrics?buildMode=release&appId={app.Id}&startDate=2026-01-01&endDate=2026-02-01");
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
     public async Task Cannot_Read_Other_User_App_Stats()
     {
         var app = await _fixture.UserB.CreateApp(Guid.NewGuid().ToString());
