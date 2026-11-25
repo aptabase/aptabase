@@ -91,10 +91,16 @@ public class LemonSqueezyWebhookController : Controller
             return BadRequest(new { message = "Missing 'user_id' on meta.custom_data" });
         }
 
-        await _db.Connection.ExecuteAsync(
-            @"UPDATE users SET lock_reason = null WHERE id = @ownerId",
-            new { ownerId }
-        );
+        // Only a subscription that is being paid for releases the owner's lock. A cancellation,
+        // an expiry, a pause or a failed payment arrives as subscription_updated too, and would
+        // otherwise let an over-quota account resume ingestion.
+        if (body.Status is "active" or "on_trial")
+        {
+            await _db.Connection.ExecuteAsync(
+                @"UPDATE users SET lock_reason = null WHERE id = @ownerId",
+                new { ownerId }
+            );
+        }
 
         if (body.Status == "expired")
         {
