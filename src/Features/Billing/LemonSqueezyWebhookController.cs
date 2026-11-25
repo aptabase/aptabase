@@ -41,7 +41,15 @@ public class LemonSqueezyWebhookController : Controller
             return Unauthorized(new { message = "Invalid LemonSqueezy Signature" });
         }
 
-        var ev = JsonSerializer.Deserialize<WebhookEvent>(body, LemonSqueezyClient.JsonSettings);
+        WebhookEvent? ev;
+        try
+        {
+            ev = JsonSerializer.Deserialize<WebhookEvent>(body, LemonSqueezyClient.JsonSettings);
+        }
+        catch (JsonException)
+        {
+            ev = null;
+        }
 
         if (ev == null)
         {
@@ -50,29 +58,34 @@ public class LemonSqueezyWebhookController : Controller
             return BadRequest(new { message = "Invalid JSON Body" });
         }
 
-        if (ev.Meta.CustomData.TryGetValue("region", out var eventRegion) == false)
+        // subscription_plan_changed is what LemonSqueezy sends when a customer switches plan in
+        // the customer portal. Answering it with 400 left the stored variant, and so the quota,
+        // at the old plan.
+        var isSubscriptionEvent = ev.Meta.EventName is "subscription_created" or "subscription_updated" or "subscription_plan_changed";
+
+        // The region comes from the checkout's custom data, which later events about the same
+        // subscription are not guaranteed to carry. A subscription event without it is matched
+        // by subscription id instead, below.
+        var hasRegion = ev.Meta.CustomData.TryGetValue("region", out var eventRegion);
+
+        if (!hasRegion && !isSubscriptionEvent)
         {
             _logger.LogError("LemonSqueezy event is missing region");
 
             return BadRequest(new { message = "Missing 'region' on meta.custom_data" });
         }
 
-        if (eventRegion != _region)
+        if (hasRegion && eventRegion != _region)
         {
             return Ok(new { message = "Ignoring event from different region" });
         }
 
-        var task = ev.Meta.EventName switch
-        {
-            "subscription_created" => HandleSubscriptionCreatedOrUpdated(ev, cancellationToken),
-            "subscription_updated" => HandleSubscriptionCreatedOrUpdated(ev, cancellationToken),
-            _ => HandleUnknownEvent(ev),
-        };
-
-        return await task;
+        return isSubscriptionEvent
+            ? await HandleSubscriptionChanged(ev, hasRegion)
+            : await HandleUnknownEvent(ev);
     }
 
-    private async Task<IActionResult> HandleSubscriptionCreatedOrUpdated([FromBody] WebhookEvent ev, CancellationToken cancellationToken)
+    private async Task<IActionResult> HandleSubscriptionChanged(WebhookEvent ev, bool hasRegion)
     {
         var body = JsonSerializer.Deserialize<SubscriptionAttributes>(ev.Data.Attributes, LemonSqueezyClient.JsonSettings);
 
@@ -82,10 +95,27 @@ public class LemonSqueezyWebhookController : Controller
         }
 
         var subId = Convert.ToInt64(ev.Data.Id);
-        var ownerId = ev.Meta.CustomData["user_id"];
+        ev.Meta.CustomData.TryGetValue("user_id", out var ownerId);
+
+        // An event about a subscription we already store belongs to its stored owner
+        if (string.IsNullOrEmpty(ownerId))
+        {
+            ownerId = await _db.Connection.QueryFirstOrDefaultAsync<string>(
+                @"SELECT owner_id FROM subscriptions WHERE id = @subId",
+                new { subId });
+        }
 
         if (string.IsNullOrEmpty(ownerId))
         {
+            if (!hasRegion)
+            {
+                // Without a region every region's deployment receives this event. Only the one
+                // that stores the subscription acts on it; the others acknowledge and move on.
+                _logger.LogWarning("LemonSqueezy {EventName} for subscription {SubId} has no custom_data and the subscription is not stored in this region; ignoring", ev.Meta.EventName, subId);
+
+                return Ok(new { message = "Ignoring event for a subscription not stored in this region" });
+            }
+
             _logger.LogError("LemonSqueezy event is missing user_id");
 
             return BadRequest(new { message = "Missing 'user_id' on meta.custom_data" });
