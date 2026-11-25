@@ -124,6 +124,16 @@ public partial class Program
                 })
             );
 
+            c.AddPolicy("BillingSync", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+                httpContext.ResolveClientIpAddress(),
+                partition => new FixedWindowRateLimiterOptions
+                {
+                    AutoReplenishment = true,
+                    PermitLimit = 6,
+                    Window = TimeSpan.FromMinutes(1)
+                })
+            );
+
             c.AddPolicy("EventIngestion", httpContext => RateLimitPartition.GetFixedWindowLimiter(
                 httpContext.ResolveClientIpAddress(),
                 partition => new FixedWindowRateLimiterOptions
@@ -151,6 +161,7 @@ public partial class Program
         builder.Services.AddSingleton<ICache, DatabaseCache>();
         builder.Services.AddSingleton<IAppQueries, AppQueries>();
         builder.Services.AddSingleton<IBillingQueries, BillingQueries>();
+        builder.Services.AddSingleton<ISubscriptionSync, SubscriptionSync>();
         builder.Services.AddSingleton<IPrivacyQueries, PrivacyQueries>();
         builder.Services.AddSingleton<IUserHasher, DailyUserHasher>();
         builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
@@ -173,6 +184,7 @@ public partial class Program
             builder.Services.AddHostedService<TrialExpiredCronJob>();
             builder.Services.AddHostedService<TrialNotificationCronJob>();
             builder.Services.AddHostedService<ResetOveruseCronJob>();
+            builder.Services.AddHostedService<SubscriptionReconciliationCronJob>();
         }
 
         builder.Services.AddGeoIPClient(appEnv);

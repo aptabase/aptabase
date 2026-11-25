@@ -39,6 +39,11 @@ public class AccountClient
         return await _client.GetAsync(url);
     }
 
+    public async Task<HttpResponseMessage> Post(string url)
+    {
+        return await _client.PostAsync(url, null);
+    }
+
     public async Task<HttpResponseMessage> GetKeyMetrics(string appId, string period)
     {
         return await _client.GetAsync($"/api/_stats/metrics?buildMode=release&period={period}&appId={appId}");
