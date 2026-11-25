@@ -10,6 +10,7 @@ public interface IBillingQueries
     Task<UserIdentity[]> GetTrialsDueSoon();
     Task<Subscription?> GetUserSubscription(UserIdentity user);
     Task<FreeSubscription> GetUserFreeTierOrTrial(UserIdentity user);
+    Task<SubscriptionPlan> ResolvePlan(UserIdentity user, Subscription? sub);
     Task<string[]> GetOwnedAppIds(UserIdentity user);
     Task<int> LockUsersWithExpiredTrials();
     Task<int> LockUser(string userId, string reason);
@@ -43,6 +44,15 @@ public class BillingQueries : IBillingQueries
         return await _db.Connection.QueryFirstAsync<FreeSubscription>(
             @"SELECT free_quota, free_trial_ends_at FROM users WHERE id = @userId",
             new { userId = user.Id });
+    }
+
+    // The one place that decides which plan an account is on. The billing page and the
+    // query API tiers both read it from here.
+    public async Task<SubscriptionPlan> ResolvePlan(UserIdentity user, Subscription? sub)
+    {
+        return sub is null || sub.Status == "expired"
+            ? SubscriptionPlan.GetFreeVariant(await GetUserFreeTierOrTrial(user))
+            : SubscriptionPlan.GetByVariantId(sub.VariantId);
     }
 
     public async Task<string[]> GetOwnedAppIds(UserIdentity user)

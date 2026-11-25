@@ -1,6 +1,5 @@
-using Aptabase.Data;
+using Aptabase.Features.Authentication;
 using Aptabase.Features.Billing;
-using Dapper;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Aptabase.Features.Api;
@@ -17,36 +16,14 @@ public record ApiTier(string Name, long? MonthlyRequests, int? MaxWindowDays, in
     public static readonly ApiTier Unlimited = new("Unlimited", null, null, null);
 
     /// <summary>
-    /// Maps a subscription to a tier. Stricter than the billing page, which treats every
-    /// status except expired as a live subscription: that is right for showing a plan
-    /// name and wrong for granting API volume. Paid tiers need a subscription that is
-    /// active, on trial, or cancelled but not yet at its end date. Everything else,
-    /// including a variant we do not know, is Free.
+    /// Maps the plan billing resolved for an account to a tier. Which plan an account is
+    /// on is billing's decision alone; this only sizes the query API for that plan.
     /// </summary>
-    public static ApiTier FromSubscription(string? status, long? variantId, DateTime? endsAt, DateTime utcNow)
+    public static ApiTier FromPlan(SubscriptionPlan plan)
     {
-        if (variantId is null)
+        // Free Plan and Free Trial carry no variant
+        if (plan.VariantId == 0)
             return Free;
-
-        var isLive = status switch
-        {
-            "active" or "on_trial" => true,
-            "cancelled" => endsAt.HasValue && endsAt.Value > utcNow,
-            _ => false,
-        };
-
-        if (!isLive)
-            return Free;
-
-        SubscriptionPlan plan;
-        try
-        {
-            plan = SubscriptionPlan.GetByVariantId(variantId.Value);
-        }
-        catch (InvalidOperationException)
-        {
-            return Free;
-        }
 
         return plan.MonthlyEvents switch
         {
@@ -64,24 +41,17 @@ public interface IApiTiers
 
 public class ApiTiers : IApiTiers
 {
-    private readonly IDbContext _db;
+    private readonly IBillingQueries _billing;
     private readonly EnvSettings _env;
     private readonly IMemoryCache _cache;
     private readonly ILogger _logger;
 
-    public ApiTiers(IDbContext db, EnvSettings env, IMemoryCache cache, ILogger<ApiTiers> logger)
+    public ApiTiers(IBillingQueries billing, EnvSettings env, IMemoryCache cache, ILogger<ApiTiers> logger)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        _billing = billing ?? throw new ArgumentNullException(nameof(billing));
         _env = env ?? throw new ArgumentNullException(nameof(env));
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
-
-    private class SubscriptionRow
-    {
-        public string Status { get; set; } = "";
-        public long VariantId { get; set; }
-        public DateTime? EndsAt { get; set; }
     }
 
     public async Task<ApiTier> ResolveAsync(string ownerId, CancellationToken cancellationToken)
@@ -97,23 +67,16 @@ public class ApiTiers : IApiTiers
         ApiTier tier;
         try
         {
-            using var cn = _db.Connection;
-            var sub = await cn.QueryFirstOrDefaultAsync<SubscriptionRow>(new CommandDefinition(
-                @"SELECT status, variant_id, ends_at FROM subscriptions
-                  WHERE owner_id = @ownerId
-                  ORDER BY created_at DESC LIMIT 1",
-                new { ownerId }, cancellationToken: cancellationToken));
-
-            tier = ApiTier.FromSubscription(sub?.Status, sub?.VariantId, sub?.EndsAt, DateTime.UtcNow);
-
-            if (sub is not null && tier == ApiTier.Free && sub.Status is "active" or "on_trial")
-                _logger.LogWarning("Subscription variant {VariantId} of {OwnerId} is unknown, resolving the API tier to Free", sub.VariantId, ownerId);
+            var owner = new UserIdentity(ownerId, "", "");
+            var sub = await _billing.GetUserSubscription(owner);
+            tier = ApiTier.FromPlan(await _billing.ResolvePlan(owner, sub));
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (Exception ex)
         {
-            // Fail closed: a billing lookup that breaks must not hand out paid volume
-            _logger.LogError(ex, "Could not resolve the API tier of {OwnerId}, falling back to Free", ownerId);
-            return ApiTier.Free;
+            // Fail closed: an unknown variant, an account with no free plan on record, or a
+            // billing lookup that breaks must not hand out paid volume
+            _logger.LogError(ex, "Could not resolve the plan of {OwnerId}, the API tier falls back to Free", ownerId);
+            tier = ApiTier.Free;
         }
 
         _cache.Set(cacheKey, tier, TimeSpan.FromSeconds(60));

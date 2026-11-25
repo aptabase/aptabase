@@ -1,5 +1,6 @@
 using Aptabase.Features;
 using Aptabase.Features.Api;
+using Aptabase.Features.Billing;
 using Aptabase.Features.Stats;
 using AwesomeAssertions;
 using Xunit;
@@ -12,34 +13,26 @@ public class ApiRulesTests
 
     // Development variant ids from Subscription.cs: 85183 = 200k, 85187 = 5M, 85192 = 30M
     [Theory]
-    [InlineData("active", 85183L, "Starter")]
-    [InlineData("on_trial", 85187L, "Growth")]
-    [InlineData("active", 85192L, "Scale")]
-    [InlineData("active", 103481L, "Scale")]
-    [InlineData("paused", 85192L, "Free")]
-    [InlineData("past_due", 85192L, "Free")]
-    [InlineData("unpaid", 85192L, "Free")]
-    [InlineData("expired", 85192L, "Free")]
-    [InlineData("active", 999L, "Free")]          // a variant we do not know
-    [InlineData("something_new", 85192L, "Free")]
-    public void Tier_follows_the_strict_status_rule(string status, long variantId, string expected)
+    [InlineData(85183L, "Starter")]
+    [InlineData(85185L, "Starter")]
+    [InlineData(85187L, "Growth")]
+    [InlineData(85190L, "Growth")]
+    [InlineData(85192L, "Scale")]
+    [InlineData(103481L, "Scale")]
+    public void Tier_follows_the_plan_billing_resolved(long variantId, string expected)
     {
-        ApiTier.FromSubscription(status, variantId, null, Now).Name.Should().Be(expected);
+        ApiTier.FromPlan(SubscriptionPlan.GetByVariantId(variantId)).Name.Should().Be(expected);
     }
 
     [Fact]
-    public void Cancelled_subscription_keeps_its_tier_until_it_ends()
+    public void Free_plan_and_free_trial_are_the_free_tier()
     {
-        ApiTier.FromSubscription("cancelled", 85187, Now.AddDays(3), Now).Should().Be(ApiTier.Growth);
-        ApiTier.FromSubscription("cancelled", 85187, Now.AddSeconds(-1), Now).Should().Be(ApiTier.Free);
-        ApiTier.FromSubscription("cancelled", 85187, null, Now).Should().Be(ApiTier.Free);
-    }
+        var freePlan = SubscriptionPlan.GetFreeVariant(new FreeSubscription { FreeQuota = 20_000 });
+        var trial = SubscriptionPlan.GetFreeVariant(new FreeSubscription { FreeTrialEndsAt = Now.AddDays(10) });
 
-    [Fact]
-    public void No_subscription_is_free()
-    {
-        var tier = ApiTier.FromSubscription(null, null, null, Now);
+        ApiTier.FromPlan(trial).Should().Be(ApiTier.Free);
 
+        var tier = ApiTier.FromPlan(freePlan);
         tier.Should().Be(ApiTier.Free);
         tier.MonthlyRequests.Should().Be(100);
         tier.MaxWindowDays.Should().Be(30);

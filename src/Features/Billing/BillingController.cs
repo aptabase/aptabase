@@ -31,9 +31,7 @@ public class BillingController : Controller
         }, cancellationToken);
 
         var sub = await _billingQueries.GetUserSubscription(user);
-        var plan = sub is null || sub.Status == "expired" 
-            ? SubscriptionPlan.GetFreeVariant(await _billingQueries.GetUserFreeTierOrTrial(user))
-            : SubscriptionPlan.GetByVariantId(sub.VariantId);
+        var plan = await _billingQueries.ResolvePlan(user, sub);
 
         var state = (usage?.Count ?? 0) < plan.MonthlyEvents ? "OK" : "OVERUSE";
         
